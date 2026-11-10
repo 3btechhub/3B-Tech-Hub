@@ -9,6 +9,7 @@ export const auditActions = [
   "content.delete",
   "content.approve",
   "content.publish",
+  "media.register",
   "media.upload",
   "media.update",
   "media.delete",
