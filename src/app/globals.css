@@ -528,3 +528,110 @@ label { color: var(--foreground); }
   min-width: 44px;
   margin: 0;
 }
+
+
+/* =========================================================
+   Adaptive Space & Fairness — site-wide layout policy
+   Components may claim needed space, but must not steal
+   space that another visible component actually needs.
+   ========================================================= */
+:root {
+  --background: #fff;
+  --surface: #fff;
+  --surface-muted: #f5f5f5;
+  --foreground: #111;
+  --muted: #595959;
+  --border: #dedede;
+  --brand: #111;
+  --brand-dark: #000;
+  --brand-accent: #111;
+  --space-page: clamp(12px, 2.2vw, 24px);
+  --space-card: clamp(14px, 1.8vw, 20px);
+  --control-height: 44px;
+  --control-radius: 10px;
+  --card-radius: 12px;
+  --icon-size: 21px;
+}
+:root[data-theme="dark"] {
+  --background: #080808;
+  --surface: #101010;
+  --surface-muted: #181818;
+  --foreground: #f7f7f7;
+  --muted: #b8b8b8;
+  --border: #3b3b3b;
+  --brand: #f7f7f7;
+  --brand-dark: #fff;
+  --brand-accent: #f7f7f7;
+}
+/* Let content determine intrinsic size; prevent accidental overflow. */
+:where(main, section, article, aside, nav, header, footer, form, fieldset,
+       .container, .card-grid, .hero-grid, .footer-inner, .header-inner) {
+  min-width: 0;
+}
+:where(.card-grid, .hero-grid, .floating-menu-grid, .menu-columns) > *,
+:where(.footer-inner, .header-inner, .callout, .quick-item) > * {
+  min-width: 0;
+  max-width: 100%;
+}
+:where(img, video, iframe, canvas, svg) { max-width: 100%; }
+:where(input, select, textarea) { min-width: 0; max-width: 100%; }
+:where(button, .button, .menu-trigger) {
+  max-width: 100%;
+  min-width: 44px;
+  min-height: 44px;
+}
+:where(.service-card, .hero-panel, .callout, .menu-group, .support-panel,
+       .auth-form, .admin-card, .editor-panel, .preview-panel,
+       .revision-browser, .settings-card, .media-card) {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+/* Use available room only when content needs it; never stretch a
+   compact control row just to fill its parent. */
+.simple-menu {
+  left: auto !important;
+  right: max(12px, calc((100vw - var(--content-max)) / 2)) !important;
+  width: min(300px, calc(100vw - 24px)) !important;
+  min-width: 190px !important;
+  max-width: calc(100vw - 24px) !important;
+  text-align: center;
+}
+.simple-menu-links { justify-items: stretch; }
+.simple-menu-link, .simple-menu-action, .simple-menu-dashboard {
+  justify-content: center;
+  text-align: center;
+}
+.simple-menu-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  align-self: center;
+  width: max-content;
+  max-width: 100%;
+  gap: 12px;
+}
+.simple-menu-icon-button {
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+}
+.menu-backdrop { display: none !important; }
+.site-header, .floating-menu, .menu-trigger, .button, .auth-submit,
+.admin-workspace button, .settings-admin button,
+.content-admin button, .media-admin button {
+  box-shadow: none !important;
+}
+:where(.hero, .section, .site-footer) { min-width: 0; }
+@media (max-width: 760px) {
+  .hero-grid { grid-template-columns: minmax(0, 1fr); }
+  .card-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+  .floating-menu-grid, .menu-columns { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 480px) {
+  .container { width: calc(100% - 24px); }
+  .simple-menu { right: 12px !important; }
+  .hero-actions { flex-wrap: wrap; }
+  .hero-actions > * { min-width: min(100%, 140px); }
+}
