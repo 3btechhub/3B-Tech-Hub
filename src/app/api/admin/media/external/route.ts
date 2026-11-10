@@ -2,22 +2,30 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { externalMediaSchema } from "@/lib/media-schema";
 import { requireOwnerApi } from "@/lib/admin-api-auth";
-import { createAppwriteRow, isMediaStoreConfigured } from "@/lib/appwrite-server";
+import { createAppwriteRow, deleteAppwriteRow, isMediaStoreConfigured } from "@/lib/appwrite-server";
+import { appendAuditEvent, isAuditStoreConfigured } from "@/lib/audit-store";
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   const auth = await requireOwnerApi(request);
   if (auth.response) return auth.response;
-  if (!isMediaStoreConfigured()) return NextResponse.json({ error: "Media storage is not configured. No asset was registered." }, { status: 503 });
+  if (!isMediaStoreConfigured() || !isAuditStoreConfigured()) return NextResponse.json({ error: "Media and audit storage must both be configured." }, { status: 503 });
   const parsed = externalMediaSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "Invalid external media details.", issues: parsed.error.issues }, { status: 400 });
   const assetId = randomUUID();
+  const tableId = process.env.APPWRITE_MEDIA_TABLE_ID!;
+  let rowCreated = false;
   try {
-    await createAppwriteRow(process.env.APPWRITE_MEDIA_TABLE_ID!, assetId, {
-      ...parsed.data, createdBy: auth.identity!.id, createdAt: new Date().toISOString(), deletedAt: null, sourceType: "external",
+    await createAppwriteRow(tableId, assetId, { ...parsed.data, createdBy: auth.identity!.id, createdAt: new Date().toISOString(), deletedAt: null, sourceType: "external" });
+    rowCreated = true;
+    await appendAuditEvent({
+      actorId: auth.identity!.id, actorRole: "owner", action: "media.register", targetType: "media",
+      targetId: assetId, outcome: "success", metadata: { sourceType: "external", mediaType: parsed.data.mediaType },
+      occurredAt: new Date().toISOString(),
     });
     return NextResponse.json({ ok: true, assetId }, { status: 201 });
   } catch {
-    return NextResponse.json({ error: "The media record could not be saved." }, { status: 502 });
+    if (rowCreated) await deleteAppwriteRow(tableId, assetId).catch(() => undefined);
+    return NextResponse.json({ error: "Media registration or audit recording failed; the new record was rolled back where possible." }, { status: 502 });
   }
 }
