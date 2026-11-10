@@ -9,15 +9,8 @@ type Props = { siteName: string; navigationItems: { label: string; href: string 
 export default function SiteHeader({ siteName }: Props) {
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<Role>("visitor");
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [language, setLanguage] = useState<"en" | "bn">("en");
-
-  useEffect(() => {
-    const savedTheme = window.localStorage.getItem("3b-theme");
-    const savedLanguage = window.localStorage.getItem("3b-language");
-    if (savedTheme === "dark" || savedTheme === "light") setTheme(savedTheme);
-    if (savedLanguage === "bn" || savedLanguage === "en") setLanguage(savedLanguage);
-  }, []);
+  const [theme, setTheme] = useState<"light" | "dark">(() => typeof window === "undefined" ? "light" : window.localStorage.getItem("3b-theme") === "dark" ? "dark" : "light");
+  const [language, setLanguage] = useState<"en" | "bn">(() => typeof window === "undefined" ? "en" : window.localStorage.getItem("3b-language") === "bn" ? "bn" : "en");
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -52,7 +45,7 @@ export default function SiteHeader({ siteName }: Props) {
         </Link>
         <button type="button" className="menu-trigger" aria-expanded={open} aria-controls="site-floating-menu" onClick={() => setOpen((value) => !value)}>
           <span className={"menu-trigger-icon " + (open ? "is-open" : "")} aria-hidden="true"><span /><span /><span /></span>
-          <span>{open ? (language === "bn" ? "বন্ধ" : "Close") : (language === "bn" ? "মেনু" : "Menu")}</span>
+          <span>{open ? "Close" : "Menu"}</span>
         </button>
       </div>
       {open && <>
