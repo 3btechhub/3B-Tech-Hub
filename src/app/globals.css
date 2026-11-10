@@ -488,3 +488,108 @@ small, .muted, .eyebrow { font-size: var(--font-small) !important; line-height: 
   .brand-mark { width: 34px; height: 34px; flex-basis: 34px; }
   .menu-trigger { min-height: 36px; padding: 7px 10px; }
 }
+
+
+/* Content-sized layout: remove fixed empty width and excessive vertical gaps */
+.container {
+  width: min(1120px, calc(100% - 32px));
+  min-width: 0;
+}
+.site-header .header-inner {
+  width: min(1120px, calc(100% - 32px));
+}
+.floating-menu.simple-menu {
+  width: max-content !important;
+  min-width: 0 !important;
+  max-width: min(280px, calc(100vw - 16px)) !important;
+  padding: 8px 10px !important;
+  justify-self: start;
+}
+.simple-menu-links {
+  width: max-content;
+  min-width: 0;
+  max-width: 100%;
+}
+.simple-menu-link {
+  width: 100%;
+  min-width: 0;
+  white-space: nowrap;
+}
+.simple-menu-tools {
+  width: max-content !important;
+  max-width: 100%;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+}
+.simple-menu-icon-button {
+  min-width: 34px;
+  min-height: 34px;
+  padding: 6px 8px;
+}
+.simple-menu-divider {
+  margin: 4px 0 !important;
+}
+.menu-trigger,
+.button {
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+}
+.menu-trigger {
+  min-height: 36px;
+  padding: 7px 10px;
+  gap: 7px;
+}
+.hero {
+  padding-block: clamp(32px, 4vw, 52px);
+}
+.hero-grid {
+  gap: clamp(16px, 3vw, 32px);
+}
+.hero-panel {
+  padding: clamp(14px, 2vw, 20px);
+}
+.hero-actions {
+  gap: clamp(8px, 1.2vw, 12px);
+  margin-top: clamp(14px, 2vw, 20px);
+}
+.button {
+  min-height: 36px;
+  padding: 8px 12px;
+}
+.section {
+  padding-block: clamp(28px, 3.5vw, 44px);
+}
+.section-heading {
+  margin-bottom: clamp(14px, 2vw, 22px);
+}
+.card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: clamp(10px, 1.5vw, 16px);
+}
+.service-card {
+  min-width: 0;
+  padding: clamp(14px, 1.8vw, 18px);
+}
+.callout {
+  padding: clamp(16px, 2.5vw, 26px);
+  gap: clamp(12px, 2vw, 20px);
+}
+.site-footer {
+  padding-block: clamp(18px, 2.5vw, 28px);
+}
+.footer-inner {
+  gap: 12px;
+}
+@media (max-width: 480px) {
+  .container,
+  .site-header .header-inner {
+    width: calc(100% - 24px);
+  }
+  .floating-menu.simple-menu {
+    max-width: calc(100vw - 16px) !important;
+  }
+  .card-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
