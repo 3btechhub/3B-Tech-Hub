@@ -58,7 +58,7 @@ export function RevisionBrowser() {
             <article className="revision-item" key={item.$id}>
               <div className="revision-main">
                 <strong>{item.slug || "Untitled page"}</strong>
-                <span>Revision {item.revision ?? "—"} · {(item.locale || "—").toUpperCase()}</span>
+                <span>Revision {item.revision ?? "—"} · {(item.locale || "—").toUpperCase()}</span><code title="Revision ID">{item.$id}</code>
               </div>
               <div className="revision-meta">
                 <span className="revision-status">{item.status || "unknown"}</span>
