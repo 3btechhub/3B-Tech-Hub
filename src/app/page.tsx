@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import SiteHeader from "@/components/site-header";
 import { getPublicSiteSettings } from "@/lib/public-site-settings";
 
@@ -7,16 +6,10 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const settings = await getPublicSiteSettings();
   const visibleServices = settings.services.filter((service) => service.enabled);
-  const brandStyle = {
-    "--brand": settings.primaryColor,
-    "--brand-dark": settings.primaryColor,
-    "--brand-accent": settings.accentColor,
-  } as CSSProperties;
-
   if (settings.maintenanceMode) {
     return (
-      <main style={{ ...brandStyle, minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "#f7f8fa" }}>
-        <section style={{ maxWidth: 620, textAlign: "center", background: "white", border: "1px solid #e5e7eb", borderRadius: 20, padding: 36 }}>
+      <main className="maintenance-page">
+        <section className="maintenance-card">
           <div className="brand-mark" style={{ margin: "0 auto 18px" }}>3B</div>
           <h1>{settings.siteName}</h1>
           <p>{settings.announcementText || "We are making improvements. Please check back soon."}</p>
@@ -26,9 +19,9 @@ export default async function HomePage() {
   }
 
   return (
-    <div style={brandStyle}>
+    <div className="site-shell">
       {settings.announcementEnabled && settings.announcementText && (
-        <div style={{ padding: "9px 20px", textAlign: "center", background: settings.accentColor, color: "white", fontSize: 13, fontWeight: 700 }}>
+        <div className="site-announcement">
           {settings.announcementUrl ? <a href={settings.announcementUrl}>{settings.announcementText}</a> : settings.announcementText}
         </div>
       )}
@@ -99,7 +92,7 @@ export default async function HomePage() {
               <h2>Contact and service booking</h2>
               <p>Contact the 3B TECH HUB team using the verified business channels below.</p>
             </div>
-            <div style={{ display: "grid", gap: 10, color: "#475467" }}>
+            <div className="contact-details">
               {settings.contactEmail && <p>Email: <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a></p>}
               {settings.contactPhone && <p>Phone: <a href={`tel:${settings.contactPhone}`}>{settings.contactPhone}</a></p>}
               {settings.whatsappUrl && <p><a href={settings.whatsappUrl} target="_blank" rel="noreferrer">Contact us on WhatsApp ↗</a></p>}
