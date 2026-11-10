@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { pageRevisionSchema } from "@/lib/content-schema";
+import { pageRevisionSchema, type PageRevision } from "@/lib/content-schema";
 
 const initialDraft = {
   slug: "home",
@@ -19,7 +19,9 @@ const initialDraft = {
 };
 
 export function ContentEditor() {
-  const [draft, setDraft] = useState(initialDraft);
+  const [draft, setDraft] = useState<PageRevision>(initialDraft);
+  const [editingRevisionId, setEditingRevisionId] = useState<string | null>(null);
+  const [revisionIdInput, setRevisionIdInput] = useState("");
   const [notice, setNotice] = useState("Draft editor — save requires configured Appwrite storage.");
   const [savedRevisionId, setSavedRevisionId] = useState<string | null>(null);
   const validation = useMemo(() => pageRevisionSchema.safeParse(draft), [draft]);
@@ -42,15 +44,33 @@ export function ContentEditor() {
     setNotice("Unsaved local changes. Persistent saving is not enabled yet.");
   }
 
+  async function loadSavedRevision() {
+    const id = revisionIdInput.trim();
+    if (!id) { setNotice("Enter a saved revision ID."); return; }
+    setNotice("Loading saved revision…");
+    try {
+      const response = await fetch(`/api/admin/content/drafts/${encodeURIComponent(id)}`, { cache: "no-store" });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error ?? "Revision could not be be loaded.");
+      const parsed = pageRevisionSchema.safeParse(body.revision);
+      if (!parsed.success) throw new Error("Saved revision has invalid content.");
+      if (parsed.data.status !== "draft") throw new Error("Only draft revisions can be reopened for editing.");
+      setDraft(parsed.data);
+      setEditingRevisionId(id);
+      setSavedRevisionId(id);
+      setNotice(`Loaded saved draft ${id}. Changes will update this draft revision.`);
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Revision could not be loaded."); }
+  }
+
   async function saveDraft() {
     setNotice("Saving draft…");
     try {
-      const response = await fetch("/api/admin/content/drafts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });
+      const response = await fetch(editingRevisionId ? `/api/admin/content/drafts/${encodeURIComponent(editingRevisionId)}` : "/api/admin/content/drafts", { method: editingRevisionId ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error ?? "Draft could not be saved.");
       setSavedRevisionId(body.revisionId);
-      setNotice(`Draft saved successfully. Revision ID: ${body.revisionId}`);
-      setDraft((current) => ({ ...current, revision: current.revision + 1 }));
+      setNotice(editingRevisionId ? `Draft revision ${editingRevisionId} updated.` : `Draft saved successfully. Revision ID: ${body.revisionId}`);
+      if (!editingRevisionId) setDraft((current) => ({ ...current, revision: current.revision + 1 }));
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Draft save failed.");
     }
@@ -58,6 +78,8 @@ export function ContentEditor() {
 
   function resetDraft() {
     setSavedRevisionId(null);
+    setEditingRevisionId(null);
+    setRevisionIdInput("");
     setDraft(initialDraft);
     setNotice("The local example has been reset.");
   }
@@ -70,6 +92,7 @@ export function ContentEditor() {
             <div><span className="editor-kicker">PAGE BUILDER</span><h2>Edit homepage</h2></div>
             <span className="draft-pill">Draft · v{draft.revision}</span>
           </div>
+          <div className="section-summary"><strong>Reopen saved draft</strong><label>Revision ID<input value={revisionIdInput} onChange={(event) => setRevisionIdInput(event.target.value)} placeholder="Paste a saved revision ID" /></label><button type="button" className="secondary-action" onClick={() => void loadSavedRevision()}>Load revision</button>{editingRevisionId && <small>Editing revision: {editingRevisionId}</small>}</div>
           <label>Page title<input value={draft.title} maxLength={120} onChange={(event) => { setSavedRevisionId(null); setNotice("Unsaved local changes."); setDraft((current) => ({ ...current, title: event.target.value })); }} /></label>
           <label>URL slug<input value={draft.slug} maxLength={100} onChange={(event) => { setSavedRevisionId(null); setNotice("Unsaved local changes."); setDraft((current) => ({ ...current, slug: event.target.value })); }} /></label>
           <label>Hero heading<input value={hero?.heading ?? ""} maxLength={120} onChange={(event) => updateHero("heading", event.target.value)} /></label>
