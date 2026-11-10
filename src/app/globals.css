@@ -446,3 +446,45 @@ small, .muted, .eyebrow { font-size: var(--font-small) !important; line-height: 
 .simple-menu-icon-button { flex: 0 0 auto; }
 .simple-menu form { margin: 0 !important; padding: 0 !important; }
 .simple-menu-link { margin: 0 !important; }
+
+
+/* Give the header a quiet, consistent separation from page content */
+.site-header {
+  background: #f5f5f5 !important;
+  border-bottom: 1px solid #d2d2d2 !important;
+  backdrop-filter: none !important;
+}
+.header-inner {
+  min-height: 68px;
+  gap: 16px;
+}
+.brand {
+  gap: 10px;
+  color: var(--foreground);
+  font-size: 15px;
+  line-height: 1.25;
+  letter-spacing: -.025em;
+}
+.brand-mark {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 9px !important;
+}
+.menu-trigger {
+  min-height: 38px;
+  padding: 8px 12px;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 650;
+}
+:root[data-theme="dark"] .site-header {
+  background: #0d0d0d !important;
+  border-bottom-color: #333 !important;
+}
+@media (max-width: 480px) {
+  .header-inner { min-height: 62px; gap: 10px; }
+  .brand { gap: 8px; font-size: 14px; }
+  .brand-mark { width: 34px; height: 34px; flex-basis: 34px; }
+  .menu-trigger { min-height: 36px; padding: 7px 10px; }
+}
