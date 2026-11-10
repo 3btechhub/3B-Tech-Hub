@@ -45,18 +45,18 @@ export default async function PublishedPage({ params }: Props) {
   if (!page) notFound();
 
   return (
-    <main className="published-page" style={{ minHeight: "100vh", background: "#fff", color: "#172033", padding: "32px 18px" }}>
-      <article style={{ maxWidth: 1080, margin: "0 auto" }}>
-        <header style={{ padding: "20px 0 40px", borderBottom: "1px solid #eaecf0" }}>
-          <Link href={`/${locale}/home`} style={{ fontWeight: 800, color: "#155eef", textDecoration: "none" }}>3B TECH HUB</Link>
-          <h1 style={{ fontSize: "clamp(34px,6vw,64px)", lineHeight: 1.08, marginTop: 32 }}>{page.title}</h1>
+    <main className="published-page">
+      <article className="published-page-shell">
+        <header className="published-page-header">
+          <Link href={`/${locale}/home`} className="published-page-brand">3B TECH HUB</Link>
+          <h1>{page.title}</h1>
         </header>
         {page.sections.map((section, index) => {
-          if (section.type === "hero") return <section key={index} style={{ padding: "48px 0", borderBottom: "1px solid #eaecf0" }}>{section.imageUrl && <Image src={section.imageUrl} alt="" width={1200} height={420} unoptimized loading="lazy" style={{ width: "100%", height: "auto", maxHeight: 420, objectFit: "cover", borderRadius: 16 }} />}<h2 style={{ fontSize: "clamp(28px,5vw,48px)" }}>{section.heading}</h2><p style={{ fontSize: 18, lineHeight: 1.7 }}>{section.subheading}</p>{section.primaryAction && <a href={section.primaryAction.href} style={{ display: "inline-block", marginTop: 12, color: "#155eef", fontWeight: 700 }}>{section.primaryAction.label} →</a>}</section>;
-          if (section.type === "rich_text") return <section key={index} style={{ padding: "32px 0" }}>{section.heading && <h2>{section.heading}</h2>}<p style={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>{section.body}</p></section>;
-          if (section.type === "service_grid") return <section key={index} style={{ padding: "32px 0" }}><h2>{section.heading}</h2><div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 14 }}>{section.serviceIds.map((id) => <div key={id} style={{ padding: 18, background: "#f2f4f7", borderRadius: 12 }}>{id.replaceAll("-", " ")}</div>)}</div></section>;
-          if (section.type === "faq") return <section key={index} style={{ padding: "32px 0" }}><h2>{section.heading}</h2>{section.items.map((item) => <details key={item.question} style={{ padding: "14px 0", borderBottom: "1px solid #eaecf0" }}><summary style={{ fontWeight: 700, cursor: "pointer" }}>{item.question}</summary><p style={{ lineHeight: 1.7 }}>{item.answer}</p></details>)}</section>;
-          return <section key={index} style={{ padding: 28, margin: "28px 0", background: "#f2f4f7", borderRadius: 14 }}><h2>{section.heading}</h2><p>{section.body}</p><a href={section.actionHref} style={{ color: "#155eef", fontWeight: 700 }}>{section.actionLabel} →</a></section>;
+          if (section.type === "hero") return <section key={index} className="published-section published-hero-section">{section.imageUrl && <Image src={section.imageUrl} alt="" width={1200} height={420} unoptimized loading="lazy" className="published-hero-image" />}<h2>{section.heading}</h2><p>{section.subheading}</p>{section.primaryAction && <a href={section.primaryAction.href} className="published-action">{section.primaryAction.label} →</a>}</section>;
+          if (section.type === "rich_text") return <section key={index} className="published-section">{section.heading && <h2>{section.heading}</h2>}<p className="published-rich-text">{section.body}</p></section>;
+          if (section.type === "service_grid") return <section key={index} style={{ padding: "32px 0" }}><h2>{section.heading}</h2><div className="published-service-grid">{section.serviceIds.map((id) => <div key={id} className="published-service-item">{id.replaceAll("-", " ")}</div>)}</div></section>;
+          if (section.type === "faq") return <section key={index} style={{ padding: "32px 0" }}><h2>{section.heading}</h2>{section.items.map((item) => <details key={item.question} className="published-faq-item"><summary>{item.question}</summary><p>{item.answer}</p></details>)}</section>;
+          return <section key={index} className="published-callout"><h2>{section.heading}</h2><p>{section.body}</p><a href={section.actionHref} className="published-action">{section.actionLabel} →</a></section>;
         })}
       </article>
     </main>
