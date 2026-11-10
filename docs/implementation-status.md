@@ -13,7 +13,10 @@ Updated: 2026-11-10
 - [x] Vitest unit-test configuration and URL-validation tests added.
 - [x] Playwright browser smoke-test configuration and homepage test added.
 - [x] Basic crawler policy added to exclude future admin/API routes.
-- [x] Admin workspace preview shell added; privileged actions remain disabled pending authentication and server-side RBAC.
+- [x] Admin workspace preview shell, content-management outline and settings workspace added.
+- [x] Role permission policy module and tests added; owner-only publishing and user management enforced in the policy module.
+- [x] Site settings validation schema and tests added; proposed en/bn and SAR/BDT defaults remain unconfirmed.
+- [x] Access-control matrix documented; server-side enforcement is still pending.
 - [x] Appwrite temporary write test: database/table/row creation, row read and update succeeded; final database inventory is empty.
 
 ## In progress / pending
