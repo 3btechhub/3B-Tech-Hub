@@ -6,13 +6,16 @@ Updated: 2026-11-10
 - [x] Architecture and logical data model drafted.
 - [x] Feature branch `foundation/architecture` created.
 - [x] Draft pull request opened for owner review.
-- [x] Next.js / React / TypeScript project scaffold added.
+- [x] Next.js 16 / React 19 / TypeScript project scaffold added.
 - [x] Responsive public homepage foundation added.
 - [x] Appwrite browser SDK initialization added (public endpoint/project ID only).
 - [x] GitHub Actions validation workflow added.
+- [x] Vitest unit-test configuration and URL-validation tests added.
+- [x] Playwright browser smoke-test configuration and homepage test added.
+- [x] Basic crawler policy added to exclude future admin/API routes.
 
 ## In progress / pending
-- [ ] Install dependencies and run lint, typecheck and production build in CI.
+- [ ] Run CI on GitHub and fix any dependency/type/lint/build/test issues.
 - [ ] Build authenticated admin shell and role-aware navigation.
 - [ ] Confirm initial languages, currencies, contact channels and booking policies.
 - [ ] Convert logical data model into physical Appwrite schema.
