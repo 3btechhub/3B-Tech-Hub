@@ -51,7 +51,7 @@ describe("mediaAssetSchema", () => {
   });
 
   it("rejects uploads larger than the configured limit", () => {
-    expect(MAX_MEDIA_UPLOAD_BYTES).toBe(50 * 1024 * 1024);
+    expect(MAX_MEDIA_UPLOAD_BYTES).toBe(50_000_000);
     expect(mediaAssetSchema.safeParse({
       ...base,
       sourceType: "appwrite",
