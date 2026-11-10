@@ -101,3 +101,14 @@ export async function updateAppwriteRow(tableId: string, rowId: string, data: Re
     { method: "PATCH", body: JSON.stringify({ data }) },
   );
 }
+
+export async function fetchAppwriteFilePreview(bucketId: string, fileId: string) {
+  const config = configuration();
+  if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
+  const response = await fetch(`${config.endpoint}/storage/buckets/${encodeURIComponent(bucketId)}/files/${encodeURIComponent(fileId)}/view`, {
+    method: "GET", headers: { "X-Appwrite-Project": config.projectId, "X-Appwrite-Key": config.apiKey },
+    cache: "no-store", signal: AbortSignal.timeout(20000),
+  });
+  if (!response.ok || !response.body) throw new Error("APPWRITE_FILE_PREVIEW_FAILED");
+  return response;
+}
