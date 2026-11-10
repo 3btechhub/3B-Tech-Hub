@@ -32,18 +32,22 @@ export default function SiteHeader({ siteName }: Props) {
   }, [theme, language]);
 
   useEffect(() => {
-    if (!open) return;
     let active = true;
     fetch("/api/session", { cache: "no-store" })
       .then((response) => response.ok ? response.json() : null)
       .then((data) => {
-        if (!active || !data) return;
-        setRole(data.role === "admin" ? "admin" : data.role === "member" ? "member" : "visitor");
+        if (!active) return;
+        setRole(data?.role === "admin" ? "admin" : data?.role === "member" ? "member" : "visitor");
       })
       .catch(() => { if (active) setRole("visitor"); });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
     window.addEventListener("keydown", onKeyDown);
-    return () => { active = false; window.removeEventListener("keydown", onKeyDown); };
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
   const closeMenu = () => setOpen(false);
@@ -64,7 +68,7 @@ export default function SiteHeader({ siteName }: Props) {
         <div className="floating-menu simple-menu container" id="site-floating-menu" role="group" aria-label="Website menu">
           <div className="simple-menu-links">
             <Link className="simple-menu-link" href="/" onClick={closeMenu}>Home</Link>
-            <Link className="simple-menu-link" href="/profile" onClick={closeMenu}>Profile</Link>
+            {loggedIn && <Link className="simple-menu-link" href="/profile" onClick={closeMenu}>Profile</Link>}
             <Link className="simple-menu-link" href="/#services" onClick={closeMenu}>Services</Link>
             <Link className="simple-menu-link" href="/gallery" onClick={closeMenu}>Gallery</Link>
             {loggedIn
