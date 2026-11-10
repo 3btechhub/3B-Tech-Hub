@@ -12,7 +12,10 @@ Updated: 2026-11-10
 - [x] Media Library UI, device upload, external HTTPS registration, metadata editing, soft-delete/restore and authenticated private-media preview.
 - [x] 50 MB media upload limit, MIME allowlist, basic file-signature validation and private-by-default uploaded objects.
 - [x] Media API pagination and title search; dashboard search and page navigation.
-- [x] Corrected Appwrite row lookup URL construction.
+- [x] Corrected Appwrite row lookup and deletion URL construction.
+- [x] Fixed Media Library pagination to filter trashed records server-side before totals are calculated.
+- [x] Aligned the application upload ceiling with Appwrite's exact 50,000,000-byte Storage limit.
+- [x] Added unit tests for Appwrite query pagination, title search, trash filtering and input bounds.
 - [x] Corrected Appwrite row deletion to use the configured endpoint.
 - [x] Applied server-side `deletedAt IS NULL` filtering before media pagination so page totals and results stay consistent.
 - [x] Server-only Appwrite adapter; APIs fail closed (503) when required production configuration is absent.
