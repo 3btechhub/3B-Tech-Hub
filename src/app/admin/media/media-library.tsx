@@ -78,7 +78,7 @@ export function MediaLibrary() {
   async function updateItem(item: MediaItem) {
     const response = await fetch(`/api/admin/media/${encodeURIComponent(item.$id)}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: item.title, altText: item.altText ?? "", caption: item.caption ?? "", tags: item.tags ?? [], visibility: item.visibility ?? "public" }),
+      body: JSON.stringify({ title: item.title, altText: item.altText ?? "", caption: item.caption ?? "", tags: item.tags ?? [] }),
     });
     const body = await response.json();
     if (!response.ok) throw new Error(body.error ?? "Update failed.");
