@@ -4,7 +4,7 @@ export const supportedLocales = ["en", "bn"] as const;
 export const supportedCurrencies = ["SAR", "BDT"] as const;
 
 const httpsOrEmpty = z.union([
-  z.url().refine((value) => new URL(value).protocol === "https:"),
+  z.url().refine((value) => value.startsWith("https://")),
   z.literal(""),
 ]);
 const safeHref = z.string().trim().max(300).regex(/^(https:\/\/|\/(?!\/)|#)/, "Use an HTTPS URL, local path or page anchor.");
