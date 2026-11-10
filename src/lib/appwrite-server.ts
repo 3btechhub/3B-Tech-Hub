@@ -70,3 +70,34 @@ export async function deleteAppwriteRow(tableId: string, rowId: string) {
   });
   if (!response.ok) throw new Error("APPWRITE_ROW_DELETE_FAILED");
 }
+
+export async function listAppwriteRows(tableId: string, limit = 100) {
+  const config = configuration();
+  const databaseId = process.env.APPWRITE_DATABASE_ID;
+  if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
+  const query = encodeURIComponent(JSON.stringify({ method: "limit", values: [Math.min(Math.max(limit, 1), 100)] }));
+  return appwriteRequest<{ total: number; rows: AppwriteRow[] }>(
+    `${config.endpoint}/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows?queries[]=${query}`,
+    { method: "GET" },
+  );
+}
+
+export async function getAppwriteRow(tableId: string, rowId: string) {
+  const config = configuration();
+  const databaseId = process.env.APPWRITE_DATABASE_ID;
+  if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
+  return appwriteRequest<AppwriteRow>(
+    `${config.endpoint}/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`,
+    { method: "GET" },
+  );
+}
+
+export async function updateAppwriteRow(tableId: string, rowId: string, data: Record<string, unknown>) {
+  const config = configuration();
+  const databaseId = process.env.APPWRITE_DATABASE_ID;
+  if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
+  return appwriteRequest<AppwriteRow>(
+    `${config.endpoint}/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`,
+    { method: "PATCH", body: JSON.stringify({ data }) },
+  );
+}
