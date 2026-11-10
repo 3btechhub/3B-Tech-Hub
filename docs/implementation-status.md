@@ -17,8 +17,8 @@ Updated: 2026-11-10
 - [x] Architecture, data model, security, content, media and Appwrite configuration documentation, including required media title full-text index.
 
 ## Remaining production work
-- [ ] Appwrite production project access is currently unavailable: the recorded project ID 6af2e894001db846da6 returns project_not_found, and organization/project discovery returns team_not_found.
-- [ ] Identify the correct connected production Appwrite project; then create and verify the TablesDB database, Content/Media/Audit tables, columns, indexes and private Storage bucket.
+- [x] Reconnected Appwrite and verified the active Production project `3B Tech Hub` (region `fra`).
+- [x] Created and verified TablesDB `3btechhub-prod`, Content/Media/Audit tables, required columns/indexes and private Storage bucket `media`.
 - [ ] Configure least-privilege server API key and production environment variables; configure actual Owner user ID in ADMIN_OWNER_USER_IDS.
 - [ ] Run live Appwrite tests for login, content create/edit/approve/publish, media upload/read/update/trash/restore, audit persistence and rollback.
 - [ ] Add media usage/reference tracking before enabling permanent deletion.
