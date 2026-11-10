@@ -7,6 +7,7 @@ const httpsOrEmpty = z.union([
   z.url().refine((value) => new URL(value).protocol === "https:"),
   z.literal(""),
 ]);
+const safeHref = z.string().trim().max(300).regex(/^(https:\/\/|\/(?!\/)|#)/, "Use an HTTPS URL, local path or page anchor.");
 
 export const siteSettingsSchema = z.object({
   siteName: z.string().trim().min(2).max(80),
@@ -30,10 +31,10 @@ export const siteSettingsSchema = z.object({
   maintenanceMode: z.boolean(),
   announcementEnabled: z.boolean(),
   announcementText: z.string().trim().max(180),
-  announcementUrl: z.string().trim().max(300),
+  announcementUrl: z.union([safeHref, z.literal("")]),
   navigationItems: z.array(z.object({
     label: z.string().trim().min(1).max(40),
-    href: z.string().trim().min(1).max(200),
+    href: safeHref.min(1).max(200),
   })).max(12),
   services: z.array(z.object({
     id: z.string().trim().min(1).max(40),
