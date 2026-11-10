@@ -116,7 +116,7 @@ export function SettingsForm() {
         <h2 style={{ margin: 0, fontSize: 19 }}>Navigation & service catalogue</h2>
         <label style={fieldStyle}>Navigation items (JSON)<textarea style={textAreaStyle} value={navigationJson} onChange={(e) => setNavigationJson(e.target.value)} /></label>
         <label style={fieldStyle}>Services (JSON)<textarea style={textAreaStyle} value={servicesJson} onChange={(e) => setServicesJson(e.target.value)} /></label>
-        <p style={{ margin: 0, color: "#667085", fontSize: 12, lineHeight: 1.5 }}>Navigation format: [{"label":"Services","href":"#services"}]. Services use id, title, description and enabled fields. Invalid JSON or values are rejected before saving.</p>
+        <p style={{ margin: 0, color: "#667085", fontSize: 12, lineHeight: 1.5 }}>Navigation format: <code>[{"label":"Services","href":"#services"}]</code>. Services use id, title, description and enabled fields. Invalid JSON or values are rejected before saving.</p>
       </section>
 
       <button type="submit" disabled={busy || saving} style={{ padding: 14, border: 0, borderRadius: 10, background: "#0b5cab", color: "white", fontWeight: 800, cursor: saving ? "wait" : "pointer" }}>{saving ? "Saving…" : "Save all website settings"}</button>
