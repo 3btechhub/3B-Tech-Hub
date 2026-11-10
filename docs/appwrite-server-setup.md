@@ -3,7 +3,7 @@
 Admin APIs remain disabled until the Owner provisions and configures dedicated Appwrite resources.
 
 ## Required server-only environment
-- APPWRITE_API_KEY: server-only key with least-privilege TablesDB row create/delete and Storage file create/delete scopes.
+- APPWRITE_API_KEY: server-only key with least-privilege TablesDB row read/create/update/delete and Storage file create/delete scopes. Uploads are private by default; do not expose them publicly until an explicit delivery-permission flow is implemented.
 - APPWRITE_DATABASE_ID
 - APPWRITE_CONTENT_TABLE_ID
 - APPWRITE_MEDIA_TABLE_ID
