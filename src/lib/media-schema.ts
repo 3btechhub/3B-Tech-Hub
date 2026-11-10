@@ -68,3 +68,12 @@ export const allowedVideoMimeTypes = [
 export const allowedDocumentMimeTypes = [
   "application/pdf",
 ] as const;
+
+export const mediaMetadataUpdateSchema = z.object({
+  title: z.string().trim().min(1).max(120).optional(),
+  altText: z.string().trim().max(250).optional(),
+  caption: z.string().trim().max(500).optional(),
+  tags: z.array(z.string().trim().min(1).max(32)).max(20).optional(),
+  visibility: z.enum(["public", "private"]).optional(),
+  externalUrl: httpsUrl.optional(),
+}).strict().refine((value) => Object.keys(value).length > 0, "At least one metadata field is required.");
