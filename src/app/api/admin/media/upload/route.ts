@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
       altText: altText.trim().slice(0, 250),
       caption: "",
       tags: [],
-      visibility: "public",
+      visibility: "private",
       sourceType: "appwrite",
       storageBucketId: bucketId,
       storageFileId: assetId,
