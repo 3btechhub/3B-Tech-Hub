@@ -39,7 +39,20 @@ export function ContentEditor() {
     setNotice("Unsaved local changes. Persistent saving is not enabled yet.");
   }
 
-  async function saveDraft() {\n    setNotice("Saving draft…");\n    try {\n      const response = await fetch("/api/admin/content/drafts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });\n      const body = await response.json();\n      if (!response.ok) throw new Error(body.error ?? "Draft could not be saved.");\n      setNotice(`Draft saved successfully. Revision ID: ${body.revisionId}`);\n      setDraft((current) => ({ ...current, revision: current.revision + 1 }));\n    } catch (error) {\n      setNotice(error instanceof Error ? error.message : "Draft save failed.");\n    }\n  }\n\n  function resetDraft() {
+  async function saveDraft() {
+    setNotice("Saving draft…");
+    try {
+      const response = await fetch("/api/admin/content/drafts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error ?? "Draft could not be saved.");
+      setNotice(`Draft saved successfully. Revision ID: ${body.revisionId}`);
+      setDraft((current) => ({ ...current, revision: current.revision + 1 }));
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "Draft save failed.");
+    }
+  }
+
+  function resetDraft() {
     setDraft(initialDraft);
     setNotice("The local example has been reset.");
   }
