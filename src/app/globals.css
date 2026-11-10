@@ -471,3 +471,42 @@ label { color: var(--foreground); }
   .site-header .brand { gap: 9px; }
   .site-header .brand-mark { flex-basis: 40px; width: 40px; height: 40px; }
 }
+
+
+/* Floating menu: right aligned, centered content, edge-to-edge tools */
+.simple-menu {
+  left: auto !important;
+  right: max(12px, calc((100vw - var(--content-max)) / 2)) !important;
+  transform: none !important;
+  width: min(300px, calc(100vw - 24px)) !important;
+  min-width: 190px !important;
+  max-width: min(300px, calc(100vw - 24px)) !important;
+  text-align: center;
+}
+.simple-menu-links { justify-items: stretch; text-align: center; }
+.simple-menu-link {
+  justify-content: center;
+  text-align: center;
+}
+.simple-menu-links form { width: 100%; }
+.simple-menu-action { justify-content: center; text-align: center; }
+.simple-menu-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between !important;
+  gap: 0 !important;
+  width: 100% !important;
+}
+.simple-menu-icon-button {
+  flex: 0 0 44px;
+  margin: 0;
+}
+.simple-menu-dashboard { justify-content: center; text-align: center; }
+@media (max-width: 480px) {
+  .simple-menu {
+    left: auto !important;
+    right: 12px !important;
+    width: min(300px, calc(100vw - 24px)) !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}
