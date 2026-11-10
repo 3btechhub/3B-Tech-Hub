@@ -389,3 +389,40 @@ label { color: var(--foreground); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+
+/* Page-level safeguards for legacy inline and embedded styles */
+.admin-session-bar {
+  background: var(--surface-muted) !important;
+  color: var(--foreground) !important;
+  border-bottom: 1px solid var(--border);
+}
+.admin-session-bar button {
+  background: var(--surface) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+.content-admin {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+}
+.published-page {
+  background: var(--background) !important;
+  color: var(--foreground) !important;
+}
+.published-page > article > header,
+.published-page > article > section {
+  border-color: var(--border) !important;
+}
+.published-page a { color: var(--foreground) !important; }
+.published-page section > div[style*="grid"] > div,
+.published-page section[style*="background"] {
+  background: var(--surface-muted) !important;
+  color: var(--foreground) !important;
+}
+.published-page img { border-radius: var(--card-radius); }
+.settings-admin [role="status"] {
+  background: var(--surface-muted) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
