@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mediaAssetSchema, MAX_MEDIA_UPLOAD_BYTES } from "./media-schema";
+import { mediaAssetSchema, mediaMetadataUpdateSchema, MAX_MEDIA_UPLOAD_BYTES } from "./media-schema";
 
 const base = {
   title: "Homepage hero",
