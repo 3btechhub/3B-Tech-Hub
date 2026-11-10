@@ -29,6 +29,36 @@ export async function GET(request: NextRequest, context: Context) {
   }
 }
 
+
+export async function PUT(request: NextRequest, context: Context) {
+  const auth = await requireOwnerApi(request);
+  if (auth.response) return auth.response;
+  if (!isContentStoreConfigured() || !isAuditStoreConfigured()) return NextResponse.json({ error: "Content and audit storage must both be configured." }, { status: 503 });
+  const { revisionId } = await context.params;
+  const parsed = pageRevisionSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "Invalid page revision.", issues: parsed.error.issues }, { status: 400 });
+  if (parsed.data.status !== "draft") return NextResponse.json({ error: "Only draft revisions can be edited." }, { status: 403 });
+  const tableId = process.env.APPWRITE_CONTENT_TABLE_ID!;
+  try {
+    const existing = await getAppwriteRow(tableId, revisionId);
+    if (existing.status !== "draft" || typeof existing.payload !== "string") return NextResponse.json({ error: "Only saved drafts can be edited; submitted or published revisions are locked." }, { status: 409 });
+    const previous = pageRevisionSchema.safeParse(JSON.parse(existing.payload));
+    if (!previous.success || previous.data.slug !== parsed.data.slug || previous.data.locale !== parsed.data.locale || previous.data.revision !== parsed.data.revision) {
+      return NextResponse.json({ error: "A draft's slug, locale and revision number cannot be changed." }, { status: 409 });
+    }
+    await updateAppwriteRow(tableId, revisionId, { payload: JSON.stringify(parsed.data), updatedAt: new Date().toISOString() });
+    try {
+      await appendAuditEvent({ actorId: auth.identity!.id, actorRole: "owner", action: "content.update", targetType: "content", targetId: revisionId, outcome: "success", metadata: { slug: parsed.data.slug, revision: parsed.data.revision }, occurredAt: new Date().toISOString() });
+    } catch {
+      await updateAppwriteRow(tableId, revisionId, { payload: existing.payload }).catch(() => undefined);
+      return NextResponse.json({ error: "Audit recording failed; draft update was rolled back where possible." }, { status: 502 });
+    }
+    return NextResponse.json({ ok: true, revisionId, status: "draft" });
+  } catch {
+    return NextResponse.json({ error: "Draft could not be updated." }, { status: 502 });
+  }
+}
+
 export async function POST(request: NextRequest, context: Context) {
   const auth = await requireOwnerApi(request);
   if (auth.response) return auth.response;
