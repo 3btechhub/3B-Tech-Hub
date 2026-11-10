@@ -60,14 +60,23 @@ Cloudflare: DNS / edge protection / caching where appropriate
 - Maintain audit events for privileged changes.
 - Use secure headers, dependency updates, backups and recovery tests.
 
-## 7. SEO and performance
+## 7. Media management and delivery
+- Provide a central Media Library with CRUD for images, videos, documents and other approved assets.
+- Support both Appwrite Storage uploads and validated external HTTPS media URLs.
+- Optimize images with responsive renditions, AVIF/WebP where supported, thumbnails, lazy loading and CDN caching for public assets.
+- Use poster images and lazy-loaded/adaptive delivery for video; avoid loading large originals unnecessarily.
+- Track media usage and prevent unsafe deletion of assets referenced by published content.
+- Validate uploads and external hosts; enforce server-side role checks and private/public storage boundaries.
+- See docs/media-management.md for the detailed media data model, security and delivery plan.
+
+## 8. SEO and performance
 - Server-render public pages where useful; generate canonical URLs, metadata, sitemap and robots rules.
 - Add Schema.org structured data for the business and relevant service/product pages.
 - Optimize images, fonts, caching and Core Web Vitals.
 - Keep admin pages authenticated and excluded from indexing.
 - Support multilingual content architecture (initial language choice to be confirmed before content production).
 
-## 8. Environments and release flow
+## 9. Environments and release flow
 - Development: local developer environment with non-production data.
 - Preview: isolated deployment for review and testing.
 - Production: promoted only after owner approval.
@@ -75,7 +84,7 @@ Cloudflare: DNS / edge protection / caching where appropriate
 - Store environment variables in hosting/provider secret stores; never in Git.
 - Maintain a documented rollback procedure.
 
-## 9. Scalability decisions
+## 10. Scalability decisions
 - API-first service boundaries allow future mobile apps and third-party integrations.
 - Modular domain areas keep booking, catalogue, content and identity concerns separate.
 - Use pagination, indexes and query limits for growing datasets.
@@ -83,7 +92,7 @@ Cloudflare: DNS / edge protection / caching where appropriate
 - Add caching only to public, non-personalized data.
 - Evaluate dedicated database/replicas only when measured traffic and reliability needs justify cost.
 
-## 10. Open decisions before production
+## 11. Open decisions before production
 - Primary domain and DNS ownership.
 - Initial public languages and currencies.
 - Payment provider(s), if online payments are required.
@@ -91,5 +100,5 @@ Cloudflare: DNS / edge protection / caching where appropriate
 - Legal/privacy policy requirements for operating markets.
 - Final admin user identities and role assignments.
 
-## 11. Current implementation status
+## 12. Current implementation status
 Architecture documentation only. No production application, Appwrite database, storage bucket, function or Vercel deployment has been created yet.
