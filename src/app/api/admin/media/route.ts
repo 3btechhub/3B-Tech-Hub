@@ -15,9 +15,9 @@ export async function GET(request: NextRequest) {
   const offset = Number.isInteger(rawOffset) ? Math.min(Math.max(rawOffset, 0), 100000) : 0;
   const search = (params.get("search") ?? "").trim().slice(0, 80);
   try {
-    const result = await listAppwriteRows(process.env.APPWRITE_MEDIA_TABLE_ID!, limit, offset, search || undefined);
-    const rows = (result.rows ?? []).filter((row) => includeTrash || !row.deletedAt);
-    return NextResponse.json({ items: rows, total: result.total ?? rows.length, limit, offset, search });
+    const result = await listAppwriteRows(process.env.APPWRITE_MEDIA_TABLE_ID!, limit, offset, search || undefined, !includeTrash);
+    const rows = result.rows ?? [];
+    return NextResponse.json({ items: rows, total: result.total ?? rows.length, limit, offset, search, includeTrash });
   } catch {
     return NextResponse.json({ error: "Media library could not be loaded. Verify the Appwrite title search index if search is enabled." }, { status: 502 });
   }
