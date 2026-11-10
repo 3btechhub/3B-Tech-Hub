@@ -54,9 +54,9 @@ export default async function HomePage() {
             </div>
             <aside className="hero-panel" aria-label="Service highlights">
               <h2>How can we help?</h2>
-              <div className="quick-item"><span className="quick-icon">01</span><div><strong>Repair & Diagnose</strong><div className="muted">Find the right technical support</div></div></div>
-              <div className="quick-item"><span className="quick-icon">02</span><div><strong>Service Booking</strong><div className="muted">Online booking is being prepared</div></div></div>
-              <div className="quick-item"><span className="quick-icon">03</span><div><strong>Explore Products</strong><div className="muted">Product catalogue is being prepared</div></div></div>
+              <div className="quick-item"><div><strong>Repair & Diagnose</strong><div className="muted">Find the right technical support</div></div></div>
+              <div className="quick-item"><div><strong>Service Booking</strong><div className="muted">Online booking is being prepared</div></div></div>
+              <div className="quick-item"><div><strong>Explore Products</strong><div className="muted">Product catalogue is being prepared</div></div></div>
             </aside>
           </div>
         </section>
@@ -71,7 +71,6 @@ export default async function HomePage() {
             <div className="card-grid">
               {visibleServices.map((service, index) => (
                 <article className="service-card" key={service.id}>
-                  <div className="quick-icon" aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
                   <h3>{service.title}</h3>
                   <p>{service.description}</p>
                 </article>
