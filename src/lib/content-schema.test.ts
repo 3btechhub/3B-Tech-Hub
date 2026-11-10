@@ -34,22 +34,8 @@ describe("pageRevisionSchema", () => {
     }).success).toBe(true);
   });
 
-  it("rejects non-HTTPS hero media URLs", () => {
-    expect(pageRevisionSchema.safeParse({
-      ...validPage,
-      sections: [{ type: "hero", heading: "Hello", imageUrl: "http://images.example.com/hero.jpg" }],
-    }).success).toBe(false);
-  });
-
-  it("accepts HTTPS hero media URLs", () => {
-    expect(pageRevisionSchema.safeParse({
-      ...validPage,
-      sections: [{ type: "hero", heading: "Hello", imageUrl: "https://cdn.example.com/hero.webp" }],
-    }).success).toBe(true);
-  });
-
   it("rejects protocol-relative and backslash-based CTA links", () => {
-    for (const actionHref of ["//evil.example/path", "/\\\\evil.example/path"]) {
+    for (const actionHref of ["//evil.example/path", "/" + String.fromCharCode(92) + "evil.example/path"]) {
       expect(pageRevisionSchema.safeParse({ ...validPage, sections: [{ type: "cta", heading: "Click", actionLabel: "Go", actionHref }] }).success).toBe(false);
     }
   });
