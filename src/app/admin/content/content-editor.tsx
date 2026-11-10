@@ -69,8 +69,8 @@ export function ContentEditor() {
             <div><span className="editor-kicker">PAGE BUILDER</span><h2>Edit homepage</h2></div>
             <span className="draft-pill">Draft · v{draft.revision}</span>
           </div>
-          <label>Page title<input value={draft.title} maxLength={120} onChange={(event) => setDraft((current) => ({ ...current, title: event.target.value }))} /></label>
-          <label>URL slug<input value={draft.slug} maxLength={100} onChange={(event) => setDraft((current) => ({ ...current, slug: event.target.value }))} /></label>
+          <label>Page title<input value={draft.title} maxLength={120} onChange={(event) => { setSavedRevisionId(null); setNotice("Unsaved local changes."); setDraft((current) => ({ ...current, title: event.target.value })); }} /></label>
+          <label>URL slug<input value={draft.slug} maxLength={100} onChange={(event) => { setSavedRevisionId(null); setNotice("Unsaved local changes."); setDraft((current) => ({ ...current, slug: event.target.value })); }} /></label>
           <label>Hero heading<input value={hero?.heading ?? ""} maxLength={120} onChange={(event) => updateHero("heading", event.target.value)} /></label>
           <label>Hero description<textarea value={hero?.subheading ?? ""} maxLength={300} rows={3} onChange={(event) => updateHero("subheading", event.target.value)} /></label>
           <div className="section-summary"><strong>Homepage sections</strong><span>Hero · Services · Contact CTA</span><small>Section ordering and additional block types will be enabled in the next editor iteration.</small></div>
