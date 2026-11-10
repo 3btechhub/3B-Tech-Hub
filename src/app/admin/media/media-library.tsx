@@ -29,7 +29,7 @@ export function MediaLibrary() {
   const pageSize = 24;
   const [notice, setNotice] = useState("Media actions require the Appwrite server configuration.");
   const [external, setExternal] = useState({ title: "", altText: "", externalUrl: "", mediaType: "image" as "image" | "video" | "document" });
-  const [upload, setUpload] = useState({ title: "", altText: "", file: null as File | null });
+  const [upload, setUpload] = useState({ title: "", altText: "", visibility: "private" as "public" | "private", file: null as File | null });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -77,12 +77,13 @@ export function MediaLibrary() {
     form.set("file", upload.file);
     form.set("title", upload.title);
     form.set("altText", upload.altText);
+    form.set("visibility", upload.visibility);
     setNotice("Uploading media…");
     try {
       const response = await fetch("/api/admin/media/upload", { method: "POST", body: form });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error ?? "Upload failed.");
-      setUpload({ title: "", altText: "", file: null });
+      setUpload({ title: "", altText: "", visibility: "private", file: null });
       setNotice("Media uploaded successfully.");
       await load();
     } catch (error) { setNotice(error instanceof Error ? error.message : "Upload failed."); }
@@ -91,7 +92,7 @@ export function MediaLibrary() {
   async function updateItem(item: MediaItem) {
     const response = await fetch(`/api/admin/media/${encodeURIComponent(item.$id)}`, {
       method: "PATCH", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: item.title, altText: item.altText ?? "", caption: item.caption ?? "", tags: item.tags ?? [] }),
+      body: JSON.stringify({ title: item.title, altText: item.altText ?? "", caption: item.caption ?? "", tags: item.tags ?? [], visibility: item.visibility ?? "private" }),
     });
     const body = await response.json();
     if (!response.ok) throw new Error(body.error ?? "Update failed.");
@@ -125,6 +126,7 @@ export function MediaLibrary() {
           <form onSubmit={uploadFile}>
             <label>Asset title<input required maxLength={120} value={upload.title} onChange={(e) => setUpload((s) => ({ ...s, title: e.target.value }))} /></label>
             <label>Alternative text<input maxLength={250} value={upload.altText} onChange={(e) => setUpload((s) => ({ ...s, altText: e.target.value }))} /></label>
+            <label>Delivery visibility<select value={upload.visibility} onChange={(e) => setUpload((s) => ({ ...s, visibility: e.target.value as "public" | "private" }))}><option value="private">Private — Owner only</option><option value="public">Public — website delivery</option></select></label>
             <label>Image, video or PDF (max 50 MB)<input required type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm,video/quicktime,application/pdf" onChange={(e) => setUpload((s) => ({ ...s, file: e.target.files?.[0] ?? null }))} /></label>
             <button className="media-action" type="submit">Upload media</button>
           </form>
@@ -148,16 +150,17 @@ export function MediaLibrary() {
             {items.map((item) => (
               <article className="media-item" key={item.$id}>
                 {(() => {
-                  const previewUrl = item.sourceType === "external" ? item.externalUrl : `/api/admin/media/${encodeURIComponent(item.$id)}/preview`;
+                  const previewUrl = item.visibility === "public" ? `/api/media/${encodeURIComponent(item.$id)}` : item.sourceType === "external" ? item.externalUrl : `/api/admin/media/${encodeURIComponent(item.$id)}/preview`;
                   if (item.mediaType === "image" && previewUrl && !item.deletedAt) return <div className="media-preview"><Image src={previewUrl} alt={item.altText || item.title || "Media preview"} width={480} height={270} unoptimized loading="lazy" /></div>;
                   if (item.mediaType === "video" && previewUrl && !item.deletedAt) return <video className="media-preview" src={previewUrl} controls preload="none" />;
                   if (item.mediaType === "document" && previewUrl && !item.deletedAt) return <a href={previewUrl} target="_blank" rel="noreferrer">Open document preview ↗</a>;
                   return null;
                 })()}
                 <h3>{item.title || "Untitled media"}</h3>
-                <p>{item.mediaType || "Media"} · {item.sourceType || "Unknown source"} · {item.mimeType || item.externalUrl || ""}</p>
+                <p>{item.mediaType || "Media"} · {item.sourceType || "Unknown source"} · {item.visibility || "private"} · {item.mimeType || item.externalUrl || ""}</p>
                 <label>Title<input value={item.title ?? ""} disabled={Boolean(item.deletedAt)} onChange={(e) => setItems((current) => current.map((entry) => entry.$id === item.$id ? { ...entry, title: e.target.value } : entry))} /></label>
                 <label>Alt text<input value={item.altText ?? ""} disabled={Boolean(item.deletedAt)} onChange={(e) => setItems((current) => current.map((entry) => entry.$id === item.$id ? { ...entry, altText: e.target.value } : entry))} /></label>
+                <label>Delivery visibility<select value={item.visibility ?? "private"} disabled={Boolean(item.deletedAt)} onChange={(e) => setItems((current) => current.map((entry) => entry.$id === item.$id ? { ...entry, visibility: e.target.value as "public" | "private" } : entry))}><option value="private">Private</option><option value="public">Public</option></select></label>
                 <div className="media-item-actions">
                   {item.deletedAt ? <button className="media-secondary" type="button" onClick={() => void restoreItem(item).catch((e) => setNotice(e.message))}>Restore</button> : <><button className="media-action" type="button" onClick={() => void updateItem(item).catch((e) => setNotice(e.message))}>Save metadata</button><button className="media-secondary" type="button" onClick={() => void trashItem(item).catch((e) => setNotice(e.message))}>Move to trash</button></>}
                 </div>
