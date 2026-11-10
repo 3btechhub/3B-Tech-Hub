@@ -31,8 +31,12 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid page revision.", issues: parsed.error.issues }, { status: 400 });
   if (parsed.data.status !== "draft") return NextResponse.json({ error: "Only draft revisions can be created through this endpoint." }, { status: 403 });
 
-  const revisionId = randomUUID();
   const tableId = process.env.APPWRITE_CONTENT_TABLE_ID!;
+  const existing = await listAppwriteRows(tableId, 100).catch(() => null);
+  if (!existing) return NextResponse.json({ error: "Could not verify the latest revision number." }, { status: 502 });
+  const latestRevision = Math.max(0, ...(existing.rows ?? []).filter((row) => row.slug === parsed.data.slug && row.locale === parsed.data.locale).map((row) => typeof row.revision === "number" ? row.revision : 0));
+  if (parsed.data.revision !== latestRevision + 1) return NextResponse.json({ error: `Next revision must be ${latestRevision + 1}.` }, { status: 409 });
+  const revisionId = randomUUID();
   let rowCreated = false;
   try {
     await createAppwriteRow(tableId, revisionId, {
