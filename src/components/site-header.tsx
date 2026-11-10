@@ -39,7 +39,7 @@ export default function SiteHeader({ siteName }: Props) {
 
   return (
     <header className="site-header">
-      <div className="container header-inner">
+      <nav className="container header-inner" aria-label="Main navigation">
         <Link className="brand" href="/" aria-label={siteName + " home"} onClick={closeMenu}>
           <span className="brand-mark">3B</span><span>{siteName}</span>
         </Link>
@@ -47,10 +47,10 @@ export default function SiteHeader({ siteName }: Props) {
           <span className={"menu-trigger-icon " + (open ? "is-open" : "")} aria-hidden="true"><span /><span /><span /></span>
           <span>{open ? "Close" : "Menu"}</span>
         </button>
-      </div>
+      </nav>
       {open && <>
         <button className="menu-backdrop" type="button" aria-label="Close menu" onClick={closeMenu} />
-        <nav className="floating-menu simple-menu container" id="site-floating-menu" aria-label="Website menu">
+        <div className="floating-menu simple-menu container" id="site-floating-menu" role="group" aria-label="Website menu">
           <div className="simple-menu-links">
             <Link className="simple-menu-link" href="/" onClick={closeMenu}>Home</Link>
             <Link className="simple-menu-link" href="/profile" onClick={closeMenu}>Profile</Link>
@@ -73,7 +73,7 @@ export default function SiteHeader({ siteName }: Props) {
             <div className="simple-menu-divider" />
             <Link className="simple-menu-link simple-menu-dashboard" href="/admin" onClick={closeMenu}>Dashboard</Link>
           </>}
-        </nav>
+        </div>
       </>}
     </header>
   );
