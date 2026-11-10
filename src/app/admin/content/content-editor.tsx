@@ -112,7 +112,7 @@ export function ContentEditor() {
           <div className="preview-top"><span>LIVE PREVIEW</span><span>Desktop · Draft</span></div>
           <div className="preview-site">
             <div className="preview-nav"><strong>3B TECH HUB</strong><span>Services　 About　 Contact</span></div>
-            <div className="preview-hero"><span className="preview-eyebrow">THREE BROTHERS · TECHNOLOGY HUB</span><h2>{hero?.heading || "Your homepage headline"}</h2><p>{hero?.subheading || "Your homepage introduction will appear here."}</p><span className="preview-cta">{cta?.type === "cta" ? cta.actionLabel : "Contact us"} ↗</span></div>
+            <div className="preview-hero"><span className="preview-eyebrow">THREE BROTHERS · TECHNOLOGY HUB</span><h2>{hero?.heading || "Your homepage headline"}</h2><p>{hero?.subheading || "Your homepage introduction will appear here."}</p><span className="preview-cta button secondary">{cta?.type === "cta" ? cta.actionLabel : "Contact us"} ↗</span></div>
             <div className="preview-services"><small>WHAT WE DO</small><h3>Technology services</h3><div><span>Phone repair</span><span>TV service</span><span>Satellite support</span></div></div>
           </div>
           <p className="preview-caption">Preview reflects local edits only. The protected saved-revision preview is available after a successful save.</p>
