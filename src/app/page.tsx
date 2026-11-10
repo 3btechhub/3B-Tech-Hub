@@ -43,8 +43,8 @@ export default function HomePage() {
             <aside className="hero-panel" aria-label="Service highlights">
               <h2>How can we help?</h2>
               <div className="quick-item"><span className="quick-icon">01</span><div><strong>Repair & Diagnose</strong><div className="muted">Find the right technical support</div></div></div>
-              <div className="quick-item"><span className="quick-icon">02</span><div><strong>Book a Service</strong><div className="muted">Booking workflow coming soon</div></div></div>
-              <div className="quick-item"><span className="quick-icon">03</span><div><strong>Explore Products</strong><div className="muted">Product catalogue foundation</div></div></div>
+              <div className="quick-item"><span className="quick-icon">02</span><div><strong>Service Booking</strong><div className="muted">Online booking is being prepared</div></div></div>
+              <div className="quick-item"><span className="quick-icon">03</span><div><strong>Explore Products</strong><div className="muted">Product catalogue is being prepared</div></div></div>
             </aside>
           </div>
         </section>
@@ -54,7 +54,7 @@ export default function HomePage() {
             <div className="section-heading">
               <span className="eyebrow">What we do</span>
               <h2>Technology services for everyday life</h2>
-              <p>Explore the service areas planned for 3B TECH HUB. Final service details, availability and pricing will be managed from the owner-controlled admin dashboard.</p>
+              <p>Explore the service areas of 3B TECH HUB. Service details, availability and pricing will be published as they are confirmed.</p>
             </div>
             <div className="card-grid">
               {services.map((service) => (
@@ -74,9 +74,9 @@ export default function HomePage() {
               <div>
                 <span className="eyebrow">Three Brothers, one hub</span>
                 <h2>Practical support. Clear communication.</h2>
-                <p>We are building a customer-friendly technology hub with service information, helpful guidance and convenient ways to connect.</p>
+                <p>3B TECH HUB brings technical services and practical technology support together in one place.</p>
               </div>
-              <a className="button secondary" href="#contact">Talk to us</a>
+              <a className="button secondary" href="#contact">Get updates</a>
             </div>
           </div>
         </section>
@@ -85,11 +85,10 @@ export default function HomePage() {
           <div className="container">
             <div className="section-heading">
               <span className="eyebrow">Get in touch</span>
-              <h2>Tell us what you need help with</h2>
-              <p>Contact details and secure booking forms will be configured after the business contact channels are confirmed.</p>
+              <h2>Contact and service booking</h2>
+              <p>Our verified business contact channels and online booking options are being prepared. We will publish them here once they are confirmed.</p>
             </div>
-            <a className="button" href="mailto:hello@3btechhub.example">Email contact placeholder</a>
-            <p className="muted">Temporary placeholder only — replace with the verified business email before public launch.</p>
+            <p className="muted">Please check back soon for official contact details. No unverified email address or phone number is displayed.</p>
           </div>
         </section>
       </main>
