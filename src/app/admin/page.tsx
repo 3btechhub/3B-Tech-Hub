@@ -37,7 +37,7 @@ export default function AdminWorkspacePage() {
                 {area.href && <p className="admin-area-open">Open tools →</p>}
               </article>
             );
-            return area.href ? <Link href={area.href} key={area.title} style={{ textDecoration: "none" }}>{card}</Link> : <div key={area.title}>{card}</div>;
+            return area.href ? <Link href={area.href} key={area.title} className="admin-area-link">{card}</Link> : <div key={area.title}>{card}</div>;
           })}
         </section>
         <aside className="admin-owner-note">
