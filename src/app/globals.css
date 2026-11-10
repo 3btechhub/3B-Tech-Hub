@@ -807,3 +807,54 @@ button svg, a svg, .button svg {
     min-height: 40px;
   }
 }
+
+
+/* Comfortable touch targets and readable controls across devices */
+:root {
+  --touch-target: 44px;
+  --icon-size: 21px;
+}
+button, .button, .menu-trigger, .auth-submit, .auth-back,
+.simple-menu-link, .simple-menu-icon-button {
+  min-height: var(--touch-target);
+}
+button, .button, .menu-trigger, .auth-submit, .auth-back {
+  font-size: 14px;
+  padding-block: 10px;
+}
+.simple-menu-link {
+  min-height: var(--touch-target);
+  padding: 10px 10px;
+  font-size: 14px;
+}
+.simple-menu-icon-button {
+  width: var(--touch-target);
+  min-width: var(--touch-target);
+  height: var(--touch-target);
+  min-height: var(--touch-target);
+  padding: 10px;
+}
+.simple-menu-icon-button svg,
+button svg, a svg, .button svg {
+  width: 21px;
+  height: 21px;
+}
+input, select, textarea {
+  min-height: var(--touch-target);
+  font-size: 15px;
+}
+.menu-trigger {
+  min-height: var(--touch-target);
+}
+@media (max-width: 480px) {
+  .simple-menu-link,
+  button, .button, .menu-trigger, .auth-submit, .auth-back {
+    min-height: 44px;
+  }
+  .simple-menu-icon-button {
+    width: 44px;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+}
