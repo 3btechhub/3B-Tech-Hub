@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireOwnerApi } from "@/lib/admin-api-auth";
-import { fetchAppwriteFilePreview, getAppwriteRow, isMediaStoreConfigured } from "@/lib/appwrite-server";
+import { fetchAppwriteFilePreview, fetchAppwriteFileView, getAppwriteRow, isMediaStoreConfigured } from "@/lib/appwrite-server";
 
 export const runtime = "nodejs";
 type Context = { params: Promise<{ assetId: string }> };
@@ -23,9 +23,12 @@ export async function GET(request: NextRequest, context: Context) {
     }
     const mimeType = typeof row.mimeType === "string" ? row.mimeType : "";
     if (!safePreviewTypes.has(mimeType)) return NextResponse.json({ error: "This media type cannot be previewed inline." }, { status: 415 });
-    const upstream = await fetchAppwriteFilePreview(row.storageBucketId, row.storageFileId);
+    const isImage = mimeType.startsWith("image/");
+    const upstream = isImage
+      ? await fetchAppwriteFilePreview(row.storageBucketId, row.storageFileId, { width: 1200, height: 900, quality: 78, output: "webp" })
+      : await fetchAppwriteFileView(row.storageBucketId, row.storageFileId);
     const headers = new Headers({
-      "Content-Type": mimeType,
+      "Content-Type": isImage ? (upstream.headers.get("content-type") ?? "image/webp") : mimeType,
       "Content-Disposition": "inline",
       "Cache-Control": "private, no-store, max-age=0",
       "X-Content-Type-Options": "nosniff",
