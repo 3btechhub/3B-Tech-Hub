@@ -39,7 +39,7 @@ export function ContentEditor() {
     setNotice("Unsaved local changes. Persistent saving is not enabled yet.");
   }
 
-  function resetDraft() {
+  async function saveDraft() {\n    setNotice("Saving draft…");\n    try {\n      const response = await fetch("/api/admin/content/drafts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });\n      const body = await response.json();\n      if (!response.ok) throw new Error(body.error ?? "Draft could not be saved.");\n      setNotice(`Draft saved successfully. Revision ID: ${body.revisionId}`);\n    } catch (error) {\n      setNotice(error instanceof Error ? error.message : "Draft save failed.");\n    }\n  }\n\n  function resetDraft() {
     setDraft(initialDraft);
     setNotice("The local example has been reset.");
   }
@@ -61,7 +61,7 @@ export function ContentEditor() {
             <label>SEO title<input value={draft.seo.title} maxLength={70} onChange={(event) => updateSeo("title", event.target.value)} /></label>
             <label>SEO description<textarea value={draft.seo.description} maxLength={180} rows={2} onChange={(event) => updateSeo("description", event.target.value)} /></label>
           </div>
-          <div className="editor-actions"><button type="button" className="secondary-action" onClick={resetDraft}>Reset example</button><button type="button" disabled={!validation.success} onClick={() => setNotice("Validation passed. Saving is intentionally disabled until secure storage and audit logging are connected.")}>Validate draft</button></div>
+          <div className="editor-actions"><button type="button" className="secondary-action" onClick={resetDraft}>Reset example</button><button type="button" disabled={!validation.success} onClick={() => void saveDraft()}>Save draft</button></div>
           <p className="editor-notice" role="status">{notice}</p>
           {!validation.success && <p className="validation-error" role="alert">{validation.error.issues[0]?.message ?? "Please check the page fields."}</p>}
           {validation.success && <p className="validation-success">All current page fields pass validation.</p>}
