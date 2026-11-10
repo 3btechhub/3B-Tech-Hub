@@ -62,7 +62,7 @@ export async function deleteAppwriteRow(tableId: string, rowId: string) {
   const config = configuration();
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
-  const response = await fetch(/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}, {
+  const response = await fetch(`/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`, {
     method: "DELETE",
     headers: { "X-Appwrite-Project": config.projectId, "X-Appwrite-Key": config.apiKey },
     cache: "no-store",
@@ -102,7 +102,7 @@ export async function updateAppwriteRow(tableId: string, rowId: string, data: Re
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   return appwriteRequest<AppwriteRow>(
-    `${config.endpoint}/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`,
+    `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`,
     { method: "PATCH", body: JSON.stringify({ data }) },
   );
 }
