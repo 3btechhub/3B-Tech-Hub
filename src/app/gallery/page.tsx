@@ -8,7 +8,7 @@ export default function GalleryPage() {
       <section className="gallery-shell">
         <p className="eyebrow">3B TECH HUB</p>
         <h1>Gallery</h1>
-        <p className="muted" style={{ lineHeight: 1.7 }}>Published photos and videos will appear here when the public gallery is enabled.</p>
+        <p className="muted gallery-description">Published photos and videos will appear here when the public gallery is enabled.</p>
         <Link href="/" className="button">Back to Home</Link>
       </section>
     </main>
