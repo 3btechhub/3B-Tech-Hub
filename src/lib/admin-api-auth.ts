@@ -3,7 +3,7 @@ import { getAdminIdentity } from "./admin-session";
 
 export async function requireOwnerApi(request: NextRequest) {
   const origin = request.headers.get("origin");
-  if (request.method !== "GET" && (!origin || origin !== request.nextUrl.origin)) {
+  if ((origin && origin !== request.nextUrl.origin) || (request.method !== "GET" && !origin)) {
     return { identity: null, response: NextResponse.json({ error: "Invalid request origin." }, { status: 403 }) };
   }
   const identity = await getAdminIdentity();
