@@ -57,6 +57,7 @@ export function ContentEditor() {
   }
 
   function resetDraft() {
+    setSavedRevisionId(null);
     setDraft(initialDraft);
     setNotice("The local example has been reset.");
   }
