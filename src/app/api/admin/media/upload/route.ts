@@ -23,7 +23,9 @@ export async function POST(request: NextRequest) {
   const file = form?.get("file");
   const title = form?.get("title");
   const altText = form?.get("altText");
-  if (!(file instanceof File) || typeof title !== "string" || typeof altText !== "string") {
+  const requestedVisibility = form?.get("visibility");
+  const visibility = requestedVisibility === "public" ? "public" : "private";
+  if (!(file instanceof File) || typeof title !== "string" || typeof altText !== "string" || (requestedVisibility !== null && requestedVisibility !== "public" && requestedVisibility !== "private")) {
     return NextResponse.json({ error: "File, title and alt text are required." }, { status: 400 });
   }
   if (file.size < 1 || file.size > MAX_MEDIA_UPLOAD_BYTES) {
@@ -44,14 +46,15 @@ export async function POST(request: NextRequest) {
   let rowCreated = false;
 
   try {
-    await uploadAppwriteFile(bucketId, file, assetId);
+    const filePermissions = visibility === "public" ? ['read("any")'] : [];
+    await uploadAppwriteFile(bucketId, file, assetId, filePermissions);
     uploaded = true;
     await createAppwriteRow(tableId, assetId, {
       title: title.trim().slice(0, 120),
       altText: altText.trim().slice(0, 250),
       caption: "",
       tags: [],
-      visibility: "private",
+      visibility,
       sourceType: "appwrite",
       storageBucketId: bucketId,
       storageFileId: assetId,
@@ -70,7 +73,7 @@ export async function POST(request: NextRequest) {
       targetType: "media",
       targetId: assetId,
       outcome: "success",
-      metadata: { mediaType: mediaType(file.type), mimeType: file.type, fileSize: file.size },
+      metadata: { mediaType: mediaType(file.type), mimeType: file.type, fileSize: file.size, visibility },
       occurredAt: new Date().toISOString(),
     });
     return NextResponse.json({ ok: true, assetId }, { status: 201 });
