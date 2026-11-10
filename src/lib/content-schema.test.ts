@@ -34,6 +34,20 @@ describe("pageRevisionSchema", () => {
     }).success).toBe(true);
   });
 
+  it("rejects non-HTTPS hero media URLs", () => {
+    expect(pageRevisionSchema.safeParse({
+      ...validPage,
+      sections: [{ type: "hero", heading: "Hello", imageUrl: "http://images.example.com/hero.jpg" }],
+    }).success).toBe(false);
+  });
+
+  it("accepts HTTPS hero media URLs", () => {
+    expect(pageRevisionSchema.safeParse({
+      ...validPage,
+      sections: [{ type: "hero", heading: "Hello", imageUrl: "https://cdn.example.com/hero.webp" }],
+    }).success).toBe(true);
+  });
+
   it("rejects unsafe external CTA links", () => {
     const result = pageRevisionSchema.safeParse({
       ...validPage,
