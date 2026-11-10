@@ -33,7 +33,8 @@ export async function GET(request: NextRequest, context: Context) {
       if (!target || target.protocol !== "https:") {
         return NextResponse.json({ error: "External media URL is invalid." }, { status: 415 });
       }
-      return NextResponse.redirect(target.toString(), 302, {
+      return NextResponse.redirect(target.toString(), {
+        status: 302,
         headers: { "Cache-Control": "private, no-store, max-age=0" },
       });
     }
@@ -66,7 +67,8 @@ export async function GET(request: NextRequest, context: Context) {
 
     // The Appwrite Storage CDN serves and caches the transformed public file directly.
     // The redirect itself is not cached so visibility changes are rechecked on each request.
-    return NextResponse.redirect(target.toString(), 302, {
+    return NextResponse.redirect(target.toString(), {
+      status: 302,
       headers: { "Cache-Control": "private, no-store, max-age=0" },
     });
   } catch {
