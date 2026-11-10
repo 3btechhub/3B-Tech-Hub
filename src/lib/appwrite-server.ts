@@ -62,7 +62,7 @@ export async function deleteAppwriteRow(tableId: string, rowId: string) {
   const config = configuration();
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
-  const response = await fetch(`${config.endpoint}/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`, {
+  const response = await fetch(/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}, {
     method: "DELETE",
     headers: { "X-Appwrite-Project": config.projectId, "X-Appwrite-Key": config.apiKey },
     cache: "no-store",
@@ -71,13 +71,18 @@ export async function deleteAppwriteRow(tableId: string, rowId: string) {
   if (!response.ok) throw new Error("APPWRITE_ROW_DELETE_FAILED");
 }
 
-export async function listAppwriteRows(tableId: string, limit = 100) {
+export async function listAppwriteRows(tableId: string, limit = 100, offset = 0, search?: string) {
   const config = configuration();
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
-  const query = encodeURIComponent(`limit(${Math.min(Math.max(limit, 1), 100)})`);
+  const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 100);
+  const safeOffset = Math.min(Math.max(Math.trunc(offset), 0), 100000);
+  const params = new URLSearchParams();
+  params.append("queries[]", `limit(${safeLimit})`);
+  params.append("queries[]", `offset(${safeOffset})`);
+  if (search?.trim()) params.append("queries[]", `search("title",${JSON.stringify(search.trim().slice(0, 80))})`);
   return appwriteRequest<{ total: number; rows: AppwriteRow[] }>(
-    `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows?queries[]=${query}`,
+    `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows?${params.toString()}`,
     { method: "GET" },
   );
 }
