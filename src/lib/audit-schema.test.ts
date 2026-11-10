@@ -28,6 +28,13 @@ describe("audit event validation", () => {
     })).toThrow();
   });
 
+  it("rejects sensitive metadata keys", () => {
+    expect(() => validateAuditEvent({
+      ...validEvent,
+      metadata: { sessionSecret: "never-store" },
+    })).toThrow();
+  });
+
   it("does not accept credentials as first-class audit fields", () => {
     expect(() => validateAuditEvent({
       ...validEvent,
