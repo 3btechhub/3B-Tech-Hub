@@ -11,11 +11,13 @@ const safeHref = z.string().trim().min(1).max(500).refine((value) => {
   }
 }, "Use an internal path or a secure HTTPS URL.");
 
+const safeMediaUrl = z.string().url().refine((value) => new URL(value).protocol === "https:", "Only HTTPS media URLs are accepted.");
+
 const heroSectionSchema = z.object({
   type: z.literal("hero"),
   heading: z.string().trim().min(1).max(120),
   subheading: z.string().trim().max(300).default(""),
-  imageUrl: z.string().url().optional(),
+  imageUrl: safeMediaUrl.optional(),
   primaryAction: z.object({
     label: z.string().trim().min(1).max(40),
     href: safeHref,
