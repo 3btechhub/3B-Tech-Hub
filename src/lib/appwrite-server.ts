@@ -80,9 +80,20 @@ export async function deleteAppwriteRow(tableId: string, rowId: string) {
 export function buildAppwriteRowQueries(limit = 100, offset = 0, search?: string, excludeDeleted = false) {
   const safeLimit = Math.min(Math.max(Math.trunc(limit), 1), 100);
   const safeOffset = Math.min(Math.max(Math.trunc(offset), 0), 100000);
-  const queries = [`limit(${safeLimit})`, `offset(${safeOffset})`];
-  if (search?.trim()) queries.push(`search("title",${JSON.stringify(search.trim().slice(0, 80))})`);
-  if (excludeDeleted) queries.push(`isNull("deletedAt")`);
+  const queries = [
+    JSON.stringify({ method: "limit", values: [safeLimit] }),
+    JSON.stringify({ method: "offset", values: [safeOffset] }),
+  ];
+  if (search?.trim()) {
+    queries.push(JSON.stringify({
+      method: "search",
+      attribute: "title",
+      values: [search.trim().slice(0, 80)],
+    }));
+  }
+  if (excludeDeleted) {
+    queries.push(JSON.stringify({ method: "isNull", attribute: "deletedAt" }));
+  }
   return queries;
 }
 
