@@ -14,7 +14,7 @@ const initialDraft = {
     { type: "service_grid" as const, heading: "Our services", serviceIds: ["phone-repair", "tv-repair", "satellite-support"] },
     { type: "cta" as const, heading: "Need technical help?", body: "Tell us what you need and our team will help.", actionLabel: "Contact us", actionHref: "/#contact" },
   ],
-  seo: { title: "3B TECH HUB | Technology Services", description: "Electronics repair and technology support." },
+  seo: { title: "3B TECH HUB | Technology Services", description: "Electronics repair and technology support.", noIndex: false },
   revision: 1,
 };
 
