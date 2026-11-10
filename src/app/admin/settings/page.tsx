@@ -8,11 +8,11 @@ export const metadata = {
 
 export default function AdminSettingsPage() {
   return (
-    <main className="settings-admin" style={{ minHeight: "100vh", background: "#f4f6f9", padding: "36px 20px" }}>
-      <div style={{ width: "min(900px,100%)", margin: "0 auto" }}>
-        <Link href="/admin" style={{ color: "#0b5cab", fontWeight: 700 }}>← Admin workspace</Link>
-        <h1 style={{ fontSize: 34, letterSpacing: "-.04em", margin: "26px 0 8px" }}>Full website settings</h1>
-        <p style={{ color: "#667085", lineHeight: 1.7, marginBottom: 24 }}>
+    <main className="settings-admin">
+      <div className="settings-shell">
+        <Link href="/admin" className="settings-back">← Admin workspace</Link>
+        <h1 className="settings-title">Full website settings</h1>
+        <p className="settings-intro">
           Change brand content, colors, languages, currencies, contact details, SEO, announcements, navigation and services. Changes are saved to the production Appwrite settings table.
         </p>
         <SettingsForm />
