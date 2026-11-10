@@ -15,7 +15,7 @@ function ThemeIcon({ dark }: { dark: boolean }) {
 }
 
 function LanguageIcon() {
-  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h12M10 3v2m4 0c-.7 4.2-3.2 7.3-7.5 9M6 8c1.1 2.7 3.5 4.9 6.5 6M14 20l4-10 4 10m-6.5-3h5" /></svg>;
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></svg>;
 }
 
 export default function SiteHeader({ siteName }: Props) {
@@ -61,7 +61,6 @@ export default function SiteHeader({ siteName }: Props) {
         </button>
       </nav>
       {open && <>
-        <button className="menu-backdrop" type="button" aria-label="Close menu" onClick={closeMenu} />
         <div className="floating-menu simple-menu container" id="site-floating-menu" role="group" aria-label="Website menu">
           <div className="simple-menu-links">
             <Link className="simple-menu-link" href="/" onClick={closeMenu}>Home</Link>
@@ -79,7 +78,6 @@ export default function SiteHeader({ siteName }: Props) {
             </button>
             <button className="simple-menu-icon-button" type="button" onClick={() => setLanguage((value) => value === "en" ? "bn" : "en")} aria-label={language === "en" ? "Switch language to Bengali" : "Switch language to English"} title={language === "en" ? "বাংলা" : "English"}>
               <LanguageIcon />
-              <span className="simple-language-value">{language.toUpperCase()}</span>
             </button>
           </div>
           {role === "admin" && <>
