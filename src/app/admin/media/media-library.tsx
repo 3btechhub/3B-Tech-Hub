@@ -1,5 +1,6 @@
 "use client";
 
+import type { FormEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
 
 type MediaItem = {
@@ -42,12 +43,12 @@ export function MediaLibrary() {
 
   useEffect(() => { void load(); }, [load]);
 
-  async function registerExternal(event: React.FormEvent<HTMLFormElement>) {
+  async function registerExternal(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setNotice("Registering external media…");
     try {
       const response = await fetch("/api/admin/media/external", {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(external),
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...external, sourceType: "external" }),
       });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error ?? "Registration failed.");
