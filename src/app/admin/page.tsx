@@ -17,7 +17,7 @@ const areas = [
 
 export default function AdminWorkspacePage() {
   return (
-    <main style={{ minHeight: "100vh", background: "#f4f6f9", padding: "40px 20px" }}>
+    <main className="admin-workspace" style={{ minHeight: "100vh", background: "#f4f6f9", padding: "40px 20px" }}>
       <div style={{ width: "min(1040px, 100%)", margin: "0 auto" }}>
         <Link href="/" style={{ color: "#0b5cab", fontWeight: 700 }}>← View public website</Link>
         <header style={{ margin: "28px 0" }}>
