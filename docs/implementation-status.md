@@ -2,41 +2,34 @@
 
 Updated: 2026-11-10
 
-## Completed
-- [x] Architecture, logical data model, responsive Next.js public foundation and admin preview shells.
-- [x] GitHub Actions CI, Vitest and Playwright smoke-test configuration.
-- [x] Settings, media and structured page-content validation schemas with unit tests.
-- [x] Interactive admin content editor with local live preview, persistent Save Draft API integration and link to protected saved-revision preview.
-- [x] Owner-only content draft create/list and submit-for-review, approve and publish workflow APIs with audit recording and rollback attempts.
-- [x] Media Library UI for device upload, external HTTPS URL registration, metadata editing, trash and restore.
-- [x] Owner-only Media APIs for listing, upload, external registration, metadata update, soft-delete and restore. Permanent deletion remains disabled until usage tracking is implemented.
-- [x] Upload validation enforces a 50 MB limit, MIME allowlist and basic file-signature checks; newly uploaded files are private by default.
-- [x] Appwrite server adapter uses server-only API key configuration; APIs return 503 until required server resource IDs and secrets exist.
-- [x] Persistent audit append adapter added; content/media writes require audit storage and attempt rollback if audit append fails.
-- [x] Appwrite setup documentation defines required Content, Media, Audit tables and private Storage bucket.
-- [x] Appwrite project inventory checked: zero TablesDB databases and zero Storage buckets; no production resources were created.
-- [x] Temporary Appwrite CRUD write test previously passed and all temporary resources were cleaned up.
-- [x] Server-side Appwrite login, HttpOnly session cookie, Appwrite session verification, logout and deny-by-default Owner ID gate.
-- [x] Role permission matrix centralized; owner-only approval/publishing and user management policy covered by tests.
-- [x] Vitest upgraded to 5.1.0 to remove the two critical Tinypool/Vitest advisories found in the earlier dependency report.
+## Implemented in the development branch
+- [x] Next.js App Router, TypeScript, responsive public-site foundation and admin workspace.
+- [x] GitHub Actions CI configuration, Vitest unit tests and Playwright smoke-test configuration.
+- [x] Settings, media, content, audit and permission validation schemas with unit tests.
+- [x] Owner-gated admin authentication routes, Appwrite session verification, HttpOnly session cookie and logout flow.
+- [x] Structured content editor, draft persistence APIs, revision browser, saved-draft reopen/edit APIs and protected revision preview.
+- [x] Owner-only content workflow transitions and audit adapter.
+- [x] Public page API and locale/slug page renderer that returns only schema-valid Published revisions.
+- [x] Media Library UI, upload/external HTTPS registration, metadata editing, soft-delete/restore and authenticated private-media preview proxy.
+- [x] 50 MB media upload limit, MIME allowlist and basic file-signature validation; uploads remain private by default.
+- [x] Server-only Appwrite adapter; APIs fail closed (503) when required production configuration is absent.
+- [x] Architecture, data model, security, content, media and Appwrite configuration documentation.
 
-## In progress / pending
-- [x] CI run #226 passed on commit `e6f8cda8fce657418cbb40bd81d52ed5c4d1adf8`: install, dependency-audit report upload, typecheck, lint, unit tests, Playwright browser setup, E2E tests and production build.
-- [ ] Dependency audit after Vitest upgrade reports 8 moderate, 0 critical. Remaining findings are in the Next 16 ESLint configuration/typescript-eslint/minimatch chain. npm suggests downgrading eslint-config-next to 15.5.29, which is not an appropriate automatic fix for this Next 16 app; review compatible upstream patch before changing.
-- [ ] Configure Appwrite server API key and provision Content, Media, Audit tables plus private Storage bucket after schema and access policy review. Current project inventory has none; APIs are disabled until configured.
-- [ ] Configure Appwrite table columns, indexes and least-privilege API key scopes exactly as documented.
-- [ ] Verify APIs against a configured non-production Appwrite preview; no live upload or persistent content write has been tested.
-- [x] Added protected server-rendered preview for saved page revisions under /admin/content/preview/[revisionId].
-- [x] Added Owner-only GET/PUT APIs to reopen and edit saved Draft revisions; slug, locale and revision number are immutable and submitted revisions remain locked.
-- [x] Added public read API and dynamic locale/slug pages that expose only schema-valid Published revisions.
-- [x] Added authenticated private Appwrite media preview proxy and lazy-loaded Media Library image/video/document previews.
-- [x] Fixed Appwrite TablesDB list endpoint construction and limit query syntax.
-- [x] Revision browser displays revision IDs for reopening saved drafts.
-- [ ] Add media pagination/search/usage tracking and generated thumbnail variants/CDN image transformations.
-- [ ] Configure distributed edge/WAF rate limiting and MFA.
-- [ ] Confirm Owner Appwrite user ID and set ADMIN_OWNER_USER_IDS in hosting secrets.
-- [ ] Implement trusted role profiles before delegating non-owner roles.
-- [ ] Connect Vercel preview and complete end-to-end owner review.
+## Production blockers
+- [ ] Appwrite production project access is unresolved. Previously recorded project ID 6af2e894001db846da6 returns project_not_found; organization project listing returns team_not_found. Do not create resources until the correct connected production project is identified.
+- [ ] Create and verify production TablesDB database and Content, Media and Audit tables with required columns and indexes.
+- [ ] Create private production Storage bucket; verify upload, authenticated read, update, restore and deletion behavior.
+- [ ] Configure least-privilege server API key and production environment variables. Never expose server keys to client bundles.
+- [ ] Configure the actual Owner Appwrite user ID in ADMIN_OWNER_USER_IDS; verify login and Owner-only actions against the production identity.
+- [ ] Complete end-to-end integration tests against the real production Appwrite project, including audit-write failure and rollback behavior.
+- [ ] Add media pagination, search, usage tracking, generated thumbnails/optimized renditions and reviewed CDN delivery policy.
+- [ ] Add distributed rate limiting, MFA and security review.
+- [ ] Resolve dependency audit findings using compatible upstream versions; do not downgrade Next.js as an automatic fix.
+- [ ] Verify GitHub Actions on the current branch; earlier CI success on e6f8cda8fce657418cbb40bd81d52ed5c4d1adf8 does not certify later commits.
+- [ ] Connect/configure production hosting, secrets, domain and DNS.
+- [ ] Complete accessibility, responsive, SEO, performance, backup/restore and browser testing.
 
-## Release rule
-No production deployment or merge to main until the owner approves the preview and release.
+## Release controls
+- Development target is the real production website and backend, not a separate preview product.
+- Do not publish publicly, change DNS, enable payment processing or perform destructive production data operations until the Owner explicitly approves that specific action.
+- Never represent an unconfigured integration as live or a pending test as passed.
