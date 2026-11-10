@@ -31,7 +31,7 @@ export const uploadedMediaSchema = z.object({
   storageFileId: z.string().trim().min(1).max(64),
   mediaType: z.enum(["image", "video", "document", "other"]),
   mimeType: z.string().trim().min(3).max(120),
-  fileSize: z.number().int().positive().max(50 * 1024 * 1024),
+  fileSize: z.number().int().positive().max(MAX_MEDIA_UPLOAD_BYTES),
 });
 
 export const externalMediaSchema = z.object({
