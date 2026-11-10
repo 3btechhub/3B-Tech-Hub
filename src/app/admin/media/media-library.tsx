@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import type { FormEvent } from "react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -137,6 +138,13 @@ export function MediaLibrary() {
           <div className="media-grid">
             {items.map((item) => (
               <article className="media-item" key={item.$id}>
+                {(() => {
+                  const previewUrl = item.sourceType === "external" ? item.externalUrl : `/api/admin/media/${encodeURIComponent(item.$id)}/preview`;
+                  if (item.mediaType === "image" && previewUrl && !item.deletedAt) return <div className="media-preview"><Image src={previewUrl} alt={item.altText || item.title || "Media preview"} width={480} height={270} unoptimized loading="lazy" /></div>;
+                  if (item.mediaType === "video" && previewUrl && !item.deletedAt) return <video className="media-preview" src={previewUrl} controls preload="none" />;
+                  if (item.mediaType === "document" && previewUrl && !item.deletedAt) return <a href={previewUrl} target="_blank" rel="noreferrer">Open document preview ↗</a>;
+                  return null;
+                })()}
                 <h3>{item.title || "Untitled media"}</h3>
                 <p>{item.mediaType || "Media"} · {item.sourceType || "Unknown source"} · {item.mimeType || item.externalUrl || ""}</p>
                 <label>Title<input value={item.title ?? ""} disabled={Boolean(item.deletedAt)} onChange={(e) => setItems((current) => current.map((entry) => entry.$id === item.$id ? { ...entry, title: e.target.value } : entry))} /></label>
@@ -149,6 +157,7 @@ export function MediaLibrary() {
           </div>
         )}
       </section>
+      <style>{`.media-preview{display:block;width:100%;height:auto;max-height:220px;object-fit:contain;background:#f2f4f7;border-radius:10px;margin:10px 0}.media-preview img{width:100%;height:220px;object-fit:contain}`}</style>
       <aside className="media-warning"><strong>Safe deletion:</strong> Items are moved to trash, not permanently erased. Permanent deletion is withheld until usage tracking can confirm that published pages do not depend on the asset.</aside>
     </div>
   );
