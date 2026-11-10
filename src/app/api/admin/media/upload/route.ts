@@ -34,6 +34,9 @@ export async function POST(request: NextRequest) {
 
   const allowed: readonly string[] = [...allowedImageMimeTypes, ...allowedVideoMimeTypes, ...allowedDocumentMimeTypes];
   if (!allowed.includes(file.type)) return NextResponse.json({ error: "This file type is not allowed." }, { status: 415 });
+  if (file.type.startsWith("image/") && file.size > 10_000_000) {
+    return NextResponse.json({ error: "Images must be 10 MB or smaller to support Appwrite image transformations. Video and PDF files may be up to 50 MB." }, { status: 413 });
+  }
   const header = new Uint8Array(await file.slice(0, 16).arrayBuffer());
   if (!matchesMediaSignature(header, file.type)) {
     return NextResponse.json({ error: "File content does not match its declared media type." }, { status: 415 });
