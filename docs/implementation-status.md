@@ -8,28 +8,28 @@ Updated: 2026-11-10
 - [x] Settings, media, content, audit and permission validation schemas with unit tests.
 - [x] Owner-gated admin authentication routes, Appwrite session verification, HttpOnly session cookie and logout flow.
 - [x] Structured content editor, draft persistence APIs, revision browser, saved-draft reopen/edit APIs and protected revision preview.
-- [x] Owner-only content workflow transitions and audit adapter.
-- [x] Public page API and locale/slug page renderer that returns only schema-valid Published revisions.
-- [x] Media Library UI, upload/external HTTPS registration, metadata editing, soft-delete/restore and authenticated private-media preview proxy.
-- [x] 50 MB media upload limit, MIME allowlist and basic file-signature validation; uploads remain private by default.
+- [x] Owner-only content workflow transitions, audit adapter and published-only public page renderer/API.
+- [x] Media Library UI, device upload, external HTTPS registration, metadata editing, soft-delete/restore and authenticated private-media preview.
+- [x] 50 MB media upload limit, MIME allowlist, basic file-signature validation and private-by-default uploaded objects.
+- [x] Media API pagination and title search; dashboard search and page navigation.
+- [x] Corrected Appwrite row lookup URL construction.
 - [x] Server-only Appwrite adapter; APIs fail closed (503) when required production configuration is absent.
-- [x] Architecture, data model, security, content, media and Appwrite configuration documentation.
+- [x] Architecture, data model, security, content, media and Appwrite configuration documentation, including required media title full-text index.
 
-## Production blockers
-- [ ] Appwrite production project access is unresolved. Previously recorded project ID 6af2e894001db846da6 returns project_not_found; organization project listing returns team_not_found. Do not create resources until the correct connected production project is identified.
-- [ ] Create and verify production TablesDB database and Content, Media and Audit tables with required columns and indexes.
-- [ ] Create private production Storage bucket; verify upload, authenticated read, update, restore and deletion behavior.
-- [ ] Configure least-privilege server API key and production environment variables. Never expose server keys to client bundles.
-- [ ] Configure the actual Owner Appwrite user ID in ADMIN_OWNER_USER_IDS; verify login and Owner-only actions against the production identity.
-- [ ] Complete end-to-end integration tests against the real production Appwrite project, including audit-write failure and rollback behavior.
-- [ ] Add media pagination, search, usage tracking, generated thumbnails/optimized renditions and reviewed CDN delivery policy.
-- [ ] Add distributed rate limiting, MFA and security review.
-- [ ] Resolve dependency audit findings using compatible upstream versions; do not downgrade Next.js as an automatic fix.
-- [ ] Verify GitHub Actions on the current branch; earlier CI success on e6f8cda8fce657418cbb40bd81d52ed5c4d1adf8 does not certify later commits.
+## Remaining production work
+- [ ] Appwrite production project access is currently unavailable: the recorded project ID 6af2e894001db846da6 returns project_not_found, and organization/project discovery returns team_not_found.
+- [ ] Identify the correct connected production Appwrite project; then create and verify the TablesDB database, Content/Media/Audit tables, columns, indexes and private Storage bucket.
+- [ ] Configure least-privilege server API key and production environment variables; configure actual Owner user ID in ADMIN_OWNER_USER_IDS.
+- [ ] Run live Appwrite tests for login, content create/edit/approve/publish, media upload/read/update/trash/restore, audit persistence and rollback.
+- [ ] Add media usage/reference tracking before enabling permanent deletion.
+- [ ] Build thumbnail/optimized rendition generation and a security-reviewed CDN delivery policy; do not expose private uploads publicly by default.
+- [ ] Add distributed rate limiting, MFA and complete security review.
+- [ ] Review remaining moderate dependency audit findings against compatible upstream patches.
+- [ ] Verify GitHub Actions checks for the current development branch; the connector currently returns no commit status entries for the latest changes.
 - [ ] Connect/configure production hosting, secrets, domain and DNS.
 - [ ] Complete accessibility, responsive, SEO, performance, backup/restore and browser testing.
 
 ## Release controls
-- Development target is the real production website and backend, not a separate preview product.
-- Do not publish publicly, change DNS, enable payment processing or perform destructive production data operations until the Owner explicitly approves that specific action.
-- Never represent an unconfigured integration as live or a pending test as passed.
+- Development is targeted at the real production project, not a separate preview product.
+- Public launch, DNS changes, payment activation and destructive production operations still require explicit Owner approval.
+- Do not describe unavailable integrations or unrun tests as completed.
