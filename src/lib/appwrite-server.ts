@@ -98,6 +98,6 @@ export async function updateAppwriteRow(tableId: string, rowId: string, data: Re
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   return appwriteRequest<AppwriteRow>(
     `${config.endpoint}/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`,
-    { method: "PUT", body: JSON.stringify({ data }) },
+    { method: "PATCH", body: JSON.stringify({ data }) },
   );
 }
