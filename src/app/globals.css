@@ -437,3 +437,12 @@ small, .muted, .eyebrow { font-size: var(--font-small) !important; line-height: 
 .service-card { padding: 20px; }
 .service-card h3 { margin: 0 0 7px; }
 .service-card p { margin: 0; }
+
+
+/* Remove unnecessary empty space from compact navigation groups */
+.simple-menu-links { gap: 0 !important; }
+.simple-menu-tools { justify-content: flex-start !important; gap: 8px !important; width: max-content; }
+.simple-menu-divider { margin: 5px 0 !important; }
+.simple-menu-icon-button { flex: 0 0 auto; }
+.simple-menu form { margin: 0 !important; padding: 0 !important; }
+.simple-menu-link { margin: 0 !important; }
