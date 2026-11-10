@@ -1,25 +1,44 @@
-const services = [
-  { icon: "TV", title: "TV & Display Repair", description: "Troubleshooting and repair support for televisions, screens and display-related issues." },
-  { icon: "M", title: "Mobile Phone Services", description: "Mobile diagnostics, repair support and accessories for everyday devices." },
-  { icon: "SAT", title: "Satellite & Dish Setup", description: "Satellite dish installation, signal alignment and reception troubleshooting." },
-  { icon: "PC", title: "Computer & Electronics", description: "Technical support for computers, electronics and connected devices." },
-  { icon: "ACC", title: "Accessories & Products", description: "A future-ready catalogue for useful technology products and accessories." },
-  { icon: "HELP", title: "Technical Consultation", description: "Get guidance to identify the right service before arranging a repair." },
-];
+import type { CSSProperties } from "react";
+import { getPublicSiteSettings } from "@/lib/public-site-settings";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const settings = await getPublicSiteSettings();
+  const visibleServices = settings.services.filter((service) => service.enabled);
+  const brandStyle = {
+    "--brand": settings.primaryColor,
+    "--brand-dark": settings.primaryColor,
+    "--brand-accent": settings.accentColor,
+  } as CSSProperties;
+
+  if (settings.maintenanceMode) {
+    return (
+      <main style={{ ...brandStyle, minHeight: "100vh", display: "grid", placeItems: "center", padding: 24, background: "#f7f8fa" }}>
+        <section style={{ maxWidth: 620, textAlign: "center", background: "white", border: "1px solid #e5e7eb", borderRadius: 20, padding: 36 }}>
+          <div className="brand-mark" style={{ margin: "0 auto 18px" }}>3B</div>
+          <h1>{settings.siteName}</h1>
+          <p>{settings.announcementText || "We are making improvements. Please check back soon."}</p>
+        </section>
+      </main>
+    );
+  }
+
   return (
-    <>
+    <div style={brandStyle}>
+      {settings.announcementEnabled && settings.announcementText && (
+        <div style={{ padding: "9px 20px", textAlign: "center", background: settings.accentColor, color: "white", fontSize: 13, fontWeight: 700 }}>
+          {settings.announcementUrl ? <a href={settings.announcementUrl}>{settings.announcementText}</a> : settings.announcementText}
+        </div>
+      )}
       <header className="site-header">
         <div className="container header-inner">
-          <a className="brand" href="#" aria-label="3B TECH HUB home">
+          <a className="brand" href="/" aria-label={`${settings.siteName} home`}>
             <span className="brand-mark">3B</span>
-            <span>3B TECH HUB</span>
+            <span>{settings.siteName}</span>
           </a>
           <nav className="nav-links" aria-label="Main navigation">
-            <a href="#services">Services</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
+            {settings.navigationItems.map((item, index) => <a href={item.href} key={`${item.href}-${index}`}>{item.label}</a>)}
           </nav>
           <a className="button" href="#contact">Get Support</a>
         </div>
@@ -29,12 +48,9 @@ export default function HomePage() {
         <section className="hero">
           <div className="container hero-grid">
             <div>
-              <span className="eyebrow">Three Brothers · Technology Hub</span>
-              <h1>Technology solutions.<br />Built on trust.</h1>
-              <p>
-                Your destination for electronics repair, mobile services, TV support,
-                satellite solutions and practical technology products.
-              </p>
+              <span className="eyebrow">{settings.tagline}</span>
+              <h1>{settings.heroTitle}</h1>
+              <p>{settings.heroSubtitle}</p>
               <div className="hero-actions">
                 <a className="button" href="#services">Explore Services <span aria-hidden="true">→</span></a>
                 <a className="button secondary" href="#contact">Contact Our Team</a>
@@ -54,12 +70,12 @@ export default function HomePage() {
             <div className="section-heading">
               <span className="eyebrow">What we do</span>
               <h2>Technology services for everyday life</h2>
-              <p>Explore the service areas of 3B TECH HUB. Service details, availability and pricing will be published as they are confirmed.</p>
+              <p>{settings.description}</p>
             </div>
             <div className="card-grid">
-              {services.map((service) => (
-                <article className="service-card" key={service.title}>
-                  <div className="quick-icon" aria-hidden="true">{service.icon}</div>
+              {visibleServices.map((service, index) => (
+                <article className="service-card" key={service.id}>
+                  <div className="quick-icon" aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
                   <h3>{service.title}</h3>
                   <p>{service.description}</p>
                 </article>
@@ -74,7 +90,7 @@ export default function HomePage() {
               <div>
                 <span className="eyebrow">Three Brothers, one hub</span>
                 <h2>Practical support. Clear communication.</h2>
-                <p>3B TECH HUB brings technical services and practical technology support together in one place.</p>
+                <p>{settings.description}</p>
               </div>
               <a className="button secondary" href="#contact">Get updates</a>
             </div>
@@ -86,19 +102,25 @@ export default function HomePage() {
             <div className="section-heading">
               <span className="eyebrow">Get in touch</span>
               <h2>Contact and service booking</h2>
-              <p>Our verified business contact channels and online booking options are being prepared. We will publish them here once they are confirmed.</p>
+              <p>Contact the 3B TECH HUB team using the verified business channels below.</p>
             </div>
-            <p className="muted">Please check back soon for official contact details. No unverified email address or phone number is displayed.</p>
+            <div style={{ display: "grid", gap: 10, color: "#475467" }}>
+              {settings.contactEmail && <p>Email: <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a></p>}
+              {settings.contactPhone && <p>Phone: <a href={`tel:${settings.contactPhone}`}>{settings.contactPhone}</a></p>}
+              {settings.whatsappUrl && <p><a href={settings.whatsappUrl} target="_blank" rel="noreferrer">Contact us on WhatsApp ↗</a></p>}
+              {settings.address && <p>Address: {settings.address}</p>}
+              {!settings.contactEmail && !settings.contactPhone && !settings.whatsappUrl && !settings.address && <p className="muted">Official contact details will appear here after the owner saves them in Site Settings.</p>}
+            </div>
           </div>
         </section>
       </main>
 
       <footer className="site-footer">
         <div className="container footer-inner">
-          <div><strong>3B TECH HUB</strong><p>Three Brothers · Technology Hub</p></div>
-          <p>© {new Date().getFullYear()} 3B TECH HUB. All rights reserved.</p>
+          <div><strong>{settings.siteName}</strong><p>{settings.tagline}</p></div>
+          <p>© {new Date().getFullYear()} {settings.siteName}. All rights reserved.</p>
         </div>
       </footer>
-    </>
+    </div>
   );
 }
