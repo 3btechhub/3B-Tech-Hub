@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import Link from "next/link";
 import { getPublicSiteSettings } from "@/lib/public-site-settings";
 
 export const dynamic = "force-dynamic";
@@ -33,10 +34,10 @@ export default async function HomePage() {
       )}
       <header className="site-header">
         <div className="container header-inner">
-          <a className="brand" href="/" aria-label={`${settings.siteName} home`}>
+          <Link className="brand" href="/" aria-label={`${settings.siteName} home`}>
             <span className="brand-mark">3B</span>
             <span>{settings.siteName}</span>
-          </a>
+          </Link>
           <nav className="nav-links" aria-label="Main navigation">
             {settings.navigationItems.map((item, index) => <a href={item.href} key={`${item.href}-${index}`}>{item.label}</a>)}
           </nav>
