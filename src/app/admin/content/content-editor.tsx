@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { pageRevisionSchema } from "@/lib/content-schema";
 
@@ -19,7 +20,8 @@ const initialDraft = {
 
 export function ContentEditor() {
   const [draft, setDraft] = useState(initialDraft);
-  const [notice, setNotice] = useState("Local draft only — no data has been sent or saved.");
+  const [notice, setNotice] = useState("Draft editor — save requires configured Appwrite storage.");
+  const [savedRevisionId, setSavedRevisionId] = useState<string | null>(null);
   const validation = useMemo(() => pageRevisionSchema.safeParse(draft), [draft]);
   const hero = draft.sections.find((section) => section.type === "hero");
   const cta = draft.sections.find((section) => section.type === "cta");
@@ -31,7 +33,7 @@ export function ContentEditor() {
         section.type === "hero" ? { ...section, [field]: value } : section,
       ),
     }));
-    setNotice("Unsaved local changes. Persistent saving is not enabled yet.");
+    setSavedRevisionId(null);\n    setNotice("Unsaved local changes.");
   }
 
   function updateSeo(field: "title" | "description", value: string) {
@@ -45,7 +47,7 @@ export function ContentEditor() {
       const response = await fetch("/api/admin/content/drafts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error ?? "Draft could not be saved.");
-      setNotice(`Draft saved successfully. Revision ID: ${body.revisionId}`);
+      setSavedRevisionId(body.revisionId);\n      setNotice(`Draft saved successfully. Revision ID: ${body.revisionId}`);
       setDraft((current) => ({ ...current, revision: current.revision + 1 }));
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Draft save failed.");
@@ -75,7 +77,7 @@ export function ContentEditor() {
             <label>SEO description<textarea value={draft.seo.description} maxLength={180} rows={2} onChange={(event) => updateSeo("description", event.target.value)} /></label>
           </div>
           <div className="editor-actions"><button type="button" className="secondary-action" onClick={resetDraft}>Reset example</button><button type="button" disabled={!validation.success} onClick={() => void saveDraft()}>Save draft</button></div>
-          <p className="editor-notice" role="status">{notice}</p>
+          <p className="editor-notice" role="status">{notice}</p>\n          {savedRevisionId && <Link href={`/admin/content/preview/${encodeURIComponent(savedRevisionId)}`} className="preview-link">Open protected preview</Link>}
           {!validation.success && <p className="validation-error" role="alert">{validation.error.issues[0]?.message ?? "Please check the page fields."}</p>}
           {validation.success && <p className="validation-success">All current page fields pass validation.</p>}
         </section>
@@ -86,7 +88,7 @@ export function ContentEditor() {
             <div className="preview-hero"><span className="preview-eyebrow">THREE BROTHERS · TECHNOLOGY HUB</span><h2>{hero?.heading || "Your homepage headline"}</h2><p>{hero?.subheading || "Your homepage introduction will appear here."}</p><span className="preview-cta">{cta?.type === "cta" ? cta.actionLabel : "Contact us"} ↗</span></div>
             <div className="preview-services"><small>WHAT WE DO</small><h3>Technology services</h3><div><span>Phone repair</span><span>TV service</span><span>Satellite support</span></div></div>
           </div>
-          <p className="preview-caption">Preview reflects local edits only. It is not published and is not visible to website visitors.</p>
+          <p className="preview-caption">Preview reflects local edits only. The protected saved-revision preview is available after a successful save.</p>
         </section>
       </div>
     </div>
