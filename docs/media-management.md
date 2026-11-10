@@ -61,3 +61,13 @@ Dedicated Media Library with grid/list views, upload progress, drag-and-drop upl
 - External URLs are references, not files under our control; their availability, speed, privacy behavior and permanence depend on the external host.
 - Do not proxy or download external content without a clear need and permission.
 - Do not create production buckets/tables or incur paid media/CDN services until owner approval and provider/cost decisions are clear.
+
+
+## Current implementation additions
+- Owner-only upload and external URL registration, metadata update, trash and restore APIs are present.
+- Media Library previews external images and streams Appwrite-managed private previews through an authenticated server proxy. Video and PDF previews are lazy-loaded/on demand.
+- Private Appwrite file previews are not publicly cached, validate the stored MIME type against an explicit allowlist, and set nosniff/referrer protections.
+- Image thumbnails use lazy loading and fixed dimensions to reduce unnecessary eager downloads and layout shift.
+
+## Remaining before production
+Appwrite Storage bucket/table resources are not provisioned, so live uploads and previews have not been integration-tested. Generated image renditions (AVIF/WebP thumbnails), CDN delivery for approved public assets, pagination/search, media usage tracking and safe permanent deletion remain pending. The current private preview route is intentionally owner-authenticated; it is not a public asset CDN.
