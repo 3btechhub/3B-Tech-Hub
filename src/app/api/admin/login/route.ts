@@ -18,9 +18,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Authentication is not configured." }, { status: 503 });
   }
 
-  // Same-origin check mitigates cross-site login CSRF.
+  // Reject missing and cross-origin Origin headers to mitigate login CSRF.
   const origin = request.headers.get("origin");
-  if (origin && origin !== request.nextUrl.origin) {
+  if (!origin || origin !== request.nextUrl.origin) {
     return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   }
 
