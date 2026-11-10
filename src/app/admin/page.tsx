@@ -5,6 +5,7 @@ export const metadata = {
 
 const areas = [
   { title: "Website Content", description: "Manage pages, navigation, banners and reusable sections.", status: "Planned" },
+  { title: "Media Library", description: "Manage uploads, external media URLs, image optimization and asset usage.", status: "Preview" },
   { title: "Services & Products", description: "Manage service listings, catalogue items and pricing.", status: "Planned" },
   { title: "Bookings & Customers", description: "Review enquiries, service requests and customer records.", status: "Planned" },
   { title: "Users & Permissions", description: "Manage staff access with role-based permissions.", status: "Planned" },
