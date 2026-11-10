@@ -426,3 +426,33 @@ label { color: var(--foreground); }
   color: var(--foreground) !important;
   border-color: var(--border) !important;
 }
+
+/* Consistent admin actions and monochrome published content */
+.admin-workspace button, .settings-admin button, .content-admin button, .media-admin button {
+  min-height: 44px;
+  border: 1px solid var(--foreground) !important;
+  border-radius: var(--control-radius) !important;
+  background: var(--foreground) !important;
+  color: var(--background) !important;
+  font-size: 14px !important;
+}
+.admin-workspace button:hover, .settings-admin button:hover,
+.content-admin button:hover, .media-admin button:hover { opacity: .82; }
+.content-admin .editor-actions .secondary-action,
+.content-admin .auth-back {
+  background: var(--surface) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+.content-admin .editor-panel, .content-admin .preview-panel,
+.content-admin .revision-browser, .content-admin .approval-note {
+  border-color: var(--border) !important;
+  border-radius: var(--card-radius) !important;
+}
+.content-admin .editor-panel label { color: var(--foreground) !important; }
+.content-admin .editor-notice, .content-admin .validation-error,
+.content-admin .validation-success, .content-admin .revision-error,
+.content-admin .revision-state { color: var(--muted) !important; }
+.published-page h1, .published-page h2, .published-page h3,
+.published-page p, .published-page summary { color: var(--foreground) !important; }
+.published-page a { text-decoration: underline; text-underline-offset: 3px; }
