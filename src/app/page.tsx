@@ -1,5 +1,4 @@
 import type { CSSProperties } from "react";
-import Link from "next/link";
 import SiteHeader from "@/components/site-header";
 import { getPublicSiteSettings } from "@/lib/public-site-settings";
 
