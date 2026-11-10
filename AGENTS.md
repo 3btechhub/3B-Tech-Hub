@@ -29,6 +29,9 @@ These rules apply to every page, route, component, and admin screen in this repo
 - Follow the project's Space Adaptation & Fairness Logic: components should adapt their own layout and size to available space before taking space another component needs; create additional space when necessary and feasible; never force unnecessary stretching or shrinking.
 - Prefer content-driven sizing, flexible layouts, wrapping, and responsive constraints over fixed dimensions that cause overflow.
 - Keep the interface clean, minimal, balanced, and accessible.
+- The floating menu is fully center-aligned: every link, form, action button, tool icon group, dashboard link, label, and nested element must be centered. Keep the menu anchored to the right side and do not add a backdrop.
+- Common UI size differences (small, medium/default, large) must be defined once as global design tokens and reusable classes in `src/app/globals.css`. Pages may choose a semantic size class such as `control--sm`, `control--md`, `control--lg`, `text--sm`, `text--md`, `text--lg`, or `surface--sm/md/lg`, but must not invent local sizes for the same reusable element.
+- Use the medium/default size unless the content or task genuinely requires a smaller or larger variant. Small variants must remain readable and touch-friendly; do not use a 36px small control for frequently tapped mobile actions unless it is nested in a larger hit target.
 
 ## Completion requirements
 
