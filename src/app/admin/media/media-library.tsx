@@ -58,7 +58,7 @@ export function MediaLibrary() {
     } catch (error) { setNotice(error instanceof Error ? error.message : "Registration failed."); }
   }
 
-  async function uploadFile(event: React.FormEvent<HTMLFormElement>) {
+  async function uploadFile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!upload.file) { setNotice("Choose a file first."); return; }
     const form = new FormData();
