@@ -16,7 +16,7 @@
 - src/lib/audit-schema.ts defines bounded event fields and allowed action/outcome values.
 - Validation rejects unknown roles/actions and oversized metadata.
 - Do not record passwords, session secrets, API keys, complete request bodies, or payment data.
-- Persistent audit storage, append-only permissions, retention and review UI are not yet enabled. Do not claim audit logging is operational.
+- An Appwrite audit append adapter is implemented and privileged content/media APIs require audit storage to be configured. Actual audit writes have not yet been verified against a provisioned Appwrite table; do not claim live audit logging until preview integration tests pass.
 
 ## Hosting environment
 - NEXT_PUBLIC_APPWRITE_ENDPOINT
