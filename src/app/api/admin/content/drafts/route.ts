@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 export async function GET(request: NextRequest) {
   const auth = await requireOwnerApi(request);
   if (auth.response) return auth.response;
-  if (!isContentStoreConfigured() || !isAuditStoreConfigured()) return NextResponse.json({ error: "Content and audit storage must both be configured." }, { status: 503 });
+  if (!isContentStoreConfigured()) return NextResponse.json({ error: "Content storage is not configured." }, { status: 503 });
   try {
     const result = await listAppwriteRows(process.env.APPWRITE_CONTENT_TABLE_ID!, 100);
     const slug = request.nextUrl.searchParams.get("slug");
