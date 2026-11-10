@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -41,7 +42,7 @@ export default function LoginPage() {
         <input type="password" autoComplete="current-password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} style={{ boxSizing: "border-box", width: "100%", padding: 12, border: "1px solid #d0d5dd", borderRadius: 9, marginTop: 7 }} />
         {error && <p role="alert" style={{ color: "#b42318", fontSize: 14 }}>{error}</p>}
         <button disabled={busy} type="submit" style={{ width: "100%", marginTop: 22, padding: 13, border: 0, borderRadius: 9, background: "#0b5cab", color: "white", fontWeight: 700, cursor: busy ? "wait" : "pointer" }}>{busy ? "Signing in…" : "Sign in securely"}</button>
-        <a href="/" style={{ display: "inline-block", marginTop: 18, color: "#475467", fontSize: 13 }}>← Back to website</a>
+        <Link href="/" style={{ display: "inline-block", marginTop: 18, color: "#475467", fontSize: 13 }}>← Back to website</Link>
       </form>
     </main>
   );
