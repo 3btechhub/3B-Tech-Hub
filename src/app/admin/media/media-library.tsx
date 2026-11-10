@@ -41,7 +41,7 @@ export function MediaLibrary() {
     }
   }, [includeTrash]);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {\n    const timer = window.setTimeout(() => { void load(); }, 0);\n    return () => window.clearTimeout(timer);\n  }, [load]);
 
   async function registerExternal(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
