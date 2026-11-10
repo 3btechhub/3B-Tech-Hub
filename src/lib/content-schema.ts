@@ -2,7 +2,7 @@ import { z } from "zod";
 import { roles, type Role } from "./permissions";
 
 const safeHref = z.string().trim().min(1).max(500).refine((value) => {
-  if (value.startsWith("/") && !value.startsWith("//")) return true;
+  if (value.startsWith("/")) return !value.startsWith("//") && !value.includes("\\\\") && !/[\\u0000-\\u001f]/.test(value);
   try {
     const url = new URL(value);
     return url.protocol === "https:";
@@ -64,7 +64,7 @@ export const pageSectionSchema = z.discriminatedUnion("type", [
 export const pageSeoSchema = z.object({
   title: z.string().trim().max(70).default(""),
   description: z.string().trim().max(180).default(""),
-  canonicalPath: z.string().trim().startsWith("/").max(500).optional(),
+  canonicalPath: z.string().trim().max(500).refine((value) => value.startsWith("/") && !value.startsWith("//") && !value.includes("\\\\") && !/[\\u0000-\\u001f]/.test(value), "Canonical path must be a safe internal path.").optional(),
   noIndex: z.boolean().default(false),
 }).strict();
 
