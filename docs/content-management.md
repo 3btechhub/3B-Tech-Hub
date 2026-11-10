@@ -16,4 +16,4 @@
 - Published revisions are immutable; create a new draft revision for subsequent edits.
 
 ## Important implementation boundary
-The schema, transition policy and a browser-local editor preview shell are implemented. The editor validates its local draft and displays a live preview. Persistent page storage, protected preview rendering, server-side authorization at mutation endpoints, audit persistence and publishing are not yet connected. The current editor is a local-only prototype; it does not save data or call a backend. Do not treat this contract alone as a live CMS.
+The schema, transition policy, browser editor and Owner-only draft APIs are implemented. Draft creation/listing and submit-for-review, approval and publishing endpoints are present, with audit writes required and rollback attempted if audit recording fails. However, the APIs remain disabled until Appwrite resources and server secrets are configured. Protected draft preview rendering and public published-page reads are still pending. Do not treat the CMS as production-ready.
