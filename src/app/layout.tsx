@@ -1,33 +1,33 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { getPublicSiteSettings } from "@/lib/public-site-settings";
 
 const siteUrl = "https://3btechhub.vercel.app";
-const description =
-  "3B TECH HUB — technology services, electronics repair, mobile, TV, computer and satellite support.";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "3B TECH HUB | Technology & Repair Services",
-    template: "%s | 3B TECH HUB",
-  },
-  description,
-  applicationName: "3B TECH HUB",
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    url: siteUrl,
-    siteName: "3B TECH HUB",
-    title: "3B TECH HUB | Technology & Repair Services",
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getPublicSiteSettings();
+  const title = settings.seoTitle || settings.siteName;
+  const description = settings.seoDescription || settings.description;
+  const images = settings.ogImageUrl ? [{ url: settings.ogImageUrl }] : undefined;
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: { default: title, template: `%s | ${settings.siteName}` },
     description,
-  },
-  twitter: {
-    card: "summary",
-    title: "3B TECH HUB | Technology & Repair Services",
-    description,
-  },
-  robots: { index: true, follow: true },
-};
+    applicationName: settings.siteName,
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      url: siteUrl,
+      siteName: settings.siteName,
+      title,
+      description,
+      images,
+    },
+    twitter: { card: "summary_large_image", title, description, images },
+    robots: { index: true, follow: true },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -35,23 +35,27 @@ export const viewport: Viewport = {
   themeColor: "#0b5cab",
 };
 
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  name: "3B TECH HUB",
-  alternateName: "Three Brothers Technology Hub",
-  url: siteUrl,
-  description,
-};
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const settings = await getPublicSiteSettings();
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: settings.siteName,
+    alternateName: "Three Brothers Technology Hub",
+    url: siteUrl,
+    description: settings.description,
+    email: settings.contactEmail || undefined,
+    telephone: settings.contactPhone || undefined,
+    address: settings.address || undefined,
+  };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang={settings.defaultLocale}>
       <body>
         {children}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, "\\u003c") }}
         />
       </body>
     </html>
