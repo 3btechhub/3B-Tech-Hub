@@ -9,7 +9,7 @@ Updated: 2026-11-10
 - [x] Page section contracts: hero, rich text, service grid, FAQ and CTA; unsafe links, arbitrary HTML and non-HTTPS hero media URLs are rejected.
 - [x] Interactive admin content editor shell with local draft editing, schema validation and live preview; no persistent save or publish action is enabled.
 - [x] Draft → In review → Owner approval → Owner publish workflow policy; published revisions are immutable.
-- [x] CI dependency-audit report step added; audit output is retained as a short-lived workflow artifact.
+- [x] CI dependency-audit report step added; audit output is retained as a short-lived workflow artifact when the updated workflow runs.
 - [x] Media delivery and CRUD requirements documented, including Appwrite uploads and external HTTPS media.
 - [x] Appwrite temporary CRUD write test passed; all temporary resources cleaned up.
 - [x] Server-side Appwrite login, HttpOnly session cookie, Appwrite session verification, logout and deny-by-default Owner ID gate.
@@ -18,7 +18,7 @@ Updated: 2026-11-10
 - [x] GitHub Actions run #75 completed successfully for its tested commit: typecheck, lint, unit tests, Playwright smoke test and production build all passed.
 
 ## In progress / pending
-- [ ] Confirm a new CI run validates the latest content editor and audit-workflow commits; run #75 predates these latest changes.
+- [ ] Confirm a new CI run validates the latest content editor, HTTPS media validation and audit-workflow commits; run #75 predates these latest changes.
 - [ ] Inspect the dependency audit artifact for exact advisories; do not apply force upgrades blindly.
 - [ ] Connect structured content schema to persistent page/version storage and protected preview rendering.
 - [ ] Enforce trusted server-side authorization on every content mutation endpoint before enabling saves or publishing.
