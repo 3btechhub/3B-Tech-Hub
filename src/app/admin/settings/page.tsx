@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { proposedSiteSettings } from "@/lib/settings-schema";
 
 export const metadata = {
@@ -18,7 +19,7 @@ export default function AdminSettingsPage() {
   return (
     <main style={{ minHeight: "100vh", background: "#f4f6f9", padding: "36px 20px" }}>
       <div style={{ width: "min(900px,100%)", margin: "0 auto" }}>
-        <a href="/admin" style={{ color: "#0b5cab", fontWeight: 700 }}>← Admin workspace</a>
+        <Link href="/admin" style={{ color: "#0b5cab", fontWeight: 700 }}>← Admin workspace</Link>
         <h1 style={{ fontSize: 34, letterSpacing: "-.04em", margin: "26px 0 8px" }}>Site settings</h1>
         <p style={{ color: "#667085", lineHeight: 1.7 }}>Proposed configuration prepared for owner review. These values are not saved to Appwrite and do not change the live website.</p>
         <section style={{ display: "grid", gap: 12, marginTop: 24 }}>
