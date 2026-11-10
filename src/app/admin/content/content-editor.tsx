@@ -33,7 +33,8 @@ export function ContentEditor() {
         section.type === "hero" ? { ...section, [field]: value } : section,
       ),
     }));
-    setSavedRevisionId(null);\n    setNotice("Unsaved local changes.");
+    setSavedRevisionId(null);
+    setNotice("Unsaved local changes.");
   }
 
   function updateSeo(field: "title" | "description", value: string) {
@@ -47,7 +48,8 @@ export function ContentEditor() {
       const response = await fetch("/api/admin/content/drafts", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(draft) });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error ?? "Draft could not be saved.");
-      setSavedRevisionId(body.revisionId);\n      setNotice(`Draft saved successfully. Revision ID: ${body.revisionId}`);
+      setSavedRevisionId(body.revisionId);
+      setNotice(`Draft saved successfully. Revision ID: ${body.revisionId}`);
       setDraft((current) => ({ ...current, revision: current.revision + 1 }));
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Draft save failed.");
@@ -77,7 +79,8 @@ export function ContentEditor() {
             <label>SEO description<textarea value={draft.seo.description} maxLength={180} rows={2} onChange={(event) => updateSeo("description", event.target.value)} /></label>
           </div>
           <div className="editor-actions"><button type="button" className="secondary-action" onClick={resetDraft}>Reset example</button><button type="button" disabled={!validation.success} onClick={() => void saveDraft()}>Save draft</button></div>
-          <p className="editor-notice" role="status">{notice}</p>\n          {savedRevisionId && <Link href={`/admin/content/preview/${encodeURIComponent(savedRevisionId)}`} className="preview-link">Open protected preview</Link>}
+          <p className="editor-notice" role="status">{notice}</p>
+          {savedRevisionId && <Link href={`/admin/content/preview/${encodeURIComponent(savedRevisionId)}`} className="preview-link">Open protected preview</Link>}
           {!validation.success && <p className="validation-error" role="alert">{validation.error.issues[0]?.message ?? "Please check the page fields."}</p>}
           {validation.success && <p className="validation-success">All current page fields pass validation.</p>}
         </section>
