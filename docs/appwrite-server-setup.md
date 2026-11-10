@@ -1,6 +1,6 @@
 # Appwrite Server Setup
 
-Admin APIs remain disabled until the Owner provisions and configures dedicated Appwrite resources.
+Admin APIs remain disabled until the Owner configures the server-only API key, production environment variables and exact Owner user ID. The production database, tables, indexes and private media bucket have been provisioned.
 
 ## Required server-only environment
 - APPWRITE_API_KEY: server-only key with least-privilege TablesDB row read/create/update/delete and Storage file create/delete scopes. Uploads are private by default; do not expose them publicly until an explicit delivery-permission flow is implemented.
@@ -39,6 +39,12 @@ Create a private bucket initially. Enforce the 50 MB maximum and allowed image/v
 - Content draft create/list and Owner-only submit-for-review, approve and publish transitions.
 - Media list, device upload, external URL registration, metadata update, soft-delete and restore.
 - Protected server-rendered preview of a saved content revision under the authenticated admin route.
+
+## Production resources provisioned
+- TablesDB database `3btechhub-prod` is ready.
+- `content`, `media_assets` and `audit_logs` tables are provisioned with private table permissions.
+- Content unique index (`slug`, `locale`, `revision`), media title full-text index, media type/trash indexes and audit lookup indexes are available.
+- Private Storage bucket `media` is enabled with per-file security, encryption, antivirus, image transformations and a 50,000,000-byte maximum upload size.
 
 ## Remaining work
 Media usage tracking and reference-safe permanent deletion, generated thumbnail/optimized rendition pipeline and reviewed CDN delivery remain pending. Content draft browsing is currently bounded and needs server-side pagination/search for large sites. Strong optimistic concurrency for concurrent revision creation and non-owner role profiles remain pending. Live Appwrite integration cannot be considered complete until the production project is connected and the documented resources and secrets are configured.
