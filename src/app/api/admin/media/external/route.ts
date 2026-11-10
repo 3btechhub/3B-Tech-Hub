@@ -10,7 +10,9 @@ export async function POST(request: NextRequest) {
   const auth = await requireOwnerApi(request);
   if (auth.response) return auth.response;
   if (!isMediaStoreConfigured() || !isAuditStoreConfigured()) return NextResponse.json({ error: "Media and audit storage must both be configured." }, { status: 503 });
-  const input = await request.json().catch(() => null);\n  const parsed = externalMediaSchema.safeParse(input).success\n    ? externalMediaSchema.safeParse(input)\n    : videoEmbedSchema.safeParse(input);
+  const input = await request.json().catch(() => null);
+  const externalParsed = externalMediaSchema.safeParse(input);
+  const parsed = externalParsed.success ? externalParsed : videoEmbedSchema.safeParse(input);
   if (!parsed.success) return NextResponse.json({ error: "Invalid external media details.", issues: parsed.error.issues }, { status: 400 });
   const assetId = randomUUID();
   const tableId = process.env.APPWRITE_MEDIA_TABLE_ID!;
@@ -20,7 +22,7 @@ export async function POST(request: NextRequest) {
     rowCreated = true;
     await appendAuditEvent({
       actorId: auth.identity!.id, actorRole: "owner", action: "media.register", targetType: "media",
-      targetId: assetId, outcome: "success", metadata: { sourceType: "external", mediaType: parsed.data.mediaType },
+      targetId: assetId, outcome: "success", metadata: { sourceType: parsed.data.sourceType, mediaType: parsed.data.mediaType },
       occurredAt: new Date().toISOString(),
     });
     return NextResponse.json({ ok: true, assetId }, { status: 201 });
