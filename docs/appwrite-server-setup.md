@@ -13,7 +13,7 @@ Admin APIs remain disabled until the Owner provisions and configures dedicated A
 
 Never expose APPWRITE_API_KEY through NEXT_PUBLIC variables, client bundles, logs or audit metadata.
 
-## Content table columns
+For content revisions, keep a unique composite index on slug + locale + revision to prevent duplicate version numbers. The current API also checks the latest known revision before insertion; the unique index is the final concurrency guard.\n\n## Content table columns
 Create a TablesDB table with row-level client permissions disabled and columns: slug (string), locale (string), revision (integer), status (string), payload (string with suitable size), createdBy (string), createdAt (string/datetime).
 
 ## Media table columns
