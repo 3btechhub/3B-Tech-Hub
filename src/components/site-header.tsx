@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-type NavigationItem = { label: string; href: string };
 type Role = "visitor" | "member" | "admin";
-type Props = { siteName: string; navigationItems: NavigationItem[]; contactEmail?: string; contactPhone?: string; whatsappUrl?: string };
+type Props = { siteName: string; navigationItems: { label: string; href: string }[]; contactEmail?: string; contactPhone?: string; whatsappUrl?: string };
 
 export default function SiteHeader({ siteName }: Props) {
   const [open, setOpen] = useState(false);
@@ -43,7 +42,6 @@ export default function SiteHeader({ siteName }: Props) {
   }, [open]);
 
   const closeMenu = () => setOpen(false);
-  const bn = language === "bn";
   const loggedIn = role === "member" || role === "admin";
 
   return (
@@ -54,34 +52,35 @@ export default function SiteHeader({ siteName }: Props) {
         </Link>
         <button type="button" className="menu-trigger" aria-expanded={open} aria-controls="site-floating-menu" onClick={() => setOpen((value) => !value)}>
           <span className={"menu-trigger-icon " + (open ? "is-open" : "")} aria-hidden="true"><span /><span /><span /></span>
-          <span>{open ? (bn ? "বন্ধ" : "Close") : (bn ? "মেনু" : "Menu")}</span>
+          <span>{open ? (language === "bn" ? "বন্ধ" : "Close") : (language === "bn" ? "মেনু" : "Menu")}</span>
         </button>
       </div>
       {open && <>
         <button className="menu-backdrop" type="button" aria-label="Close menu" onClick={closeMenu} />
-        <section className="floating-menu container" id="site-floating-menu" aria-label="Website menu">
-          <div className="floating-menu-heading">
-            <div><span className="eyebrow">3B TECH HUB</span><h2>{bn ? "আপনি কোথায় যেতে চান?" : "Where would you like to go?"}</h2><p>{bn ? "প্রয়োজনীয় লিংক ও সেটিংস এক জায়গায়।" : "Quick links and useful website controls."}</p></div>
-            <button type="button" className="menu-close" onClick={closeMenu} aria-label="Close menu">×</button>
+        <nav className="floating-menu simple-menu container" id="site-floating-menu" aria-label="Website menu">
+          <div className="simple-menu-links">
+            <Link className="simple-menu-link" href="/" onClick={closeMenu}>Home</Link>
+            <Link className="simple-menu-link" href="/profile" onClick={closeMenu}>Profile</Link>
+            <Link className="simple-menu-link" href="/#services" onClick={closeMenu}>Services</Link>
+            <Link className="simple-menu-link" href="/gallery" onClick={closeMenu}>Gallery</Link>
+            {loggedIn
+              ? <form action="/api/admin/logout" method="post"><button className="simple-menu-link simple-menu-action" type="submit">Log Out</button></form>
+              : <Link className="simple-menu-link" href="/login?next=%2Fprofile" onClick={closeMenu}>Log In</Link>}
           </div>
-          <div className="menu-columns">
-            <section className="menu-group">
-              <h3>Normal Link</h3>
-              <Link className="menu-item" href="/" onClick={closeMenu}>⌂ <span>Home</span></Link>
-              <Link className="menu-item" href="/profile" onClick={closeMenu}>◉ <span>Profile</span>{!loggedIn && <small>Sign in required</small>}</Link>
-              <Link className="menu-item" href="/#services" onClick={closeMenu}>⚙ <span>Services</span></Link>
-              <Link className="menu-item" href="/gallery" onClick={closeMenu}>▧ <span>Gallery</span></Link>
-              {loggedIn ? <form action="/api/admin/logout" method="post"><button className="menu-item menu-logout" type="submit">↪ <span>{bn ? "লগ আউট" : "Log Out"}</span></button></form> : <Link className="menu-item menu-login" href="/login?next=%2Fprofile" onClick={closeMenu}>↪ <span>{bn ? "লগইন" : "Log In"}</span></Link>}
-            </section>
-            <section className="menu-group">
-              <h3>Tools</h3>
-              <button className="menu-item menu-control" type="button" onClick={() => setTheme((value) => value === "light" ? "dark" : "light")}>{theme === "light" ? "☾" : "☀"} <span>{bn ? "ডে / নাইট" : "Day / Night Switch"}</span><small>{theme === "light" ? "Light" : "Dark"}</small></button>
-              <button className="menu-item menu-control" type="button" onClick={() => setLanguage((value) => value === "en" ? "bn" : "en")}>文 <span>{bn ? "ভাষা পরিবর্তন" : "Language Switch"}</span><small>{language.toUpperCase()}</small></button>
-            </section>
-            {role === "admin" && <section className="menu-group"><h3>Admin Link</h3><Link className="menu-item admin-menu-item" href="/admin" onClick={closeMenu}>▣ <span>Dashboard</span><b>→</b></Link></section>}
+          <div className="simple-menu-divider" />
+          <div className="simple-menu-tools">
+            <button className="simple-menu-toggle" type="button" onClick={() => setTheme((value) => value === "light" ? "dark" : "light")} aria-pressed={theme === "dark"}>
+              <span>Dark/Light</span><span className={"simple-switch " + (theme === "dark" ? "is-on" : "")} aria-hidden="true"><span /></span>
+            </button>
+            <button className="simple-menu-toggle" type="button" onClick={() => setLanguage((value) => value === "en" ? "bn" : "en")} aria-pressed={language === "bn"}>
+              <span>Language</span><span className="simple-language-value">{language.toUpperCase()}</span>
+            </button>
           </div>
-          <div className="floating-menu-footer"><span>3B TECH HUB</span><span>Three Brothers · Technical Hub</span></div>
-        </section>
+          {role === "admin" && <>
+            <div className="simple-menu-divider" />
+            <Link className="simple-menu-link simple-menu-dashboard" href="/admin" onClick={closeMenu}>Dashboard</Link>
+          </>}
+        </nav>
       </>}
     </header>
   );
