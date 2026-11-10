@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -48,7 +49,7 @@ export default function LoginPage() {
         {error && <p className="auth-error" role="alert">{error}</p>}
         <button className="auth-submit" disabled={busy} type="submit">{busy ? "Please wait…" : step === "email" ? "Continue" : "Sign in"}</button>
         {step === "code" && <button className="auth-back" type="button" disabled={busy} onClick={() => { setStep("email"); setSecret(""); setNotice(""); setError(""); }}>Change email</button>}
-        <a className="auth-home" href="/">Home</a>
+        <Link className="auth-home" href="/">Home</Link>
       </form>
     </main>
   );
