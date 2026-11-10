@@ -14,6 +14,9 @@ export function isContentStoreConfigured() {
 export function isMediaStoreConfigured() {
   return Boolean(configuration() && process.env.APPWRITE_DATABASE_ID && process.env.APPWRITE_MEDIA_TABLE_ID && process.env.APPWRITE_MEDIA_BUCKET_ID);
 }
+export function isSettingsStoreConfigured() {
+  return Boolean(configuration() && process.env.APPWRITE_DATABASE_ID && process.env.APPWRITE_SETTINGS_TABLE_ID);
+}
 
 async function appwriteRequest<T>(path: string, init: RequestInit): Promise<T> {
   const config = configuration();
