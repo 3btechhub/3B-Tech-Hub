@@ -2,9 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { pageRevisionSchema } from "@/lib/content-schema";
 import { requireOwnerApi } from "@/lib/admin-api-auth";
-import { createAppwriteRow, deleteAppwriteRow, isContentStoreConfigured } from "@/lib/appwrite-server";
+import { createAppwriteRow, deleteAppwriteRow, isContentStoreConfigured, listAppwriteRows } from "@/lib/appwrite-server";
 import { appendAuditEvent, isAuditStoreConfigured } from "@/lib/audit-store";
 export const runtime = "nodejs";
+
+export async function GET(request: NextRequest) {
+  const auth = await requireOwnerApi(request);
+  if (auth.response) return auth.response;
+  if (!isContentStoreConfigured() || !isAuditStoreConfigured()) return NextResponse.json({ error: "Content and audit storage must both be configured." }, { status: 503 });
+  try {
+    const result = await listAppwriteRows(process.env.APPWRITE_CONTENT_TABLE_ID!, 100);
+    const slug = request.nextUrl.searchParams.get("slug");
+    const locale = request.nextUrl.searchParams.get("locale");
+    const items = (result.rows ?? []).filter((row) => row.status !== "published" && (!slug || row.slug === slug) && (!locale || row.locale === locale));
+    return NextResponse.json({ items, total: items.length, limit: 100 });
+  } catch {
+    return NextResponse.json({ error: "Draft revisions could not be loaded." }, { status: 502 });
+  }
+}
 
 export async function POST(request: NextRequest) {
   const auth = await requireOwnerApi(request);
