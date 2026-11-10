@@ -642,3 +642,20 @@ label { color: var(--foreground); }
 .site-announcement { padding:9px var(--space-page); text-align:center; background:var(--surface-muted); color:var(--foreground); border-bottom:1px solid var(--border); font-size:14px; font-weight:700; }
 .site-announcement a { text-decoration:underline; text-underline-offset:3px; }
 .contact-details { display:grid; gap:10px; color:var(--foreground); }
+
+/* Admin settings use the same content-first adaptive layout. */
+.settings-admin{min-height:100vh;padding:var(--space-section) var(--space-page);background:var(--background)!important;color:var(--foreground)!important}
+.settings-shell{width:min(900px,100%);margin-inline:auto}
+.settings-back{color:var(--foreground)!important;font-weight:700}
+.settings-title{margin:26px 0 8px;letter-spacing:-.04em}
+.settings-intro{margin:0 0 24px;color:var(--muted)!important;line-height:1.7}
+.settings-form{display:grid;gap:16px}.settings-form.is-loading{opacity:.65}
+.settings-notice{margin:0;padding:12px;border:1px solid var(--border);border-radius:var(--control-radius);background:var(--surface-muted);color:var(--foreground)!important;font-size:14px}
+.settings-panel{display:grid;gap:14px;min-width:0;padding:var(--space-card);border:1px solid var(--border);border-radius:var(--card-radius);background:var(--surface)}
+.settings-panel h2{margin:0;font-size:19px!important}
+.settings-field{display:grid;gap:6px;min-width:0;color:var(--foreground);font-size:14px;font-weight:700}
+.settings-input{width:100%;min-width:0;min-height:var(--control-height);padding:10px 12px;border:1px solid var(--border)!important;border-radius:var(--control-radius)!important;background:var(--surface)!important;color:var(--foreground)!important;font:inherit;font-weight:400}
+.settings-textarea{min-height:120px;resize:vertical}
+.settings-check{display:flex;align-items:center;gap:9px;color:var(--foreground)}
+.settings-help,.settings-fixed-theme{margin:0;color:var(--muted)!important;font-size:13px;line-height:1.55}
+.settings-save{width:100%;min-height:44px;padding:10px 16px;border:1px solid var(--foreground)!important;border-radius:var(--control-radius)!important;background:var(--foreground)!important;color:var(--background)!important;font-weight:800}
