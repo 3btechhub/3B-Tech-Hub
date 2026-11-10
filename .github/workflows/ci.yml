@@ -20,4 +20,7 @@ jobs:
       - run: npm install
       - run: npm run typecheck
       - run: npm run lint
+      - run: npm run test
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
       - run: npm run build
