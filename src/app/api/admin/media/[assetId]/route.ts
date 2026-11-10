@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { mediaMetadataUpdateSchema } from "@/lib/media-schema";
 import { requireOwnerApi } from "@/lib/admin-api-auth";
 import { appendAuditEvent, isAuditStoreConfigured } from "@/lib/audit-store";
-import { getAppwriteRow, isMediaStoreConfigured, updateAppwriteRow } from "@/lib/appwrite-server";
+import { getAppwriteRow, isMediaStoreConfigured, updateAppwriteFilePermissions, updateAppwriteRow } from "@/lib/appwrite-server";
 
 export const runtime = "nodejs";
 type Context = { params: Promise<{ assetId: string }> };
@@ -23,16 +23,27 @@ export async function PATCH(request: NextRequest, context: Context) {
       return NextResponse.json({ error: "Only externally hosted assets can change their URL." }, { status: 400 });
     }
 
+    const previousVisibility = existing.visibility === "public" ? "public" : "private";
+    if (parsed.data.visibility && parsed.data.visibility !== previousVisibility && existing.sourceType === "appwrite") {
+      if (typeof existing.storageBucketId !== "string" || typeof existing.storageFileId !== "string") {
+        return NextResponse.json({ error: "Stored file metadata is incomplete." }, { status: 409 });
+      }
+      const filePermissions = parsed.data.visibility === "public" ? ['read("any")'] : [];
+      await updateAppwriteFilePermissions(existing.storageBucketId, existing.storageFileId, filePermissions);
+    }
     await updateAppwriteRow(tableId, assetId, parsed.data);
     try {
       await appendAuditEvent({
         actorId: auth.identity!.id, actorRole: "owner", action: "media.update", targetType: "media",
-        targetId: assetId, outcome: "success", metadata: { changedFields: Object.keys(parsed.data).join(",") },
+        targetId: assetId, outcome: "success", metadata: { changedFields: Object.keys(parsed.data).join(","), visibility: parsed.data.visibility ?? previousVisibility },
         occurredAt: new Date().toISOString(),
       });
     } catch {
       const previous = Object.fromEntries(Object.keys(parsed.data).map((key) => [key, existing[key]]));
       await updateAppwriteRow(tableId, assetId, previous).catch(() => undefined);
+      if (parsed.data.visibility && parsed.data.visibility !== previousVisibility && existing.sourceType === "appwrite" && typeof existing.storageBucketId === "string" && typeof existing.storageFileId === "string") {
+        await updateAppwriteFilePermissions(existing.storageBucketId, existing.storageFileId, previousVisibility === "public" ? ['read("any")'] : []).catch(() => undefined);
+      }
       return NextResponse.json({ error: "Audit recording failed; metadata was rolled back where possible." }, { status: 502 });
     }
     return NextResponse.json({ ok: true });
