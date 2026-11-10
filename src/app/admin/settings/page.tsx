@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function AdminSettingsPage() {
   return (
-    <main style={{ minHeight: "100vh", background: "#f4f6f9", padding: "36px 20px" }}>
+    <main className="settings-admin" style={{ minHeight: "100vh", background: "#f4f6f9", padding: "36px 20px" }}>
       <div style={{ width: "min(900px,100%)", margin: "0 auto" }}>
         <Link href="/admin" style={{ color: "#0b5cab", fontWeight: 700 }}>← Admin workspace</Link>
         <h1 style={{ fontSize: 34, letterSpacing: "-.04em", margin: "26px 0 8px" }}>Full website settings</h1>
