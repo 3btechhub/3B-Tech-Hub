@@ -28,7 +28,7 @@ export async function GET(request: NextRequest, context: Context) {
       return NextResponse.json({ error: "Media not found." }, { status: 404 });
     }
 
-    if (row.sourceType === "external") {
+    if (row.sourceType === "external" || row.sourceType === "video_embed") {
       const target = typeof row.externalUrl === "string" ? new URL(row.externalUrl) : null;
       if (!target || target.protocol !== "https:") {
         return NextResponse.json({ error: "External media URL is invalid." }, { status: 415 });
