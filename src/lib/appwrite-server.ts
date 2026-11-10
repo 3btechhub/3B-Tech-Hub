@@ -103,20 +103,37 @@ export async function listAppwriteRows(tableId: string, limit = 100, offset = 0,
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   const params = new URLSearchParams();
   for (const query of buildAppwriteRowQueries(limit, offset, search, excludeDeleted)) params.append("queries[]", query);
-  return appwriteRequest<{ total: number; rows: AppwriteRow[] }>(
+  const result = await appwriteRequest<{ total: number; rows: AppwriteRow[] }>(
     `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows?${params.toString()}`,
     { method: "GET" },
   );
+  return {
+    total: result.total ?? 0,
+    rows: (result.rows ?? []).map((row) => ({
+      ...(row.data && typeof row.data === "object" ? row.data as Record<string, unknown> : {}),
+      $id: row.$id,
+      $createdAt: row.$createdAt,
+      $updatedAt: row.$updatedAt,
+      $permissions: row.$permissions,
+    })) as AppwriteRow[],
+  };
 }
 
 export async function getAppwriteRow(tableId: string, rowId: string) {
   const config = configuration();
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
-  return appwriteRequest<AppwriteRow>(
+  const row = await appwriteRequest<AppwriteRow>(
     `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`,
     { method: "GET" },
   );
+  return {
+    ...(row.data && typeof row.data === "object" ? row.data as Record<string, unknown> : {}),
+    $id: row.$id,
+    $createdAt: row.$createdAt,
+    $updatedAt: row.$updatedAt,
+    $permissions: row.$permissions,
+  } as AppwriteRow;
 }
 
 export async function updateAppwriteRow(tableId: string, rowId: string, data: Record<string, unknown>) {
