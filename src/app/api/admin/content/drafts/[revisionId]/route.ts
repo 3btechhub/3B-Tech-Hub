@@ -12,6 +12,23 @@ const actions = {
   publish: { next: "published" as const, audit: "content.publish" as const },
 };
 
+
+export async function GET(request: NextRequest, context: Context) {
+  const auth = await requireOwnerApi(request);
+  if (auth.response) return auth.response;
+  if (!isContentStoreConfigured()) return NextResponse.json({ error: "Content storage is not configured." }, { status: 503 });
+  const { revisionId } = await context.params;
+  try {
+    const row = await getAppwriteRow(process.env.APPWRITE_CONTENT_TABLE_ID!, revisionId);
+    if (typeof row.payload !== "string") return NextResponse.json({ error: "Revision payload is invalid." }, { status: 409 });
+    const parsed = pageRevisionSchema.safeParse(JSON.parse(row.payload));
+    if (!parsed.success) return NextResponse.json({ error: "Stored revision failed validation." }, { status: 409 });
+    return NextResponse.json({ revisionId, revision: parsed.data });
+  } catch {
+    return NextResponse.json({ error: "Saved revision could not be loaded." }, { status: 404 });
+  }
+}
+
 export async function POST(request: NextRequest, context: Context) {
   const auth = await requireOwnerApi(request);
   if (auth.response) return auth.response;
