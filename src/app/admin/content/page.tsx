@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ContentEditor } from "./content-editor";
+import { RevisionBrowser } from "./revision-browser";
 
 export const metadata = {
   title: "Content Management",
@@ -16,6 +17,7 @@ export default function ContentManagementPage() {
           <p>Shape your website content, check the preview and validate changes before they enter the approval process.</p>
         </header>
         <ContentEditor />
+        <RevisionBrowser />
         <aside className="approval-note"><strong>Owner-controlled publishing</strong><span>Saving, review submission and publishing are not connected yet. No changes leave this browser. Production publishing will remain restricted to the Owner.</span></aside>
       </div>
       <style>{`
