@@ -75,9 +75,9 @@ export async function listAppwriteRows(tableId: string, limit = 100) {
   const config = configuration();
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
-  const query = encodeURIComponent(JSON.stringify({ method: "limit", values: [Math.min(Math.max(limit, 1), 100)] }));
+  const query = encodeURIComponent(`limit(${Math.min(Math.max(limit, 1), 100)})`);
   return appwriteRequest<{ total: number; rows: AppwriteRow[] }>(
-    `${config.endpoint}/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows?queries[]=${query}`,
+    `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows?queries[]=${query}`,
     { method: "GET" },
   );
 }
