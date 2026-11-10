@@ -16,4 +16,4 @@
 - Published revisions are immutable; create a new draft revision for subsequent edits.
 
 ## Important implementation boundary
-The schema and transition policy are implemented and unit-tested. Persistent page storage, editor UI, preview rendering, server-side authorization at mutation endpoints, audit persistence and publishing are not yet connected. Do not treat this contract alone as a live CMS.
+The schema, transition policy and a browser-local editor preview shell are implemented. The editor validates its local draft and displays a live preview. Persistent page storage, protected preview rendering, server-side authorization at mutation endpoints, audit persistence and publishing are not yet connected. The current editor is a local-only prototype; it does not save data or call a backend. Do not treat this contract alone as a live CMS.
