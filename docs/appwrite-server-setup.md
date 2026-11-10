@@ -26,7 +26,7 @@ Create a separate table with actorId, actorRole, action, targetType, targetId, r
 Create a private bucket initially. Enforce the 50 MB maximum and allowed image/video/PDF MIME types. Public delivery must be enabled only after a separate review of public/private access and CDN cache policy.
 
 ## API behavior
-- Draft creation is Owner-only, same-origin and accepts only schema-valid draft revisions.
+- Draft creation and listing are Owner-only, same-origin and accept only schema-valid draft revisions.\n- Owner-only workflow actions support submit for review, approve and publish, with validated status transitions and audit events.
 - External media registration is Owner-only and accepts HTTPS URLs only.
 - Upload validates size, MIME and basic file signature before storage. If metadata or audit persistence fails, the uploaded object and metadata row are rolled back where possible.
 - APIs return 503 while required server-side configuration is absent. They do not create resources automatically.
