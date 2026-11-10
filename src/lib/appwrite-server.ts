@@ -36,10 +36,13 @@ export async function createAppwriteRow(tableId: string, rowId: string, data: Re
   });
 }
 
-export async function uploadAppwriteFile(bucketId: string, file: File, fileId: string) {
+export async function uploadAppwriteFile(bucketId: string, file: File, fileId: string, permissions: string[] = []) {
   const config = configuration();
   if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
-  const form = new FormData(); form.set("fileId", fileId); form.set("file", file, file.name);
+  const form = new FormData();
+  form.set("fileId", fileId);
+  form.set("file", file, file.name);
+  for (const permission of permissions) form.append("permissions[]", permission);
   const response = await fetch(`${config.endpoint}/storage/buckets/${encodeURIComponent(bucketId)}/files`, {
     method: "POST", headers: { "X-Appwrite-Project": config.projectId, "X-Appwrite-Key": config.apiKey },
     body: form, cache: "no-store", signal: AbortSignal.timeout(60000),
@@ -112,13 +115,48 @@ export async function updateAppwriteRow(tableId: string, rowId: string, data: Re
   );
 }
 
-export async function fetchAppwriteFilePreview(bucketId: string, fileId: string) {
+export async function updateAppwriteFilePermissions(bucketId: string, fileId: string, permissions: string[]) {
   const config = configuration();
   if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
-  const response = await fetch(`${config.endpoint}/storage/buckets/${encodeURIComponent(bucketId)}/files/${encodeURIComponent(fileId)}/view`, {
+  const response = await fetch(`${config.endpoint}/storage/buckets/${encodeURIComponent(bucketId)}/files/${encodeURIComponent(fileId)}`, {
+    method: "PUT",
+    headers: { "X-Appwrite-Project": config.projectId, "X-Appwrite-Key": config.apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({ permissions }),
+    cache: "no-store",
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!response.ok) throw new Error("APPWRITE_FILE_PERMISSION_UPDATE_FAILED");
+  return response.json() as Promise<AppwriteRow>;
+}
+
+export async function fetchAppwriteFilePreview(
+  bucketId: string,
+  fileId: string,
+  options: { width?: number; height?: number; quality?: number; output?: "webp" | "avif" | "jpg" | "png" } = {},
+) {
+  const config = configuration();
+  if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
+  const query = new URLSearchParams();
+  if (options.width) query.set("width", String(Math.min(Math.max(options.width, 1), 2000)));
+  if (options.height) query.set("height", String(Math.min(Math.max(options.height, 1), 2000)));
+  if (options.quality) query.set("quality", String(Math.min(Math.max(options.quality, 30), 90)));
+  if (options.output) query.set("output", options.output);
+  const suffix = query.size ? `?${query.toString()}` : "";
+  const response = await fetch(`${config.endpoint}/storage/buckets/${encodeURIComponent(bucketId)}/files/${encodeURIComponent(fileId)}/preview${suffix}`, {
     method: "GET", headers: { "X-Appwrite-Project": config.projectId, "X-Appwrite-Key": config.apiKey },
     cache: "no-store", signal: AbortSignal.timeout(20000),
   });
   if (!response.ok || !response.body) throw new Error("APPWRITE_FILE_PREVIEW_FAILED");
+  return response;
+}
+
+export async function fetchAppwriteFileView(bucketId: string, fileId: string) {
+  const config = configuration();
+  if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
+  const response = await fetch(`${config.endpoint}/storage/buckets/${encodeURIComponent(bucketId)}/files/${encodeURIComponent(fileId)}/view`, {
+    method: "GET", headers: { "X-Appwrite-Project": config.projectId, "X-Appwrite-Key": config.apiKey },
+    cache: "no-store", signal: AbortSignal.timeout(30000),
+  });
+  if (!response.ok || !response.body) throw new Error("APPWRITE_FILE_VIEW_FAILED");
   return response;
 }
