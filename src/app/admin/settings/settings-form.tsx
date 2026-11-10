@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { CSSProperties, FormEvent } from "react";
 import type { SiteSettings } from "@/lib/settings-schema";
 import { proposedSiteSettings } from "@/lib/settings-schema";
 
@@ -34,7 +35,7 @@ export function SettingsForm() {
     setSettings((current) => ({ ...current, [key]: value }));
   }
 
-  async function save(event: React.FormEvent<HTMLFormElement>) {
+  async function save(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
     setNotice("Saving settings…");
@@ -60,10 +61,10 @@ export function SettingsForm() {
     }
   }
 
-  const fieldStyle: React.CSSProperties = { display: "grid", gap: 6, fontSize: 13, fontWeight: 700, color: "#344054" };
-  const inputStyle: React.CSSProperties = { width: "100%", boxSizing: "border-box", padding: 11, border: "1px solid #d0d5dd", borderRadius: 8, font: "inherit", fontWeight: 400, background: "white" };
-  const panelStyle: React.CSSProperties = { background: "white", border: "1px solid #e4e7ec", borderRadius: 14, padding: 20, display: "grid", gap: 14 };
-  const textAreaStyle: React.CSSProperties = { ...inputStyle, minHeight: 180, fontFamily: "ui-monospace,monospace", fontSize: 12 };
+  const fieldStyle: CSSProperties = { display: "grid", gap: 6, fontSize: 13, fontWeight: 700, color: "#344054" };
+  const inputStyle: CSSProperties = { width: "100%", boxSizing: "border-box", padding: 11, border: "1px solid #d0d5dd", borderRadius: 8, font: "inherit", fontWeight: 400, background: "white" };
+  const panelStyle: CSSProperties = { background: "white", border: "1px solid #e4e7ec", borderRadius: 14, padding: 20, display: "grid", gap: 14 };
+  const textAreaStyle: CSSProperties = { ...inputStyle, minHeight: 180, fontFamily: "ui-monospace,monospace", fontSize: 12 };
 
   return (
     <form onSubmit={save} style={{ display: "grid", gap: 16, opacity: busy ? 0.65 : 1 }}>
