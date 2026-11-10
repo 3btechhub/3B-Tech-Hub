@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
+import SiteHeader from "@/components/site-header";
 import { getPublicSiteSettings } from "@/lib/public-site-settings";
 
 export const dynamic = "force-dynamic";
@@ -32,18 +33,13 @@ export default async function HomePage() {
           {settings.announcementUrl ? <a href={settings.announcementUrl}>{settings.announcementText}</a> : settings.announcementText}
         </div>
       )}
-      <header className="site-header">
-        <div className="container header-inner">
-          <Link className="brand" href="/" aria-label={`${settings.siteName} home`}>
-            <span className="brand-mark">3B</span>
-            <span>{settings.siteName}</span>
-          </Link>
-          <nav className="nav-links" aria-label="Main navigation">
-            {settings.navigationItems.map((item, index) => <a href={item.href} key={`${item.href}-${index}`}>{item.label}</a>)}
-          </nav>
-          <a className="button" href="#contact">Get Support</a>
-        </div>
-      </header>
+      <SiteHeader
+        siteName={settings.siteName}
+        navigationItems={settings.navigationItems}
+        contactEmail={settings.contactEmail}
+        contactPhone={settings.contactPhone}
+        whatsappUrl={settings.whatsappUrl}
+      />
 
       <main>
         <section className="hero">
