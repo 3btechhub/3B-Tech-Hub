@@ -21,13 +21,18 @@ Updated: 2026-11-10
 - [x] Vitest upgraded to 5.1.0 to remove the two critical Tinypool/Vitest advisories found in the earlier dependency report.
 
 ## In progress / pending
-- [x] CI run #226 passed on commit `e6f8cda8fce657418cbb40bd81d52ed5c4d1adf8`: install, dependency-audit report upload, typecheck, lint, unit tests, Playwright browser setup, E2E tests and production build.\n- [x] Saved content revision browser with Owner-only preview links; revision IDs are displayed for direct reopening.
+- [x] CI run #226 passed on commit `e6f8cda8fce657418cbb40bd81d52ed5c4d1adf8`: install, dependency-audit report upload, typecheck, lint, unit tests, Playwright browser setup, E2E tests and production build.
 - [ ] Dependency audit after Vitest upgrade reports 8 moderate, 0 critical. Remaining findings are in the Next 16 ESLint configuration/typescript-eslint/minimatch chain. npm suggests downgrading eslint-config-next to 15.5.29, which is not an appropriate automatic fix for this Next 16 app; review compatible upstream patch before changing.
 - [ ] Configure Appwrite server API key and provision Content, Media, Audit tables plus private Storage bucket after schema and access policy review. Current project inventory has none; APIs are disabled until configured.
 - [ ] Configure Appwrite table columns, indexes and least-privilege API key scopes exactly as documented.
 - [ ] Verify APIs against a configured non-production Appwrite preview; no live upload or persistent content write has been tested.
-- [x] Added protected server-rendered preview for saved page revisions under /admin/content/preview/[revisionId].\n- [ ] Connect published content to public website pages.
-- [x] Added an Owner-protected saved content revision browser with refresh, status/revision metadata and links to private previews.\n- [ ] Add media pagination/search/usage tracking and generated thumbnail variants/CDN image transformations.
+- [x] Added protected server-rendered preview for saved page revisions under /admin/content/preview/[revisionId].
+- [x] Added Owner-only GET/PUT APIs to reopen and edit saved Draft revisions; slug, locale and revision number are immutable and submitted revisions remain locked.
+- [x] Added public read API and dynamic locale/slug pages that expose only schema-valid Published revisions.
+- [x] Added authenticated private Appwrite media preview proxy and lazy-loaded Media Library image/video/document previews.
+- [x] Fixed Appwrite TablesDB list endpoint construction and limit query syntax.
+- [x] Revision browser displays revision IDs for reopening saved drafts.
+- [ ] Add media pagination/search/usage tracking and generated thumbnail variants/CDN image transformations.
 - [ ] Configure distributed edge/WAF rate limiting and MFA.
 - [ ] Confirm Owner Appwrite user ID and set ADMIN_OWNER_USER_IDS in hosting secrets.
 - [ ] Implement trusted role profiles before delegating non-owner roles.
