@@ -6,7 +6,7 @@ Updated: 2026-11-10
 - [x] Architecture, logical data model, responsive Next.js public foundation and admin preview shells.
 - [x] GitHub Actions CI, Vitest and Playwright smoke-test configuration.
 - [x] Settings, media and structured page-content validation schemas with unit tests.
-- [x] Interactive admin content editor with local live preview and Save Draft API integration.
+- [x] Interactive admin content editor with local live preview, persistent Save Draft API integration and link to protected saved-revision preview.
 - [x] Owner-only content draft create/list and submit-for-review, approve and publish workflow APIs with audit recording and rollback attempts.
 - [x] Media Library UI for device upload, external HTTPS URL registration, metadata editing, trash and restore.
 - [x] Owner-only Media APIs for listing, upload, external registration, metadata update, soft-delete and restore. Permanent deletion remains disabled until usage tracking is implemented.
@@ -21,13 +21,13 @@ Updated: 2026-11-10
 - [x] Vitest upgraded to 5.1.0 to remove the two critical Tinypool/Vitest advisories found in the earlier dependency report.
 
 ## In progress / pending
-- [ ] Latest full CI run #189 is queued for the current branch head; earlier run #150 failed typecheck on an older PR merge snapshot containing escaped-newline syntax errors. Those files were corrected; wait for #189 before claiming success.
+- [ ] Latest CI runs are validating recent fixes; run #197 exposed escaped-newline syntax in the media effect and run #198/#202 were started on intermediate commits. A newer run is required for the latest branch head before claiming success.
 - [ ] Dependency audit after Vitest upgrade reports 8 moderate, 0 critical. Remaining findings are in the Next 16 ESLint configuration/typescript-eslint/minimatch chain. npm suggests downgrading eslint-config-next to 15.5.29, which is not an appropriate automatic fix for this Next 16 app; review compatible upstream patch before changing.
 - [ ] Configure Appwrite server API key and provision Content, Media, Audit tables plus private Storage bucket after schema and access policy review. Current project inventory has none; APIs are disabled until configured.
 - [ ] Configure Appwrite table columns, indexes and least-privilege API key scopes exactly as documented.
 - [ ] Verify APIs against a configured non-production Appwrite preview; no live upload or persistent content write has been tested.
-- [ ] Add protected preview rendering and connect published content to public website pages.
-- [ ] Add content draft editing/list UI and media pagination/search/usage tracking.
+- [x] Added protected server-rendered preview for saved page revisions under /admin/content/preview/[revisionId].\n- [ ] Connect published content to public website pages.
+- [ ] Add a full content draft browser/editor for saved revisions and media pagination/search/usage tracking.
 - [ ] Configure distributed edge/WAF rate limiting and MFA.
 - [ ] Confirm Owner Appwrite user ID and set ADMIN_OWNER_USER_IDS in hosting secrets.
 - [ ] Implement trusted role profiles before delegating non-owner roles.
