@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const MAX_MEDIA_UPLOAD_BYTES = 50_000_000;
+
 const httpsUrl = z.url().refine((value) => {
   try {
     return new URL(value).protocol === "https:";
@@ -58,8 +60,6 @@ export const mediaAssetSchema = z.discriminatedUnion("sourceType", [
 export type MediaAssetInput = z.input<typeof mediaAssetSchema>;
 export type MediaAsset = z.output<typeof mediaAssetSchema>;
 
-// Keep the application limit aligned with Appwrite Storage's 50,000,000-byte bucket limit.
-export const MAX_MEDIA_UPLOAD_BYTES = 50_000_000;
 export const allowedImageMimeTypes = [
   "image/jpeg", "image/png", "image/webp", "image/avif", "image/gif",
 ] as const;
