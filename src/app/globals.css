@@ -349,20 +349,41 @@ label { color: var(--foreground); }
   max-width: calc(100vw - 24px) !important;
   text-align: center;
 }
-.simple-menu-links { display: grid; justify-items: stretch; text-align: center; }
-.simple-menu-link, .simple-menu-action, .simple-menu-dashboard {
+.simple-menu,
+.simple-menu * {
+  text-align: center;
+}
+.simple-menu-links {
+  display: grid;
+  justify-items: stretch;
   justify-content: center;
   text-align: center;
 }
-.simple-menu-links form { width: 100%; margin: 0 !important; }
+.simple-menu-link, .simple-menu-action, .simple-menu-dashboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.simple-menu-links form {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 0 !important;
+}
 .simple-menu-tools {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   align-self: center;
   width: max-content;
   max-width: 100%;
   gap: 12px;
+}
+.simple-menu-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .simple-menu-icon-button {
   flex: 0 0 44px;
