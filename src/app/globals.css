@@ -862,3 +862,6 @@ body input[type="checkbox"],body input[type="radio"] {accent-color:var(--foregro
 @media(max-width:800px){.content-header,.media-header{display:block;}.content-header p,.media-header p{margin-top:10px;}.editor-grid{grid-template-columns:1fr;}}
 @media(max-width:560px){.revision-browser-heading{display:block;}.revision-item{align-items:flex-start;flex-direction:column;}.revision-meta{width:100%;justify-content:space-between;}}
 @media(max-width:420px){.content-admin,.media-admin{padding:22px 12px 42px;}.preview-services>div{grid-template-columns:1fr;}.preview-nav span{font-size:12px;}}
+
+/* Remaining semantic page-only text treatment */
+.gallery-description { line-height: 1.7; }
