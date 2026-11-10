@@ -17,6 +17,8 @@ Updated: 2026-11-10
 - [x] Role permission policy module and tests added; owner-only publishing and user management enforced in the policy module.
 - [x] Site settings validation schema and tests added; proposed en/bn and SAR/BDT defaults remain unconfirmed.
 - [x] Access-control matrix documented; server-side enforcement is still pending.
+- [x] Media delivery requirements documented: optimized responsive images, CDN caching, lazy loading, video delivery, Appwrite Storage CRUD and external media URLs.
+- [x] Media Library logical data model, usage tracking, upload validation, deletion safety and permission requirements documented.
 - [x] Appwrite temporary write test: database/table/row creation, row read and update succeeded; final database inventory is empty.
 
 ## In progress / pending
