@@ -19,6 +19,9 @@ Updated: 2026-11-10
 - [x] Access-control matrix documented; server-side enforcement is still pending.
 - [x] Media delivery requirements documented: optimized responsive images, CDN caching, lazy loading, video delivery, Appwrite Storage CRUD and external media URLs.
 - [x] Media Library logical data model, usage tracking, upload validation, deletion safety and permission requirements documented.
+- [x] Media asset Zod schema added for Appwrite uploads, external HTTPS URLs and approved YouTube/Vimeo embeds.
+- [x] Media validation tests added for secure URLs, provider allowlists and upload-size limits.
+- [x] Admin Media Library preview page added and linked from the admin workspace; operational actions remain disabled pending server authorization and Appwrite storage setup.
 - [x] Appwrite temporary write test: database/table/row creation, row read and update succeeded; final database inventory is empty.
 
 ## In progress / pending
