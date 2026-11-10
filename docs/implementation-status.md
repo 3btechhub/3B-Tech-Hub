@@ -13,6 +13,8 @@ Updated: 2026-11-10
 - [x] Vitest unit-test configuration and URL-validation tests added.
 - [x] Playwright browser smoke-test configuration and homepage test added.
 - [x] Basic crawler policy added to exclude future admin/API routes.
+- [x] Admin workspace preview shell added; privileged actions remain disabled pending authentication and server-side RBAC.
+- [x] Appwrite temporary write test: database/table/row creation, row read and update succeeded; final database inventory is empty.
 
 ## In progress / pending
 - [ ] Run CI on GitHub and fix any dependency/type/lint/build/test issues.
