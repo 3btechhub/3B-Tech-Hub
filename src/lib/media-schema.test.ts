@@ -63,3 +63,14 @@ describe("mediaAssetSchema", () => {
     }).success).toBe(false);
   });
 });
+
+describe("media metadata update schema", () => {
+  it("accepts bounded metadata updates", () => {
+    expect(mediaMetadataUpdateSchema.safeParse({ title: "Updated title", altText: "A repair technician" }).success).toBe(true);
+  });
+
+  it("rejects unknown fields and insecure external URLs", () => {
+    expect(mediaMetadataUpdateSchema.safeParse({ externalUrl: "http://example.com/a.jpg" }).success).toBe(false);
+    expect(mediaMetadataUpdateSchema.safeParse({ title: "Valid", storageFileId: "forged" }).success).toBe(false);
+  });
+});
