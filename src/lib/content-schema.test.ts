@@ -48,7 +48,13 @@ describe("pageRevisionSchema", () => {
     }).success).toBe(true);
   });
 
-  it("rejects protocol-relative and backslash-based CTA links", () => {\n    for (const actionHref of ["//evil.example/path", "/\\\\evil.example/path"]) {\n      expect(pageRevisionSchema.safeParse({ ...validPage, sections: [{ type: "cta", heading: "Click", actionLabel: "Go", actionHref }] }).success).toBe(false);\n    }\n  });\n\n  it("rejects unsafe external CTA links", () => {
+  it("rejects protocol-relative and backslash-based CTA links", () => {
+    for (const actionHref of ["//evil.example/path", "/\\\\evil.example/path"]) {
+      expect(pageRevisionSchema.safeParse({ ...validPage, sections: [{ type: "cta", heading: "Click", actionLabel: "Go", actionHref }] }).success).toBe(false);
+    }
+  });
+
+  it("rejects unsafe external CTA links", () => {
     const result = pageRevisionSchema.safeParse({
       ...validPage,
       sections: [{ type: "cta", heading: "Click", actionLabel: "Go", actionHref: "javascript:alert(1)" }],
@@ -63,7 +69,12 @@ describe("pageRevisionSchema", () => {
     }).success).toBe(false);
   });
 
-  it("rejects unsafe canonical paths", () => {\n    expect(pageRevisionSchema.safeParse({ ...validPage, seo: { title: "Home", canonicalPath: "//evil.example" } }).success).toBe(false);\n    expect(pageRevisionSchema.safeParse({ ...validPage, seo: { title: "Home", canonicalPath: "/\\\\evil.example" } }).success).toBe(false);\n  });\n\n  it("enforces SEO description limits", () => {
+  it("rejects unsafe canonical paths", () => {
+    expect(pageRevisionSchema.safeParse({ ...validPage, seo: { title: "Home", canonicalPath: "//evil.example" } }).success).toBe(false);
+    expect(pageRevisionSchema.safeParse({ ...validPage, seo: { title: "Home", canonicalPath: "/\\\\evil.example" } }).success).toBe(false);
+  });
+
+  it("enforces SEO description limits", () => {
     expect(pageRevisionSchema.safeParse({
       ...validPage,
       seo: { title: "Home", description: "x".repeat(181) },
