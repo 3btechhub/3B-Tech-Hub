@@ -765,7 +765,7 @@ body .callout, body .auth-form {
 /* Migrated from src/app/admin/media/media-library.tsx */
 .media-preview{display:block;width:100%;height:auto;max-height:220px;object-fit:contain;background:#f2f4f7;border-radius:10px;margin:10px 0}.media-preview img{width:100%;height:220px;object-fit:contain}
 
-body button:not(.menu-item):not(.simple-menu-link),
+body button:not(.menu-item):not(.simple-menu-link):not(.secondary):not(.auth-back):not(.media-secondary):not(.secondary-action):not(.menu-close):not(.simple-menu-icon-button):not([data-variant="secondary"]):not([data-variant="danger"]),
 body input[type="button"], body input[type="submit"], body input[type="reset"],
 body .button, body .published-action {
  display:inline-flex;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;
@@ -777,9 +777,15 @@ body .button, body .published-action {
  font-weight:700!important;line-height:1.35!important;text-align:center;
  text-decoration:none;white-space:normal;cursor:pointer;
 }
-body button.secondary,body button.auth-back,body button.media-secondary,body button.secondary-action,
-body button.menu-close,body button.simple-menu-icon-button,body button[data-variant="secondary"],
-body button[data-variant="danger"],body .button.secondary,body .published-action.secondary {
+body button:not(.menu-item):not(.simple-menu-link).secondary,
+body button:not(.menu-item):not(.simple-menu-link).auth-back,
+body button:not(.menu-item):not(.simple-menu-link).media-secondary,
+body button:not(.menu-item):not(.simple-menu-link).secondary-action,
+body button:not(.menu-item):not(.simple-menu-link).menu-close,
+body button:not(.menu-item):not(.simple-menu-link).simple-menu-icon-button,
+body button:not(.menu-item):not(.simple-menu-link)[data-variant="secondary"],
+body button:not(.menu-item):not(.simple-menu-link)[data-variant="danger"],
+body .button.secondary,body .published-action.secondary {
  border-color:var(--border)!important;background:var(--surface)!important;color:var(--foreground)!important;
 }
 body button.simple-menu-icon-button,body button.menu-close {
