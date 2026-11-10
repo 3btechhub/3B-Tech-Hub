@@ -6,6 +6,18 @@ import Link from "next/link";
 type Role = "visitor" | "member" | "admin";
 type Props = { siteName: string; navigationItems: { label: string; href: string }[]; contactEmail?: string; contactPhone?: string; whatsappUrl?: string };
 
+function ThemeIcon({ dark }: { dark: boolean }) {
+  return dark ? (
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42" /></svg>
+  ) : (
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z" /></svg>
+  );
+}
+
+function LanguageIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h12M10 3v2m4 0c-.7 4.2-3.2 7.3-7.5 9M6 8c1.1 2.7 3.5 4.9 6.5 6M14 20l4-10 4 10m-6.5-3h5" /></svg>;
+}
+
 export default function SiteHeader({ siteName }: Props) {
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<Role>("visitor");
@@ -62,11 +74,12 @@ export default function SiteHeader({ siteName }: Props) {
           </div>
           <div className="simple-menu-divider" />
           <div className="simple-menu-tools">
-            <button className="simple-menu-toggle" type="button" onClick={() => setTheme((value) => value === "light" ? "dark" : "light")} aria-pressed={theme === "dark"}>
-              <span>Dark/Light</span><span className={"simple-switch " + (theme === "dark" ? "is-on" : "")} aria-hidden="true"><span /></span>
+            <button className="simple-menu-icon-button" type="button" onClick={() => setTheme((value) => value === "light" ? "dark" : "light")} aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"} title={theme === "light" ? "Dark mode" : "Light mode"}>
+              <ThemeIcon dark={theme === "dark"} />
             </button>
-            <button className="simple-menu-toggle" type="button" onClick={() => setLanguage((value) => value === "en" ? "bn" : "en")} aria-pressed={language === "bn"}>
-              <span>Language</span><span className="simple-language-value">{language.toUpperCase()}</span>
+            <button className="simple-menu-icon-button" type="button" onClick={() => setLanguage((value) => value === "en" ? "bn" : "en")} aria-label={language === "en" ? "Switch language to Bengali" : "Switch language to English"} title={language === "en" ? "বাংলা" : "English"}>
+              <LanguageIcon />
+              <span className="simple-language-value">{language.toUpperCase()}</span>
             </button>
           </div>
           {role === "admin" && <>
