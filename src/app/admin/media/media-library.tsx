@@ -127,7 +127,7 @@ export function MediaLibrary() {
             <label>Asset title<input required maxLength={120} value={upload.title} onChange={(e) => setUpload((s) => ({ ...s, title: e.target.value }))} /></label>
             <label>Alternative text<input maxLength={250} value={upload.altText} onChange={(e) => setUpload((s) => ({ ...s, altText: e.target.value }))} /></label>
             <label>Delivery visibility<select value={upload.visibility} onChange={(e) => setUpload((s) => ({ ...s, visibility: e.target.value as "public" | "private" }))}><option value="private">Private — Owner only</option><option value="public">Public — website delivery</option></select></label>
-            <label>Image, video or PDF (max 50 MB)<input required type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm,video/quicktime,application/pdf" onChange={(e) => setUpload((s) => ({ ...s, file: e.target.files?.[0] ?? null }))} /></label>
+            <label>Image (max 10 MB), video or PDF (max 50 MB)<input required type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm,video/quicktime,application/pdf" onChange={(e) => setUpload((s) => ({ ...s, file: e.target.files?.[0] ?? null }))} /></label>
             <button className="media-action" type="submit">Upload media</button>
           </form>
         </section>
@@ -152,6 +152,7 @@ export function MediaLibrary() {
                 {(() => {
                   const previewUrl = item.visibility === "public" ? `/api/media/${encodeURIComponent(item.$id)}` : item.sourceType === "external" ? item.externalUrl : `/api/admin/media/${encodeURIComponent(item.$id)}/preview`;
                   if (item.mediaType === "image" && previewUrl && !item.deletedAt) return <div className="media-preview"><Image src={previewUrl} alt={item.altText || item.title || "Media preview"} width={480} height={270} unoptimized loading="lazy" /></div>;
+                  if (item.sourceType === "video_embed" && item.externalUrl && !item.deletedAt) return <a href={item.externalUrl} target="_blank" rel="noreferrer">Open video provider ↗</a>;
                   if (item.mediaType === "video" && previewUrl && !item.deletedAt) return <video className="media-preview" src={previewUrl} controls preload="none" />;
                   if (item.mediaType === "document" && previewUrl && !item.deletedAt) return <a href={previewUrl} target="_blank" rel="noreferrer">Open document preview ↗</a>;
                   return null;
