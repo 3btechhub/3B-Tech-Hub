@@ -32,6 +32,13 @@ export const auditEventSchema = z.object({
     z.boolean(),
   ])).optional(),
   occurredAt: z.string().datetime(),
+}).strict().superRefine((event, context) => {
+  const blocked = /password|secret|token|api.?key|authorization|cookie|payment|card|cvv/i;
+  for (const key of Object.keys(event.metadata ?? {})) {
+    if (blocked.test(key)) {
+      context.addIssue({ code: "custom", path: ["metadata", key], message: "Sensitive values are not allowed in audit metadata." });
+    }
+  }
 });
 
 export type AuditEvent = z.infer<typeof auditEventSchema>;
