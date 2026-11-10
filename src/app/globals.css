@@ -182,3 +182,64 @@ button, input, textarea, select { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .menu-item { transition: none; }
 }
+
+
+/* Plain, minimal navigation menu */
+.floating-menu.simple-menu {
+  width: min(300px, calc(100vw - 24px));
+  max-width: 300px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 12px 32px rgba(15, 35, 60, .14);
+}
+.simple-menu-links { display: grid; gap: 0; }
+.simple-menu-link {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.35;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.simple-menu-link:hover { color: var(--brand); background: transparent; text-decoration: underline; }
+.simple-menu-links form { margin: 0; }
+.simple-menu-action { appearance: none; }
+.simple-menu-divider { height: 1px; margin: 8px 0; background: var(--border); }
+.simple-menu-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.simple-menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 7px 0;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.simple-switch { display: inline-flex; align-items: center; width: 30px; height: 17px; padding: 2px; border-radius: 20px; background: #a8b0ba; transition: background .15s ease; }
+.simple-switch > span { width: 13px; height: 13px; border-radius: 50%; background: white; transition: transform .15s ease; }
+.simple-switch.is-on { background: var(--brand); }
+.simple-switch.is-on > span { transform: translateX(13px); }
+.simple-language-value { font-size: 11px; font-weight: 700; }
+.simple-menu-dashboard { font-weight: 600; }
+:root[data-theme="dark"] .floating-menu.simple-menu { background: #182432; border-color: #344253; }
+:root[data-theme="dark"] .simple-menu-link,:root[data-theme="dark"] .simple-menu-toggle { color: #edf2f7; }
+@media (max-width: 480px) {
+  .floating-menu.simple-menu { width: min(300px, calc(100vw - 16px)); padding: 9px 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .simple-switch,.simple-switch > span { transition: none; } }
