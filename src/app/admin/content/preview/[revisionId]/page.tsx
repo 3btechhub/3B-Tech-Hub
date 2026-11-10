@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { pageRevisionSchema } from "@/lib/content-schema";
+import { pageRevisionSchema, type PageRevision } from "@/lib/content-schema";
 import { getAppwriteRow, isContentStoreConfigured } from "@/lib/appwrite-server";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +11,7 @@ type Props = { params: Promise<{ revisionId: string }> };
 export default async function ContentPreviewPage({ params }: Props) {
   const { revisionId } = await params;
   if (!isContentStoreConfigured()) notFound();
-  let revision;
+  let revision: PageRevision;
   try {
     const row = await getAppwriteRow(process.env.APPWRITE_CONTENT_TABLE_ID!, revisionId);
     if (typeof row.payload !== "string") notFound();
