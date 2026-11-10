@@ -17,7 +17,7 @@ export async function POST(request: NextRequest, context: Context) {
   if (auth.response) return auth.response;
   if (!isContentStoreConfigured() || !isAuditStoreConfigured()) return NextResponse.json({ error: "Content and audit storage must both be configured." }, { status: 503 });
   const body = await request.json().catch(() => null) as { action?: keyof typeof actions } | null;
-  if (!body?.action || !(body.action in actions)) return NextResponse.json({ error: "Unsupported workflow action." }, { status: 400 });
+  if (!body?.action || !Object.hasOwn(actions, body.action)) return NextResponse.json({ error: "Unsupported workflow action." }, { status: 400 });
   const { revisionId } = await context.params;
   const tableId = process.env.APPWRITE_CONTENT_TABLE_ID!;
   try {
