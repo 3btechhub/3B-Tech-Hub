@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export const metadata = {
   title: "Admin Workspace",
   robots: { index: false, follow: false },
@@ -17,7 +19,7 @@ export default function AdminWorkspacePage() {
   return (
     <main style={{ minHeight: "100vh", background: "#f4f6f9", padding: "40px 20px" }}>
       <div style={{ width: "min(1040px, 100%)", margin: "0 auto" }}>
-        <a href="/" style={{ color: "#0b5cab", fontWeight: 700 }}>← View public website</a>
+        <Link href="/" style={{ color: "#0b5cab", fontWeight: 700 }}>← View public website</Link>
         <header style={{ margin: "28px 0" }}>
           <p style={{ color: "#0b5cab", fontWeight: 800, letterSpacing: ".12em", fontSize: 12 }}>3B TECH HUB · CONTROL CENTER</p>
           <h1 style={{ fontSize: 36, letterSpacing: "-.04em", margin: "8px 0" }}>Admin workspace</h1>
