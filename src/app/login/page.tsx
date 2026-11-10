@@ -48,7 +48,7 @@ export default function LoginPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Unable to verify code.");
       const next = new URLSearchParams(window.location.search).get("next");
-      window.location.assign(next?.startsWith("/admin") ? next : "/admin");
+      window.location.assign(next?.startsWith("/") && !next.startsWith("//") ? next : "/admin");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Unable to verify code.");
     } finally {
