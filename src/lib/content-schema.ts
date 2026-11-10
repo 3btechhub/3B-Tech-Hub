@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { roles, type Role } from "./permissions";
 
+const hasUnsafePathChars = (value: string) => value.includes(String.fromCharCode(92)) || /[\x00-\x1f]/.test(value);
+
 const safeHref = z.string().trim().min(1).max(500).refine((value) => {
-  if (value.startsWith("/")) return !value.startsWith("//") && !value.includes("\\\\") && !/[\\u0000-\\u001f]/.test(value);
+  if (value.startsWith("/")) return !value.startsWith("//") && !hasUnsafePathChars(value);
   try {
     const url = new URL(value);
     return url.protocol === "https:";
@@ -64,7 +66,7 @@ export const pageSectionSchema = z.discriminatedUnion("type", [
 export const pageSeoSchema = z.object({
   title: z.string().trim().max(70).default(""),
   description: z.string().trim().max(180).default(""),
-  canonicalPath: z.string().trim().max(500).refine((value) => value.startsWith("/") && !value.startsWith("//") && !value.includes("\\\\") && !/[\\u0000-\\u001f]/.test(value), "Canonical path must be a safe internal path.").optional(),
+  canonicalPath: z.string().trim().max(500).refine((value) => value.startsWith("/") && !value.startsWith("//") && !hasUnsafePathChars(value), "Canonical path must be a safe internal path.").optional(),
   noIndex: z.boolean().default(false),
 }).strict();
 
