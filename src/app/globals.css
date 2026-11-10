@@ -865,3 +865,130 @@ body input[type="checkbox"],body input[type="radio"] {accent-color:var(--foregro
 
 /* Remaining semantic page-only text treatment */
 .gallery-description { line-height: 1.7; }
+
+
+/* =========================================================
+   GLOBAL SIZE VARIANTS + CENTERED FLOATING MENU
+   Reuse these classes across every route; do not create
+   page-specific size variants for common UI elements.
+   ========================================================= */
+
+/* Floating menu: every section and every child is center-aligned. */
+.simple-menu {
+  left: auto !important;
+  right: max(12px, calc((100vw - var(--content-max)) / 2)) !important;
+  transform: none !important;
+  display: flex !important;
+  flex-direction: column;
+  align-items: center !important;
+  justify-content: flex-start;
+  width: min(300px, calc(100vw - 24px)) !important;
+  min-width: min(190px, calc(100vw - 24px)) !important;
+  max-width: calc(100vw - 24px) !important;
+  text-align: center !important;
+}
+.simple-menu,
+.simple-menu * {
+  text-align: center !important;
+}
+.simple-menu-links {
+  display: grid !important;
+  justify-items: stretch !important;
+  align-content: center;
+  justify-content: center;
+  width: 100% !important;
+  gap: 2px !important;
+}
+.simple-menu-links > a,
+.simple-menu-links > form,
+.simple-menu-links > form > button,
+.simple-menu-dashboard {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+.simple-menu-link {
+  justify-content: center !important;
+  text-align: center !important;
+}
+.simple-menu-tools {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
+  width: max-content !important;
+  max-width: 100%;
+  gap: var(--space-control-gap, 8px) !important;
+}
+.simple-menu-icon-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  text-align: center !important;
+}
+.simple-menu-divider { align-self: stretch; }
+
+/* Semantic global sizing scale.
+   Default = medium. Add these classes to reuse a size anywhere. */
+:root {
+  --control-height-sm: 36px;
+  --control-height-md: 44px;
+  --control-height-lg: 48px;
+  --control-padding-x-sm: 11px;
+  --control-padding-x-md: 16px;
+  --control-padding-x-lg: 20px;
+  --control-font-sm: 13px;
+  --control-font-md: 14px;
+  --control-font-lg: 16px;
+  --field-font-sm: 14px;
+  --field-font-md: 15px;
+  --field-font-lg: 16px;
+  --surface-padding-sm: 10px;
+  --surface-padding-md: 16px;
+  --surface-padding-lg: 24px;
+}
+body button.control--sm, body .button.control--sm,
+body input[type="button"].control--sm, body input[type="submit"].control--sm {
+  min-height: var(--control-height-sm) !important;
+  padding: 7px var(--control-padding-x-sm) !important;
+  font-size: var(--control-font-sm) !important;
+}
+body button.control--md, body .button.control--md,
+body input[type="button"].control--md, body input[type="submit"].control--md {
+  min-height: var(--control-height-md) !important;
+  padding: 10px var(--control-padding-x-md) !important;
+  font-size: var(--control-font-md) !important;
+}
+body button.control--lg, body .button.control--lg,
+body input[type="button"].control--lg, body input[type="submit"].control--lg {
+  min-height: var(--control-height-lg) !important;
+  padding: 11px var(--control-padding-x-lg) !important;
+  font-size: var(--control-font-lg) !important;
+}
+body input.control--sm, body select.control--sm, body textarea.control--sm {
+  min-height: var(--control-height-sm) !important;
+  padding: 7px 10px !important;
+  font-size: var(--field-font-sm) !important;
+}
+body input.control--md, body select.control--md, body textarea.control--md {
+  min-height: var(--control-height-md) !important;
+  padding: 10px 12px !important;
+  font-size: var(--field-font-md) !important;
+}
+body input.control--lg, body select.control--lg, body textarea.control--lg {
+  min-height: var(--control-height-lg) !important;
+  padding: 11px 14px !important;
+  font-size: var(--field-font-lg) !important;
+}
+.text--sm { font-size: var(--font-small, 13px) !important; }
+.text--md { font-size: var(--font-body, 15px) !important; }
+.text--lg { font-size: clamp(18px, 2vw, 22px) !important; }
+.surface--sm { padding: var(--surface-padding-sm) !important; }
+.surface--md { padding: var(--surface-padding-md) !important; }
+.surface--lg { padding: var(--surface-padding-lg) !important; }
