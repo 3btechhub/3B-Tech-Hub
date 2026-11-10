@@ -23,6 +23,10 @@ export function MediaLibrary() {
   const [items, setItems] = useState<MediaItem[]>([]);
   const [includeTrash, setIncludeTrash] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [offset, setOffset] = useState(0);
+  const [total, setTotal] = useState(0);
+  const pageSize = 24;
   const [notice, setNotice] = useState("Media actions require the Appwrite server configuration.");
   const [external, setExternal] = useState({ title: "", altText: "", externalUrl: "", mediaType: "image" as "image" | "video" | "document" });
   const [upload, setUpload] = useState({ title: "", altText: "", file: null as File | null });
@@ -30,17 +34,21 @@ export function MediaLibrary() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/admin/media${includeTrash ? "?includeTrash=1" : ""}`, { cache: "no-store" });
+      const query = new URLSearchParams({ limit: String(pageSize), offset: String(offset) });
+      if (includeTrash) query.set("includeTrash", "1");
+      if (search.trim()) query.set("search", search.trim());
+      const response = await fetch(`/api/admin/media?${query.toString()}`, { cache: "no-store" });
       const body = await response.json();
       if (!response.ok) throw new Error(body.error ?? "Could not load media.");
       setItems(body.items ?? []);
-      setNotice(`Loaded ${body.items?.length ?? 0} media records.`);
+      setTotal(body.total ?? 0);
+      setNotice(`Showing ${body.items?.length ?? 0} of ${body.total ?? 0} matching media records.`);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "Media library unavailable.");
     } finally {
       setLoading(false);
     }
-  }, [includeTrash]);
+  }, [includeTrash, offset, search]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => { void load(); }, 0);
@@ -133,7 +141,8 @@ export function MediaLibrary() {
         </section>
       </div>
       <section className="media-list">
-        <div className="media-list-head"><h2>Library assets</h2><button className="media-secondary" type="button" onClick={() => setIncludeTrash((value) => !value)}>{includeTrash ? "Hide trash" : "Show trash"}</button></div>
+        <div className="media-list-head"><h2>Library assets</h2><button className="media-secondary" type="button" onClick={() => { setOffset(0); setIncludeTrash((value) => !value); }}>{includeTrash ? "Hide trash" : "Show trash"}</button></div>
+        <label>Search media title<input type="search" maxLength={80} placeholder="Search by title…" value={search} onChange={(e) => { setOffset(0); setSearch(e.target.value); }} /></label>
         {loading ? <p>Loading media…</p> : items.length === 0 ? <p>No media records found. Configure the Appwrite tables and bucket to enable the library.</p> : (
           <div className="media-grid">
             {items.map((item) => (
@@ -156,6 +165,11 @@ export function MediaLibrary() {
             ))}
           </div>
         )}
+        <div className="media-item-actions" aria-label="Media pagination">
+          <button className="media-secondary" type="button" disabled={loading || offset === 0} onClick={() => setOffset((value) => Math.max(0, value - pageSize))}>Previous</button>
+          <span>Page {Math.floor(offset / pageSize) + 1} of {Math.max(1, Math.ceil(total / pageSize))}</span>
+          <button className="media-secondary" type="button" disabled={loading || offset + pageSize >= total} onClick={() => setOffset((value) => value + pageSize)}>Next</button>
+        </div>
       </section>
       <style>{`.media-preview{display:block;width:100%;height:auto;max-height:220px;object-fit:contain;background:#f2f4f7;border-radius:10px;margin:10px 0}.media-preview img{width:100%;height:220px;object-fit:contain}`}</style>
       <aside className="media-warning"><strong>Safe deletion:</strong> Items are moved to trash, not permanently erased. Permanent deletion is withheld until usage tracking can confirm that published pages do not depend on the asset.</aside>
