@@ -57,3 +57,16 @@ export async function deleteAppwriteFile(bucketId: string, fileId: string) {
   });
   if (!response.ok) throw new Error("APPWRITE_FILE_DELETE_FAILED");
 }
+
+export async function deleteAppwriteRow(tableId: string, rowId: string) {
+  const config = configuration();
+  const databaseId = process.env.APPWRITE_DATABASE_ID;
+  if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
+  const response = await fetch(`${config.endpoint}/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`, {
+    method: "DELETE",
+    headers: { "X-Appwrite-Project": config.projectId, "X-Appwrite-Key": config.apiKey },
+    cache: "no-store",
+    signal: AbortSignal.timeout(15000),
+  });
+  if (!response.ok) throw new Error("APPWRITE_ROW_DELETE_FAILED");
+}
