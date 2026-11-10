@@ -175,7 +175,7 @@ export function MediaLibrary() {
           <button className="media-secondary" type="button" disabled={loading || offset + pageSize >= total} onClick={() => setOffset((value) => value + pageSize)}>Next</button>
         </div>
       </section>
-      <style>{`.media-preview{display:block;width:100%;height:auto;max-height:220px;object-fit:contain;background:#f2f4f7;border-radius:10px;margin:10px 0}.media-preview img{width:100%;height:220px;object-fit:contain}`}</style>
+      
       <aside className="media-warning"><strong>Safe deletion:</strong> Items are moved to trash, not permanently erased. Permanent deletion is withheld until usage tracking can confirm that published pages do not depend on the asset.</aside>
     </div>
   );
