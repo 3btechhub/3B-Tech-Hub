@@ -635,3 +635,10 @@ label { color: var(--foreground); }
   .hero-actions { flex-wrap: wrap; }
   .hero-actions > * { min-width: min(100%, 140px); }
 }
+
+/* Homepage shell elements now use the shared monochrome tokens. */
+.maintenance-page { min-height:100vh; display:grid; place-items:center; padding:var(--space-page); background:var(--background); color:var(--foreground); }
+.maintenance-card { width:min(620px,100%); padding:var(--space-card); text-align:center; border:1px solid var(--border); border-radius:var(--card-radius); background:var(--surface); color:var(--foreground); }
+.site-announcement { padding:9px var(--space-page); text-align:center; background:var(--surface-muted); color:var(--foreground); border-bottom:1px solid var(--border); font-size:14px; font-weight:700; }
+.site-announcement a { text-decoration:underline; text-underline-offset:3px; }
+.contact-details { display:grid; gap:10px; color:var(--foreground); }
