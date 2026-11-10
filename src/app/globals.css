@@ -243,3 +243,83 @@ button, input, textarea, select { font: inherit; }
   .floating-menu.simple-menu { width: min(300px, calc(100vw - 16px)); padding: 9px 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .simple-switch,.simple-switch > span { transition: none; } }
+
+
+/* Site-wide monochrome design system: only black, white and neutral grey */
+:root {
+  color-scheme: light;
+  --background: #fff !important;
+  --foreground: #000 !important;
+  --muted: #666 !important;
+  --brand: #000 !important;
+  --brand-dark: #000 !important;
+  --surface: #fff !important;
+  --border: #ddd !important;
+  --brand-accent: #000 !important;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #000 !important;
+  --foreground: #fff !important;
+  --muted: #aaa !important;
+  --brand: #fff !important;
+  --brand-dark: #fff !important;
+  --surface: #000 !important;
+  --border: #444 !important;
+  --brand-accent: #fff !important;
+}
+html, body { background: var(--background) !important; color: var(--foreground) !important; }
+::selection { background: #000; color: #fff; }
+:root[data-theme="dark"] ::selection { background: #fff; color: #000; }
+.site-header, .floating-menu, .simple-menu, .menu-group, .service-card, .hero-panel,
+.callout, .site-footer, .support-panel, .auth-form, .admin-card {
+  background: var(--surface) !important; color: var(--foreground) !important;
+  border-color: var(--border) !important; box-shadow: none !important;
+}
+.brand-mark, .button, .menu-trigger, .auth-submit {
+  background: var(--foreground) !important; color: var(--background) !important;
+  border: 1px solid var(--foreground) !important; box-shadow: none !important;
+}
+.button.secondary, .auth-back {
+  background: var(--surface) !important; color: var(--foreground) !important;
+  border: 1px solid var(--foreground) !important;
+}
+.hero, .eyebrow, .quick-icon, .support-panel, .callout, .site-footer {
+  background: var(--background) !important; color: var(--foreground) !important;
+}
+.hero { background-image: none !important; }
+.eyebrow, .quick-icon { border: 1px solid var(--border); border-radius: 0; }
+.hero p, .section-heading p, .service-card p, .callout p, .muted,
+.floating-menu-heading p, .simple-menu-toggle, .site-footer { color: var(--muted) !important; }
+a:hover, button:hover { opacity: .72; }
+input, textarea, select {
+  background: var(--surface) !important; color: var(--foreground) !important;
+  border: 1px solid var(--border) !important; border-radius: 2px !important;
+  box-shadow: none !important;
+}
+button, .button, .service-card, .hero-panel, .callout, .menu-group,
+.floating-menu, .simple-menu, .auth-form { border-radius: 2px !important; }
+.menu-trigger { border-radius: 2px !important; }
+.simple-menu-link:hover, .menu-item:hover, .floating-menu-link:hover {
+  background: transparent !important; color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+.simple-menu-toggle { color: var(--foreground) !important; }
+.simple-switch { background: #777 !important; }
+.simple-switch.is-on { background: var(--foreground) !important; }
+.simple-language-value { color: var(--foreground) !important; }
+.menu-backdrop { background: rgba(0,0,0,.35) !important; backdrop-filter: none !important; }
+:root[data-theme="dark"] .simple-menu-link,
+:root[data-theme="dark"] .simple-menu-toggle,
+:root[data-theme="dark"] .menu-item { color: #fff !important; }
+:root[data-theme="dark"] .menu-backdrop { background: rgba(255,255,255,.16) !important; }
+.auth-page { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: var(--background); color: var(--foreground); }
+.auth-form { width: min(360px,100%); display: grid; gap: 12px; padding: 24px; border: 1px solid var(--border); background: var(--surface); }
+.auth-form label { font-size: 13px; }
+.auth-form input { width: 100%; min-height: 44px; padding: 10px 12px; }
+.auth-submit, .auth-back { width: 100%; min-height: 42px; padding: 10px 14px; cursor: pointer; font-size: 14px; }
+.auth-home { justify-self: center; margin-top: 4px; font-size: 13px; text-decoration: underline; }
+.auth-message, .auth-error { margin: 0; color: var(--foreground); font-size: 13px; line-height: 1.5; }
+.auth-error { text-decoration: underline; }
+.admin-workspace, .admin-content { background: var(--background) !important; color: var(--foreground) !important; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
