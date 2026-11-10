@@ -458,3 +458,16 @@ label { color: var(--foreground); }
 .published-page h1, .published-page h2, .published-page h3,
 .published-page p, .published-page summary { color: var(--foreground) !important; }
 .published-page a { text-decoration: underline; text-underline-offset: 3px; }
+
+
+/* Header proportion and brand alignment */
+.site-header .header-inner { min-height: 68px; }
+.site-header .brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 15px; line-height: 1.2; }
+.site-header .brand-mark { display: grid; place-items: center; flex: 0 0 40px; width: 40px; height: 40px; aspect-ratio: 1; border-radius: 10px !important; font-size: 16px; line-height: 1; }
+.site-header .brand > span:last-child { min-width: 0; font-size: 15px; line-height: 1.2; white-space: nowrap; }
+.site-header .menu-trigger { min-height: 44px; height: 44px; padding: 0 14px; border-radius: 10px !important; font-size: 14px; line-height: 1; }
+@media (max-width: 480px) {
+  .site-header .header-inner { min-height: 64px; }
+  .site-header .brand { gap: 9px; }
+  .site-header .brand-mark { flex-basis: 40px; width: 40px; height: 40px; }
+}
