@@ -32,7 +32,11 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       return NextResponse.json({ error: "Unable to send a sign-in code. Confirm the Owner email is registered and try again." }, { status: 502 });
     }
-    return NextResponse.json({ ok: true, message: "A one-time sign-in code has been sent to the Owner email." });
+    const token = await response.json() as { userId?: string };
+    if (token.userId !== ownerId) {
+      return NextResponse.json({ error: "Owner account verification failed." }, { status: 502 });
+    }
+    return NextResponse.json({ ok: true, userId: token.userId, message: "A one-time sign-in code has been sent to the Owner email." });
   } catch {
     return NextResponse.json({ error: "Authentication service unavailable." }, { status: 502 });
   }
