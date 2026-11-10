@@ -9,5 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/api/"],
       },
     ],
+    sitemap: "https://3btechhub.vercel.app/sitemap.xml",
   };
 }
