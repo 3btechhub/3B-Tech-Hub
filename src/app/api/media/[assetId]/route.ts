@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAppwriteRow, fetchAppwriteFilePreview, fetchAppwriteFileView, isMediaStoreConfigured } from "@/lib/appwrite-server";
+import { getAppwriteRow, isMediaStoreConfigured } from "@/lib/appwrite-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,7 +33,9 @@ export async function GET(request: NextRequest, context: Context) {
       if (!target || target.protocol !== "https:") {
         return NextResponse.json({ error: "External media URL is invalid." }, { status: 415 });
       }
-      return NextResponse.redirect(target.toString(), 302);
+      return NextResponse.redirect(target.toString(), 302, {
+        headers: { "Cache-Control": "private, no-store, max-age=0" },
+      });
     }
 
     if (row.sourceType !== "appwrite"
@@ -47,31 +49,26 @@ export async function GET(request: NextRequest, context: Context) {
       return NextResponse.json({ error: "This media type cannot be delivered." }, { status: 415 });
     }
 
+    const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.replace(/\/$/, "");
+    if (!endpoint) return NextResponse.json({ error: "Media endpoint is not configured." }, { status: 503 });
     const isImage = mimeType.startsWith("image/");
-    const upstream = isImage
-      ? await fetchAppwriteFilePreview(row.storageBucketId, row.storageFileId, {
-          width: dimension(request.nextUrl.searchParams.get("w")) ?? 1600,
-          height: dimension(request.nextUrl.searchParams.get("h")) ?? 1200,
-          quality: 78,
-          output: "webp",
-        })
-      : await fetchAppwriteFileView(row.storageBucketId, row.storageFileId);
+    const resource = isImage ? "preview" : "view";
+    const target = new URL(
+      `${endpoint}/storage/buckets/${encodeURIComponent(row.storageBucketId)}/files/${encodeURIComponent(row.storageFileId)}/${resource}`,
+    );
 
-    const contentType = isImage
-      ? upstream.headers.get("content-type") ?? "image/webp"
-      : mimeType;
-    const headers = new Headers({
-      "Content-Type": contentType,
-      "X-Content-Type-Options": "nosniff",
-      "Referrer-Policy": "strict-origin-when-cross-origin",
-      "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
-      "CDN-Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+    if (isImage) {
+      target.searchParams.set("width", String(dimension(request.nextUrl.searchParams.get("w")) ?? 1600));
+      target.searchParams.set("height", String(dimension(request.nextUrl.searchParams.get("h")) ?? 1200));
+      target.searchParams.set("quality", "78");
+      target.searchParams.set("output", "webp");
+    }
+
+    // The Appwrite Storage CDN serves and caches the transformed public file directly.
+    // The redirect itself is not cached so visibility changes are rechecked on each request.
+    return NextResponse.redirect(target.toString(), 302, {
+      headers: { "Cache-Control": "private, no-store, max-age=0" },
     });
-    const length = upstream.headers.get("content-length");
-    if (length && /^\d+$/.test(length)) headers.set("Content-Length", length);
-    const etag = upstream.headers.get("etag");
-    if (etag) headers.set("ETag", etag);
-    return new Response(upstream.body, { status: 200, headers });
   } catch {
     return NextResponse.json({ error: "Media delivery is temporarily unavailable." }, { status: 502 });
   }
