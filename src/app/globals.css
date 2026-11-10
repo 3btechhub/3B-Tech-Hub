@@ -510,3 +510,21 @@ label { color: var(--foreground); }
     max-width: calc(100vw - 24px) !important;
   }
 }
+
+
+/* Keep menu tools compact; their spacing must not stretch the menu */
+.simple-menu-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between !important;
+  align-self: center;
+  width: max-content !important;
+  max-width: 100%;
+  gap: 12px !important;
+}
+.simple-menu-icon-button {
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  margin: 0;
+}
