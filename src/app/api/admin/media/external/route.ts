@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
-import { externalMediaSchema } from "@/lib/media-schema";
+import { externalMediaSchema, videoEmbedSchema } from "@/lib/media-schema";
 import { requireOwnerApi } from "@/lib/admin-api-auth";
 import { createAppwriteRow, deleteAppwriteRow, isMediaStoreConfigured } from "@/lib/appwrite-server";
 import { appendAuditEvent, isAuditStoreConfigured } from "@/lib/audit-store";
@@ -10,13 +10,13 @@ export async function POST(request: NextRequest) {
   const auth = await requireOwnerApi(request);
   if (auth.response) return auth.response;
   if (!isMediaStoreConfigured() || !isAuditStoreConfigured()) return NextResponse.json({ error: "Media and audit storage must both be configured." }, { status: 503 });
-  const parsed = externalMediaSchema.safeParse(await request.json().catch(() => null));
+  const input = await request.json().catch(() => null);\n  const parsed = externalMediaSchema.safeParse(input).success\n    ? externalMediaSchema.safeParse(input)\n    : videoEmbedSchema.safeParse(input);
   if (!parsed.success) return NextResponse.json({ error: "Invalid external media details.", issues: parsed.error.issues }, { status: 400 });
   const assetId = randomUUID();
   const tableId = process.env.APPWRITE_MEDIA_TABLE_ID!;
   let rowCreated = false;
   try {
-    await createAppwriteRow(tableId, assetId, { ...parsed.data, createdBy: auth.identity!.id, createdAt: new Date().toISOString(), deletedAt: null, sourceType: "external" });
+    await createAppwriteRow(tableId, assetId, { ...parsed.data, createdBy: auth.identity!.id, createdAt: new Date().toISOString(), deletedAt: null });
     rowCreated = true;
     await appendAuditEvent({
       actorId: auth.identity!.id, actorRole: "owner", action: "media.register", targetType: "media",
