@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { pageRevisionSchema, type PageRevision } from "@/lib/content-schema";
@@ -47,7 +48,7 @@ export default async function PublishedPage({ params }: Props) {
     <main style={{ minHeight: "100vh", background: "#fff", color: "#172033", padding: "32px 18px" }}>
       <article style={{ maxWidth: 1080, margin: "0 auto" }}>
         <header style={{ padding: "20px 0 40px", borderBottom: "1px solid #eaecf0" }}>
-          <a href={`/${locale}/home`} style={{ fontWeight: 800, color: "#155eef", textDecoration: "none" }}>3B TECH HUB</a>
+          <Link href={`/${locale}/home`} style={{ fontWeight: 800, color: "#155eef", textDecoration: "none" }}>3B TECH HUB</Link>
           <h1 style={{ fontSize: "clamp(34px,6vw,64px)", lineHeight: 1.08, marginTop: 32 }}>{page.title}</h1>
         </header>
         {page.sections.map((section, index) => {
