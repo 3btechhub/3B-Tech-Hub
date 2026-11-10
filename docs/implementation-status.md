@@ -13,6 +13,8 @@ Updated: 2026-11-10
 - [x] 50 MB media upload limit, MIME allowlist, basic file-signature validation and private-by-default uploaded objects.
 - [x] Media API pagination and title search; dashboard search and page navigation.
 - [x] Corrected Appwrite row lookup URL construction.
+- [x] Corrected Appwrite row deletion to use the configured endpoint.
+- [x] Applied server-side `deletedAt IS NULL` filtering before media pagination so page totals and results stay consistent.
 - [x] Server-only Appwrite adapter; APIs fail closed (503) when required production configuration is absent.
 - [x] Architecture, data model, security, content, media and Appwrite configuration documentation, including required media title full-text index.
 
