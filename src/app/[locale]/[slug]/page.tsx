@@ -45,7 +45,7 @@ export default async function PublishedPage({ params }: Props) {
   if (!page) notFound();
 
   return (
-    <main style={{ minHeight: "100vh", background: "#fff", color: "#172033", padding: "32px 18px" }}>
+    <main className="published-page" style={{ minHeight: "100vh", background: "#fff", color: "#172033", padding: "32px 18px" }}>
       <article style={{ maxWidth: 1080, margin: "0 auto" }}>
         <header style={{ padding: "20px 0 40px", borderBottom: "1px solid #eaecf0" }}>
           <Link href={`/${locale}/home`} style={{ fontWeight: 800, color: "#155eef", textDecoration: "none" }}>3B TECH HUB</Link>
