@@ -1,45 +1,25 @@
 import Link from "next/link";
+import { MediaLibrary } from "./media-library";
 
 export const metadata = {
   title: "Media Library",
   robots: { index: false, follow: false },
 };
 
-const capabilities = [
-  ["Upload media", "Upload images, video and documents to managed Appwrite Storage."],
-  ["External media URL", "Register secure HTTPS media hosted on another server or CDN."],
-  ["Organize library", "Search, filter, tag and group assets by content type."],
-  ["Edit metadata", "Manage title, alt text, caption, tags and public/private visibility."],
-  ["Usage tracking", "See where an asset is used before replacing or deleting it."],
-  ["Safe deletion", "Move unused assets to trash before owner-authorized permanent deletion."],
-];
-
 export default function AdminMediaPage() {
   return (
-    <main style={{ minHeight: "100vh", background: "#f4f6f9", padding: "36px 20px" }}>
-      <div style={{ width: "min(1040px, 100%)", margin: "0 auto" }}>
-        <Link href="/admin" style={{ color: "#0b5cab", fontWeight: 700 }}>← Admin workspace</Link>
-        <header style={{ margin: "26px 0" }}>
-          <p style={{ color: "#0b5cab", fontWeight: 800, letterSpacing: ".12em", fontSize: 12 }}>3B TECH HUB · CONTENT TOOLS</p>
-          <h1 style={{ fontSize: 36, letterSpacing: "-.04em", margin: "8px 0" }}>Media Library</h1>
-          <p style={{ color: "#667085", lineHeight: 1.7, maxWidth: 720 }}>
-            A central library for website images, videos, documents and external media links.
-            The data rules and management workflow are being prepared.
-          </p>
+    <main className="media-admin">
+      <div className="media-shell">
+        <Link href="/admin" className="media-back">← Admin workspace</Link>
+        <header className="media-header">
+          <div><span>3B TECH HUB · CONTENT TOOLS</span><h1>Media Library</h1></div>
+          <p>Upload optimized assets or register externally hosted media. Manage metadata and safely move unused items to trash.</p>
         </header>
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))", gap: 14 }}>
-          {capabilities.map(([title, description]) => (
-            <article key={title} style={{ padding: 20, borderRadius: 14, background: "white", border: "1px solid #e5e7eb" }}>
-              <h2 style={{ fontSize: 17, margin: "0 0 8px" }}>{title}</h2>
-              <p style={{ fontSize: 14, color: "#667085", lineHeight: 1.6, margin: 0 }}>{description}</p>
-            </article>
-          ))}
-        </section>
-        <aside style={{ marginTop: 22, padding: 18, background: "#fff7ed", border: "1px solid #fed7aa", borderRadius: 12, color: "#9a3412", lineHeight: 1.6 }}>
-          <strong>Preview only:</strong> Upload, edit and delete actions are not enabled until authenticated server-side permissions,
-          Appwrite Storage bucket rules and media metadata storage are implemented and tested. Do not upload production files here yet.
-        </aside>
+        <MediaLibrary />
       </div>
+      <style>{`
+        .media-admin{min-height:100vh;background:#f4f6f9;padding:34px 20px 60px;color:#172033}.media-shell{max-width:1100px;margin:0 auto}.media-back{color:#155eef;text-decoration:none;font-weight:700;font-size:14px}.media-header{display:flex;justify-content:space-between;align-items:end;gap:24px;margin:28px 0}.media-header span{font-size:11px;letter-spacing:.13em;color:#667085;font-weight:800}.media-header h1{font-size:clamp(30px,4vw,42px);letter-spacing:-.045em;margin:7px 0}.media-header p{max-width:450px;color:#667085;line-height:1.7;margin:0 0 5px}.media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}.media-panel,.media-item{background:#fff;border:1px solid #e4e7ec;border-radius:15px;padding:18px}.media-panel h2{font-size:17px;margin:0 0 14px}.media-panel label,.media-item label{display:grid;gap:6px;margin:10px 0;font-size:12px;font-weight:700;color:#344054}.media-panel input,.media-item input,.media-panel select{width:100%;padding:10px;border:1px solid #d0d5dd;border-radius:8px;font:inherit;font-size:13px;background:white}.media-action{border:0;border-radius:8px;background:#155eef;color:white;padding:10px 13px;font-weight:700;cursor:pointer}.media-action:disabled{opacity:.5}.media-secondary{border:1px solid #d0d5dd;background:white;color:#344054;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer}.media-list{margin-top:22px}.media-list-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.media-list-head h2{font-size:20px}.media-item h3{font-size:15px;margin:0 0 6px;overflow-wrap:anywhere}.media-item p{font-size:12px;color:#667085;overflow-wrap:anywhere}.media-item-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.media-notice{margin:12px 0;padding:12px 14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;color:#164a7b;font-size:13px;line-height:1.5}.media-warning{margin-top:18px;padding:14px 16px;background:#fffaeb;border:1px solid #fedf89;border-radius:10px;color:#7a4d00;font-size:13px;line-height:1.6}@media(max-width:760px){.media-header{display:block}.media-header p{margin-top:10px}}@media(max-width:420px){.media-admin{padding:22px 12px 42px}}
+      `}</style>
     </main>
   );
 }
