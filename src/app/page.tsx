@@ -10,7 +10,7 @@ export default async function HomePage() {
     return (
       <main className="maintenance-page">
         <section className="maintenance-card">
-          <div className="brand-mark" style={{ margin: "0 auto 18px" }}>3B</div>
+          <div className="brand-mark maintenance-brand-mark">3B</div>
           <h1>{settings.siteName}</h1>
           <p>{settings.announcementText || "We are making improvements. Please check back soon."}</p>
         </section>
