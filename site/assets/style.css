@@ -433,3 +433,25 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
   .workshop-card { min-height:76px; padding:8px; gap:8px; }
   .workshop-card>img,.workshop-card-placeholder { flex-basis:48px; width:48px; height:48px; }
 }
+
+
+/* One shared responsive card grid for all three homepage sections */
+.service-card-grid,#workshops-list,.technician-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.service-card,.workshop-card,.technician-card { min-height:82px; padding:10px; border-radius:11px; }
+.service-icon,.workshop-card>img,.workshop-card-placeholder,.technician-card>img,.technician-card-placeholder {
+  flex-basis:48px; width:48px; height:48px; border-radius:8px;
+}
+@media(max-width:760px) {
+  .service-card-grid,#workshops-list,.technician-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:520px) {
+  .service-card-grid,#workshops-list,.technician-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .service-card,.workshop-card,.technician-card { min-height:76px; padding:8px; gap:8px; }
+  .service-icon,.workshop-card>img,.workshop-card-placeholder,.technician-card>img,.technician-card-placeholder {
+    flex-basis:42px; width:42px; height:42px;
+  }
+}
