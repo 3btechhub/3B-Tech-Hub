@@ -236,28 +236,121 @@ if (form) {
 
 const profile = document.querySelector("#profile-card");
 if (profile) {
-  const email = document.querySelector("#profile-email");
   const status = document.querySelector("#profile-message");
-  const logout = document.querySelector("#sign-out");
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) location.replace(new URL("login/", ROOT_URL).href);
-  });
-  const { data, error } = await supabase.auth.getUser();
-  if (error || !data.user) {
-    location.replace(new URL("login/", ROOT_URL).href);
-  } else {
-    email.textContent = data.user.email ?? "Signed-in account";
+  const fields = {
+    name: document.querySelector("#profile-name"),
+    email: document.querySelector("#profile-email"),
+    phone: document.querySelector("#profile-phone"),
+  };
+  const forms = {
+    name: document.querySelector("#edit-name-form"),
+    email: document.querySelector("#edit-email-form"),
+    phone: document.querySelector("#edit-phone-form"),
+    password: document.querySelector("#edit-password-form"),
+  };
+  let currentUser = null;
+
+  function profileMessage(text, kind = "") {
+    status.textContent = text;
+    status.dataset.kind = kind;
   }
-  logout.addEventListener("click", async () => {
-    logout.disabled = true;
-    const { error: signOutError } = await supabase.auth.signOut();
-    if (signOutError) {
-      status.textContent = signOutError.message;
-      status.dataset.kind = "error";
-      logout.disabled = false;
+  function closeEditors() {
+    Object.values(forms).forEach((form) => { form.hidden = true; form.reset(); });
+  }
+
+  document.querySelectorAll("[data-edit]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const key = button.dataset.edit;
+      closeEditors();
+      const form = forms[key];
+      if (!form) return;
+      form.hidden = false;
+      if (key === "name") form.elements.name.value = fields.name.textContent === "—" ? "" : fields.name.textContent;
+      if (key === "email") form.elements.email.value = currentUser.email ?? "";
+      if (key === "phone") form.elements.phone.value = fields.phone.textContent === "—" ? "" : fields.phone.textContent;
+      form.querySelector("input")?.focus();
+      profileMessage("");
+    });
+  });
+  document.querySelectorAll("[data-cancel]").forEach((button) => {
+    button.addEventListener("click", () => closeEditors());
+  });
+
+  async function loadProfile() {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      location.replace(new URL("login/", ROOT_URL).href);
       return;
     }
-    subscription.unsubscribe();
-    location.replace(new URL("login/", ROOT_URL).href);
+    currentUser = data.user;
+    fields.name.textContent = currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "—";
+    fields.email.textContent = currentUser.email || "—";
+    const { data: profileData, error: profileError } = await supabase
+      .from("user_profiles").select("phone").eq("user_id", currentUser.id).maybeSingle();
+    if (profileError) {
+      profileMessage("Could not load your phone number. Please refresh and try again.", "error");
+    } else {
+      fields.phone.textContent = profileData?.phone || "—";
+    }
+  }
+
+  async function saveForm(key, handler) {
+    const form = forms[key];
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const submit = form.querySelector('button[type="submit"]');
+      submit.disabled = true;
+      profileMessage("Saving…");
+      try {
+        await handler(new FormData(form));
+        closeEditors();
+        profileMessage(key === "email" ? "A confirmation link has been sent to your new email address. Verify it to complete the change." : key === "password" ? "Password changed successfully." : "Updated successfully.", "success");
+        await loadProfile();
+      } catch (error) {
+        profileMessage(error instanceof Error ? error.message : "Could not save changes. Please try again.", "error");
+      } finally {
+        submit.disabled = false;
+      }
+    });
+  }
+
+  await loadProfile();
+  await saveForm("name", async (formData) => {
+    const name = String(formData.get("name") || "").trim();
+    if (!name) throw new Error("Enter your name.");
+    const { data, error } = await supabase.auth.updateUser({
+      data: { ...(currentUser.user_metadata || {}), display_name: name },
+    });
+    if (error) throw error;
+    currentUser = data.user;
   });
+  await saveForm("email", async (formData) => {
+    const email = String(formData.get("email") || "").trim().toLowerCase();
+    if (!email || email === currentUser.email) throw new Error("Enter a different email address.");
+    const { error } = await supabase.auth.updateUser({ email });
+    if (error) throw error;
+  });
+  await saveForm("phone", async (formData) => {
+    const phone = String(formData.get("phone") || "").trim();
+    if (phone && !/^\+?[0-9() .-]{7,24}$/.test(phone)) throw new Error("Enter a valid phone number.");
+    const { error } = await supabase.from("user_profiles").upsert(
+      { user_id: currentUser.id, phone: phone || null },
+      { onConflict: "user_id" },
+    );
+    if (error) throw error;
+  });
+  await saveForm("password", async (formData) => {
+    const currentPassword = String(formData.get("currentPassword") || "");
+    const newPassword = String(formData.get("newPassword") || "");
+    const confirmPassword = String(formData.get("confirmPassword") || "");
+    if (newPassword.length < 8) throw new Error("New password must be at least 8 characters.");
+    if (newPassword !== confirmPassword) throw new Error("New passwords do not match.");
+    const { error } = await supabase.auth.updateUser({ password: newPassword, currentPassword });
+    if (error) throw error;
+  });
+
+  const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (!session) location.replace(new URL("login/", ROOT_URL).href);
+  });
+  window.addEventListener("pagehide", () => authListener.subscription.unsubscribe(), { once: true });
 }
