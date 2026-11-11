@@ -1,73 +1,48 @@
-# 3B TECH HUB — Data Model
+# 3B TECH HUB — Supabase Data Model
 
-This document distinguishes the four provisioned Appwrite TablesDB tables from future business modules. The current physical schema is authoritative for the live application; proposed modules below are not claimed to be provisioned.
+The live database is Supabase project `sburxeuxkrilbfppxylm` in `ap-northeast-1`.
 
-## Implemented TablesDB foundation
+## Live application tables
+| Table | Purpose |
+|---|---|
+| `user_profiles` | User display name, phone and profile settings |
+| `user_roles` | Server-controlled role assignments |
+| `site_content` | Structured website content |
+| `products` | Product types and group/country routing |
+| `services` | Six country-specific service categories |
+| `media_assets` | Metadata for approved media |
+| `site_settings` | Website configuration |
+| `audit_logs` | Append-only administrative event history |
+| `workshops` | Workshop listings |
+| `technicians` | Technician listings |
 
-| Table ID | Purpose | Current use |
-|---|---|---|
-| `content` | Content revisions | Draft and revision records |
-| `audit_logs` | Audit trail | Privileged action history |
-| `media_assets` | Media metadata | Storage file references and media details |
-| `site_settings` | Site configuration | Persisted global settings |
+## Product grouping
+- `mobile` → Mobile & Accessories
+- `satellite` → Satellite & TV Equipment
 
-The production database ID is `3btechhub-prod`. All four tables are enabled with row-level security enabled and empty table permissions (deny by default). The production application accesses these tables only through server-side route handlers using the narrowly scoped Appwrite Site key. Do not grant direct public/client access to these tables.
+Product records describe a product type/category, not an individual stock item. Country values are `bd`, `saudi`, `global` or null where the schema allows it.
 
-## Design rules
-- Use stable IDs; do not expose sequential internal identifiers.
-- Include createdAt/updatedAt where appropriate.
-- Use explicit status enums and validate transitions server-side.
-- Store money as integer minor units plus ISO currency code (never floating-point money).
-- Store timestamps in UTC; render in the user's selected timezone.
-- Keep private customer and operational data separate from public catalogue/content.
-- Avoid storing payment card data; use a compliant payment provider.
+## Service routing
+Bangladesh:
+- TV Repair
+- Mobile Repair
+- Mobile Parts Sell
 
-## Future business modules (not yet provisioned)
-| Table | Purpose | Key fields |
-|---|---|---|
-| pages | Page metadata and routing | slug, title, status, locale, seoJson |
-| page_versions | Draft/published page revisions | pageId, version, contentJson, state, createdBy, approvedBy |
-| navigation_items | Editable menus | label, href, parentId, sortOrder, isVisible |
-| services | Repair/service catalogue | slug, name, description, categoryId, active |
-| service_categories | Service grouping | name, slug, sortOrder |
-| products | Product catalogue | sku, slug, name, description, priceMinor, currency, stockQty, active |
-| customers | Customer profile | authUserId, name, email, phone, consentJson |
-| bookings | Service booking requests | bookingNo, customerId, serviceId, preferredAt, status, notes |
-| orders | Product orders | orderNo, customerId, status, subtotalMinor, currency |
-| order_items | Order line items | orderId, productId, quantity, unitPriceMinor |
-| service_jobs | Repair work lifecycle | bookingId, jobNo, status, diagnosis, estimateMinor, finalMinor |
-| reviews | Customer feedback | customerId, serviceId, rating, body, moderationStatus |
-| articles | Blog/news content | slug, title, bodyJson, status, publishedAt, seoJson |
-| users_profile | Application role profile | authUserId, displayName, role, active |
-| notifications | Notification delivery state | recipientId, channel, templateKey, status, sentAt |
-
-## Suggested status flows
-- Page: draft → in_review → approved → published → archived.
-- Booking: requested → confirmed → in_progress → completed; cancellation/rejection recorded separately.
-- Order: pending → confirmed → processing → fulfilled; cancellation/refund states handled explicitly.
-- Service job: received → diagnosing → awaiting_approval → repairing → quality_check → ready → delivered.
+Saudi Arabia:
+- Satellite Dish Installation
+- Satellite Dish Servicing
+- Satellite Dish Parts Sell
 
 ## Access-control intent
-- Public visitors: read only published public pages, active services and active products.
-- Customer: read/update permitted own profile; read own bookings/orders/jobs only.
-- Staff: access assigned operational records only; no publishing or role administration by default.
-- Manager: manage approved operational areas; no owner-only publishing/security settings unless explicitly delegated.
-- Admin: manage content and operations within assigned scope; cannot bypass owner approval.
-- Owner: full administrative authority, final approval and publishing.
-- Server runtime: use narrowly scoped service credentials and validate actor/ownership before each operation.
+- Public visitors: read active/published public catalogue and media only.
+- Authenticated customer: read/update own profile.
+- Admin: delegated catalogue operations only; no Owner-role assignment.
+- Owner: highest authority, role management and system configuration.
+- Audit logs: application roles cannot update or delete audit entries.
 
-## Index candidates for future modules
-Create indexes only after query patterns are finalized. Likely candidates include:
-- pages.slug (unique), pages.status + locale
-- products.slug (unique), products.sku (unique), products.active
-- bookings.bookingNo (unique), bookings.customerId + createdAt, bookings.status + preferredAt
-- orders.orderNo (unique), orders.customerId + createdAt, orders.status
-- articles.slug (unique), articles.status + publishedAt
-- audit_logs.actorId + createdAt, audit_logs.resourceType + resourceId
-
-## Before expanding the schema
-1. Confirm initial language(s) and currency/currencies.
-2. Confirm customer account requirements for profile features.
-3. Confirm whether product checkout/payment is in launch scope.
-4. Review data retention, privacy and consent requirements.
-5. Convert approved future modules into Appwrite columns, indexes and permissions.
+## Data safety
+- Keep migrations in version control and reconcile applied migration versions before future schema work.
+- Add indexes to foreign-key columns used in joins/deletes.
+- Store only changed column names in audit metadata; do not copy full rows.
+- Never expose private profile data or service credentials through the public Data API.
+- Do not claim a database backup until a full export and restore test are verified.

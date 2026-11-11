@@ -1,41 +1,10 @@
 {
-  "name": "3b-tech-hub",
-  "version": "0.1.0",
+  "name": "3b-tech-hub-static",
+  "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "test:e2e": "playwright test"
-  },
-  "dependencies": {
-    "clsx": "^2.1.1",
-    "lucide-react": "^0.468.0",
-    "next": "^16.4.6",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "tailwind-merge": "^3.3.1",
-    "zod": "^4.0.0",
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.119.0"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.55.0",
-    "@tailwindcss/postcss": "^4.1.0",
-    "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "eslint": "^9.0.0",
-    "eslint-config-next": "^16.4.6",
-    "tailwindcss": "^4.1.0",
-    "typescript": "^5.9.0",
-    "vitest": "^5.1.0"
-  },
-  "overrides": {
-    "minimatch": "11.0.1",
-    "glob": "^14.0.4"
+    "test": "node --test tests/*.test.mjs",
+    "validate": "node --input-type=module --check < site/assets/app.js && node --input-type=module --check < site/assets/product-catalog.js && npm test"
   }
 }

@@ -1,29 +1,29 @@
-# 3B TECH HUB — Access Control Matrix
+# 3B TECH HUB — Supabase Access Control Matrix
 
-This is the application policy baseline. It must be enforced in trusted server code and Appwrite row/file permissions before any privileged feature is enabled. Hiding UI elements is not authorization.
-
-| Capability | Owner | Admin | Manager | Staff |
-|---|---:|---:|---:|---:|
-| Read content | Yes | Yes | Yes | Yes |
-| Edit content drafts | Yes | Yes | No | No |
-| Approve content | Yes | No | No | No |
-| Publish content | Yes | No | No | No |
-| Manage catalogue | Yes | Yes | Yes | No |
-| Manage bookings | Yes | Yes | Yes | Yes (assigned scope only) |
-| Manage customers | Yes | Yes | Yes | No |
-| Manage users and roles | Yes | No | No | No |
-| Manage system settings | Yes | No | No | No |
-| Read audit log | Yes | Yes (limited) | No | No |
+| Capability | Anonymous | Customer | Staff | Manager | Admin | Owner |
+|---|---:|---:|---:|---:|---:|---:|
+| Read active public catalogue | Yes | Yes | Yes | Yes | Yes | Yes |
+| Read own profile | No | Yes | Yes | Yes | Yes | Yes |
+| Update own profile | No | Yes | Yes | Yes | Yes | Yes |
+| Manage products/services/workshops/technicians | No | No | No | No | Delegated | Yes |
+| Read all user roles | No | No | No | No | Read only | Yes |
+| Create/change roles | No | No | No | No | No | Yes |
+| Grant Owner role | No | No | No | No | No | Protected Owner workflow only |
+| Read audit logs | No | No | No | No | Yes | Yes |
+| Update/delete audit logs | No | No | No | No | No | No |
+| Manage site settings | No | No | No | No | No | Yes |
 
 ## Enforcement requirements
-1. Resolve the authenticated Appwrite user on the server for every privileged request.
-2. Load the role from a protected server-managed profile; never trust a role supplied by the browser.
-3. Apply deny-by-default checks on every read/write endpoint and Appwrite resource.
-4. Validate record ownership and staff assignment before returning operational records.
-5. Require owner role for approval and publishing, with a second explicit confirmation for production release.
-6. Record actor, action, resource, timestamp and relevant before/after metadata in append-only audit events.
-7. Do not expose Appwrite API keys or privileged credentials to browser code.
-8. Add tests for both allowed and denied paths; include cross-customer access tests.
+1. RLS is enabled on every exposed application table.
+2. Anonymous role receives SELECT only on explicitly public tables.
+3. Authenticated role receives only the table privileges needed by the application; RLS still restricts each row and operation.
+4. Profile SELECT/UPDATE must be restricted to `auth.uid()`, with a separate trusted Owner policy where necessary.
+5. User-role INSERT/UPDATE/DELETE must be Owner-only. Admin must never be able to promote itself or another account to Owner.
+6. UPDATE policies must include both `USING` and `WITH CHECK`.
+7. Storage writes must be Owner/Admin-only; public reads must be limited to approved public assets.
+8. Audit rows are append-only to application roles and readable only by authorized administrators.
+9. Never use user-editable JWT metadata as an authorization source.
+10. Never expose service-role credentials to browser code.
 
-## Current status
-The role policy is implemented as a tested TypeScript policy module. It is not yet connected to authenticated sessions or Appwrite permissions, so it is not a production security boundary.
+## Current verification boundary
+RLS is enabled on all 10 public tables. The audit hardening migration is applied and verified: anonymous application-table writes are revoked, user-role changes are Owner-only, the primary Owner is protected, audit triggers are active and workshop FK indexes exist. Browser-level negative access tests and the complete admin UI release checks are still pending.

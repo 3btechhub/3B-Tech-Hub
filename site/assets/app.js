@@ -1,3 +1,5 @@
+import { filterProductsForRegion, getNextVisibleCount } from "./product-catalog.js";
+
 await window.countryContextReady;
 
 // Make country context available before the rest of the application runs.
@@ -103,8 +105,8 @@ async function setMenuSession(session) {
     if (session?.user?.id) {
       const { data, error } = await supabase
         .from("user_roles").select("role")
-        .eq("user_id", session.user.id).eq("role", "owner").maybeSingle();
-      if (!error && data?.role === "owner") dashboardMenuLink.hidden = false;
+        .eq("user_id", session.user.id).in("role", ["owner", "admin"]).limit(1).maybeSingle();
+      if (!error && data?.role) dashboardMenuLink.hidden = false;
     }
   }
 }
@@ -463,6 +465,7 @@ if (profile) {
 
 
 // Owner-only dashboard: the database role is checked again on the page itself.
+let currentDashboardRole = null;
 const ownerDashboard = document.querySelector("#owner-dashboard");
 if (ownerDashboard) {
   const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -471,10 +474,17 @@ if (ownerDashboard) {
   } else {
     const { data: ownerRole, error: roleError } = await supabase
       .from("user_roles").select("role")
-      .eq("user_id", authData.user.id).eq("role", "owner").maybeSingle();
-    if (roleError || ownerRole?.role !== "owner") {
+      .eq("user_id", authData.user.id).in("role", ["owner", "admin"]).limit(1).maybeSingle();
+    if (roleError || !["owner", "admin"].includes(ownerRole?.role)) {
       location.replace(new URL("profile/", ROOT_URL).href);
     } else {
+      currentDashboardRole = ownerRole.role;
+      if (currentDashboardRole !== "owner") {
+        for (const moduleName of ["user", "role", "permission", "settings"]) {
+          document.querySelector(`[data-dashboard-tab="${moduleName}"]`)?.remove();
+          document.querySelector(`[data-dashboard-panel="${moduleName}"]`)?.remove();
+        }
+      }
       const ownerEmail = document.querySelector("#dashboard-owner-email");
       if (ownerEmail) ownerEmail.textContent = authData.user.email || "";
       const resources = [
@@ -500,9 +510,389 @@ if (ownerDashboard) {
 }
 
 
+// Owner-only user administration is performed by a JWT-verified Supabase Edge Function.
+const userInviteForm = document.querySelector("#user-invite-form");
+const userItems = document.querySelector("#user-admin-items");
+const userMessage = document.querySelector("#user-message");
+const roleSummaryList = document.querySelector("#role-summary-list");
+const userRefreshButton = document.querySelector("#user-refresh");
+
+async function callOwnerUsers(payload) {
+  const { data, error } = await supabase.functions.invoke("owner-users", { body: payload });
+  if (error) throw new Error(error.message || "User administration request failed.");
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
+function renderRoleSummary(users) {
+  if (!roleSummaryList) return;
+  roleSummaryList.replaceChildren();
+  const roles = ["owner", "admin", "manager", "editor", "staff", "customer"];
+  for (const role of roles) {
+    const row = document.createElement("article");
+    row.className = "technician-admin-row";
+    const count = users.filter((user) => user.role === role).length;
+    addTextElement(row, "strong", "", role.charAt(0).toUpperCase() + role.slice(1));
+    addTextElement(row, "span", "", String(count) + (count === 1 ? " account" : " accounts"));
+    roleSummaryList.append(row);
+  }
+}
+
+function renderUserList(users) {
+  if (!userItems) return;
+  userItems.replaceChildren();
+  if (!users.length) {
+    addTextElement(userItems, "p", "muted", "No accounts found.");
+    return;
+  }
+
+  const roles = ["customer", "staff", "editor", "manager", "admin"];
+  for (const user of users) {
+    const row = document.createElement("article");
+    row.className = "technician-admin-row";
+    const primary = document.createElement("div");
+    addTextElement(primary, "strong", "", user.email || "Unknown email");
+    const blocked = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
+    const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Never signed in";
+    addTextElement(primary, "span", "muted", [
+      user.role === "owner" ? "Owner" : (user.role || "Customer"),
+      blocked ? "Blocked" : "Active",
+      "Last sign-in: " + lastSignIn,
+    ].join(" · "));
+    row.append(primary);
+
+    const actions = document.createElement("div");
+    actions.className = "editor-actions";
+    const roleSelect = document.createElement("select");
+    roleSelect.setAttribute("aria-label", "Role for " + (user.email || user.id));
+    const ownerOption = document.createElement("option");
+    ownerOption.value = "owner";
+    ownerOption.textContent = "Owner";
+    ownerOption.disabled = true;
+    roleSelect.append(ownerOption);
+    for (const role of roles) {
+      const option = document.createElement("option");
+      option.value = role;
+      option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+      roleSelect.append(option);
+    }
+    roleSelect.value = user.role || "customer";
+    roleSelect.disabled = user.role === "owner";
+    actions.append(roleSelect);
+
+    const saveRole = document.createElement("button");
+    saveRole.type = "button";
+    saveRole.textContent = "Save Role";
+    saveRole.disabled = user.role === "owner";
+    saveRole.addEventListener("click", async () => {
+      saveRole.disabled = true;
+      try {
+        await callOwnerUsers({ action: "set-role", userId: user.id, role: roleSelect.value });
+        if (userMessage) userMessage.textContent = "Role updated for " + user.email + ".";
+        await loadOwnerUsers();
+      } catch (error) {
+        if (userMessage) userMessage.textContent = error.message || "Could not update role.";
+      } finally {
+        saveRole.disabled = user.role === "owner";
+      }
+    });
+    actions.append(saveRole);
+
+    const statusButton = document.createElement("button");
+    statusButton.type = "button";
+    statusButton.className = "secondary-button";
+    statusButton.textContent = blocked ? "Unblock" : "Block";
+    statusButton.disabled = user.role === "owner";
+    statusButton.addEventListener("click", async () => {
+      statusButton.disabled = true;
+      try {
+        await callOwnerUsers({ action: "set-status", userId: user.id, blocked: !blocked });
+        if (userMessage) userMessage.textContent = user.email + (blocked ? " has been unblocked." : " has been blocked.");
+        await loadOwnerUsers();
+      } catch (error) {
+        if (userMessage) userMessage.textContent = error.message || "Could not change account status.";
+      } finally {
+        statusButton.disabled = user.role === "owner";
+      }
+    });
+    actions.append(statusButton);
+
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.className = "secondary-button";
+    resetButton.textContent = "Send Password Reset";
+    resetButton.disabled = user.role === "owner";
+    resetButton.addEventListener("click", async () => {
+      resetButton.disabled = true;
+      try {
+        await callOwnerUsers({ action: "reset-password", userId: user.id });
+        if (userMessage) userMessage.textContent = "Password reset email sent to " + user.email + ".";
+      } catch (error) {
+        if (userMessage) userMessage.textContent = error.message || "Could not send password reset.";
+      } finally {
+        resetButton.disabled = user.role === "owner";
+      }
+    });
+    actions.append(resetButton);
+    row.append(actions);
+    userItems.append(row);
+  }
+}
+
+async function loadOwnerUsers() {
+  if (!ownerDashboard || currentDashboardRole !== "owner" || !userItems) return;
+  if (userMessage) userMessage.textContent = "Loading users…";
+  try {
+    const result = await callOwnerUsers({ action: "list", page: 1, perPage: 50 });
+    const users = Array.isArray(result.users) ? result.users : [];
+    renderUserList(users);
+    renderRoleSummary(users);
+    const count = document.querySelector("#dashboard-users-count");
+    if (count) count.textContent = String(result.total ?? users.length);
+    if (userMessage) userMessage.textContent = "Showing " + users.length + " of " + (result.total ?? users.length) + " accounts.";
+  } catch (error) {
+    if (userMessage) userMessage.textContent = error.message || "Could not load users.";
+    if (userItems) userItems.replaceChildren();
+  }
+}
+
+if (userInviteForm) {
+  userInviteForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submit = document.querySelector("#user-invite-submit");
+    const form = new FormData(userInviteForm);
+    const email = String(form.get("email") || "").trim();
+    const role = String(form.get("role") || "customer");
+    if (submit) submit.disabled = true;
+    if (userMessage) userMessage.textContent = "Sending invitation…";
+    try {
+      await callOwnerUsers({ action: "invite", email, role });
+      userInviteForm.reset();
+      if (userMessage) userMessage.textContent = "Invitation sent to " + email + ".";
+      await loadOwnerUsers();
+    } catch (error) {
+      if (userMessage) userMessage.textContent = error.message || "Could not invite user.";
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  });
+}
+if (userRefreshButton) userRefreshButton.addEventListener("click", () => void loadOwnerUsers());
+if (ownerDashboard && userItems) void loadOwnerUsers();
+
+// Owner-only Media Library for public catalogue images in Supabase Storage.
+const mediaUploadForm = document.querySelector("#media-upload-form");
+const mediaItems = document.querySelector("#media-admin-items");
+const mediaSearch = document.querySelector("#media-search");
+const mediaTypeFilter = document.querySelector("#media-type-filter");
+const mediaDateFilter = document.querySelector("#media-date-filter");
+const mediaMessage = document.querySelector("#media-message");
+let mediaAssetData = [];
+
+function getMediaPublicUrl(item) {
+  return supabase.storage.from("site-media").getPublicUrl(item.storage_path).data.publicUrl;
+}
+
+function renderMediaAssets() {
+  if (!mediaItems) return;
+  mediaItems.replaceChildren();
+  const search = String(mediaSearch?.value || "").trim().toLowerCase();
+  const type = String(mediaTypeFilter?.value || "all");
+  const days = String(mediaDateFilter?.value || "all");
+  const cutoff = days === "all" ? 0 : Date.now() - Number(days) * 24 * 60 * 60 * 1000;
+  const visible = mediaAssetData.filter((item) => {
+    const matchesSearch = !search || String(item.file_name || "").toLowerCase().includes(search);
+    const matchesType = type === "all" || item.content_type === type;
+    const matchesDate = !cutoff || new Date(item.created_at).getTime() >= cutoff;
+    return matchesSearch && matchesType && matchesDate;
+  });
+  if (!visible.length) {
+    addTextElement(mediaItems, "p", "muted", mediaAssetData.length ? "No matching images." : "No images uploaded yet.");
+    return;
+  }
+
+  for (const item of visible) {
+    const row = document.createElement("article");
+    row.className = "technician-admin-row";
+    const image = document.createElement("img");
+    image.className = "technician-detail-photo";
+    image.src = getMediaPublicUrl(item);
+    image.alt = item.alt_text || item.file_name || "Media image";
+    image.loading = "lazy";
+    row.append(image);
+
+    const details = document.createElement("div");
+    addTextElement(details, "strong", "", item.file_name || "Untitled image");
+    addTextElement(details, "span", "muted", [
+      item.content_type || "Image",
+      (Number(item.size_bytes || 0) / 1024).toFixed(1) + " KB",
+      item.created_at ? new Date(item.created_at).toLocaleDateString() : "",
+    ].filter(Boolean).join(" · "));
+    const fileNameInput = document.createElement("input");
+    fileNameInput.type = "text";
+    fileNameInput.maxLength = 255;
+    fileNameInput.value = item.file_name || "";
+    fileNameInput.setAttribute("aria-label", "File name for " + item.file_name);
+    details.append(fileNameInput);
+    const altInput = document.createElement("input");
+    altInput.type = "text";
+    altInput.maxLength = 250;
+    altInput.value = item.alt_text || "";
+    altInput.setAttribute("aria-label", "Alternative text for " + item.file_name);
+    details.append(altInput);
+    row.append(details);
+
+    const actions = document.createElement("div");
+    actions.className = "editor-actions";
+    const save = document.createElement("button");
+    save.type = "button";
+    save.textContent = "Save Alt Text";
+    save.addEventListener("click", async () => {
+      save.disabled = true;
+      try {
+        const { error } = await supabase.from("media_assets").update({ file_name: fileNameInput.value.trim().slice(0, 255), alt_text: altInput.value.trim() }).eq("id", item.id);
+        if (error) throw error;
+        item.file_name = fileNameInput.value.trim().slice(0, 255);
+        item.alt_text = altInput.value.trim();
+        if (mediaMessage) mediaMessage.textContent = "Media details saved.";
+      } catch (error) {
+        if (mediaMessage) mediaMessage.textContent = error.message || "Could not update media details.";
+      } finally {
+        save.disabled = false;
+      }
+    });
+    actions.append(save);
+
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.className = "secondary-button";
+    copy.textContent = "Copy URL";
+    copy.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(getMediaPublicUrl(item));
+        if (mediaMessage) mediaMessage.textContent = "Public media URL copied.";
+      } catch {
+        if (mediaMessage) mediaMessage.textContent = "Clipboard access is unavailable in this browser.";
+      }
+    });
+    actions.append(copy);
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "secondary-button";
+    remove.textContent = "Delete";
+    remove.addEventListener("click", async () => {
+      if (!confirm("Delete this image? It will be removed only if no catalogue record uses it.")) return;
+      remove.disabled = true;
+      try {
+        const publicUrl = getMediaPublicUrl(item);
+        for (const table of ["products", "services", "workshops", "technicians"]) {
+          const { data, error } = await supabase.from(table).select("id").eq("photo_url", publicUrl).limit(1);
+          if (error) throw error;
+          if (data?.length) throw new Error("This image is still used by " + table + ". Change that record's image before deleting it.");
+        }
+        const { error: storageError } = await supabase.storage.from("site-media").remove([item.storage_path]);
+        if (storageError) throw storageError;
+        const { error: metadataError } = await supabase.from("media_assets").delete().eq("id", item.id);
+        if (metadataError) throw metadataError;
+        mediaAssetData = mediaAssetData.filter((entry) => entry.id !== item.id);
+        renderMediaAssets();
+        if (mediaMessage) mediaMessage.textContent = "Image deleted.";
+      } catch (error) {
+        if (mediaMessage) mediaMessage.textContent = error.message || "Could not delete image.";
+      } finally {
+        remove.disabled = false;
+      }
+    });
+    actions.append(remove);
+    row.append(actions);
+    mediaItems.append(row);
+  }
+}
+
+async function loadMediaAssets() {
+  if (!ownerDashboard || !mediaItems) return;
+  if (mediaMessage) mediaMessage.textContent = "Loading media…";
+  const { data, error } = await supabase
+    .from("media_assets")
+    .select("id,storage_path,file_name,content_type,size_bytes,alt_text,is_public,uploaded_by,created_at")
+    .eq("is_public", true)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) {
+    if (mediaMessage) mediaMessage.textContent = error.message || "Could not load Media Library.";
+    return;
+  }
+  mediaAssetData = data || [];
+  renderMediaAssets();
+  if (mediaMessage) mediaMessage.textContent = "Showing " + mediaAssetData.length + " media assets.";
+}
+
+if (mediaUploadForm) {
+  mediaUploadForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submit = document.querySelector("#media-upload-submit");
+    const form = new FormData(mediaUploadForm);
+    const file = form.get("file");
+    const altText = String(form.get("alt_text") || "").trim();
+    const extensions = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+      "image/avif": "avif",
+      "image/gif": "gif",
+    };
+    if (!(file instanceof File) || !extensions[file.type]) {
+      if (mediaMessage) mediaMessage.textContent = "Choose a supported image file.";
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      if (mediaMessage) mediaMessage.textContent = "Image must be 10 MB or smaller.";
+      return;
+    }
+    if (submit) submit.disabled = true;
+    if (mediaMessage) mediaMessage.textContent = "Uploading image…";
+    const storagePath = "library/" + crypto.randomUUID() + "." + extensions[file.type];
+    try {
+      const { error: uploadError } = await supabase.storage.from("site-media").upload(storagePath, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
+      if (uploadError) throw uploadError;
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
+      const { error: metadataError } = await supabase.from("media_assets").insert({
+        storage_path: storagePath,
+        file_name: file.name.slice(0, 255),
+        content_type: file.type,
+        size_bytes: file.size,
+        alt_text: altText,
+        is_public: true,
+        uploaded_by: authData.user.id,
+      });
+      if (metadataError) {
+        await supabase.storage.from("site-media").remove([storagePath]);
+        throw metadataError;
+      }
+      mediaUploadForm.reset();
+      await loadMediaAssets();
+      if (mediaMessage) mediaMessage.textContent = "Image uploaded successfully.";
+    } catch (error) {
+      if (mediaMessage) mediaMessage.textContent = error.message || "Could not upload image.";
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  });
+}
+if (mediaSearch) mediaSearch.addEventListener("input", renderMediaAssets);
+if (mediaTypeFilter) mediaTypeFilter.addEventListener("change", renderMediaAssets);
+if (mediaDateFilter) mediaDateFilter.addEventListener("change", renderMediaAssets);
+if (ownerDashboard && mediaItems) void loadMediaAssets();
+
 // Dashboard module tabs: all modules stay on one horizontal row.
-const dashboardTabs = document.querySelectorAll("[data-dashboard-tab]");
-const dashboardPanels = document.querySelectorAll("[data-dashboard-panel]");
+const dashboardTabs = Array.from(document.querySelectorAll("[data-dashboard-tab]"));
+const dashboardPanels = Array.from(document.querySelectorAll("[data-dashboard-panel]"));
 function activateDashboardModule(moduleName, focusTab = false) {
   dashboardTabs.forEach((tab) => {
     const active = tab.dataset.dashboardTab === moduleName;
@@ -744,12 +1134,13 @@ function renderProducts(items) {
     dialog.showModal();
   };
 
-  const visibleItems = items.filter(item => item && item.name && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region)));
+  const visibleItems = filterProductsForRegion(items, activeCountry.region);
   let visibleCount = 4;
   visibleItems.forEach((item, index) => {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "technician-card";
+    card.hidden = index >= visibleCount;
     card.setAttribute("aria-label", "View " + item.name + " product details");
     if (item.photo_url) {
       const image = document.createElement("img");
@@ -780,7 +1171,7 @@ function renderProducts(items) {
     moreButton.className = "product-more-button";
     moreButton.textContent = "More";
     moreButton.addEventListener("click", () => {
-      visibleCount = Math.min(visibleCount + 4, visibleItems.length);
+      visibleCount = getNextVisibleCount(visibleCount, visibleItems.length, 4);
       target.querySelectorAll(".technician-card").forEach((card, index) => { card.hidden = index >= visibleCount; });
       if (visibleCount >= visibleItems.length) moreButton.remove();
     });
@@ -974,12 +1365,14 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
     productData.forEach(item=>{
       const row=document.createElement("article");row.className="technician-admin-row";productItems.append(row);
       addTextElement(row,"strong","",item.name);
-      addTextElement(row,"span","",[`Category: ${item.category||"—"}`,item.country==="bd"?"Bangladesh (BD)":item.country==="saudi"?"Saudi Arabia (Saudi)":"Global",item.status==="active"?"Published":"Draft"].join(" · "));
+      const groupLabel=item.category_group==="satellite"?"Satellite & TV Equipment":"Mobile & Accessories";
+      addTextElement(row,"span","",[groupLabel,`Type: ${item.category||"—"}`,item.country==="bd"?"Bangladesh (BD)":item.country==="saudi"?"Saudi Arabia (Saudi)":"Global",item.status==="active"?"Published":"Draft"].join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
       edit.addEventListener("click",()=>{
         productEditor.elements.id.value=item.id;
         productEditor.elements.name.value=item.name||"";
+        productEditor.elements.category_group.value=item.category_group||"mobile";
         productEditor.elements.category.value=item.category||"";
         productEditor.elements.description.value=item.description||"";
         productEditor.elements.country.value=item.country||"";
@@ -1000,6 +1393,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
   function resetProductForm(){
     productEditor.reset();productPhotoUrl="";previewImage(productPhotoPreview,"");
     productEditor.elements.country.value="";
+    productEditor.elements.category_group.value="mobile";
     document.querySelector("#product-form-title").textContent="Add Product";
     document.querySelector("#product-cancel").hidden=true;
   }
@@ -1012,10 +1406,12 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
         const name=String(form.get("name")||"").trim();
         const description=String(form.get("description")||"").trim();
         const category=String(form.get("category")||"").trim();
+        const categoryGroup=String(form.get("category_group")||"mobile");
+        if(!["mobile","satellite"].includes(categoryGroup))throw new Error("Select a valid product group.");
         const photo=await uploadContentPhoto(form.get("photo"),"products");
         if(!name)throw new Error("Name is required.");
         const slug=id?(productData.find(x=>x.id===id)?.slug||""):(name.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"product")+"-"+crypto.randomUUID().slice(0,8);
-        const item={slug,name,category:category||null,description,photo_url:photo||(id?(productData.find(x=>x.id===id)?.photo_url||null):null),country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,status:form.get("is_published")==="on"?"active":"draft"};
+        const item={slug,name,category_group:categoryGroup,category:category||null,description,photo_url:photo||(id?(productData.find(x=>x.id===id)?.photo_url||null):null),country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,status:form.get("is_published")==="on"?"active":"draft"};
         const query=id?supabase.from("products").update(item).eq("id",id):supabase.from("products").insert(item);
         const {error}=await query;if(error)throw error;
         resetProductForm();await loadIdentityEditors();editorMessage(productMessage,"Product saved.");
