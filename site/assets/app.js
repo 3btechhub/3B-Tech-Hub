@@ -201,7 +201,7 @@ if (form) {
         });
         if (error) throw error;
         if (!data.session) {
-          showMessage("Account created. Check your email to confirm your address before signing in.", "success");
+          showMessage("If this email is not registered yet, check your inbox to confirm your account. If you already have an account, use Login or Forgot password.", "success");
         } else {
           showMessage("Account created successfully.", "success");
           location.assign(new URL("profile/", ROOT_URL).href);
