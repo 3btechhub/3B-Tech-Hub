@@ -767,9 +767,27 @@ function renderMediaAssets() {
     save.addEventListener("click", async () => {
       save.disabled = true;
       try {
-        const { error } = await supabase.from("media_assets").update({ file_name: fileNameInput.value.trim().slice(0, 255), alt_text: altInput.value.trim() }).eq("id", item.id);
-        if (error) throw error;
-        item.file_name = fileNameInput.value.trim().slice(0, 255);
+        const fileName = fileNameInput.value.trim().slice(0, 255);
+        if (!fileName) throw new Error("File name is required.");
+        const changes = { file_name: fileName, alt_text: altInput.value.trim() };
+        if (item.id) {
+          const { error } = await supabase.from("media_assets").update(changes).eq("id", item.id);
+          if (error) throw error;
+        } else {
+          const { data: authData, error: authError } = await supabase.auth.getUser();
+          if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
+          const { data, error } = await supabase.from("media_assets").insert({
+            ...changes,
+            storage_path: item.storage_path,
+            content_type: item.content_type || "application/octet-stream",
+            size_bytes: Number(item.size_bytes || 0),
+            is_public: true,
+            uploaded_by: authData.user.id,
+          }).select("id").single();
+          if (error) throw error;
+          item.id = data.id;
+        }
+        item.file_name = fileName;
         item.alt_text = altInput.value.trim();
         if (mediaMessage) mediaMessage.textContent = "Media details saved.";
       } catch (error) {
@@ -808,10 +826,19 @@ function renderMediaAssets() {
           if (error) throw error;
           if (data?.length) throw new Error("This image is still used by " + table + ". Change that record's image before deleting it.");
         }
+        const { data: contentRows, error: contentError } = await supabase.from("site_content").select("id,body").limit(100);
+        if (contentError) throw contentError;
+        const isUsedInContent = (contentRows || []).some((entry) => {
+          const serialized = JSON.stringify(entry.body || {});
+          return serialized.includes(publicUrl) || serialized.includes(item.storage_path);
+        });
+        if (isUsedInContent) throw new Error("This image is still used by website content.");
         const { error: storageError } = await supabase.storage.from("site-media").remove([item.storage_path]);
         if (storageError) throw storageError;
-        const { error: metadataError } = await supabase.from("media_assets").delete().eq("id", item.id);
-        if (metadataError) throw metadataError;
+        if (item.id) {
+          const { error: metadataError } = await supabase.from("media_assets").delete().eq("id", item.id);
+          if (metadataError) throw metadataError;
+        }
         mediaAssetData = mediaAssetData.filter((entry) => entry.id !== item.id);
         renderMediaAssets();
         if (mediaMessage) mediaMessage.textContent = "Image deleted.";
@@ -827,22 +854,66 @@ function renderMediaAssets() {
   }
 }
 
+async function listMediaStorageFiles(folder = "", depth = 0) {
+  if (depth > 5) return [];
+  const files = [];
+  for (let offset = 0; offset < 1000; offset += 100) {
+    const { data, error } = await supabase.storage.from("site-media").list(folder, {
+      limit: 100,
+      offset,
+      sortBy: { column: "name", order: "asc" },
+    });
+    if (error) throw error;
+    for (const entry of data || []) {
+      const path = folder ? folder + "/" + entry.name : entry.name;
+      if (!entry.id && !entry.metadata) {
+        files.push(...await listMediaStorageFiles(path, depth + 1));
+      } else {
+        files.push({
+          storage_path: path,
+          storage_name: entry.name,
+          storage_metadata: entry.metadata || {},
+          storage_created_at: entry.created_at || null,
+        });
+      }
+    }
+    if (!data || data.length < 100) break;
+  }
+  return files;
+}
+
 async function loadMediaAssets() {
   if (!ownerDashboard || !mediaItems) return;
   if (mediaMessage) mediaMessage.textContent = "Loading media…";
-  const { data, error } = await supabase
-    .from("media_assets")
-    .select("id,storage_path,file_name,content_type,size_bytes,alt_text,is_public,uploaded_by,created_at")
-    .eq("is_public", true)
-    .order("created_at", { ascending: false })
-    .limit(100);
-  if (error) {
+  try {
+    const [{ data: metadata, error: metadataError }, storageFiles] = await Promise.all([
+      supabase.from("media_assets")
+        .select("id,storage_path,file_name,content_type,size_bytes,alt_text,is_public,uploaded_by,created_at")
+        .eq("is_public", true)
+        .order("created_at", { ascending: false })
+        .limit(1000),
+      listMediaStorageFiles(),
+    ]);
+    if (metadataError) throw metadataError;
+    const metadataByPath = new Map((metadata || []).map((item) => [item.storage_path, item]));
+    mediaAssetData = storageFiles.map((file) => {
+      const saved = metadataByPath.get(file.storage_path) || {};
+      return {
+        ...saved,
+        storage_path: file.storage_path,
+        file_name: saved.file_name || file.storage_name,
+        content_type: saved.content_type || file.storage_metadata.mimetype || "",
+        size_bytes: saved.size_bytes ?? file.storage_metadata.size ?? 0,
+        alt_text: saved.alt_text || "",
+        created_at: saved.created_at || file.storage_created_at,
+        is_public: true,
+      };
+    }).sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    renderMediaAssets();
+    if (mediaMessage) mediaMessage.textContent = "Showing " + mediaAssetData.length + " media assets.";
+  } catch (error) {
     if (mediaMessage) mediaMessage.textContent = error.message || "Could not load Media Library.";
-    return;
   }
-  mediaAssetData = data || [];
-  renderMediaAssets();
-  if (mediaMessage) mediaMessage.textContent = "Showing " + mediaAssetData.length + " media assets.";
 }
 
 if (mediaUploadForm) {
