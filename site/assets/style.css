@@ -324,3 +324,41 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
   line-height:1;
   text-align:center;
 }
+
+
+/* Homepage identity sections */
+.home-company-section,.home-technicians-section{margin:54px 0 0;padding-top:30px;border-top:1px solid var(--line)}
+.home-section-heading{margin:0 0 20px}
+.home-section-heading h2{margin:0;font-size:clamp(22px,3vw,28px)}
+.company-profile-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:24px;align-items:center}
+.company-profile-content>img{width:100%;max-height:340px;object-fit:cover;border-radius:12px;background:var(--hover)}
+.company-profile-details h3{margin:0 0 10px;font-size:21px}
+.company-profile-details p{margin:0 0 12px;color:var(--muted);line-height:1.7;white-space:pre-line}
+.company-contact-links{display:flex;flex-wrap:wrap;gap:9px;margin-top:14px}
+.company-contact-links a,.editor-actions button,.content-editor-form button{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 13px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--page-text);font-size:13px;font-weight:600}
+.company-contact-links a:hover,.editor-actions button:hover{background:var(--hover)}
+.technician-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px}
+.technician-card{padding:15px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}
+.technician-card>img{width:100%;height:190px;object-fit:cover;border-radius:8px;background:var(--hover)}
+.technician-card h3{margin:13px 0 5px;font-size:17px}
+.technician-card .technician-specialty{margin:0;color:var(--muted);font-size:14px}
+@media(max-width:600px){.company-profile-content{grid-template-columns:1fr}.company-profile-content>img{max-height:250px}.home-company-section,.home-technicians-section{margin-top:38px;padding-top:24px}}
+/* Identity content editor */
+.content-editor-form{display:grid;gap:13px;max-width:680px;padding:20px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}
+.content-editor-form h2,.technician-admin-list h2{margin:0 0 4px;font-size:19px}
+.content-editor-form label{display:grid;gap:6px;color:var(--page-text);font-size:13px;font-weight:600}
+.content-editor-form input:not([type=file]),.content-editor-form textarea{width:100%;min-height:42px;padding:10px 11px;border:1px solid var(--line);border-radius:7px;background:var(--page-bg);color:var(--page-text);font:inherit;font-size:14px}
+.content-editor-form textarea{resize:vertical}
+.content-editor-form input[type=file]{max-width:100%;font-size:13px}
+.content-editor-form button[type=submit]{min-height:44px;border-color:var(--page-text);background:var(--page-text);color:var(--page-bg);cursor:pointer}
+.content-editor-form button:disabled{opacity:.6;cursor:wait}
+.editor-preview img{display:block;width:min(100%,220px);max-height:160px;object-fit:cover;border-radius:8px}
+.editor-message{min-height:18px;margin:0;color:var(--muted);font-size:13px}
+.editor-message[data-kind=error]{color:#b42318}
+.editor-actions{display:flex;flex-wrap:wrap;gap:8px}
+.editor-actions .secondary-button,.secondary-button{background:var(--surface)!important;color:var(--page-text)!important;border-color:var(--line)!important}
+.technician-admin-list{margin-top:24px}
+.technician-admin-list h2{margin-bottom:12px}
+.technician-admin-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:13px 0;border-bottom:1px solid var(--line)}
+.technician-admin-row>span{color:var(--muted);font-size:13px}
+@media(max-width:480px){.content-editor-form{padding:14px}.technician-admin-row{align-items:flex-start;flex-direction:column}}
