@@ -94,53 +94,114 @@ const form = document.querySelector("#auth-form");
 
 if (form) {
   const params = new URLSearchParams(location.search);
-  const title = document.querySelector("#auth-title");
-  const description = document.querySelector("#auth-description");
   const message = document.querySelector("#auth-message");
   const submit = document.querySelector("#auth-submit");
   const toggle = document.querySelector("#toggle-signup");
   const forgot = document.querySelector("#forgot-password");
-  let mode = params.get("mode") === "signup" ? "signup" : "login";
+  const passwordInput = form.elements.password;
+  let mode = params.get("mode") === "signup" ? "signup" : params.get("mode") === "recovery" ? "recovery" : "login";
+  let recoveryReady = false;
 
   function showMessage(text, kind = "") {
     message.textContent = text;
     message.dataset.kind = kind;
   }
+
   function render() {
     const signup = mode === "signup";
-    submit.textContent = signup ? "Create account" : "Login";
-    toggle.textContent = signup ? "Login Account" : "Create account";
-    showMessage("");
+    const recovery = mode === "recovery";
+    submit.textContent = recovery ? "Update Password" : signup ? "Create Account" : "Login";
+    toggle.textContent = signup ? "Login Account" : "Create Account";
+    toggle.disabled = recovery;
+    forgot.disabled = recovery;
+    passwordInput.autocomplete = recovery || signup ? "new-password" : "current-password";
+    passwordInput.setAttribute("aria-label", "Password");
+    passwordInput.placeholder = "Password";
+    passwordInput.required = true;
+    if (recovery) passwordInput.focus();
   }
+
   toggle.addEventListener("click", () => {
+    if (mode === "recovery") return;
     mode = mode === "signup" ? "login" : "signup";
     render();
+    showMessage("");
   });
+
   forgot.addEventListener("click", async () => {
     const email = form.elements.email.value.trim();
-    if (!email) return showMessage("Enter your email address first.", "error");
+    if (!email) {
+      form.elements.email.focus();
+      return showMessage("Enter your email address first.", "error");
+    }
     forgot.disabled = true;
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: new URL("login/?mode=recovery", ROOT_URL).href,
-    });
-    forgot.disabled = false;
-    showMessage(error ? error.message : "If this email is registered, a password reset link has been sent.", error ? "error" : "success");
+    showMessage("Sending reset link…");
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: new URL("login/?mode=recovery", ROOT_URL).href,
+      });
+      if (error) throw error;
+      showMessage("If this email is registered, a password reset link has been sent.", "success");
+    } catch (error) {
+      showMessage(error instanceof Error ? error.message : "Could not send the reset link. Please try again.", "error");
+    } finally {
+      forgot.disabled = mode === "recovery";
+    }
   });
+
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY" && session) {
+      recoveryReady = true;
+      mode = "recovery";
+      render();
+      showMessage("Enter your new password.", "success");
+    }
+  });
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const email = form.elements.email.value.trim();
-    const password = form.elements.password.value;
-    if (!email || password.length < 8) return showMessage("Enter a valid email and a password of at least 8 characters.", "error");
+    const password = passwordInput.value;
+
+    if (mode !== "recovery" && !email) {
+      form.elements.email.focus();
+      return showMessage("Enter your email address.", "error");
+    }
+    if (password.length < 8) {
+      passwordInput.focus();
+      return showMessage("Password must be at least 8 characters.", "error");
+    }
+    if (mode === "recovery" && !recoveryReady) {
+      return showMessage("This password reset link is invalid or expired. Request a new link.", "error");
+    }
+
     submit.disabled = true;
-    showMessage(mode === "signup" ? "Creating account…" : "Signing in…");
+    showMessage(mode === "recovery" ? "Updating password…" : mode === "signup" ? "Creating account…" : "Signing in…");
     try {
-      const result = mode === "signup"
-        ? await supabase.auth.signUp({ email, password, options: { emailRedirectTo: new URL("login/", ROOT_URL).href } })
-        : await supabase.auth.signInWithPassword({ email, password });
-      if (result.error) throw result.error;
-      if (mode === "signup" && !result.data.session) {
-        showMessage("Account created. Check your email to confirm your address before signing in.", "success");
+      if (mode === "recovery") {
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) throw error;
+        mode = "login";
+        recoveryReady = false;
+        passwordInput.value = "";
+        render();
+        showMessage("Password updated successfully.", "success");
+      } else if (mode === "signup") {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: new URL("login/", ROOT_URL).href },
+        });
+        if (error) throw error;
+        if (!data.session) {
+          showMessage("Account created. Check your email to confirm your address before signing in.", "success");
+        } else {
+          showMessage("Account created successfully.", "success");
+          location.assign(new URL("profile/", ROOT_URL).href);
+        }
       } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
         showMessage("Signed in successfully.", "success");
         location.assign(new URL("profile/", ROOT_URL).href);
       }
@@ -150,9 +211,10 @@ if (form) {
       submit.disabled = false;
     }
   });
+
   render();
-  if (params.get("mode") === "recovery") {
-    showMessage("Use the password reset link sent to your email to continue.", "success");
+  if (mode === "recovery") {
+    showMessage("Open the password reset link from your email to continue.", "success");
   }
 }
 
