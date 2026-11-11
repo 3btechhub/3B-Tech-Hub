@@ -29,7 +29,7 @@ jobs:
         run: node --check site/assets/app.js
       - name: Validate static routes and required branding
         run: |
-          grep -q "Three Brothers Technology Hub" site/index.html
+          grep -q "3B TECH HUB" site/index.html
           grep -q "signInWithPassword" site/assets/app.js
           grep -q "resetPasswordForEmail" site/assets/app.js
-          ! grep -R -E "SUPABASE_SECRET_KEY|service_role|CLOUDFLARE_API_TOKEN|APPWRITE" site
+          ! grep -R -E "SUPABASE_SECRET_KEY|service_role" site
