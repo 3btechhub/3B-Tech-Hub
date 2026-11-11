@@ -290,17 +290,18 @@ if (profile) {
     field.classList.toggle("is-placeholder", !hasValue);
   }
   function enableInlineEdit(button) {
-    const row = button.closest(".profile-row");
-    const input = row.querySelector("input[data-profile-field]");
-    if (!input) return;
-    if (input.dataset.profileField === "name") input.value = currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "";
-    if (input.dataset.profileField === "email") input.value = currentUser.email || "";
-    if (input.dataset.profileField === "phone") input.value = currentPhone;
-    row.querySelector(".profile-value").hidden = true;
+    const key = button.dataset.editField;
+    const field = fields[key];
+    if (!field) return;
+    const original = key === "name"
+      ? (currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "")
+      : key === "email" ? (currentUser.email || "") : currentPhone;
+    field.textContent = original;
+    field.contentEditable = "true";
+    field.classList.add("is-editing");
     button.hidden = true;
-    input.hidden = false;
     saveButton.hidden = false;
-    input.focus();
+    field.focus();
     profileMessage("");
   }
   profile.querySelectorAll("[data-edit-field]").forEach((button) => {
@@ -340,12 +341,9 @@ if (profile) {
     profileMessage("Saving…");
     try {
       const data = new FormData(form);
-      const nameInput = form.querySelector('[data-profile-field="name"]');
-      const emailInput = form.querySelector('[data-profile-field="email"]');
-      const phoneInput = form.querySelector('[data-profile-field="phone"]');
-      const name = nameInput && !nameInput.hidden ? nameInput.value.trim() : (currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "");
-      const email = emailInput && !emailInput.hidden ? emailInput.value.trim().toLowerCase() : (currentUser.email || "");
-      const phone = phoneInput && !phoneInput.hidden ? phoneInput.value.trim() : currentPhone;
+      const name = fields.name.contentEditable === "true" ? fields.name.textContent.trim() : (currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "");
+      const email = fields.email.contentEditable === "true" ? fields.email.textContent.trim().toLowerCase() : (currentUser.email || "");
+      const phone = fields.phone.contentEditable === "true" ? fields.phone.textContent.trim() : currentPhone;
       const currentPassword = String(data.get("currentPassword") || "");
       const newPassword = String(data.get("newPassword") || "");
       const confirmPassword = String(data.get("confirmPassword") || "");
@@ -387,10 +385,10 @@ if (profile) {
         if (passwordError) throw passwordError;
       }
 
-      form.querySelectorAll("[data-profile-field]").forEach((input) => {
-        input.hidden = true;
-        input.closest(".profile-row").querySelector(".profile-value").hidden = false;
-        input.closest(".profile-row").querySelector("[data-edit-field]").hidden = false;
+      form.querySelectorAll("[data-profile-field]").forEach((field) => {
+        field.contentEditable = "false";
+        field.classList.remove("is-editing");
+        field.closest(".profile-row").querySelector("[data-edit-field]").hidden = false;
       });
       document.querySelector("#profile-password-fields").hidden = true;
       document.querySelector("#profile-password-edit").hidden = false;
