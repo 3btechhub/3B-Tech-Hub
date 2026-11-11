@@ -54,6 +54,13 @@ export async function uploadAppwriteFile(bucketId: string, file: File, fileId: s
   return response.json() as Promise<AppwriteRow>;
 }
 
+export async function getAppwriteBucket(bucketId: string) {
+  return appwriteRequest<{ $id: string; enabled?: boolean }>(
+    `/storage/buckets/${encodeURIComponent(bucketId)}`,
+    { method: "GET" },
+  );
+}
+
 export async function deleteAppwriteFile(bucketId: string, fileId: string) {
   const config = configuration();
   if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
