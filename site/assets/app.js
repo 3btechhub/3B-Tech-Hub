@@ -696,26 +696,16 @@ function renderWorkshops(items) {
   });
   if (target.children.length && homepageWorkshops) homepageWorkshops.hidden = false;
 }
-function renderProducts(products) {
+function renderProducts(items) {
   const target = document.querySelector("#products-list");
-  if (!target) return;
+  if (!target || !Array.isArray(items)) return;
   target.replaceChildren();
-
-  const region = activeCountry.region;
-  const visibleProducts = (products || []).filter(item =>
-    item && item.name &&
-    (region === "global" || !item.country || item.country === "global" || item.country === region)
-  );
-  if (!visibleProducts.length) {
-    if (homepageProducts) homepageProducts.hidden = true;
-    return;
-  }
 
   const groupTitles = {
     mobile: "Mobile & Accessories",
     satellite: "Satellite & TV Equipment"
   };
-  const getGroupTitle = item => groupTitles[item.category_group] || item.category || "Other Products";
+  const getProductGroup = item => groupTitles[item.category_group] || item.category || "Other Products";
 
   let dialog = document.querySelector("#product-detail-dialog");
   if (!dialog) {
@@ -725,76 +715,64 @@ function renderProducts(products) {
     dialog.innerHTML = '<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';
     document.body.append(dialog);
     dialog.querySelector(".technician-detail-close").addEventListener("click", () => dialog.close());
-    dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener("click", event => {
+      if (event.target === dialog) dialog.close();
+    });
   }
 
   const detailBody = dialog.querySelector(".technician-detail-body");
-  const grid = document.createElement("div");
-  grid.className = "product-showcase-grid";
-
-  visibleProducts.forEach(product => {
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "product-showcase-card";
-    card.setAttribute("aria-label", "View " + product.name + " details");
-
-    const visual = document.createElement("span");
-    visual.className = "product-showcase-visual";
-    if (product.photo_url) {
+  const openDetails = item => {
+    detailBody.replaceChildren();
+    if (item.photo_url) {
       const image = document.createElement("img");
-      image.src = product.photo_url;
-      image.alt = "";
-      image.loading = "lazy";
-      visual.append(image);
+      image.src = item.photo_url;
+      image.alt = item.name;
+      image.className = "technician-detail-photo";
+      detailBody.append(image);
     } else {
       const icon = document.createElement("span");
+      icon.className = "technician-card-placeholder";
       icon.setAttribute("aria-hidden", "true");
-      icon.textContent = product.category_group === "satellite" ? "📡" : "📱";
-      visual.append(icon);
+      icon.textContent = item.category_group === "satellite" ? "📡" : "📱";
+      detailBody.append(icon);
     }
-    card.append(visual);
+    addTextElement(detailBody, "h2", "", item.name);
+    addTextElement(detailBody, "p", "technician-detail-specialty", getProductGroup(item));
+    if (item.description) addTextElement(detailBody, "p", "technician-detail-specialty", item.description);
+    if (item.country) addTextElement(detailBody, "p", "workshop-location", item.country === "bd" ? "Bangladesh (BD)" : item.country === "saudi" ? "Saudi Arabia (Saudi)" : "Global");
+    dialog.showModal();
+  };
 
-    const group = document.createElement("span");
-    group.className = "product-showcase-group";
-    group.textContent = getGroupTitle(product);
-    card.append(group);
-
-    const title = document.createElement("strong");
-    title.className = "product-showcase-title";
-    title.textContent = product.name;
-    card.append(title);
-
-    const arrow = document.createElement("span");
-    arrow.className = "product-showcase-arrow";
-    arrow.setAttribute("aria-hidden", "true");
-    arrow.textContent = "↗";
-    card.append(arrow);
-
-    card.addEventListener("click", () => {
-      detailBody.replaceChildren();
-      if (product.photo_url) {
-        const image = document.createElement("img");
-        image.src = product.photo_url;
-        image.alt = product.name;
-        image.className = "technician-detail-photo";
-        detailBody.append(image);
-      } else {
-        const icon = document.createElement("div");
-        icon.className = "product-detail-icon";
-        icon.textContent = product.category_group === "satellite" ? "📡" : "📱";
-        detailBody.append(icon);
-      }
-      addTextElement(detailBody, "h2", "", product.name);
-      addTextElement(detailBody, "p", "technician-detail-specialty", getGroupTitle(product));
-      if (product.description) addTextElement(detailBody, "p", "product-detail-description", product.description);
-      dialog.showModal();
-    });
-
-    grid.append(card);
+  items.filter(item => item && item.name && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region))).forEach(item => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "technician-card";
+    card.setAttribute("aria-label", "View " + item.name + " product details");
+    if (item.photo_url) {
+      const image = document.createElement("img");
+      image.src = item.photo_url;
+      image.alt = "";
+      image.loading = "lazy";
+      card.append(image);
+    } else {
+      const placeholder = document.createElement("span");
+      placeholder.className = "technician-card-placeholder";
+      placeholder.setAttribute("aria-hidden", "true");
+      placeholder.textContent = item.category_group === "satellite" ? "📡" : "📱";
+      card.append(placeholder);
+    }
+    const info = document.createElement("span");
+    info.className = "technician-card-info";
+    addTextElement(info, "strong", "", item.name);
+    addTextElement(info, "small", "technician-specialty", getProductGroup(item));
+    addTextElement(info, "small", "technician-card-hint", "View details");
+    card.append(info);
+    card.addEventListener("click", () => openDetails(item));
+    target.append(card);
   });
 
-  target.append(grid);
-  if (homepageProducts) homepageProducts.hidden = !grid.children.length;
+  if (target.children.length && homepageProducts) homepageProducts.hidden = false;
+  else if (homepageProducts) homepageProducts.hidden = true;
 }
 
 async function loadPublicServices() {
