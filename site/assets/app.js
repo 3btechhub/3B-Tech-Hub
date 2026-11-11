@@ -711,11 +711,20 @@ function renderProducts(products) {
   visibleProducts.forEach(product => {
     const card = document.createElement("article");
     card.className = "product-type-card";
-    const icon = document.createElement("span");
-    icon.className = "product-type-icon";
-    icon.setAttribute("aria-hidden", "true");
-    icon.textContent = "📦";
-    card.append(icon);
+    if (product.photo_url) {
+      const image = document.createElement("img");
+      image.src = product.photo_url;
+      image.alt = product.name;
+      image.loading = "lazy";
+      image.className = "product-type-image";
+      card.append(image);
+    } else {
+      const icon = document.createElement("span");
+      icon.className = "product-type-icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.textContent = "📦";
+      card.append(icon);
+    }
     addTextElement(card, "h3", "product-type-name", product.name);
     if (product.category) addTextElement(card, "p", "product-type-category", product.category);
     list.append(card);
@@ -803,7 +812,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
     workshopData=workshops||[];
     productData=products||[];
     serviceData=services||[];
-    for(const row of settings||[])if(row.setting_key==="technicians")technicianData=Array.isArray(row.setting_value)?row.setting_value:[];
+    for(const row of settings||[])if(row.setting_key==="technicians")technicianData=Array.isArray(row.setting_value)?row.setting_value.map(item=>({...item,category:item.category||item.specialty||"",description:item.description||""})):[];
     if(workshopEditor)renderWorkshopAdminList();
     if(technicianEditor)renderTechnicianAdminList();
     if(productEditor)renderProductAdminList();
