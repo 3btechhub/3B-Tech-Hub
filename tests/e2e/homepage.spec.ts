@@ -12,7 +12,7 @@ test("homepage keeps a clean shell and separate logo and title controls", async 
 });
 
 test("header search replaces the title and shows matching floating suggestions", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Search" }).click();
   await expect(page.locator(".brand-title")).toHaveCount(0);
   const input = page.getByRole("searchbox", { name: "Search the website" });
@@ -22,7 +22,7 @@ test("header search replaces the title and shows matching floating suggestions",
 });
 
 test("menu and search close when clicking outside their floating panels", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/", { waitUntil: "networkidle" });
   await page.getByRole("button", { name: "Menu" }).click();
   await expect(page.getByRole("group", { name: "Website menu" })).toBeVisible();
   await page.locator(".home-clean-surface").click();
