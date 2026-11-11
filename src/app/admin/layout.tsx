@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { requireAdmin } from "@/lib/admin-session";
+import AdminModuleNav from "./admin-module-nav";
 
 export const metadata = {
   robots: { index: false, follow: false },
@@ -16,6 +17,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           <button className="secondary" type="submit">Sign out</button>
         </form>
       </div>
+      <AdminModuleNav />
       {children}
     </>
   );
