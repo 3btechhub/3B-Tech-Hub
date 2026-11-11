@@ -712,37 +712,31 @@ function renderWorkshops(items) {
   });
   if (target.children.length && homepageWorkshops) homepageWorkshops.hidden = false;
 }
-function renderProducts() {
+function renderProducts(products) {
   const target = document.querySelector("#products-list");
   if (!target) return;
   target.replaceChildren();
-
-  const groups = [
-    { title: "Mobile & Accessories", icon: "📱", types: ["Earphones & Headphones", "Phone Cases & Covers", "Glass Protector", "Chargers & Adapters"] },
-    { title: "Satellite & TV Equipment", icon: "📡", types: ["Satellite Dishes", "Satellite Receivers", "LNB", "Coaxial Cables", "Connectors & Splitters"] }
-  ];
-
-  groups.forEach(group => {
-    const section = document.createElement("section");
-    section.className = "product-type-group";
-    addTextElement(section, "h2", "product-group-heading", group.title);
-    const list = document.createElement("div");
-    list.className = "product-type-list";
-    group.types.forEach(type => {
-      const item = document.createElement("article");
-      item.className = "product-type-card";
-      const icon = document.createElement("span");
-      icon.className = "product-type-icon";
-      icon.setAttribute("aria-hidden", "true");
-      icon.textContent = group.icon;
-      item.append(icon);
-      addTextElement(item, "h3", "product-type-name", type);
-      list.append(item);
-    });
-    section.append(list);
-    target.append(section);
+  const region = activeCountry.region;
+  const visibleProducts = (products || []).filter(item => region === "global" || item.country === "global" || item.country === region);
+  if (!visibleProducts.length) {
+    if (homepageProducts) homepageProducts.hidden = true;
+    return;
+  }
+  const list = document.createElement("div");
+  list.className = "product-type-list";
+  visibleProducts.forEach(product => {
+    const card = document.createElement("article");
+    card.className = "product-type-card";
+    const icon = document.createElement("span");
+    icon.className = "product-type-icon";
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = "📦";
+    card.append(icon);
+    addTextElement(card, "h3", "product-type-name", product.name);
+    if (product.category) addTextElement(card, "p", "product-type-category", product.category);
+    list.append(card);
   });
-
+  target.append(list);
   if (homepageProducts) homepageProducts.hidden = false;
 }
 
@@ -874,9 +868,58 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor)) {
     document.querySelector("#workshop-cancel").addEventListener("click",resetWorkshopForm);
     workshopEditor.elements.photo.addEventListener("change",()=>{const file=workshopEditor.elements.photo.files[0];if(file)previewImage(workshopPhotoPreview,URL.createObjectURL(file));});
   }
-  function renderProductAdminList(){productItems.replaceChildren();if(!productData.length){addTextElement(productItems,"p","muted","No products added yet.");return;}const labels={"mobile":"Mobile & Accessories","satellite":"Satellite & TV Equipment"};for(const group of ["mobile","satellite"]){const grouped=productData.filter(item=>(item.category_group||"mobile")===group);if(!grouped.length)continue;addTextElement(productItems,"h3","product-group-heading",labels[group]);grouped.forEach(item=>{const row=document.createElement("article");row.className="technician-admin-row";productItems.append(row);addTextElement(row,"strong","",item.name);addTextElement(row,"span","",[item.category,item.country==="bd"?"Bangladesh":item.country==="saudi"?"Saudi Arabia":"Global",item.status].filter(Boolean).join(" · "));const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";edit.addEventListener("click",()=>{productEditor.elements.id.value=item.id;productEditor.elements.name.value=item.name||"";productEditor.elements.category_group.value=item.category_group||"mobile";productEditor.elements.category.value=item.category||"";productEditor.elements.description.value=item.description||"";productEditor.elements.country.value=item.country||"global";productEditor.elements.phone.value=item.phone||"";productEditor.elements.whatsapp.value=item.whatsapp||"";productEditor.elements.is_published.checked=item.status==="active";productPhotoUrl=item.photo_url||"";productEditor.elements.remove_photo.checked=false;document.querySelector("#product-remove-photo-wrap").hidden=!productPhotoUrl;previewImage(productPhotoPreview,productPhotoUrl);document.querySelector("#product-form-title").textContent="Edit Product";document.querySelector("#product-cancel").hidden=false;});actions.append(edit);const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";del.addEventListener("click",async()=>{if(!confirm("Delete this product?"))return;const {error}=await supabase.from("products").delete().eq("id",item.id);if(error){editorMessage(productMessage,error.message,true);return;}productData=productData.filter(x=>x.id!==item.id);renderProductAdminList();});actions.append(del);});}}
-  function resetProductForm(){productEditor.reset();productPhotoUrl="";document.querySelector("#product-remove-photo-wrap").hidden=true;previewImage(productPhotoPreview,"");document.querySelector("#product-form-title").textContent="Add Product";document.querySelector("#product-cancel").hidden=true;}
-  if(productEditor){productEditor.elements.category.addEventListener("change",()=>{const satelliteCategories=["Satellite Dishes","Satellite Receivers","LNB","Coaxial Cables","Connectors & Splitters"];productEditor.elements.category_group.value=satelliteCategories.includes(productEditor.elements.category.value)?"satellite":"mobile";});productEditor.addEventListener("submit",async event=>{event.preventDefault();const button=document.querySelector("#product-save");button.disabled=true;editorMessage(productMessage,"Saving…");try{const form=new FormData(productEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"products");const name=String(form.get("name")||"").trim();const slug=id?(productData.find(x=>x.id===id)?.slug||""):(name.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"product")+"-"+crypto.randomUUID().slice(0,8);const item={slug,name,category_group:["mobile","satellite"].includes(String(form.get("category_group")||""))?String(form.get("category_group")):"mobile",category:String(form.get("category")||"").trim()||null,description:String(form.get("description")||"").trim(),country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",phone:String(form.get("phone")||"").trim()||null,whatsapp:String(form.get("whatsapp")||"").trim()||null,photo_url:photo||(form.get("remove_photo")==="on"?"":productPhotoUrl)||null,status:form.get("is_published")==="on"?"active":"draft"};const query=id?supabase.from("products").update(item).eq("id",id):supabase.from("products").insert(item);const {error}=await query;if(error)throw error;resetProductForm();await loadIdentityEditors();editorMessage(productMessage,"Product saved.");}catch(error){editorMessage(productMessage,error.message||"Could not save product.",true);}finally{button.disabled=false;}});document.querySelector("#product-cancel").addEventListener("click",resetProductForm);productEditor.elements.photo.addEventListener("change",()=>{const file=productEditor.elements.photo.files[0];if(file)previewImage(productPhotoPreview,URL.createObjectURL(file));});}
+  function renderProductAdminList(){
+    productItems.replaceChildren();
+    if(!productData.length){addTextElement(productItems,"p","muted","No product types added yet.");return;}
+    productData.forEach(item=>{
+      const row=document.createElement("article");row.className="technician-admin-row";productItems.append(row);
+      addTextElement(row,"strong","",item.name);
+      addTextElement(row,"span","",[`Category: ${item.category||"—"}`,item.country==="bd"?"Bangladesh (BD)":item.country==="saudi"?"Saudi Arabia (Saudi)":"Global",item.status==="active"?"Published":"Draft"].join(" · "));
+      const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
+      const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
+      edit.addEventListener("click",()=>{
+        productEditor.elements.id.value=item.id;
+        productEditor.elements.name.value=item.name||"";
+        productEditor.elements.category.value=item.category||"";
+        productEditor.elements.country.value=item.country||"global";
+        productEditor.elements.is_published.checked=item.status==="active";
+        document.querySelector("#product-form-title").textContent="Edit Product Type";
+        document.querySelector("#product-cancel").hidden=false;
+      });actions.append(edit);
+      const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";
+      del.addEventListener("click",async()=>{
+        if(!confirm("Delete this product type?"))return;
+        const {error}=await supabase.from("products").delete().eq("id",item.id);
+        if(error){editorMessage(productMessage,error.message,true);return;}
+        productData=productData.filter(x=>x.id!==item.id);renderProductAdminList();
+      });actions.append(del);
+    });
+  }
+  function resetProductForm(){
+    productEditor.reset();
+    productEditor.elements.country.value="global";
+    document.querySelector("#product-form-title").textContent="Add Product Type";
+    document.querySelector("#product-cancel").hidden=true;
+  }
+  if(productEditor){
+    productEditor.addEventListener("submit",async event=>{
+      event.preventDefault();
+      const button=document.querySelector("#product-save");button.disabled=true;editorMessage(productMessage,"Saving…");
+      try{
+        const form=new FormData(productEditor);const id=String(form.get("id")||"");
+        const name=String(form.get("name")||"").trim();
+        const category=String(form.get("category")||"").trim();
+        if(!name||!category)throw new Error("Type and Category are required.");
+        const slug=id?(productData.find(x=>x.id===id)?.slug||""):(name.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"product")+"-"+crypto.randomUUID().slice(0,8);
+        const item={slug,name,category,description:"",country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",status:form.get("is_published")==="on"?"active":"draft"};
+        const query=id?supabase.from("products").update(item).eq("id",id):supabase.from("products").insert(item);
+        const {error}=await query;if(error)throw error;
+        resetProductForm();await loadIdentityEditors();editorMessage(productMessage,"Product type saved.");
+      }catch(error){editorMessage(productMessage,error.message||"Could not save product type.",true);}
+      finally{button.disabled=false;}
+    });
+    document.querySelector("#product-cancel").addEventListener("click",resetProductForm);
+  }
   function renderTechnicianAdminList(){
     technicianItems.replaceChildren();
     if(!technicianData.length){addTextElement(technicianItems,"p","muted","No technicians added yet.");return;}
