@@ -69,7 +69,7 @@
     regionSelect.addEventListener("change", goToRegion);
     regionSelect.addEventListener("input", goToRegion);
   }
-  makeDropdown(languageSelect, "Language");
+  if (languageSelect) {\n    const defaultLanguage = activeRegion === "bd" ? "bn" : activeRegion === "saudi" ? "ar" : "en";\n    try { languageSelect.value = localStorage.getItem("3b-language-" + activeRegion) || defaultLanguage; } catch (_) { languageSelect.value = defaultLanguage; }\n  }\n  makeDropdown(languageSelect, "Language");
   makeDropdown(regionSelect, "Country");
 
   if (!button || !menu) return;
