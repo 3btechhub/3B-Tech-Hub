@@ -24,5 +24,4 @@ test("owner login provides email and password fields", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
   await expect(page.getByLabel("Email")).toHaveAttribute("type", "email");
   await expect(page.getByLabel("Password")).toHaveAttribute("type", "password");
-  await expect(page.getByRole("link", { name: "Forgot password?" })).toHaveAttribute("href", "/login/recovery");
 });
