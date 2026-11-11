@@ -1,9 +1,9 @@
 # Appwrite Server Setup
 
-Admin APIs remain disabled until the Owner configures the server-only API key, production environment variables and exact Owner user ID. The production database, tables, indexes and private media bucket have been provisioned.
+Admin APIs remain disabled until production environment variables and the exact Owner user ID are configured. Appwrite Sites supplies a short-lived `x-appwrite-key` header to each SSR request; the server adapter must use this header instead of a stored API key. The production database, tables, indexes and private media bucket have been provisioned.
 
 ## Required server-only environment
-- APPWRITE_API_KEY: server-only key with least-privilege TablesDB row read/create/update/delete and Storage file create/delete scopes. Uploads are private by default; do not expose them publicly until an explicit delivery-permission flow is implemented.
+- Appwrite Sites ephemeral `x-appwrite-key` header: Appwrite mints a short-lived key for each SSR request using the scopes granted to the Site. No permanent API key is required or stored. The production Site already has TablesDB and Storage read/write scopes.
 - APPWRITE_DATABASE_ID
 - APPWRITE_CONTENT_TABLE_ID
 - APPWRITE_MEDIA_TABLE_ID
@@ -11,7 +11,7 @@ Admin APIs remain disabled until the Owner configures the server-only API key, p
 - APPWRITE_MEDIA_BUCKET_ID
 - Existing NEXT_PUBLIC_APPWRITE_ENDPOINT and NEXT_PUBLIC_APPWRITE_PROJECT_ID.
 
-Never expose APPWRITE_API_KEY through NEXT_PUBLIC variables, client bundles, logs or audit metadata.
+Never store a long-lived API key in Site variables, GitHub secrets, client bundles, logs or audit metadata. Use only the per-request ephemeral key from Appwrite's `x-appwrite-key` header.
 
 For content revisions, keep a unique composite index on slug + locale + revision to prevent duplicate version numbers. The current API also checks the latest known revision before insertion; the unique index is the final concurrency guard. For Media Library title search, add a full-text index on the title column. Pagination uses Appwrite limit/offset queries and is capped at 100 rows per request.
 
@@ -47,4 +47,4 @@ Create a private bucket initially. Enforce the 50 MB maximum and allowed image/v
 - Private Storage bucket `media` is enabled with per-file security, encryption, antivirus, image transformations and a 50,000,000-byte maximum upload size.
 
 ## Remaining work
-Media usage tracking and reference-safe permanent deletion, generated thumbnail/optimized rendition pipeline and reviewed CDN delivery remain pending. Content draft browsing is currently bounded and needs server-side pagination/search for large sites. Strong optimistic concurrency for concurrent revision creation and non-owner role profiles remain pending. Live Appwrite integration cannot be considered complete until the production project is connected and the documented resources and secrets are configured.
+Media usage tracking and reference-safe permanent deletion, generated thumbnail/optimized rendition pipeline and reviewed CDN delivery remain pending. Content draft browsing is currently bounded and needs server-side pagination/search for large sites. Strong optimistic concurrency for concurrent revision creation and non-owner role profiles remain pending. Live Appwrite integration still requires production runtime and end-to-end verification.
