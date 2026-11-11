@@ -20,7 +20,7 @@ The production website is a static, mobile-first frontend published by **GitHub 
 
 The `.github/workflows/deploy-pages.yml` workflow validates and publishes the `site/` directory. GitHub Pages must be configured to use GitHub Actions in repository Settings → Pages. The expected project-site URL is:
 
-`https://3btechhub.github.io/3B-Tech-Hub/`
+`https://3btechhub.github.io/3btechhub/`
 
 The current static release contains the requested homepage and Supabase email/password authentication. Admin CMS, media management, bookings, and server-only API workflows are not yet migrated; they must not be exposed until implemented with Supabase Auth/RLS/Edge Functions.
 
