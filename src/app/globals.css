@@ -1003,7 +1003,7 @@ body input.control--lg, body select.control--lg, body textarea.control--lg {
 .header-actions { display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:0; }
 .header-search { position:relative; display:flex; align-items:center; gap:9px; min-width:44px; min-height:44px; }
 .header-search-trigger { display:inline-flex; align-items:center; justify-content:center; flex:0 0 44px; width:44px; min-width:44px; height:44px; min-height:44px; padding:10px!important; border:1px solid var(--border)!important; border-radius:10px!important; background:var(--surface)!important; color:var(--foreground)!important; cursor:pointer; }
-.header-search-trigger svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.header-search-trigger svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }\n.header-search-trigger[aria-label="Close search"] { background:var(--foreground)!important; color:var(--background)!important; border-color:var(--foreground)!important; }
 .header-search-divider { align-self:stretch; width:1px; min-height:38px; background:var(--border); }
 .header-search-input { display:block; width:clamp(120px, 24vw, 280px)!important; min-width:0; max-width:min(280px, 40vw)!important; height:44px; min-height:44px!important; padding:8px 4px!important; border:0!important; border-radius:0!important; border-bottom:1px solid var(--foreground)!important; background:transparent!important; box-shadow:none!important; color:var(--foreground)!important; font-size:15px!important; outline:none!important; }
 .header-search-input:focus { outline:none!important; }
