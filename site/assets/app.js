@@ -683,7 +683,7 @@ function renderWorkshops(items) {
     dialog.showModal();
   };
 
-  items.filter(item => item && item.title).forEach(item => {
+  items.filter(item => item && item.title && (activeCountry.region === "global" || (item.country || "global") === activeCountry.region)).forEach(item => {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "workshop-card";
@@ -778,7 +778,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
     workshopData.forEach(item=>{
       const row=document.createElement("article");row.className="technician-admin-row";workshopItems.append(row);
       addTextElement(row,"strong","",item.title);
-      addTextElement(row,"span","",[item.workshop_date,item.location,item.status].filter(Boolean).join(" · "));
+      addTextElement(row,"span","",[item.workshop_date,item.location,item.country === "bd" ? "Bangladesh" : item.country === "saudi" ? "Saudi Arabia" : "Global",item.status].filter(Boolean).join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
       edit.addEventListener("click",()=>{
@@ -787,6 +787,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
         workshopEditor.elements.description.value=item.description||"";
         workshopEditor.elements.date.value=item.workshop_date||"";
         workshopEditor.elements.time.value=item.workshop_time||"";
+        workshopEditor.elements.country.value=item.country||"global";
         for(const key of ["location","trainer","phone","whatsapp"])workshopEditor.elements[key].value=item[key]||"";
         workshopEditor.elements.is_published.checked=item.status==="published";
         workshopPhotoUrl=item.photo_url||"";workshopEditor.elements.remove_photo.checked=false;document.querySelector("#workshop-remove-photo-wrap").hidden=!workshopPhotoUrl;previewImage(workshopPhotoPreview,workshopPhotoUrl);
@@ -813,7 +814,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
       try{
         const form=new FormData(workshopEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"workshops");
         const {data:userData}=await supabase.auth.getUser();
-        const item={title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim()||null,workshop_date:String(form.get("date")||"")||null,workshop_time:String(form.get("time")||"")||null,location:String(form.get("location")||"").trim()||null,trainer:String(form.get("trainer")||"").trim()||null,phone:String(form.get("phone")||"").trim()||null,whatsapp:String(form.get("whatsapp")||"").trim()||null,photo_url:photo||(form.get("remove_photo")==="on"?"":workshopPhotoUrl)||null,status:form.get("is_published")==="on"?"published":"draft",updated_by:userData.user?.id||null,updated_at:new Date().toISOString()};
+        const item={title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim()||null,workshop_date:String(form.get("date")||"")||null,workshop_time:String(form.get("time")||"")||null,location:String(form.get("location")||"").trim()||null,trainer:String(form.get("trainer")||"").trim()||null,phone:String(form.get("phone")||"").trim()||null,whatsapp:String(form.get("whatsapp")||"").trim()||null,photo_url:photo||(form.get("remove_photo")==="on"?"":workshopPhotoUrl)||null,country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",status:form.get("is_published")==="on"?"published":"draft,updated_by:userData.user?.id||null,updated_at:new Date().toISOString()};
         const query=id?supabase.from("workshops").update(item).eq("id",id):supabase.from("workshops").insert({...item,created_by:userData.user?.id||null});
         const {error}=await query;
         if(error)throw error;
