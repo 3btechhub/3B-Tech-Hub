@@ -30,39 +30,21 @@
   </header>
   <main class="auth-main">
     <section id="profile-card" class="profile-form">
-      <div class="profile-row">
-        <span id="profile-name">Loading…</span>
-        <button class="profile-edit" type="button" data-edit="name">Edit</button>
-      </div>
-      <form class="profile-edit-form" id="edit-name-form" hidden>
-        <input name="name" type="text" maxlength="80" placeholder="Name" aria-label="Name" required>
-        <div class="profile-form-actions"><button type="submit">Save</button><button type="button" class="profile-cancel" data-cancel="name">Cancel</button></div>
-      </form>
-      <div class="profile-row">
-        <span id="profile-email">Loading…</span>
-        <button class="profile-edit" type="button" data-edit="email">Edit</button>
-      </div>
-      <form class="profile-edit-form" id="edit-email-form" hidden>
-        <input name="email" type="email" maxlength="254" placeholder="Email" aria-label="Email" required>
-        <div class="profile-form-actions"><button type="submit">Save</button><button type="button" class="profile-cancel" data-cancel="email">Cancel</button></div>
-      </form>
-      <div class="profile-row">
-        <span id="profile-phone">—</span>
-        <button class="profile-edit" type="button" data-edit="phone">Edit</button>
-      </div>
-      <form class="profile-edit-form" id="edit-phone-form" hidden>
-        <input name="phone" type="tel" maxlength="24" placeholder="Phone Number" aria-label="Phone Number">
-        <div class="profile-form-actions"><button type="submit">Save</button><button type="button" class="profile-cancel" data-cancel="phone">Cancel</button></div>
-      </form>
-      <div class="profile-row profile-password-row">
-        <span>Change Password</span>
-        <button class="profile-edit" type="button" data-edit="password">Change</button>
-      </div>
-      <form class="profile-edit-form" id="edit-password-form" hidden>
-        <input name="currentPassword" type="password" autocomplete="current-password" placeholder="Current Password" aria-label="Current Password" required>
-        <input name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="New Password" aria-label="New Password" required>
-        <input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="Confirm New Password" aria-label="Confirm New Password" required>
-        <div class="profile-form-actions"><button type="submit">Save</button><button type="button" class="profile-cancel" data-cancel="password">Cancel</button></div>
+      <div class="profile-row"><span id="profile-name">Loading…</span></div>
+      <div class="profile-row"><span id="profile-email">Loading…</span></div>
+      <div class="profile-row"><span id="profile-phone">Phone Number</span></div>
+      <button class="profile-edit" id="profile-edit-toggle" type="button">Edit Profile</button>
+      <form class="profile-edit-form" id="profile-edit-form" hidden>
+        <label>Name<input name="name" type="text" maxlength="80" placeholder="Name" aria-label="Name" required></label>
+        <label>Email<input name="email" type="email" maxlength="254" placeholder="Email" aria-label="Email" required></label>
+        <label>Phone Number<input name="phone" type="tel" maxlength="24" placeholder="Phone Number" aria-label="Phone Number"></label>
+        <fieldset class="profile-password-fields">
+          <legend>Change Password</legend>
+          <input name="currentPassword" type="password" autocomplete="current-password" placeholder="Current Password (only when changing password)" aria-label="Current Password">
+          <input name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="New Password (leave blank to keep current)" aria-label="New Password">
+          <input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="Confirm New Password" aria-label="Confirm New Password">
+        </fieldset>
+        <div class="profile-form-actions"><button type="submit">Save</button><button type="button" class="profile-cancel" id="profile-edit-cancel">Cancel</button></div>
       </form>
       <p id="profile-message" class="auth-message" role="status" aria-live="polite"></p>
     </section>
