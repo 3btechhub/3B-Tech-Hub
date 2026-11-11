@@ -630,17 +630,85 @@ function renderWorkshops(items) {
   const target = document.querySelector("#workshops-list");
   if (!target || !Array.isArray(items)) return;
   target.replaceChildren();
+
+  let dialog = document.querySelector("#workshop-detail-dialog");
+  if (!dialog) {
+    dialog = document.createElement("dialog");
+    dialog.id = "workshop-detail-dialog";
+    dialog.className = "technician-detail-dialog";
+    dialog.innerHTML = '<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';
+    document.body.append(dialog);
+    dialog.querySelector(".technician-detail-close").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+  }
+
+  const detailBody = dialog.querySelector(".technician-detail-body");
+  const openDetails = item => {
+    detailBody.replaceChildren();
+    if (item.photo_url) {
+      const image = document.createElement("img");
+      image.src = item.photo_url;
+      image.alt = item.title;
+      image.className = "technician-detail-photo";
+      detailBody.append(image);
+    } else {
+      const icon = document.createElement("span");
+      icon.className = "workshop-detail-fallback";
+      icon.setAttribute("aria-hidden", "true");
+      icon.textContent = "🛠️";
+      detailBody.append(icon);
+    }
+    addTextElement(detailBody, "h2", "", item.title);
+    if (item.description) addTextElement(detailBody, "p", "technician-detail-specialty", item.description);
+    if (item.workshop_date || item.workshop_time) addTextElement(detailBody, "p", "workshop-date", [item.workshop_date, item.workshop_time].filter(Boolean).join(" · "));
+    if (item.location) addTextElement(detailBody, "p", "workshop-location", item.location);
+    if (item.trainer) addTextElement(detailBody, "p", "workshop-trainer", item.trainer);
+    const contacts = document.createElement("div");
+    contacts.className = "technician-detail-contacts";
+    if (item.phone) {
+      const call = document.createElement("a");
+      call.href = "tel:" + item.phone.replace(/[^+\\d]/g, "");
+      call.textContent = "Call";
+      contacts.append(call);
+    }
+    if (item.whatsapp) {
+      const whatsapp = document.createElement("a");
+      whatsapp.href = "https://wa.me/" + item.whatsapp.replace(/\\D/g, "");
+      whatsapp.target = "_blank";
+      whatsapp.rel = "noopener noreferrer";
+      whatsapp.textContent = "WhatsApp";
+      contacts.append(whatsapp);
+    }
+    if (contacts.children.length) detailBody.append(contacts);
+    dialog.showModal();
+  };
+
   items.filter(item => item && item.title).forEach(item => {
-    const card = document.createElement("article"); card.className = "workshop-card"; target.append(card);
-    if (item.photo_url) { const img = document.createElement("img"); img.src = item.photo_url; img.alt = item.title; img.loading = "lazy"; card.append(img); }
-    addTextElement(card, "h3", "", item.title);
-    if (item.description) addTextElement(card, "p", "", item.description);
-    if (item.workshop_date || item.workshop_time) addTextElement(card, "p", "workshop-date", [item.workshop_date, item.workshop_time].filter(Boolean).join(" · "));
-    if (item.location) addTextElement(card, "p", "workshop-location", item.location);
-    if (item.trainer) addTextElement(card, "p", "workshop-trainer", item.trainer);
-    const links = document.createElement("div"); links.className = "company-contact-links"; card.append(links);
-    if (item.phone) { const a = document.createElement("a"); a.href = "tel:" + item.phone.replace(/[^+\\d]/g, ""); a.textContent = "Call"; links.append(a); }
-    if (item.whatsapp) { const a = document.createElement("a"); a.href = "https://wa.me/" + item.whatsapp.replace(/\\D/g, ""); a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = "WhatsApp"; links.append(a); }
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "workshop-card";
+    card.setAttribute("aria-label", "View " + item.title + " workshop details");
+    if (item.photo_url) {
+      const image = document.createElement("img");
+      image.src = item.photo_url;
+      image.alt = "";
+      image.loading = "lazy";
+      card.append(image);
+    } else {
+      const icon = document.createElement("span");
+      icon.className = "workshop-card-placeholder";
+      icon.setAttribute("aria-hidden", "true");
+      icon.textContent = "🛠️";
+      card.append(icon);
+    }
+    const info = document.createElement("span");
+    info.className = "technician-card-info";
+    addTextElement(info, "strong", "", item.title);
+    if (item.workshop_date || item.workshop_time) addTextElement(info, "small", "", [item.workshop_date, item.workshop_time].filter(Boolean).join(" · "));
+    addTextElement(info, "small", "technician-card-hint", "View details");
+    card.append(info);
+    card.addEventListener("click", () => openDetails(item));
+    target.append(card);
   });
   if (target.children.length && homepageWorkshops) homepageWorkshops.hidden = false;
 }
