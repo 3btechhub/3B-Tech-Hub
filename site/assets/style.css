@@ -408,3 +408,28 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
   .technician-card-info strong { font-size:12px; }
   .technician-detail-content { padding:20px; }
 }
+
+
+/* Workshop cards share the compact Services/Technicians card pattern */
+#workshops-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr)); gap:10px; }
+.workshop-card {
+  display:flex; align-items:center; gap:11px; width:100%; min-width:0; min-height:82px;
+  padding:10px; border:1px solid var(--line); border-radius:11px; background:var(--surface);
+  color:var(--page-text); font:inherit; text-align:left; cursor:pointer;
+  transition:transform .16s ease,border-color .16s ease,background .16s ease;
+}
+.workshop-card:hover,.workshop-card:focus-visible { transform:translateY(-2px); border-color:var(--page-text); background:var(--hover); }
+.workshop-card>img,.workshop-card-placeholder {
+  display:grid; place-items:center; flex:0 0 58px; width:58px; height:58px; margin:0;
+  border-radius:8px; object-fit:cover; background:var(--hover);
+}
+.workshop-card-placeholder { font-size:25px; }
+.workshop-detail-fallback { display:grid; place-items:center; width:110px; height:90px; border-radius:12px; background:var(--hover); font-size:42px; }
+.workshop-detail-dialog .workshop-date,.workshop-detail-dialog .workshop-location,.workshop-detail-dialog .workshop-trainer {
+  margin:0; color:var(--muted); font-size:13px; line-height:1.5;
+}
+@media(max-width:520px) {
+  #workshops-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .workshop-card { min-height:76px; padding:8px; gap:8px; }
+  .workshop-card>img,.workshop-card-placeholder { flex-basis:48px; width:48px; height:48px; }
+}
