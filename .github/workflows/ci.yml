@@ -4,33 +4,32 @@ on:
   pull_request:
     branches: [main]
   push:
-    branches: [main, "foundation/**", "launch/**"]
+    branches: [main, "migration/**"]
 
 permissions:
   contents: read
 
 jobs:
-  validate:
+  validate-static-site:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
-      - name: Dependency security audit (moderate and higher block CI)
-        run: npm audit --audit-level=moderate --json > npm-audit.json
-      - name: Upload dependency audit report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-audit-report
-          path: npm-audit.json
-          if-no-files-found: ignore
-          retention-days: 7
-      - run: npm run typecheck
-      - run: npm run lint
-      - run: npm run test
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
-      - run: npm run build
+      - name: Validate required website files
+        run: |
+          test -s site/index.html
+          test -s site/login/index.html
+          test -s site/profile/index.html
+          test -s site/assets/style.css
+          test -s site/assets/app.js
+          test -s site/404.html
+      - name: Validate JavaScript syntax
+        run: node --check site/assets/app.js
+      - name: Validate static routes and required branding
+        run: |
+          grep -q "Three Brothers Technology Hub" site/index.html
+          grep -q "signInWithPassword" site/assets/app.js
+          grep -q "resetPasswordForEmail" site/assets/app.js
+          ! grep -R -E "SUPABASE_SECRET_KEY|service_role|CLOUDFLARE_API_TOKEN|APPWRITE" site
