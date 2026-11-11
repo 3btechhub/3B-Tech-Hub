@@ -1,3 +1,21 @@
+const menuButton = document.querySelector(".menu-trigger");
+const siteMenu = document.querySelector("#site-menu");
+if (menuButton && siteMenu) {
+  menuButton.addEventListener("click", () => {
+    const opening = siteMenu.hidden;
+    siteMenu.hidden = !opening;
+    menuButton.setAttribute("aria-expanded", String(opening));
+    menuButton.setAttribute("aria-label", opening ? "Close menu" : "Open menu");
+  });
+  document.addEventListener("click", (event) => {
+    if (!siteMenu.hidden && !siteMenu.contains(event.target) && !menuButton.contains(event.target)) {
+      siteMenu.hidden = true;
+      menuButton.setAttribute("aria-expanded", "false");
+      menuButton.setAttribute("aria-label", "Open menu");
+    }
+  });
+}
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
