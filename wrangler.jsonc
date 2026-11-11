@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "3b-tech-hub",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": { "enabled": true },
+  "vars": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://sburxeuxkrilbfppxylm.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szacT"
+  }
+}
