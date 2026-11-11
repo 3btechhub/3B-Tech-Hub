@@ -311,7 +311,7 @@ if (profile) {
     fieldsBox.hidden = false;
     event.currentTarget.hidden = true;
     saveButton.hidden = false;
-    fields.elements.currentPassword.focus();
+    form.elements.currentPassword.focus();
   });
 
   async function loadProfile() {
