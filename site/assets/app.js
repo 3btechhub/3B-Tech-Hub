@@ -1,3 +1,4 @@
+await window.countryContextReady;
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const profileMenuLink = document.querySelector("#profile-menu-link");
