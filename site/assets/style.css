@@ -42,3 +42,5 @@ body{background:var(--page-bg);color:var(--page-text)}
 .site-menu .menu-tools{
   width:100%;
 }
+
+.auth-form input[hidden]{display:none}
