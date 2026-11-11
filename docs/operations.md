@@ -32,5 +32,4 @@ Before release verify:
 - Keep schema migrations and a data export separate; both are needed for recovery.
 - A restore procedure is not complete until it has been tested against an isolated database.
 
-## Legacy code
-The repository contains an unshipped Next.js prototype under `src/`. GitHub Pages does not deploy it. Do not configure it with any retired provider or describe its server routes as production features.
+The retired Next.js/Appwrite prototype has been removed from the production branch. The pre-cleanup source remains in `backup/2026-11-12-pre-audit-fixes`; do not restore it to the live runtime.
