@@ -602,6 +602,7 @@ function renderTechnicians(items) {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "technician-card";
+    card.hidden = index >= visibleCount;
     card.setAttribute("aria-label", "View " + item.name + " profile");
     if (item.photo_url) {
       const image = document.createElement("img");
@@ -743,7 +744,9 @@ function renderProducts(items) {
     dialog.showModal();
   };
 
-  items.filter(item => item && item.name && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region))).forEach(item => {
+  const visibleItems = items.filter(item => item && item.name && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region)));
+  let visibleCount = 4;
+  visibleItems.forEach((item, index) => {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "technician-card";
@@ -771,7 +774,20 @@ function renderProducts(items) {
     target.append(card);
   });
 
-  if (target.children.length && homepageProducts) homepageProducts.hidden = false;
+  if (visibleItems.length > 4) {
+    const moreButton = document.createElement("button");
+    moreButton.type = "button";
+    moreButton.className = "product-more-button";
+    moreButton.textContent = "More";
+    moreButton.addEventListener("click", () => {
+      visibleCount = Math.min(visibleCount + 4, visibleItems.length);
+      target.querySelectorAll(".technician-card").forEach((card, index) => { card.hidden = index >= visibleCount; });
+      if (visibleCount >= visibleItems.length) moreButton.remove();
+    });
+    target.append(moreButton);
+  }
+
+  if (target.querySelector(".technician-card") && homepageProducts) homepageProducts.hidden = false;
   else if (homepageProducts) homepageProducts.hidden = true;
 }
 
