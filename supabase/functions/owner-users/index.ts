@@ -18,6 +18,23 @@ function response(body: unknown, status: number, origin: string | null) {
   return new Response(JSON.stringify(body), { status, headers });
 }
 
+async function recordAudit(
+  admin: ReturnType<typeof createClient>,
+  actorId: string,
+  action: string,
+  resourceId: string,
+  metadata: Record<string, unknown> = {},
+) {
+  const { error } = await admin.from("audit_logs").insert({
+    actor_id: actorId,
+    action,
+    resource_type: "auth.users",
+    resource_id: resourceId,
+    metadata,
+  });
+  return error?.message || null;
+}
+
 function validUuid(value: unknown): value is string {
   return typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
@@ -99,7 +116,8 @@ Deno.serve(async (request: Request) => {
         created_by: actor.id,
       });
       if (roleInsertError) throw roleInsertError;
-      return response({ invited: true, user: { id: data.user.id, email: data.user.email, role } }, 201, origin);
+      const auditWarning = await recordAudit(admin, actor.id, "user_invited", data.user.id, { role });
+      return response({ invited: true, user: { id: data.user.id, email: data.user.email, role }, auditWarning }, 201, origin);
     }
 
     if (body.action === "set-role") {
@@ -119,7 +137,8 @@ Deno.serve(async (request: Request) => {
         created_by: actor.id,
       });
       if (insertError) throw insertError;
-      return response({ updated: true, userId: body.userId, role: body.role }, 200, origin);
+      const auditWarning = await recordAudit(admin, actor.id, "user_role_changed", body.userId, { role: body.role });
+      return response({ updated: true, userId: body.userId, role: body.role, auditWarning }, 200, origin);
     }
 
     if (body.action === "set-status") {
@@ -135,7 +154,8 @@ Deno.serve(async (request: Request) => {
         ban_duration: body.blocked ? "876000h" : "none",
       });
       if (error) throw error;
-      return response({ updated: true, userId: body.userId, blocked: body.blocked }, 200, origin);
+      const auditWarning = await recordAudit(admin, actor.id, body.blocked ? "user_blocked" : "user_unblocked", body.userId);
+      return response({ updated: true, userId: body.userId, blocked: body.blocked, auditWarning }, 200, origin);
     }
 
     if (body.action === "reset-password") {
@@ -147,7 +167,8 @@ Deno.serve(async (request: Request) => {
       }
       const { error } = await admin.auth.resetPasswordForEmail(targetData.user.email, { redirectTo });
       if (error) throw error;
-      return response({ sent: true }, 200, origin);
+      const auditWarning = await recordAudit(admin, actor.id, "password_reset_requested", body.userId);
+      return response({ sent: true, auditWarning }, 200, origin);
     }
 
     return response({ error: "Unsupported action." }, 400, origin);
