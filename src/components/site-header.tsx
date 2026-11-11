@@ -23,7 +23,7 @@ function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" /><path d="m16 16 5 5" /></svg>;
 }
 
-export default function SiteHeader({ siteName }: Props) {
+export default function SiteHeader({ siteName, navigationItems }: Props) {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -83,12 +83,12 @@ export default function SiteHeader({ siteName }: Props) {
   const loggedIn = role === "member" || role === "admin";
   const searchItems: SearchItem[] = useMemo(() => [
     { label: "Home", href: "/" },
+    ...navigationItems,
     ...(loggedIn ? [{ label: "Profile", href: "/profile" }] : []),
-    { label: "Services", href: "/#services" },
     { label: "Gallery", href: "/gallery" },
     ...(loggedIn ? [{ label: "Log Out", href: "/api/admin/logout" }] : [{ label: "Log In", href: "/login?next=%2Fprofile" }]),
     ...(role === "admin" ? [{ label: "Dashboard", href: "/admin" }] : []),
-  ], [loggedIn, role]);
+  ].filter((item, index, items) => items.findIndex((candidate) => candidate.href === item.href) === index), [loggedIn, role, navigationItems]);
   const suggestions = search.trim()
     ? searchItems.filter((item) => item.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())).slice(0, 6)
     : searchItems.slice(0, 5);
