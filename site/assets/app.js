@@ -555,8 +555,8 @@ function renderTechnicians(items) {
     addTextElement(card,"h3","",item.name);
     if(item.specialty)addTextElement(card,"p","technician-specialty",item.specialty);
     const links=document.createElement("div");links.className="company-contact-links";card.append(links);
-    if(item.phone){const a=document.createElement("a");a.href="tel:"+item.phone.replace(/[^+\\d]/g,"");a.textContent="Call";links.append(a);}
-    if(item.whatsapp){const a=document.createElement("a");a.href="https://wa.me/"+item.whatsapp.replace(/\\D/g,"");a.target="_blank";a.rel="noopener noreferrer";a.textContent="WhatsApp";links.append(a);}
+    if(item.phone){const a=document.createElement("a");a.href="tel:"+item.phone.replace(/[^+\d]/g,"");a.textContent="Call";links.append(a);}
+    if(item.whatsapp){const a=document.createElement("a");a.href="https://wa.me/"+item.whatsapp.replace(/\D/g,"");a.target="_blank";a.rel="noopener noreferrer";a.textContent="WhatsApp";links.append(a);}
   });
   if(target.children.length) homepageTechnicians.hidden=false;
 }
@@ -573,8 +573,8 @@ function renderWorkshops(items) {
     if(item.location)addTextElement(card,"p","workshop-location",item.location);
     if(item.trainer)addTextElement(card,"p","workshop-trainer",item.trainer);
     const links=document.createElement("div");links.className="company-contact-links";card.append(links);
-    if(item.phone){const a=document.createElement("a");a.href="tel:"+item.phone.replace(/[^+\\d]/g,"");a.textContent="Call";links.append(a);}
-    if(item.whatsapp){const a=document.createElement("a");a.href="https://wa.me/"+item.whatsapp.replace(/\\D/g,"");a.target="_blank";a.rel="noopener noreferrer";a.textContent="WhatsApp";links.append(a);}
+    if(item.phone){const a=document.createElement("a");a.href="tel:"+item.phone.replace(/[^+\d]/g,"");a.textContent="Call";links.append(a);}
+    if(item.whatsapp){const a=document.createElement("a");a.href="https://wa.me/"+item.whatsapp.replace(/\D/g,"");a.target="_blank";a.rel="noopener noreferrer";a.textContent="WhatsApp";links.append(a);}
   });
   if(target.children.length && homepageWorkshops) homepageWorkshops.hidden=false;
 }
