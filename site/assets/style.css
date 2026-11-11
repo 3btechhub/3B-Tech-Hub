@@ -242,3 +242,15 @@ body{background:var(--page-bg);color:var(--page-text)}
 .country-prompt .country-choice-list button:hover{background:var(--hover)}
 
 html:not([data-country-ready="true"]) body{visibility:hidden}
+
+
+/* Menu layout: primary links, preferences, and dashboard separated clearly */
+.site-menu{min-width:260px;padding:10px;gap:0}
+.menu-section{display:grid;gap:2px}
+.menu-divider{height:1px;width:100%;background:var(--line);margin:8px 0}
+.site-menu .menu-link{text-align:left}
+.menu-tools{display:grid;grid-template-columns:1fr;gap:7px;border:0;margin:0;padding:0}
+.site-menu .menu-tool{width:100%;min-width:0;max-width:none;min-height:40px;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--page-text);font-size:14px;text-align:left}
+.site-menu .theme-tool{display:flex;align-items:center;justify-content:flex-start;gap:9px;font-size:14px}
+.site-menu .theme-tool span{font-size:14px}
+@media(max-width:480px){.site-menu{min-width:250px;max-width:calc(100vw - 28px)}}
