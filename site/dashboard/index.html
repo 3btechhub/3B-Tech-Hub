@@ -28,7 +28,7 @@
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" aria-controls="panel-user" aria-selected="false" data-dashboard-tab="user" tabindex="-1">User</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" aria-controls="panel-role" aria-selected="false" data-dashboard-tab="role" tabindex="-1">Role</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" aria-controls="panel-permission" aria-selected="false" data-dashboard-tab="permission" tabindex="-1">Permission</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-company" aria-controls="panel-company" aria-selected="false" data-dashboard-tab="company" tabindex="-1">Company Profile</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshop" aria-controls="panel-workshop" aria-selected="false" data-dashboard-tab="workshop" tabindex="-1">Workshop</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-technician" aria-controls="panel-technician" aria-selected="false" data-dashboard-tab="technician" tabindex="-1">Technician</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-dashboard-tab="settings" tabindex="-1">Settings</button>
     </nav>
@@ -124,19 +124,26 @@
         <article class="dashboard-function-card"><h2>Verify Access</h2></article>
       </div>
     </section>
-    <section class="dashboard-module-panel" id="panel-company" role="tabpanel" aria-labelledby="tab-company" data-dashboard-panel="company" hidden>
-      <form id="company-profile-form" class="content-editor-form">
-        <h2>Company Profile</h2><p class="muted">Only the company name is required. Add contact details, address, links or a photo whenever available.</p>
-        <label>Company name<input name="name" maxlength="120" required></label>
-        <label>Short introduction (optional)<textarea name="description" rows="4" maxlength="1200"></textarea></label>
-        <label>Office / shop address (optional)<textarea name="address" rows="2" maxlength="500"></textarea></label>
+    <section class="dashboard-module-panel" id="panel-workshop" role="tabpanel" aria-labelledby="tab-workshop" data-dashboard-panel="workshop" hidden>
+      <form id="workshop-form" class="content-editor-form">
+        <h2 id="workshop-form-title">Add Workshop</h2>
+        <p class="muted">Only the workshop title is required. Date, time, venue, trainer, contact details, description and image are optional.</p>
+        <input type="hidden" name="id">
+        <label>Workshop title<input name="title" maxlength="160" required></label>
+        <label>Description (optional)<textarea name="description" rows="4" maxlength="2000"></textarea></label>
+        <label>Date (optional)<input name="date" type="date"></label>
+        <label>Time (optional)<input name="time" type="time"></label>
+        <label>Venue / location (optional)<input name="location" maxlength="240"></label>
+        <label>Trainer / instructor (optional)<input name="trainer" maxlength="160"></label>
         <label>Phone (optional)<input name="phone" type="tel" maxlength="40"></label>
         <label>WhatsApp number (optional)<input name="whatsapp" type="tel" maxlength="40"></label>
-        <label>Google Maps link (optional)<input name="maps_url" type="url" placeholder="https://maps.google.com/..."></label>
-        <label>Company photo (optional)<input name="photo" type="file" accept="image/*"></label>
-        <div class="editor-preview" id="company-photo-preview"></div>
-        <button type="submit">Save Company Profile</button><p class="editor-message" id="company-profile-message" role="status"></p>
+        <label>Workshop image (optional)<input name="photo" type="file" accept="image/*"></label>
+        <div class="editor-preview" id="workshop-photo-preview"></div>
+        <label><input name="is_published" type="checkbox" checked> Publish workshop on the website</label>
+        <div class="editor-actions"><button type="submit" id="workshop-save">Save Workshop</button><button type="button" id="workshop-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
+        <p class="editor-message" id="workshop-message" role="status"></p>
       </form>
+      <div class="technician-admin-list"><h2>Workshop List</h2><div id="workshop-admin-items"></div></div>
     </section>
     <section class="dashboard-module-panel" id="panel-technician" role="tabpanel" aria-labelledby="tab-technician" data-dashboard-panel="technician" hidden>
       <form id="technician-form" class="content-editor-form">
