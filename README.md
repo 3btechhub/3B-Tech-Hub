@@ -23,7 +23,8 @@ Vercel is not part of the deployment architecture. Production hosting and server
 ## Repository and deployment
 - Repository: [3btechhub/3B-Tech-Hub](https://github.com/3btechhub/3B-Tech-Hub)
 - Production branch: `main`
-- Appwrite Site: `3b-tech-hub`
+- Appwrite Site: `3B TECH HUB` (`3b-tech-hub`)
+- Production URL: https://3btechhub.appwrite.network
 - Appwrite project: `6af3bd9b003db0b9afb5`
 - Appwrite database: `3btechhub-prod`
 - Storage bucket: `media`
