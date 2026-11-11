@@ -9,8 +9,8 @@ const savedLanguage = localStorage.getItem("3b-language") || "en";
 document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
 document.documentElement.lang = savedLanguage;
 const translations = {
-  en: {home:"Home",login:"Login",profile:"Profile",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
-  bn: {home:"হোম",login:"লগইন",profile:"প্রোফাইল",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"}
+  en: {home:"Home",profile:"Profile",services:"Services",login:"Login",logout:"Logout",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
+  bn: {home:"হোম",profile:"প্রোফাইল",services:"সার্ভিস",login:"লগইন",logout:"লগআউট",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"}
 };
 function applyLanguage(language) {
   const lang = language === "bn" ? "bn" : "en";
@@ -39,49 +39,56 @@ if (languageToggle) languageToggle.addEventListener("click", () => {
   applyLanguage(next);
   applyTheme(document.documentElement.dataset.theme);
 });
-if (menuButton && siteMenu) {
-  menuButton.addEventListener("click", () => {
-    const opening = siteMenu.hidden;
-    siteMenu.hidden = !opening;
-    menuButton.setAttribute("aria-expanded", String(opening));
-    menuButton.setAttribute("aria-label", opening ? "Close menu" : "Open menu");
-  });
-  document.addEventListener("click", (event) => {
-    if (!siteMenu.hidden && !siteMenu.contains(event.target) && !menuButton.contains(event.target)) {
-      siteMenu.hidden = true;
-      menuButton.setAttribute("aria-expanded", "false");
-      menuButton.setAttribute("aria-label", "Open menu");
-    }
-  });
-}
-
-
-const siteMenu = document.querySelector("#site-menu");
-if (menuButton && siteMenu) {
-  menuButton.addEventListener("click", () => {
-    const opening = siteMenu.hidden;
-    siteMenu.hidden = !opening;
-    menuButton.setAttribute("aria-expanded", String(opening));
-    menuButton.setAttribute("aria-label", opening ? "Close menu" : "Open menu");
-  });
-  document.addEventListener("click", (event) => {
-    if (!siteMenu.hidden && !siteMenu.contains(event.target) && !menuButton.contains(event.target)) {
-      siteMenu.hidden = true;
-      menuButton.setAttribute("aria-expanded", "false");
-      menuButton.setAttribute("aria-label", "Open menu");
-    }
-  });
-}
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szac";
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const loginMenuLink = document.querySelector("#login-menu-link");
+const logoutMenuLink = document.querySelector("#logout-menu-link");
+function closeSiteMenu() {
+  if (!siteMenu || !menuButton) return;
+  siteMenu.hidden = true;
+  menuButton.classList.remove("is-open");
+  menuButton.setAttribute("aria-expanded", "false");
+  menuButton.setAttribute("aria-label", "Open menu");
+}
+function setMenuSession(session) {
+  setMenuSession(session);
+  if (loginMenuLink) loginMenuLink.hidden = !!session;
+  if (logoutMenuLink) logoutMenuLink.hidden = !session;
+}
+if (menuButton && siteMenu) {
+  menuButton.addEventListener("click", () => {
+    const opening = siteMenu.hidden;
+    if (opening) {
+      siteMenu.hidden = false;
+      menuButton.classList.add("is-open");
+      menuButton.setAttribute("aria-expanded", "true");
+      menuButton.setAttribute("aria-label", "Close menu");
+    } else closeSiteMenu();
+  });
+  document.addEventListener("click", (event) => {
+    if (!siteMenu.hidden && !siteMenu.contains(event.target) && !menuButton.contains(event.target)) closeSiteMenu();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeSiteMenu();
+  });
+}
+if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
+  logoutMenuLink.disabled = true;
+  const { error } = await supabase.auth.signOut();
+  logoutMenuLink.disabled = false;
+  if (!error) {
+    setMenuSession(null);
+    closeSiteMenu();
+    location.assign(new URL("login/", ROOT_URL).href);
+  }
+});
 async function syncProfileMenu() {
   if (!profileMenuLink) return;
   const { data } = await supabase.auth.getSession();
-  profileMenuLink.hidden = !data.session;
+  setMenuSession(data.session);
 }
 syncProfileMenu();
 supabase.auth.onAuthStateChange((_event, session) => {
