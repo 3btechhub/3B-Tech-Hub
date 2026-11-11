@@ -103,3 +103,21 @@ body{background:var(--page-bg);color:var(--page-text)}
 .profile-form-actions button{width:100%;min-height:44px;font-weight:600}
 .profile-form .auth-message{margin-top:12px}
 @media(max-width:480px){.profile-row{gap:10px}.profile-row strong,.profile-row span{font-size:13px}.profile-edit-form{gap:12px}}
+
+
+/* Inline profile editing: edit each value in its own row */
+.profile-inline-form{display:grid;gap:0;width:100%}
+.profile-row{display:grid;grid-template-columns:minmax(88px,auto) minmax(0,1fr) auto;align-items:center;gap:10px;min-height:58px;padding:8px 0;border-bottom:1px solid var(--line)}
+.profile-row strong{font-size:14px;white-space:nowrap}
+.profile-row .profile-value{min-width:0;overflow-wrap:anywhere;text-align:right;font-size:14px}
+.profile-row input{grid-column:2;grid-row:1;width:100%;min-width:0;height:40px;padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--page-text);font-size:14px}
+.profile-row input:focus{outline:2px solid var(--page-text);outline-offset:1px}
+.profile-inline-edit{grid-column:3;grid-row:1;min-width:48px;min-height:34px;padding:6px 9px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--page-text);font-size:13px;cursor:pointer}
+.profile-inline-edit:hover{background:var(--hover)}
+.profile-password-fields{display:grid;gap:10px;margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:8px}
+.profile-password-fields[hidden]{display:none}
+.profile-password-fields input{width:100%;height:42px;padding:9px 11px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--page-text);font-size:14px}
+.profile-form-actions{display:block;margin-top:14px}
+.profile-form-actions button{width:100%;min-height:44px;border:1px solid var(--page-text);border-radius:7px;background:var(--page-text);color:var(--page-bg);font-weight:600;cursor:pointer}
+.profile-form-actions button[hidden]{display:none}
+@media(max-width:390px){.profile-row{grid-template-columns:minmax(82px,auto) minmax(0,1fr) auto;gap:7px}.profile-row strong,.profile-row .profile-value{font-size:13px}.profile-inline-edit{min-width:42px;padding-inline:7px}}
