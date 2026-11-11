@@ -3,25 +3,20 @@ const siteMenu = document.querySelector("#site-menu");
 const profileMenuLink = document.querySelector("#profile-menu-link");
 const dashboardMenuLink = document.querySelector("#dashboard-menu-link");
 const themeToggle = document.querySelector("#theme-toggle");
-const languageToggle = document.querySelector("#language-toggle");
-const languageCode = document.querySelector("#language-code");
 const savedTheme = localStorage.getItem("3b-theme");
-const savedLanguage = localStorage.getItem("3b-language") || "en";
+const savedLanguage = "en";
 document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
 document.documentElement.lang = savedLanguage;
 const translations = {
-  en: {home:"Home",profile:"Profile",services:"Services",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
-  bn: {home:"হোম",profile:"প্রোফাইল",services:"সার্ভিস",login:"লগইন",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"}
+  en: {home:"Home",profile:"Profile",services:"Services",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"}
 };
-function applyLanguage(language) {
-  const lang = language === "bn" ? "bn" : "en";
-  document.documentElement.lang = lang;
+function applyLanguage() {
+  document.documentElement.lang = "en";
   document.querySelectorAll("[data-label]").forEach((element) => {
     const key = element.dataset.label;
-    if (translations[lang][key]) element.textContent = translations[lang][key];
+    if (translations.en[key]) element.textContent = translations.en[key];
   });
-  if (languageCode) languageCode.textContent = lang.toUpperCase();
-  localStorage.setItem("3b-language", lang);
+  localStorage.setItem("3b-language", "en");
 }
 function applyTheme(theme) {
   const dark = theme === "dark";
@@ -32,14 +27,9 @@ function applyTheme(theme) {
   }
   localStorage.setItem("3b-theme", dark ? "dark" : "light");
 }
-applyLanguage(savedLanguage);
+applyLanguage();
 applyTheme(savedTheme === "dark" ? "dark" : "light");
 if (themeToggle) themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
-if (languageToggle) languageToggle.addEventListener("click", () => {
-  const next = document.documentElement.lang === "bn" ? "en" : "bn";
-  applyLanguage(next);
-  applyTheme(document.documentElement.dataset.theme);
-});
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szacT";
 let supabase;
