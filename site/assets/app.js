@@ -481,7 +481,6 @@ if (ownerDashboard) {
         ["site_content", "dashboard-content-count"],
         ["services", "dashboard-services-count"],
         ["products", "dashboard-products-count"],
-        ["service_bookings", "dashboard-bookings-count"],
         ["user_roles", "dashboard-users-count"],
         ["media_assets", "dashboard-media-count"],
         ["site_settings", "dashboard-settings-count"],
