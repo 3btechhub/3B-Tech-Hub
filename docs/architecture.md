@@ -9,29 +9,34 @@ Build a maintainable, secure, responsive business platform that can grow from a 
 Customer / Admin browser
         |
         v
-Next.js App Router (React + TypeScript)
+Appwrite Sites — Next.js App Router (SSR, Node.js 22)
   | Public pages / SEO / Admin UI
-  | Server Actions or Route Handlers (validated)
+  | Server Route Handlers (validated)
   v
 Appwrite services
-  | Auth + TablesDB + Storage + Functions
+  | Auth + TablesDB + Storage
   v
 Business data and protected files
 
-GitHub repository -> GitHub Actions -> Vercel Preview
-                                      -> Owner approval
-                                      -> Production deployment
-Cloudflare: DNS / edge protection / caching where appropriate
+GitHub repository -> GitHub Actions (CI)
+        |
+        v
+Appwrite VCS deployment -> build -> SSR deployment
+        |
+        v
+Owner verification / release approval
 ```
+
+Vercel is intentionally excluded. Appwrite Sites is the production hosting and SSR platform.
 
 ## 3. Technology choices
 - Next.js App Router + React + TypeScript: server rendering, metadata, typed application code and shared public/admin foundation.
-- Tailwind CSS + shadcn/ui: responsive design system with accessible reusable components.
-- Appwrite: authentication, TablesDB, file storage and server-side functions.
-- Vercel: preview and production hosting for Next.js. GitHub Pages is not the target host because the planned platform requires server-side capabilities.
-- GitHub Actions: automated lint, type-check, tests and build validation.
+- Tailwind CSS + shared UI components: responsive design system with accessible reusable components and globally consistent sizing.
+- Appwrite: authentication, TablesDB, file storage and server-side runtime credentials.
+- Appwrite Sites: GitHub-connected Next.js SSR hosting.
+- GitHub Actions: automated lint, type-check, tests, dependency audit and build validation.
 - Vitest + Playwright: unit/component and end-to-end browser testing.
-- Cloudflare: DNS and carefully configured edge protection; avoid caching authenticated/admin responses.
+- DNS and edge protection: configure only after the primary domain and DNS owner are confirmed. Do not cache authenticated/admin responses.
 
 ## 4. Application modules
 1. Public website: home, about, service categories, service details, products, blog, FAQ, reviews and contact.
@@ -59,38 +64,37 @@ Cloudflare: DNS / edge protection / caching where appropriate
 - Restrict uploads by type, size and ownership; use private storage for sensitive files.
 - Maintain audit events for privileged changes.
 - Use secure headers, dependency updates, backups and recovery tests.
+- The SSR API key must remain a secret Site variable and should have only the TablesDB row and Storage file scopes required by the application.
 
-## 7. Media management and delivery
+## 7. Current Appwrite resources
+- Site: `3b-tech-hub`
+- Database: `3btechhub-prod`
+- Tables: `content`, `audit_logs`, `media_assets`, `site_settings`
+- Storage bucket: `media`
+- The tables are provisioned in Appwrite TablesDB. The logical data model in `docs/data-model.md` describes the current implemented foundation and future expansion separately.
+
+## 8. Media management and delivery
 - Provide a central Media Library with CRUD for images, videos, documents and other approved assets.
-- Support both Appwrite Storage uploads and validated external HTTPS media URLs.
+- Support Appwrite Storage uploads and validated external HTTPS media URLs.
 - Optimize images with responsive renditions, AVIF/WebP where supported, thumbnails, lazy loading and CDN caching for public assets.
 - Use poster images and lazy-loaded/adaptive delivery for video; avoid loading large originals unnecessarily.
 - Track media usage and prevent unsafe deletion of assets referenced by published content.
 - Validate uploads and external hosts; enforce server-side role checks and private/public storage boundaries.
-- See docs/media-management.md for the detailed media data model, security and delivery plan.
 
-## 8. SEO and performance
+## 9. SEO and performance
 - Server-render public pages where useful; generate canonical URLs, metadata, sitemap and robots rules.
 - Add Schema.org structured data for the business and relevant service/product pages.
 - Optimize images, fonts, caching and Core Web Vitals.
 - Keep admin pages authenticated and excluded from indexing.
 - Support multilingual content architecture (initial language choice to be confirmed before content production).
 
-## 9. Environments and release flow
+## 10. Environments and release flow
 - Development: local developer environment with non-production data.
-- Preview: isolated deployment for review and testing.
-- Production: promoted only after owner approval.
-- CI checks: lint, TypeScript, unit tests, end-to-end smoke tests and production build.
-- Store environment variables in hosting/provider secret stores; never in Git.
-- Maintain a documented rollback procedure.
-
-## 10. Scalability decisions
-- API-first service boundaries allow future mobile apps and third-party integrations.
-- Modular domain areas keep booking, catalogue, content and identity concerns separate.
-- Use pagination, indexes and query limits for growing datasets.
-- Add background jobs/functions for notifications and long-running workflows.
-- Add caching only to public, non-personalized data.
-- Evaluate dedicated database/replicas only when measured traffic and reliability needs justify cost.
+- Preview: isolated Appwrite deployment for review and testing.
+- Production: promote only after owner approval and release checks.
+- CI checks: lint, TypeScript, unit tests, end-to-end smoke tests, dependency audit and production build.
+- Store environment variables in Appwrite Site secret variables; never in Git.
+- Maintain a documented rollback procedure using a previously successful Appwrite deployment.
 
 ## 11. Open decisions before production
 - Primary domain and DNS ownership.
@@ -98,7 +102,9 @@ Cloudflare: DNS / edge protection / caching where appropriate
 - Payment provider(s), if online payments are required.
 - Exact service locations, booking rules and notification channels.
 - Legal/privacy policy requirements for operating markets.
-- Final admin user identities and role assignments.
+- Additional admin user identities and delegated role assignments.
 
 ## 12. Current implementation status
-Architecture documentation only. No production application, Appwrite database, storage bucket, function or Vercel deployment has been created yet.
+The Next.js application is connected to GitHub and Appwrite Sites. The production Site is configured for Next.js SSR on Node.js 22. The Appwrite database, four core TablesDB tables and media bucket are provisioned. A successful Appwrite build has been recorded.
+
+A successful build is not equivalent to full end-to-end production verification. Owner authentication, content CRUD, media workflows, settings persistence, audit events, backup/restore and browser-level checks must pass before the system is declared fully production-ready.
