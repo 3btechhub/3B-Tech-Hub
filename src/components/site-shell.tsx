@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import SiteHeader from "@/components/site-header";
+import SiteFooter from "@/components/site-footer";
 
 type Props = {
   children: ReactNode;
@@ -12,16 +13,16 @@ type Props = {
 
 export default function SiteShell({ children, siteName, navigationItems }: Props) {
   const pathname = usePathname();
-  const hideHeader = pathname === "/"
-    || pathname.startsWith("/admin")
+  const hideChrome = pathname.startsWith("/admin")
     || pathname.startsWith("/login")
     || pathname.startsWith("/profile")
     || pathname.startsWith("/api");
 
   return (
     <>
-      {!hideHeader && <SiteHeader siteName={siteName} navigationItems={navigationItems} />}
+      {!hideChrome && <SiteHeader siteName={siteName} navigationItems={navigationItems} />}
       {children}
+      {!hideChrome && <SiteFooter siteName={siteName} />}
     </>
   );
 }
