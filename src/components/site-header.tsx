@@ -111,8 +111,8 @@ export default function SiteHeader({ siteName, navigationItems }: Props) {
 
         <div className="header-actions">
           <div className={"header-search " + (searchOpen ? "is-open" : "")} ref={searchRef}>
-            <button type="button" className="header-search-trigger" aria-label={searchOpen ? "Close search" : "Search"} aria-expanded={searchOpen} onClick={() => { setOpen(false); setSearchOpen((value) => !value); setSearch(""); }}>
-              {searchOpen ? <span className="search-close-mark" aria-hidden="true">×</span> : <SearchIcon />}
+            <button type="button" className="header-search-trigger" aria-label={searchOpen ? "Close search" : "Search"} aria-expanded={searchOpen} onClick={() => { setOpen(false); if (searchOpen) closeSearch(); else { setSearch(""); setSearchOpen(true); } }}>
+              {searchOpen ? <CloseSearchIcon /> : <SearchIcon />}
             </button>
             {searchOpen && (
               <>
