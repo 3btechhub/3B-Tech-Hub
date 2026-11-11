@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>Login | Three Brothers Technology Hub</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script type="module" src="../assets/app.js"></script>
+</head>
+<body class="auth-body">
+  <main class="auth-main">
+    <a class="back-link" href="../">← Home</a>
+    <form id="auth-form" class="auth-form">
+      <h1 id="auth-title">Login</h1>
+      <p id="auth-description" class="muted">Sign in with your email address and password.</p>
+      <label class="visually-hidden" for="email">Email address</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="Enter your email address" maxlength="254" required>
+      <label class="visually-hidden" for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" minlength="8" maxlength="256" required>
+      <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
+      <button id="auth-submit" type="submit">Login</button>
+      <div class="auth-links">
+        <button id="forgot-password" class="text-button" type="button">Forgot password?</button>
+        <button id="toggle-signup" class="text-button" type="button">Create account</button>
+      </div>
+    </form>
+  </main>
+</body>
+</html>
