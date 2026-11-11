@@ -54,7 +54,7 @@ function closeSiteMenu() {
   menuButton.setAttribute("aria-label", "Open menu");
 }
 function setMenuSession(session) {
-  setMenuSession(session);
+  if (profileMenuLink) profileMenuLink.hidden = !session;
   if (loginMenuLink) loginMenuLink.hidden = !!session;
   if (logoutMenuLink) logoutMenuLink.hidden = !session;
 }
@@ -92,7 +92,7 @@ async function syncProfileMenu() {
 }
 syncProfileMenu();
 supabase.auth.onAuthStateChange((_event, session) => {
-  if (profileMenuLink) profileMenuLink.hidden = !session;
+  setMenuSession(session);
 });
 const ROOT_URL = new URL("../", import.meta.url);
 const form = document.querySelector("#auth-form");
