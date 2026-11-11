@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = "https://3btechhub.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://3btechhub.appwrite.network";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
