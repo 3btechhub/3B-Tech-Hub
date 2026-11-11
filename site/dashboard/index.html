@@ -126,27 +126,27 @@
     </section>
     <section class="dashboard-module-panel" id="panel-company" role="tabpanel" aria-labelledby="tab-company" data-dashboard-panel="company" hidden>
       <form id="company-profile-form" class="content-editor-form">
-        <h2>Company Profile</h2>
+        <h2>Company Profile</h2><p class="muted">Only the company name is required. Add contact details, address, links or a photo whenever available.</p>
         <label>Company name<input name="name" maxlength="120" required></label>
-        <label>Short introduction<textarea name="description" rows="4" maxlength="1200"></textarea></label>
-        <label>Office / shop address<textarea name="address" rows="2" maxlength="500"></textarea></label>
-        <label>Phone<input name="phone" type="tel" maxlength="40"></label>
-        <label>WhatsApp number<input name="whatsapp" type="tel" maxlength="40"></label>
-        <label>Google Maps link<input name="maps_url" type="url" placeholder="https://maps.google.com/..."></label>
-        <label>Company photo<input name="photo" type="file" accept="image/*"></label>
+        <label>Short introduction (optional)<textarea name="description" rows="4" maxlength="1200"></textarea></label>
+        <label>Office / shop address (optional)<textarea name="address" rows="2" maxlength="500"></textarea></label>
+        <label>Phone (optional)<input name="phone" type="tel" maxlength="40"></label>
+        <label>WhatsApp number (optional)<input name="whatsapp" type="tel" maxlength="40"></label>
+        <label>Google Maps link (optional)<input name="maps_url" type="url" placeholder="https://maps.google.com/..."></label>
+        <label>Company photo (optional)<input name="photo" type="file" accept="image/*"></label>
         <div class="editor-preview" id="company-photo-preview"></div>
         <button type="submit">Save Company Profile</button><p class="editor-message" id="company-profile-message" role="status"></p>
       </form>
     </section>
     <section class="dashboard-module-panel" id="panel-technician" role="tabpanel" aria-labelledby="tab-technician" data-dashboard-panel="technician" hidden>
       <form id="technician-form" class="content-editor-form">
-        <h2 id="technician-form-title">Add Technician</h2>
+        <h2 id="technician-form-title">Add Technician</h2><p class="muted">Only the technician name is required. All other details can be added later.</p>
         <input type="hidden" name="id">
         <label>Technician name<input name="name" maxlength="120" required></label>
-        <label>Expertise / skill<input name="specialty" maxlength="160" required></label>
-        <label>Phone<input name="phone" type="tel" maxlength="40"></label>
-        <label>WhatsApp number<input name="whatsapp" type="tel" maxlength="40"></label>
-        <label>Technician photo<input name="photo" type="file" accept="image/*"></label>
+        <label>Expertise / skill (optional)<input name="specialty" maxlength="160"></label>
+        <label>Phone (optional)<input name="phone" type="tel" maxlength="40"></label>
+        <label>WhatsApp number (optional)<input name="whatsapp" type="tel" maxlength="40"></label>
+        <label>Technician photo (optional)<input name="photo" type="file" accept="image/*"></label>
         <div class="editor-preview" id="technician-photo-preview"></div>
         <div class="editor-actions"><button type="submit" id="technician-save">Save Technician</button><button type="button" id="technician-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
         <p class="editor-message" id="technician-message" role="status"></p>

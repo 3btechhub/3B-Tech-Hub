@@ -390,7 +390,6 @@ if (profile) {
       const newPassword = String(data.get("newPassword") || "");
       const confirmPassword = String(data.get("confirmPassword") || "");
 
-      if (!name) throw new Error("Enter your name.");
       if (!email) throw new Error("Enter your email address.");
       if (phone && !/^\+?[0-9() .-]{7,24}$/.test(phone)) throw new Error("Enter a valid phone number.");
       if (newPassword) {
@@ -404,7 +403,7 @@ if (profile) {
       }
 
       const { data: nameData, error: nameError } = await supabase.auth.updateUser({
-        data: { ...(currentUser.user_metadata || {}), display_name: name },
+        data: { ...(currentUser.user_metadata || {}), display_name: name || null },
       });
       if (nameError) throw nameError;
       currentUser = nameData.user;
