@@ -151,7 +151,7 @@ if (form) {
     forgot.disabled = true;
     showMessage("Sending verification code…");
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {\n        redirectTo: new URL("login/?recovery=1", ROOT_URL).href,\n      });
       if (error) throw error;
       recoveryEmail = email;
       mode = "recovery";
