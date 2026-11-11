@@ -362,3 +362,96 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 .technician-admin-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:13px 0;border-bottom:1px solid var(--line)}
 .technician-admin-row>span{color:var(--muted);font-size:13px}
 @media(max-width:480px){.content-editor-form{padding:14px}.technician-admin-row{align-items:flex-start;flex-direction:column}}
+
+
+/* Compact technician cards with an accessible full-profile dialog */
+.technician-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 10px; }
+.technician-card {
+  display:flex; align-items:center; gap:11px; width:100%; min-width:0; min-height:82px;
+  padding:10px; color:var(--page-text); font:inherit; text-align:left; cursor:pointer;
+  transition:border-color .16s ease,background .16s ease;
+}
+.technician-card:hover,.technician-card:focus-visible { border-color:var(--page-text); background:var(--hover); }
+.technician-card>img,.technician-card-placeholder {
+  display:grid; place-items:center; flex:0 0 58px; width:58px; height:58px; margin:0;
+  border-radius:8px; object-fit:cover; background:var(--hover);
+}
+.technician-card-placeholder { font-size:25px; }
+.technician-card-info { display:grid; gap:3px; min-width:0; }
+.technician-card-info strong { font-size:13px; line-height:1.35; overflow-wrap:anywhere; }
+.technician-card-info small { color:var(--muted); font-size:11px; line-height:1.35; }
+.technician-card-info .technician-card-hint { margin-top:2px; font-weight:700; }
+.technician-detail-dialog {
+  width:min(420px,calc(100% - 28px)); max-width:420px; max-height:min(82vh,680px); padding:0;
+  overflow:auto; border:1px solid var(--line); border-radius:14px; background:var(--surface); color:var(--page-text);
+}
+.technician-detail-dialog::backdrop { background:rgb(0 0 0 / 58%); }
+.technician-detail-content { position:relative; padding:24px; }
+.technician-detail-close {
+  position:absolute; top:10px; right:10px; width:38px; height:38px; border:1px solid var(--line);
+  border-radius:8px; background:var(--surface); color:var(--page-text); font-size:24px; cursor:pointer;
+}
+.technician-detail-body { display:grid; justify-items:center; gap:12px; padding-top:10px; text-align:center; }
+.technician-detail-photo { width:min(100%,220px); height:220px; border-radius:12px; object-fit:cover; background:var(--hover); }
+.technician-detail-body h2 { margin:4px 0 0; font-size:21px; }
+.technician-detail-specialty { margin:0; color:var(--muted); font-size:14px; }
+.technician-detail-contacts { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:6px; }
+.technician-detail-contacts a {
+  display:inline-flex; align-items:center; justify-content:center; min-height:42px; padding:9px 16px;
+  border:1px solid var(--line); border-radius:8px; font-size:13px; font-weight:700;
+}
+.technician-detail-contacts a:hover { background:var(--hover); }
+@media(max-width:520px) {
+  .technician-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .technician-card { min-height:76px; padding:8px; gap:8px; }
+  .technician-card>img,.technician-card-placeholder { flex-basis:48px; width:48px; height:48px; }
+  .technician-card-info strong { font-size:12px; }
+  .technician-detail-content { padding:20px; }
+}
+
+
+/* Workshop cards share the compact Services/Technicians card pattern */
+#workshops-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr)); gap:10px; }
+.workshop-card {
+  display:flex; align-items:center; gap:11px; width:100%; min-width:0; min-height:82px;
+  padding:10px; border:1px solid var(--line); border-radius:11px; background:var(--surface);
+  color:var(--page-text); font:inherit; text-align:left; cursor:pointer;
+  transition:transform .16s ease,border-color .16s ease,background .16s ease;
+}
+.workshop-card:hover,.workshop-card:focus-visible { transform:translateY(-2px); border-color:var(--page-text); background:var(--hover); }
+.workshop-card>img,.workshop-card-placeholder {
+  display:grid; place-items:center; flex:0 0 58px; width:58px; height:58px; margin:0;
+  border-radius:8px; object-fit:cover; background:var(--hover);
+}
+.workshop-card-placeholder { font-size:25px; }
+.workshop-detail-fallback { display:grid; place-items:center; width:110px; height:90px; border-radius:12px; background:var(--hover); font-size:42px; }
+.workshop-detail-dialog .workshop-date,.workshop-detail-dialog .workshop-location,.workshop-detail-dialog .workshop-trainer {
+  margin:0; color:var(--muted); font-size:13px; line-height:1.5;
+}
+@media(max-width:520px) {
+  #workshops-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .workshop-card { min-height:76px; padding:8px; gap:8px; }
+  .workshop-card>img,.workshop-card-placeholder { flex-basis:48px; width:48px; height:48px; }
+}
+
+
+/* One shared responsive card grid for all three homepage sections */
+.service-card-grid,#workshops-list,.technician-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.service-card,.workshop-card,.technician-card { min-height:82px; padding:10px; border-radius:11px; }
+.service-icon,.workshop-card>img,.workshop-card-placeholder,.technician-card>img,.technician-card-placeholder {
+  flex-basis:48px; width:48px; height:48px; border-radius:8px;
+}
+@media(max-width:760px) {
+  .service-card-grid,#workshops-list,.technician-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:520px) {
+  .service-card-grid,#workshops-list,.technician-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .service-card,.workshop-card,.technician-card { min-height:76px; padding:8px; gap:8px; }
+  .service-icon,.workshop-card>img,.workshop-card-placeholder,.technician-card>img,.technician-card-placeholder {
+    flex-basis:42px; width:42px; height:42px;
+  }
+}
