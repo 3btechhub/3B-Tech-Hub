@@ -977,7 +977,8 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
     productData.forEach(item=>{
       const row=document.createElement("article");row.className="technician-admin-row";productItems.append(row);
       addTextElement(row,"strong","",item.name);
-      addTextElement(row,"span","",[`Category: ${item.category||"—"}`,item.country==="bd"?"Bangladesh (BD)":item.country==="saudi"?"Saudi Arabia (Saudi)":"Global",item.status==="active"?"Published":"Draft"].join(" · "));
+      const groupLabel=item.category_group==="satellite"?"Satellite & TV Equipment":"Mobile & Accessories";
+      addTextElement(row,"span","",[groupLabel,`Type: ${item.category||"—"}`,item.country==="bd"?"Bangladesh (BD)":item.country==="saudi"?"Saudi Arabia (Saudi)":"Global",item.status==="active"?"Published":"Draft"].join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
       edit.addEventListener("click",()=>{
