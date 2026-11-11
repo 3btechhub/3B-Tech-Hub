@@ -9,7 +9,7 @@
     if (fallback) fallback.hidden = false;
   };
   // Explicit regional URLs are always respected; detection runs only on the root entry.
-  const path = window.location.pathname.replace(/\\/+$/, "") + "/";
+  const path = window.location.pathname.replace(/\/+$/, "") + "/";
   if (path !== BASE) return;
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 6500);
