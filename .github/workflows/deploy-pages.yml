@@ -32,6 +32,7 @@ jobs:
           test -s site/index.html
           test -s site/login/index.html
           test -s site/profile/index.html
+          test -s site/dashboard/index.html
           test -s site/assets/style.css
           test -s site/assets/app.js
           test -s site/404.html
