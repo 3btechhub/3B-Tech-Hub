@@ -499,3 +499,82 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 .product-item-name{min-width:0;overflow-wrap:anywhere}
 :root[data-theme="dark"] .product-group{box-shadow:none}
 @media(max-width:420px){.product-group{padding:15px}.product-group:first-child{padding:15px}.product-group-list{grid-template-columns:1fr}.product-group-item{min-height:40px}}
+
+
+/* Product group cards use the same compact visual pattern as Services and Workshops. */
+.product-card-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.product-group-card {
+  display:flex;
+  align-items:center;
+  gap:11px;
+  width:100%;
+  min-width:0;
+  min-height:82px;
+  padding:10px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:var(--surface);
+  color:var(--page-text);
+  font:inherit;
+  text-align:left;
+  cursor:pointer;
+  transition:transform .16s ease,border-color .16s ease,background .16s ease;
+}
+.product-group-card:hover,.product-group-card:focus-visible {
+  transform:translateY(-2px);
+  border-color:var(--page-text);
+  background:var(--hover);
+}
+.product-group-card-icon {
+  display:grid;
+  place-items:center;
+  flex:0 0 48px;
+  width:48px;
+  height:48px;
+  border-radius:8px;
+  background:var(--hover);
+  font-size:25px;
+}
+.product-detail-dialog .product-group-detail-icon {
+  display:grid;
+  place-items:center;
+  width:76px;
+  height:76px;
+  border-radius:12px;
+  background:var(--hover);
+  font-size:38px;
+}
+.product-detail-type-list {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  width:100%;
+  margin:8px 0 0;
+  padding:0;
+  list-style:none;
+  text-align:left;
+}
+.product-detail-type-list li {
+  display:flex;
+  align-items:center;
+  min-height:42px;
+  padding:9px 11px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:var(--page-bg);
+  font-size:13px;
+  line-height:1.4;
+}
+@media(max-width:760px) {
+  .product-card-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:520px) {
+  .product-card-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .product-group-card { min-height:76px; padding:8px; gap:8px; }
+  .product-group-card-icon { flex-basis:42px; width:42px; height:42px; font-size:22px; }
+  .product-detail-type-list { grid-template-columns:1fr; }
+}
