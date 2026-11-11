@@ -29,9 +29,11 @@
     return context;
   };
   const routeHome = (region) => window.location.replace(BASE + region + "/");
-  if (path === BASE || path === BASE.slice(0, -1)) {
-    window.location.replace(BASE + "global/");
-    return;
+  const isEntryPath = path === BASE || path === BASE.slice(0, -1);
+  if (isEntryPath) {
+    let manuallySelected = null;
+    try { manuallySelected = localStorage.getItem(MANUAL_KEY); } catch (_) {}
+    if (["bd", "saudi", "global"].includes(manuallySelected)) { routeHome(manuallySelected); return; }
   }
   const pathRegion = regionFromPath();
   if (pathRegion === "bd" || pathRegion === "saudi" || pathRegion === "ksa" || pathRegion === "global") {
@@ -48,7 +50,7 @@
     settled = true;
     const context = applyContext(region, source);
     resolveContext(context);
-
+    if (isEntryPath) routeHome(region);
   };
   const showPrompt = () => {
     if (settled) return;
@@ -73,7 +75,7 @@
         try { localStorage.setItem(MANUAL_KEY, region); } catch (_) {}
         overlay.remove();
         finish(region, "manual");
-        if (region === "bd" || region === "saudi") routeHome(region);
+        if (isEntryPath) routeHome(region);
       });
       document.body.appendChild(overlay);
     };
