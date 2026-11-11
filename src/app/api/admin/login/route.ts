@@ -13,13 +13,6 @@ function cookieName() {
   return projectId ? `a_session_${projectId}` : "";
 }
 
-function configuredOwnerIds() {
-  return [
-    ...(process.env.ADMIN_OWNER_USER_IDS ?? "").split(","),
-    process.env.ADMIN_OWNER_USER_ID ?? "",
-  ].map((id) => id.trim()).filter(Boolean);
-}
-
 export async function POST(request: NextRequest) {
   if (!endpoint || !projectId) {
     return NextResponse.json({ error: "Authentication is not configured." }, { status: 503 });
