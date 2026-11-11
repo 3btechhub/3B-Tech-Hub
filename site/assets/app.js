@@ -14,12 +14,12 @@ const serviceCountryRules = {
 const servicePrefix = "/3btechhub/services/";
 if (currentPath.startsWith(servicePrefix)) {
   const serviceSlug = currentPath.slice(servicePrefix.length).split("/")[0];
-  if (serviceCountryRules[serviceSlug] && serviceCountryRules[serviceSlug] !== activeCountry.region) {
+  if (serviceCountryRules[serviceSlug] && activeCountry.region !== "global" && serviceCountryRules[serviceSlug] !== activeCountry.region) {
     window.location.replace("/3btechhub/" + activeCountry.region + "/");
   }
 }
 document.querySelectorAll("[data-country-region]").forEach((section) => {
-  section.hidden = section.dataset.countryRegion !== activeCountry.region;
+  section.hidden = activeCountry.region !== "global" && section.dataset.countryRegion !== activeCountry.region;
 });
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
