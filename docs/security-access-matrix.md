@@ -26,4 +26,4 @@
 10. Never expose service-role credentials to browser code.
 
 ## Current verification boundary
-RLS is enabled on all 10 public tables and the Owner role is assigned to `3btechhub@gmail.com`. The database grants and role-mutation policies are under review; do not treat the matrix as fully enforced until the corresponding migration is applied and negative access tests pass.
+RLS is enabled on all 10 public tables. The audit hardening migration is applied and verified: anonymous application-table writes are revoked, user-role changes are Owner-only, the primary Owner is protected, audit triggers are active and workshop FK indexes exist. Browser-level negative access tests and the complete admin UI release checks are still pending.
