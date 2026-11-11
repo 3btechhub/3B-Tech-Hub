@@ -105,8 +105,8 @@ async function setMenuSession(session) {
     if (session?.user?.id) {
       const { data, error } = await supabase
         .from("user_roles").select("role")
-        .eq("user_id", session.user.id).eq("role", "owner").maybeSingle();
-      if (!error && data?.role === "owner") dashboardMenuLink.hidden = false;
+        .eq("user_id", session.user.id).in("role", ["owner", "admin"]).limit(1).maybeSingle();
+      if (!error && data?.role) dashboardMenuLink.hidden = false;
     }
   }
 }
@@ -465,6 +465,7 @@ if (profile) {
 
 
 // Owner-only dashboard: the database role is checked again on the page itself.
+let currentDashboardRole = null;
 const ownerDashboard = document.querySelector("#owner-dashboard");
 if (ownerDashboard) {
   const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -473,10 +474,17 @@ if (ownerDashboard) {
   } else {
     const { data: ownerRole, error: roleError } = await supabase
       .from("user_roles").select("role")
-      .eq("user_id", authData.user.id).eq("role", "owner").maybeSingle();
-    if (roleError || ownerRole?.role !== "owner") {
+      .eq("user_id", authData.user.id).in("role", ["owner", "admin"]).limit(1).maybeSingle();
+    if (roleError || !["owner", "admin"].includes(ownerRole?.role)) {
       location.replace(new URL("profile/", ROOT_URL).href);
     } else {
+      currentDashboardRole = ownerRole.role;
+      if (currentDashboardRole !== "owner") {
+        for (const moduleName of ["user", "role", "permission", "settings"]) {
+          document.querySelector(`[data-dashboard-tab="${moduleName}"]`)?.remove();
+          document.querySelector(`[data-dashboard-panel="${moduleName}"]`)?.remove();
+        }
+      }
       const ownerEmail = document.querySelector("#dashboard-owner-email");
       if (ownerEmail) ownerEmail.textContent = authData.user.email || "";
       const resources = [
@@ -632,7 +640,7 @@ function renderUserList(users) {
 }
 
 async function loadOwnerUsers() {
-  if (!ownerDashboard || !userItems) return;
+  if (!ownerDashboard || currentDashboardRole !== "owner" || !userItems) return;
   if (userMessage) userMessage.textContent = "Loading users…";
   try {
     const result = await callOwnerUsers({ action: "list", page: 1, perPage: 50 });
@@ -864,8 +872,8 @@ if (mediaSearch) mediaSearch.addEventListener("input", renderMediaAssets);
 if (ownerDashboard && mediaItems) void loadMediaAssets();
 
 // Dashboard module tabs: all modules stay on one horizontal row.
-const dashboardTabs = document.querySelectorAll("[data-dashboard-tab]");
-const dashboardPanels = document.querySelectorAll("[data-dashboard-panel]");
+const dashboardTabs = Array.from(document.querySelectorAll("[data-dashboard-tab]"));
+const dashboardPanels = Array.from(document.querySelectorAll("[data-dashboard-panel]"));
 function activateDashboardModule(moduleName, focusTab = false) {
   dashboardTabs.forEach((tab) => {
     const active = tab.dataset.dashboardTab === moduleName;
