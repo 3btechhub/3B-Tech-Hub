@@ -72,31 +72,27 @@
       </div>
     </section>
     <section class="dashboard-module-panel" id="panel-user" role="tabpanel" aria-labelledby="tab-user" data-dashboard-panel="user" hidden>
-      <div class="dashboard-function-grid" aria-label="User Management functions">
-        <article class="dashboard-function-card"><h2>User List & Profiles</h2></article>
-        <article class="dashboard-function-card"><h2>Add New User</h2></article>
-        <article class="dashboard-function-card"><h2>Edit Details & Delete Account</h2></article>
-        <article class="dashboard-function-card"><h2>Active / Block Account</h2></article>
-        <article class="dashboard-function-card"><h2>Assign Role</h2></article>
-        <article class="dashboard-function-card"><h2>Request Password Reset</h2></article>
-      </div>
+      <form id="user-invite-form" class="content-editor-form">
+        <h2>Invite User</h2>
+        <p class="muted">Send an invitation and assign a role. The primary Owner account cannot be changed here.</p>
+        <label>Email Address<input name="email" type="email" maxlength="254" autocomplete="email" required></label>
+        <label>Role<select name="role" required><option value="customer">Customer</option><option value="staff">Staff</option><option value="editor">Editor</option><option value="manager">Manager</option><option value="admin">Admin</option></select></label>
+        <div class="editor-actions"><button type="submit" id="user-invite-submit">Send Invitation</button><button type="button" id="user-refresh" class="secondary-button">Refresh Users</button></div>
+        <p class="editor-message" id="user-message" role="status"></p>
+      </form>
+      <div class="technician-admin-list"><h2>User List</h2><div id="user-admin-items"></div></div>
     </section>
     <section class="dashboard-module-panel" id="panel-role" role="tabpanel" aria-labelledby="tab-role" data-dashboard-panel="role" hidden>
-      <div class="dashboard-function-grid" aria-label="Role Management functions">
-        <article class="dashboard-function-card"><h2>Create Role</h2></article>
-        <article class="dashboard-function-card"><h2>Role List & Details</h2></article>
-        <article class="dashboard-function-card"><h2>Edit / Delete Role</h2></article>
-        <article class="dashboard-function-card"><h2>Assign Permissions to Role</h2></article>
-        <article class="dashboard-function-card"><h2>View Users by Role</h2></article>
-      </div>
+      <div class="technician-admin-list"><h2>Role Assignments</h2><p class="muted">Assign roles from User Management. Only the Owner can invite users or change roles. The Owner role is protected.</p><div id="role-summary-list"></div></div>
     </section>
     <section class="dashboard-module-panel" id="panel-permission" role="tabpanel" aria-labelledby="tab-permission" data-dashboard-panel="permission" hidden>
-      <div class="dashboard-function-grid" aria-label="Permission Management functions">
-        <article class="dashboard-function-card"><h2>Module-based Permissions</h2></article>
-        <article class="dashboard-function-card"><h2>Control Create / Read / Update / Delete</h2></article>
-        <article class="dashboard-function-card"><h2>Assign Permissions by Role</h2></article>
-        <article class="dashboard-function-card"><h2>Add / Remove Permission</h2></article>
-        <article class="dashboard-function-card"><h2>Verify Access</h2></article>
+      <div class="technician-admin-list"><h2>Permission Matrix</h2><p class="muted">Read-only access policy. Database RLS remains the enforcement layer.</p>
+        <div class="technician-admin-row"><strong>Owner</strong><span>All administration, user/role management, settings and audit access.</span></div>
+        <div class="technician-admin-row"><strong>Admin</strong><span>Delegated catalogue and content operations. Cannot manage users or grant Owner.</span></div>
+        <div class="technician-admin-row"><strong>Manager</strong><span>Operational catalogue access only where explicitly granted by policy.</span></div>
+        <div class="technician-admin-row"><strong>Editor</strong><span>Content editing only where explicitly granted by policy.</span></div>
+        <div class="technician-admin-row"><strong>Staff</strong><span>No administrative access unless explicitly granted by policy.</span></div>
+        <div class="technician-admin-row"><strong>Customer</strong><span>Own profile access only.</span></div>
       </div>
     </section>
     <section class="dashboard-module-panel" id="panel-workshop" role="tabpanel" aria-labelledby="tab-workshop" data-dashboard-panel="workshop" hidden>
