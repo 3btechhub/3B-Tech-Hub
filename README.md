@@ -37,8 +37,7 @@ The current static release contains the requested homepage and Supabase email/pa
 
 ## Validation
 
-- `npm run typecheck`
-- `npm run lint`
-- `npm run test`
-- `npm run test:e2e`
+- `npm test` — built-in Node.js regression tests.
+- `npm run validate` — browser-module syntax checks plus regression tests.
+- GitHub Actions validates required static routes and deployment artifacts.
 - GitHub Pages workflow validates the deployed static assets.
