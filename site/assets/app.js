@@ -564,28 +564,30 @@ function renderWorkshops(items) {
   const target = document.querySelector("#workshops-list");
   if (!target || !Array.isArray(items)) return;
   target.replaceChildren();
-  items.filter(item=>item && item.title && item.is_published !== false).forEach(item=>{
-    const card=document.createElement("article");card.className="workshop-card";target.append(card);
-    if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt=item.title;img.loading="lazy";card.append(img);}
-    addTextElement(card,"h3","",item.title);
-    if(item.description)addTextElement(card,"p","",item.description);
-    if(item.date || item.time)addTextElement(card,"p","workshop-date",[item.date,item.time].filter(Boolean).join(" · "));
-    if(item.location)addTextElement(card,"p","workshop-location",item.location);
-    if(item.trainer)addTextElement(card,"p","workshop-trainer",item.trainer);
-    const links=document.createElement("div");links.className="company-contact-links";card.append(links);
-    if(item.phone){const a=document.createElement("a");a.href="tel:"+item.phone.replace(/[^+\d]/g,"");a.textContent="Call";links.append(a);}
-    if(item.whatsapp){const a=document.createElement("a");a.href="https://wa.me/"+item.whatsapp.replace(/\D/g,"");a.target="_blank";a.rel="noopener noreferrer";a.textContent="WhatsApp";links.append(a);}
+  items.filter(item => item && item.title).forEach(item => {
+    const card = document.createElement("article"); card.className = "workshop-card"; target.append(card);
+    if (item.photo_url) { const img = document.createElement("img"); img.src = item.photo_url; img.alt = item.title; img.loading = "lazy"; card.append(img); }
+    addTextElement(card, "h3", "", item.title);
+    if (item.description) addTextElement(card, "p", "", item.description);
+    if (item.workshop_date || item.workshop_time) addTextElement(card, "p", "workshop-date", [item.workshop_date, item.workshop_time].filter(Boolean).join(" · "));
+    if (item.location) addTextElement(card, "p", "workshop-location", item.location);
+    if (item.trainer) addTextElement(card, "p", "workshop-trainer", item.trainer);
+    const links = document.createElement("div"); links.className = "company-contact-links"; card.append(links);
+    if (item.phone) { const a = document.createElement("a"); a.href = "tel:" + item.phone.replace(/[^+\\d]/g, ""); a.textContent = "Call"; links.append(a); }
+    if (item.whatsapp) { const a = document.createElement("a"); a.href = "https://wa.me/" + item.whatsapp.replace(/\\D/g, ""); a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = "WhatsApp"; links.append(a); }
   });
-  if(target.children.length && homepageWorkshops) homepageWorkshops.hidden=false;
+  if (target.children.length && homepageWorkshops) homepageWorkshops.hidden = false;
 }
 async function loadHomepageIdentity() {
   if (!homepageTechnicians && !homepageWorkshops) return;
-  const {data,error}=await supabase.from("site_settings").select("setting_key,setting_value").eq("is_public",true).in("setting_key",["technicians","workshops"]);
-  if(error){console.warn("Homepage content unavailable:",error.message);return;}
-  for(const row of data||[]){
-    if(row.setting_key==="technicians")renderTechnicians(row.setting_value||[]);
-    if(row.setting_key==="workshops")renderWorkshops(row.setting_value||[]);
-  }
+  const [{ data: settings, error: settingsError }, { data: workshops, error: workshopsError }] = await Promise.all([
+    supabase.from("site_settings").select("setting_key,setting_value").eq("is_public", true).eq("setting_key", "technicians"),
+    supabase.from("workshops").select("*").eq("status", "published").order("workshop_date", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false })
+  ]);
+  if (settingsError) console.warn("Homepage technician content unavailable:", settingsError.message);
+  else for (const row of settings || []) if (row.setting_key === "technicians") renderTechnicians(row.setting_value || []);
+  if (workshopsError) console.warn("Homepage workshop content unavailable:", workshopsError.message);
+  else renderWorkshops(workshops || []);
 }
 loadHomepageIdentity();
 
@@ -625,12 +627,14 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
     if(url){const img=document.createElement("img");img.src=url;img.alt="Selected image preview";container.append(img);}
   }
   async function loadIdentityEditors(){
-    const {data,error}=await supabase.from("site_settings").select("setting_key,setting_value").in("setting_key",["workshops","technicians"]);
-    if(error){editorMessage(workshopMessage||technicianMessage,error.message,true);return;}
-    for(const row of data||[]){
-      if(row.setting_key==="workshops")workshopData=Array.isArray(row.setting_value)?row.setting_value:[];
-      if(row.setting_key==="technicians")technicianData=Array.isArray(row.setting_value)?row.setting_value:[];
-    }
+    const [{data:workshops,error:workshopError},{data:settings,error:settingsError}] = await Promise.all([
+      supabase.from("workshops").select("*").order("created_at",{ascending:false}),
+      supabase.from("site_settings").select("setting_key,setting_value").eq("setting_key","technicians")
+    ]);
+    if(workshopError){editorMessage(workshopMessage,workshopError.message,true);return;}
+    if(settingsError){editorMessage(technicianMessage,settingsError.message,true);return;}
+    workshopData=workshops||[];
+    for(const row of settings||[])if(row.setting_key==="technicians")technicianData=Array.isArray(row.setting_value)?row.setting_value:[];
     if(workshopEditor)renderWorkshopAdminList();
     if(technicianEditor)renderTechnicianAdminList();
   }
@@ -640,13 +644,17 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
     workshopData.forEach(item=>{
       const row=document.createElement("article");row.className="technician-admin-row";workshopItems.append(row);
       addTextElement(row,"strong","",item.title);
-      addTextElement(row,"span","",[item.date,item.location].filter(Boolean).join(" · "));
+      addTextElement(row,"span","",[item.workshop_date,item.location,item.status].filter(Boolean).join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
       edit.addEventListener("click",()=>{
         workshopEditor.elements.id.value=item.id;
-        for(const key of ["title","description","date","time","location","trainer","phone","whatsapp"])workshopEditor.elements[key].value=item[key]||"";
-        workshopEditor.elements.is_published.checked=item.is_published!==false;
+        workshopEditor.elements.title.value=item.title||"";
+        workshopEditor.elements.description.value=item.description||"";
+        workshopEditor.elements.date.value=item.workshop_date||"";
+        workshopEditor.elements.time.value=item.workshop_time||"";
+        for(const key of ["location","trainer","phone","whatsapp"])workshopEditor.elements[key].value=item[key]||"";
+        workshopEditor.elements.is_published.checked=item.status==="published";
         workshopPhotoUrl=item.photo_url||"";workshopEditor.elements.remove_photo.checked=false;document.querySelector("#workshop-remove-photo-wrap").hidden=!workshopPhotoUrl;previewImage(workshopPhotoPreview,workshopPhotoUrl);
         document.querySelector("#workshop-form-title").textContent="Edit Workshop";
         document.querySelector("#workshop-cancel").hidden=false;
@@ -654,9 +662,9 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
       const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";
       del.addEventListener("click",async()=>{
         if(!confirm("Delete this workshop?"))return;
-        const previous=workshopData;workshopData=workshopData.filter(x=>x.id!==item.id);
-        try{await saveSetting("workshops",workshopData);renderWorkshopAdminList();}
-        catch(error){workshopData=previous;editorMessage(workshopMessage,error.message,true);}
+        const {error}=await supabase.from("workshops").delete().eq("id",item.id);
+        if(error){editorMessage(workshopMessage,error.message,true);return;}
+        workshopData=workshopData.filter(x=>x.id!==item.id);renderWorkshopAdminList();
       });actions.append(del);
     });
   }
@@ -670,11 +678,12 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
       event.preventDefault();const button=document.querySelector("#workshop-save");button.disabled=true;editorMessage(workshopMessage,"Saving…");
       try{
         const form=new FormData(workshopEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"workshops");
-        const item={id:id||crypto.randomUUID(),title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim(),date:String(form.get("date")||""),time:String(form.get("time")||""),location:String(form.get("location")||"").trim(),trainer:String(form.get("trainer")||"").trim(),phone:String(form.get("phone")||"").trim(),whatsapp:String(form.get("whatsapp")||"").trim(),photo_url:photo||(form.get("remove_photo")==="on"?"":workshopPhotoUrl)||"",is_published:form.get("is_published")==="on"};
-        const previous=workshopData;
-        workshopData=id?workshopData.map(x=>x.id===id?item:x):[...workshopData,item];
-        await saveSetting("workshops",workshopData);
-        resetWorkshopForm();renderWorkshopAdminList();editorMessage(workshopMessage,"Workshop saved.");
+        const {data:userData}=await supabase.auth.getUser();
+        const item={title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim()||null,workshop_date:String(form.get("date")||"")||null,workshop_time:String(form.get("time")||"")||null,location:String(form.get("location")||"").trim()||null,trainer:String(form.get("trainer")||"").trim()||null,phone:String(form.get("phone")||"").trim()||null,whatsapp:String(form.get("whatsapp")||"").trim()||null,photo_url:photo||(form.get("remove_photo")==="on"?"":workshopPhotoUrl)||null,status:form.get("is_published")==="on"?"published":"draft",updated_by:userData.user?.id||null,updated_at:new Date().toISOString()};
+        const query=id?supabase.from("workshops").update(item).eq("id",id):supabase.from("workshops").insert({...item,created_by:userData.user?.id||null});
+        const {error}=await query;
+        if(error)throw error;
+        resetWorkshopForm();await loadIdentityEditors();editorMessage(workshopMessage,"Workshop saved.");
       }catch(error){editorMessage(workshopMessage,error.message||"Could not save workshop.",true);}
       finally{button.disabled=false;}
     });
