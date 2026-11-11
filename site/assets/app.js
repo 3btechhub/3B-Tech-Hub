@@ -722,9 +722,19 @@ function renderProducts(products) {
     if (!groupProducts.length) return;
 
     const group = document.createElement("section");
-    group.className = "product-group";
-    const heading = addTextElement(group, "h3", "product-group-title", groupTitles[groupKey]);
+    group.className = "product-group product-group-" + groupKey;
+
+    const header = document.createElement("div");
+    header.className = "product-group-header";
+    const headingWrap = document.createElement("div");
+    headingWrap.className = "product-group-heading-wrap";
+    const icon = addTextElement(headingWrap, "span", "product-group-icon", groupKey === "mobile" ? "📱" : "📡");
+    icon.setAttribute("aria-hidden", "true");
+    const heading = addTextElement(headingWrap, "h3", "product-group-title", groupTitles[groupKey]);
     heading.id = "product-group-" + groupKey;
+    header.append(headingWrap);
+    const count = addTextElement(header, "span", "product-group-count", groupProducts.length + " types");
+    group.append(header);
 
     const list = document.createElement("ul");
     list.className = "product-group-list";
@@ -732,7 +742,9 @@ function renderProducts(products) {
     groupProducts.forEach(product => {
       const item = document.createElement("li");
       item.className = "product-group-item";
-      item.textContent = product.name;
+      const marker = addTextElement(item, "span", "product-item-marker", "✓");
+      marker.setAttribute("aria-hidden", "true");
+      addTextElement(item, "span", "product-item-name", product.name);
       list.append(item);
     });
     group.append(list);
