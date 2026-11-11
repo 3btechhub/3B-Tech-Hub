@@ -712,15 +712,38 @@ function renderWorkshops(items) {
   });
   if (target.children.length && homepageWorkshops) homepageWorkshops.hidden = false;
 }
-function renderProducts(items) {
-  const target=document.querySelector("#products-list");if(!target||!Array.isArray(items))return;target.replaceChildren();
-  let dialog=document.querySelector("#product-detail-dialog");
-  if(!dialog){dialog=document.createElement("dialog");dialog.id="product-detail-dialog";dialog.className="technician-detail-dialog product-detail-dialog";dialog.innerHTML='<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';document.body.append(dialog);dialog.querySelector(".technician-detail-close").addEventListener("click",()=>dialog.close());dialog.addEventListener("click",event=>{if(event.target===dialog)dialog.close();});}
-  const body=dialog.querySelector(".technician-detail-body"),labels={"mobile":"Mobile & Accessories","satellite":"Satellite & TV Equipment"};
-  const openDetails=item=>{body.replaceChildren();if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt=item.name;img.className="technician-detail-photo";body.append(img);}else{const icon=document.createElement("span");icon.className="workshop-detail-fallback";icon.setAttribute("aria-hidden","true");icon.textContent="📦";body.append(icon);}addTextElement(body,"h2","",item.name);if(item.category_group)addTextElement(body,"p","technician-detail-specialty",labels[item.category_group]||item.category_group);if(item.category)addTextElement(body,"p","technician-detail-specialty",item.category);if(item.description)addTextElement(body,"p","product-detail-description",item.description);const contacts=document.createElement("div");contacts.className="technician-detail-contacts";if(item.phone){const link=document.createElement("a");link.href="tel:"+item.phone.replace(/[^+\\d]/g,"");link.textContent="Call";contacts.append(link);}if(item.whatsapp){const link=document.createElement("a");link.href="https://wa.me/"+item.whatsapp.replace(/\\D/g,"");link.target="_blank";link.rel="noopener noreferrer";link.textContent="WhatsApp";contacts.append(link);}if(contacts.children.length)body.append(contacts);dialog.showModal();};
-  const visible=items.filter(item=>item&&item.name&&(activeCountry.region==="global"||(item.country||"global")===activeCountry.region));
-  for(const group of ["mobile","satellite"]){const grouped=visible.filter(item=>(item.category_group||"mobile")===group);if(!grouped.length)continue;addTextElement(target,"h2","product-group-heading",labels[group]);grouped.forEach(item=>{const card=document.createElement("button");card.type="button";card.className="technician-card product-card";card.setAttribute("aria-label","View "+item.name+" product details");if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt="";img.loading="lazy";card.append(img);}else{const icon=document.createElement("span");icon.className="technician-card-placeholder";icon.setAttribute("aria-hidden","true");icon.textContent="📦";card.append(icon);}const info=document.createElement("span");info.className="technician-card-info";addTextElement(info,"strong","",item.name);if(item.category)addTextElement(info,"small","",item.category);addTextElement(info,"small","technician-card-hint","View details");card.append(info);card.addEventListener("click",()=>openDetails(item));target.append(card);});}
-  if(target.children.length&&homepageProducts)homepageProducts.hidden=false;
+function renderProducts() {
+  const target = document.querySelector("#products-list");
+  if (!target) return;
+  target.replaceChildren();
+
+  const groups = [
+    { title: "Mobile & Accessories", icon: "📱", types: ["Earphones & Headphones", "Phone Cases & Covers", "Glass Protector", "Chargers & Adapters"] },
+    { title: "Satellite & TV Equipment", icon: "📡", types: ["Satellite Dishes", "Satellite Receivers", "LNB", "Coaxial Cables", "Connectors & Splitters"] }
+  ];
+
+  groups.forEach(group => {
+    const section = document.createElement("section");
+    section.className = "product-type-group";
+    addTextElement(section, "h2", "product-group-heading", group.title);
+    const list = document.createElement("div");
+    list.className = "product-type-list";
+    group.types.forEach(type => {
+      const item = document.createElement("article");
+      item.className = "product-type-card";
+      const icon = document.createElement("span");
+      icon.className = "product-type-icon";
+      icon.setAttribute("aria-hidden", "true");
+      icon.textContent = group.icon;
+      item.append(icon);
+      addTextElement(item, "h3", "product-type-name", type);
+      list.append(item);
+    });
+    section.append(list);
+    target.append(section);
+  });
+
+  if (homepageProducts) homepageProducts.hidden = false;
 }
 
 async function loadHomepageIdentity() {
