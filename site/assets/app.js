@@ -40,7 +40,7 @@ if (languageToggle) languageToggle.addEventListener("click", () => {
   applyTheme(document.documentElement.dataset.theme);
 });
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szac";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szacT";
 let supabase;
 const loginMenuLink = document.querySelector("#login-menu-link");
 const logoutMenuLink = document.querySelector("#logout-menu-link");
