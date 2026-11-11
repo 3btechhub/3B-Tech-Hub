@@ -52,17 +52,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid authentication response." }, { status: 502 });
     }
 
-    if (!configuredOwnerIds().includes(session.userId)) {
-      await fetch(`${endpoint}/account/sessions/current`, {
-        method: "DELETE",
-        headers: {
-          "X-Appwrite-Project": projectId,
-          Cookie: `${cookieName()}=${session.secret}`,
-        },
-        cache: "no-store",
-      }).catch(() => undefined);
-      return NextResponse.json({ error: "This account is not authorized for owner access." }, { status: 403 });
-    }
+    // Any verified Appwrite account may sign in. Owner-only access is enforced
+    // separately by the admin session guards, not by the shared login form.
 
     const result = NextResponse.json({ ok: true });
     result.cookies.set(cookieName(), session.secret, {
