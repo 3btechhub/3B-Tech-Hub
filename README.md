@@ -24,11 +24,13 @@ Vercel is not part of the deployment architecture. Production hosting and server
 - Repository: [3btechhub/3B-Tech-Hub](https://github.com/3btechhub/3B-Tech-Hub)
 - Production branch: `main`
 - Appwrite Site: `3b-tech-hub`
-- Appwrite project: `6af2e894001db846da6a`
+- Appwrite project: `6af3bd9b003db0b9afb5`
 - Appwrite database: `3btechhub-prod`
 - Storage bucket: `media`
 - Deployment is connected to GitHub VCS and is built with `npm install` and `npm run build`.
 - The Appwrite Site uses the Next.js SSR adapter and Node.js 22.
+- Server-only Appwrite credentials are stored as secret Site variables; never commit them to this repository.
+- The Owner account must be created in Appwrite Auth and its exact user ID added to `ADMIN_OWNER_USER_IDS` before admin sign-in is enabled.
 - A successful build does not by itself prove that every authenticated workflow or integration is operational; use the health endpoint and release checklist below.
 
 ## Local development
