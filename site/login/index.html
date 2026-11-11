@@ -10,8 +10,15 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="../" aria-label="3B TECH HUB home"><span class="brand-mark">3B</span><span>3B TECH HUB</span></a>
-    <nav class="site-nav" aria-label="Main navigation"><a href="../">Home</a><a href="./">Login</a></nav>
+    <a class="brand" href="../" aria-label="3B TECH HUB home"><span class="brand-mark">3B</span></a>
+    <button class="menu-trigger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-menu" id="site-menu" aria-label="Site menu" hidden>
+      <a href="../">Home</a>
+      <a href="../login/">Login</a>
+      <a href="../profile/">Profile</a>
+    </nav>
   </header>
   <main class="auth-main">
     <a class="back-link" href="../">← Home</a>
