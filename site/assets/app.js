@@ -299,19 +299,30 @@ if (profile) {
     field.textContent = original;
     field.contentEditable = "true";
     field.classList.add("is-editing");
-    button.hidden = true;
-    saveButton.hidden = false;
+    button.dataset.saving = "true";
+    button.textContent = "Save";
     field.focus();
     profileMessage("");
   }
   profile.querySelectorAll("[data-edit-field]").forEach((button) => {
-    button.addEventListener("click", () => enableInlineEdit(button));
+    button.addEventListener("click", () => {
+      if (button.dataset.saving === "true") {
+        form.requestSubmit();
+        return;
+      }
+      enableInlineEdit(button);
+    });
   });
   document.querySelector("#profile-password-edit").addEventListener("click", (event) => {
     const fieldsBox = document.querySelector("#profile-password-fields");
+    const button = event.currentTarget;
+    if (button.dataset.saving === "true") {
+      form.requestSubmit();
+      return;
+    }
     fieldsBox.hidden = false;
-    event.currentTarget.hidden = true;
-    saveButton.hidden = false;
+    button.dataset.saving = "true";
+    button.textContent = "Save";
     form.elements.currentPassword.focus();
   });
 
@@ -388,12 +399,15 @@ if (profile) {
       form.querySelectorAll("[data-profile-field]").forEach((field) => {
         field.contentEditable = "false";
         field.classList.remove("is-editing");
-        field.closest(".profile-row").querySelector("[data-edit-field]").hidden = false;
+        const editButton = field.closest(".profile-row").querySelector("[data-edit-field]");
+        editButton.dataset.saving = "false";
+        editButton.textContent = "Edit";
       });
       document.querySelector("#profile-password-fields").hidden = true;
-      document.querySelector("#profile-password-edit").hidden = false;
+      const passwordEditButton = document.querySelector("#profile-password-edit");
+      passwordEditButton.dataset.saving = "false";
+      passwordEditButton.textContent = "Edit";
       form.reset();
-      saveButton.hidden = true;
       await loadProfile();
       profileMessage(
         emailPending
