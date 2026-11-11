@@ -253,3 +253,4 @@ drop trigger if exists audit_site_setting_changes on public.site_settings;
 create trigger audit_site_setting_changes
   after insert or update or delete on public.site_settings
   for each row execute function private.capture_audit_event('site_settings');
+

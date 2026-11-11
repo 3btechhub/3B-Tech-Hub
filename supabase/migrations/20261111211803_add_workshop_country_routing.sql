@@ -1,4 +1,3 @@
--- Add optional country targeting for workshops. Existing records remain global.
 alter table public.workshops
   add column if not exists country text not null default 'global';
 

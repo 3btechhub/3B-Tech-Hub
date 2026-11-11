@@ -11,3 +11,4 @@ alter table public.products
 
 create index if not exists products_category_group_status_idx
   on public.products (category_group, status, updated_at desc);
+

@@ -1,4 +1,4 @@
--- Add optional catalogue details and country targeting to the existing products table.
+-- Extend the existing products catalogue for contact-first product profiles.
 alter table public.products
   add column if not exists category text,
   add column if not exists country text not null default 'global',
@@ -18,3 +18,4 @@ create index if not exists products_status_country_updated_idx
 
 grant select on public.products to anon, authenticated;
 grant insert, update, delete on public.products to authenticated;
+

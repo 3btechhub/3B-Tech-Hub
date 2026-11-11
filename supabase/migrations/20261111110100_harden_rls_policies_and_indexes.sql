@@ -80,3 +80,4 @@ create index if not exists media_assets_uploaded_by_idx on public.media_assets(u
 create index if not exists service_bookings_service_id_idx on public.service_bookings(service_id);
 create index if not exists site_settings_updated_by_idx on public.site_settings(updated_by);
 create index if not exists audit_logs_actor_id_idx on public.audit_logs(actor_id);
+
