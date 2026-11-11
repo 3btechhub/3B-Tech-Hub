@@ -1,25 +1,26 @@
 type AppwriteRow = { $id?: string; [key: string]: unknown };
 
-function configuration() {
-  const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.replace(/\/$/, "");
-  const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
-  const apiKey = process.env.APPWRITE_API_KEY;
+async function configuration() {
+  const requestHeaders = await headers();
+  const endpoint = (process.env.APPWRITE_SITE_API_ENDPOINT ?? process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)?.replace(/\/$/, "");
+  const projectId = process.env.APPWRITE_SITE_PROJECT_ID ?? process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
+  const apiKey = requestHeaders.get("x-appwrite-key") ?? process.env.APPWRITE_SITE_API_KEY;
   if (!endpoint || !projectId || !apiKey) return null;
   return { endpoint, projectId, apiKey };
 }
 
 export function isContentStoreConfigured() {
-  return Boolean(configuration() && process.env.APPWRITE_DATABASE_ID && process.env.APPWRITE_CONTENT_TABLE_ID);
+  return Boolean((process.env.APPWRITE_SITE_API_ENDPOINT || process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) && (process.env.APPWRITE_SITE_PROJECT_ID || process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) && process.env.APPWRITE_DATABASE_ID && process.env.APPWRITE_CONTENT_TABLE_ID);
 }
 export function isMediaStoreConfigured() {
-  return Boolean(configuration() && process.env.APPWRITE_DATABASE_ID && process.env.APPWRITE_MEDIA_TABLE_ID && process.env.APPWRITE_MEDIA_BUCKET_ID);
+  return Boolean((process.env.APPWRITE_SITE_API_ENDPOINT || process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) && (process.env.APPWRITE_SITE_PROJECT_ID || process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) && process.env.APPWRITE_DATABASE_ID && process.env.APPWRITE_MEDIA_TABLE_ID && process.env.APPWRITE_MEDIA_BUCKET_ID);
 }
 export function isSettingsStoreConfigured() {
-  return Boolean(configuration() && process.env.APPWRITE_DATABASE_ID && process.env.APPWRITE_SETTINGS_TABLE_ID);
+  return Boolean((process.env.APPWRITE_SITE_API_ENDPOINT || process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT) && (process.env.APPWRITE_SITE_PROJECT_ID || process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID) && process.env.APPWRITE_DATABASE_ID && process.env.APPWRITE_SETTINGS_TABLE_ID);
 }
 
 async function appwriteRequest<T>(path: string, init: RequestInit): Promise<T> {
-  const config = configuration();
+  const config = await configuration();
   if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   const response = await fetch(`${config.endpoint}${path}`, {
     ...init,
@@ -40,7 +41,7 @@ export async function createAppwriteRow(tableId: string, rowId: string, data: Re
 }
 
 export async function uploadAppwriteFile(bucketId: string, file: File, fileId: string, permissions: string[] = []) {
-  const config = configuration();
+  const config = await configuration();
   if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   const form = new FormData();
   form.set("fileId", fileId);
@@ -62,7 +63,7 @@ export async function getAppwriteBucket(bucketId: string) {
 }
 
 export async function deleteAppwriteFile(bucketId: string, fileId: string) {
-  const config = configuration();
+  const config = await configuration();
   if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   const response = await fetch(`${config.endpoint}/storage/buckets/${encodeURIComponent(bucketId)}/files/${encodeURIComponent(fileId)}`, {
     method: "DELETE", headers: { "X-Appwrite-Project": config.projectId, "X-Appwrite-Key": config.apiKey },
@@ -72,7 +73,7 @@ export async function deleteAppwriteFile(bucketId: string, fileId: string) {
 }
 
 export async function deleteAppwriteRow(tableId: string, rowId: string) {
-  const config = configuration();
+  const config = await configuration();
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   const response = await fetch(`${config.endpoint}/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`, {
@@ -105,7 +106,7 @@ export function buildAppwriteRowQueries(limit = 100, offset = 0, search?: string
 }
 
 export async function listAppwriteRows(tableId: string, limit = 100, offset = 0, search?: string, excludeDeleted = false) {
-  const config = configuration();
+  const config = await configuration();
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   const params = new URLSearchParams();
@@ -127,7 +128,7 @@ export async function listAppwriteRows(tableId: string, limit = 100, offset = 0,
 }
 
 export async function getAppwriteRow(tableId: string, rowId: string) {
-  const config = configuration();
+  const config = await configuration();
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   const row = await appwriteRequest<AppwriteRow>(
@@ -144,7 +145,7 @@ export async function getAppwriteRow(tableId: string, rowId: string) {
 }
 
 export async function updateAppwriteRow(tableId: string, rowId: string, data: Record<string, unknown>) {
-  const config = configuration();
+  const config = await configuration();
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   return appwriteRequest<AppwriteRow>(
@@ -154,7 +155,7 @@ export async function updateAppwriteRow(tableId: string, rowId: string, data: Re
 }
 
 export async function updateAppwriteFilePermissions(bucketId: string, fileId: string, permissions: string[]) {
-  const config = configuration();
+  const config = await configuration();
   if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   const response = await fetch(`${config.endpoint}/storage/buckets/${encodeURIComponent(bucketId)}/files/${encodeURIComponent(fileId)}`, {
     method: "PUT",
@@ -172,7 +173,7 @@ export async function fetchAppwriteFilePreview(
   fileId: string,
   options: { width?: number; height?: number; quality?: number; output?: "webp" | "avif" | "jpg" | "png" } = {},
 ) {
-  const config = configuration();
+  const config = await configuration();
   if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   const query = new URLSearchParams();
   if (options.width) query.set("width", String(Math.min(Math.max(options.width, 1), 2000)));
@@ -189,7 +190,7 @@ export async function fetchAppwriteFilePreview(
 }
 
 export async function fetchAppwriteFileView(bucketId: string, fileId: string) {
-  const config = configuration();
+  const config = await configuration();
   if (!config) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   const response = await fetch(`${config.endpoint}/storage/buckets/${encodeURIComponent(bucketId)}/files/${encodeURIComponent(fileId)}/view`, {
     method: "GET", headers: { "X-Appwrite-Project": config.projectId, "X-Appwrite-Key": config.apiKey },
