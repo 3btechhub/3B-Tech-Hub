@@ -480,3 +480,22 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 .product-group-title{margin:0 0 12px;font-size:18px;line-height:1.4}
 .product-group-list{display:flex;flex-wrap:wrap;gap:9px;margin:0;padding:0;list-style:none}
 .product-group-item{display:inline-flex;align-items:center;min-height:40px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--page-text);font-size:14px;line-height:1.4}
+
+
+/* Refined homepage product category cards */
+.home-products-section{margin-top:48px;padding-top:28px}
+.home-products-section>.home-section-heading{margin-bottom:18px}
+.product-catalogue{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px}
+.product-group{min-width:0;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:0 5px 18px #00000008}
+.product-group:first-child{padding:20px}
+.product-group-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+.product-group-heading-wrap{display:flex;align-items:center;gap:11px;min-width:0}
+.product-group-icon{display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;border-radius:13px;background:var(--hover);font-size:23px}
+.product-group-title{margin:0;font-size:clamp(16px,2vw,19px);font-weight:700;line-height:1.35}
+.product-group-count{flex:0 0 auto;padding:5px 9px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:11px;font-weight:600;white-space:nowrap}
+.product-group-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:0;padding:0;list-style:none}
+.product-group-item{display:flex;align-items:center;gap:8px;min-width:0;min-height:43px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--page-bg);font-size:13px;line-height:1.35}
+.product-item-marker{display:grid;place-items:center;flex:0 0 19px;width:19px;height:19px;border-radius:50%;background:var(--hover);color:var(--muted);font-size:11px;font-weight:700}
+.product-item-name{min-width:0;overflow-wrap:anywhere}
+:root[data-theme="dark"] .product-group{box-shadow:none}
+@media(max-width:420px){.product-group{padding:15px}.product-group:first-child{padding:15px}.product-group-list{grid-template-columns:1fr}.product-group-item{min-height:40px}}
