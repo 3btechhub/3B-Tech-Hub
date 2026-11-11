@@ -282,3 +282,15 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
   color:var(--page-text);
 }
 .menu-tools{display:grid;grid-template-columns:1fr;align-items:stretch;gap:8px}
+
+
+/* Collapsible in-menu language and country dropdowns */
+#language-select,#region-select{display:none!important}
+.menu-dropdown{position:relative;width:100%;min-width:0}
+.menu-dropdown-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;cursor:pointer}
+.menu-dropdown-trigger::after{content:"▾";font-size:13px;color:var(--muted)}
+.menu-dropdown-trigger[aria-expanded="true"]::after{content:"▴"}
+.menu-dropdown-options{display:grid;gap:3px;margin-top:5px;padding:5px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+.menu-dropdown-options[hidden]{display:none}
+.menu-dropdown-option{width:100%;min-height:36px;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:var(--page-text);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.menu-dropdown-option:hover,.menu-dropdown-option.is-selected{background:var(--hover)}
