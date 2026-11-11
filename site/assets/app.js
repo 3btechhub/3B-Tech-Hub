@@ -672,6 +672,197 @@ if (userInviteForm) {
 if (userRefreshButton) userRefreshButton.addEventListener("click", () => void loadOwnerUsers());
 if (ownerDashboard && userItems) void loadOwnerUsers();
 
+// Owner-only Media Library for public catalogue images in Supabase Storage.
+const mediaUploadForm = document.querySelector("#media-upload-form");
+const mediaItems = document.querySelector("#media-admin-items");
+const mediaSearch = document.querySelector("#media-search");
+const mediaMessage = document.querySelector("#media-message");
+let mediaAssetData = [];
+
+function getMediaPublicUrl(item) {
+  return supabase.storage.from("site-media").getPublicUrl(item.storage_path).data.publicUrl;
+}
+
+function renderMediaAssets() {
+  if (!mediaItems) return;
+  mediaItems.replaceChildren();
+  const search = String(mediaSearch?.value || "").trim().toLowerCase();
+  const visible = mediaAssetData.filter((item) => !search || String(item.file_name || "").toLowerCase().includes(search));
+  if (!visible.length) {
+    addTextElement(mediaItems, "p", "muted", mediaAssetData.length ? "No matching images." : "No images uploaded yet.");
+    return;
+  }
+
+  for (const item of visible) {
+    const row = document.createElement("article");
+    row.className = "technician-admin-row";
+    const image = document.createElement("img");
+    image.className = "technician-detail-photo";
+    image.src = getMediaPublicUrl(item);
+    image.alt = item.alt_text || item.file_name || "Media image";
+    image.loading = "lazy";
+    row.append(image);
+
+    const details = document.createElement("div");
+    addTextElement(details, "strong", "", item.file_name || "Untitled image");
+    addTextElement(details, "span", "muted", [
+      item.content_type || "Image",
+      (Number(item.size_bytes || 0) / 1024).toFixed(1) + " KB",
+      item.created_at ? new Date(item.created_at).toLocaleDateString() : "",
+    ].filter(Boolean).join(" · "));
+    const altInput = document.createElement("input");
+    altInput.type = "text";
+    altInput.maxLength = 250;
+    altInput.value = item.alt_text || "";
+    altInput.setAttribute("aria-label", "Alternative text for " + item.file_name);
+    details.append(altInput);
+    row.append(details);
+
+    const actions = document.createElement("div");
+    actions.className = "editor-actions";
+    const save = document.createElement("button");
+    save.type = "button";
+    save.textContent = "Save Alt Text";
+    save.addEventListener("click", async () => {
+      save.disabled = true;
+      try {
+        const { error } = await supabase.from("media_assets").update({ alt_text: altInput.value.trim() }).eq("id", item.id);
+        if (error) throw error;
+        item.alt_text = altInput.value.trim();
+        if (mediaMessage) mediaMessage.textContent = "Media details saved.";
+      } catch (error) {
+        if (mediaMessage) mediaMessage.textContent = error.message || "Could not update media details.";
+      } finally {
+        save.disabled = false;
+      }
+    });
+    actions.append(save);
+
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.className = "secondary-button";
+    copy.textContent = "Copy URL";
+    copy.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(getMediaPublicUrl(item));
+        if (mediaMessage) mediaMessage.textContent = "Public media URL copied.";
+      } catch {
+        if (mediaMessage) mediaMessage.textContent = "Clipboard access is unavailable in this browser.";
+      }
+    });
+    actions.append(copy);
+
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "secondary-button";
+    remove.textContent = "Delete";
+    remove.addEventListener("click", async () => {
+      if (!confirm("Delete this image? It will be removed only if no catalogue record uses it.")) return;
+      remove.disabled = true;
+      try {
+        const publicUrl = getMediaPublicUrl(item);
+        for (const table of ["products", "services", "workshops", "technicians"]) {
+          const { data, error } = await supabase.from(table).select("id").eq("photo_url", publicUrl).limit(1);
+          if (error) throw error;
+          if (data?.length) throw new Error("This image is still used by " + table + ". Change that record's image before deleting it.");
+        }
+        const { error: storageError } = await supabase.storage.from("site-media").remove([item.storage_path]);
+        if (storageError) throw storageError;
+        const { error: metadataError } = await supabase.from("media_assets").delete().eq("id", item.id);
+        if (metadataError) throw metadataError;
+        mediaAssetData = mediaAssetData.filter((entry) => entry.id !== item.id);
+        renderMediaAssets();
+        if (mediaMessage) mediaMessage.textContent = "Image deleted.";
+      } catch (error) {
+        if (mediaMessage) mediaMessage.textContent = error.message || "Could not delete image.";
+      } finally {
+        remove.disabled = false;
+      }
+    });
+    actions.append(remove);
+    row.append(actions);
+    mediaItems.append(row);
+  }
+}
+
+async function loadMediaAssets() {
+  if (!ownerDashboard || !mediaItems) return;
+  if (mediaMessage) mediaMessage.textContent = "Loading media…";
+  const { data, error } = await supabase
+    .from("media_assets")
+    .select("id,storage_path,file_name,content_type,size_bytes,alt_text,is_public,uploaded_by,created_at")
+    .eq("is_public", true)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error) {
+    if (mediaMessage) mediaMessage.textContent = error.message || "Could not load Media Library.";
+    return;
+  }
+  mediaAssetData = data || [];
+  renderMediaAssets();
+  if (mediaMessage) mediaMessage.textContent = "Showing " + mediaAssetData.length + " media assets.";
+}
+
+if (mediaUploadForm) {
+  mediaUploadForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submit = document.querySelector("#media-upload-submit");
+    const form = new FormData(mediaUploadForm);
+    const file = form.get("file");
+    const altText = String(form.get("alt_text") || "").trim();
+    const extensions = {
+      "image/jpeg": "jpg",
+      "image/png": "png",
+      "image/webp": "webp",
+      "image/avif": "avif",
+      "image/gif": "gif",
+    };
+    if (!(file instanceof File) || !extensions[file.type]) {
+      if (mediaMessage) mediaMessage.textContent = "Choose a supported image file.";
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      if (mediaMessage) mediaMessage.textContent = "Image must be 10 MB or smaller.";
+      return;
+    }
+    if (submit) submit.disabled = true;
+    if (mediaMessage) mediaMessage.textContent = "Uploading image…";
+    const storagePath = "library/" + crypto.randomUUID() + "." + extensions[file.type];
+    try {
+      const { error: uploadError } = await supabase.storage.from("site-media").upload(storagePath, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
+      if (uploadError) throw uploadError;
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
+      const { error: metadataError } = await supabase.from("media_assets").insert({
+        storage_path: storagePath,
+        file_name: file.name.slice(0, 255),
+        content_type: file.type,
+        size_bytes: file.size,
+        alt_text: altText,
+        is_public: true,
+        uploaded_by: authData.user.id,
+      });
+      if (metadataError) {
+        await supabase.storage.from("site-media").remove([storagePath]);
+        throw metadataError;
+      }
+      mediaUploadForm.reset();
+      await loadMediaAssets();
+      if (mediaMessage) mediaMessage.textContent = "Image uploaded successfully.";
+    } catch (error) {
+      if (mediaMessage) mediaMessage.textContent = error.message || "Could not upload image.";
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  });
+}
+if (mediaSearch) mediaSearch.addEventListener("input", renderMediaAssets);
+if (ownerDashboard && mediaItems) void loadMediaAssets();
+
 // Dashboard module tabs: all modules stay on one horizontal row.
 const dashboardTabs = document.querySelectorAll("[data-dashboard-tab]");
 const dashboardPanels = document.querySelectorAll("[data-dashboard-panel]");
