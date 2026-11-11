@@ -19,6 +19,7 @@
     window.siteCountry = context;
     document.documentElement.dataset.country = region;
     document.documentElement.dataset.countryCode = context.code;
+    document.documentElement.dataset.countryReady = "true";
     window.dispatchEvent(new CustomEvent("countrycontextready", { detail: context }));
     return context;
   };
@@ -44,6 +45,7 @@
   };
   const showPrompt = () => {
     const render = () => {
+      document.documentElement.dataset.countryReady = "true";
       if (document.getElementById("country-detection-prompt")) return;
       const overlay = document.createElement("div");
       overlay.id = "country-detection-prompt";
