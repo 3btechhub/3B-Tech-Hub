@@ -17,7 +17,7 @@ export async function GET() {
     media: isMediaStoreConfigured(),
     settings: isSettingsStoreConfigured(),
     audit: isAuditStoreConfigured(),
-    mediaBucket: Boolean(process.env.APPWRITE_API_KEY && process.env.APPWRITE_MEDIA_BUCKET_ID),
+    mediaBucket: Boolean(process.env.APPWRITE_MEDIA_BUCKET_ID),
     owner: (process.env.ADMIN_OWNER_USER_IDS ?? "").split(",").some((id) => id.trim().length > 0),
   };
 
