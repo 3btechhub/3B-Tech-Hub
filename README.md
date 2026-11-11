@@ -25,15 +25,15 @@ The `.github/workflows/deploy-pages.yml` workflow validates and publishes the `s
 
 `https://3btechhub.github.io/3btechhub/`
 
-The current static release contains the requested homepage and Supabase email/password authentication. Admin CMS and server-only API workflows are not yet migrated; they must not be exposed until implemented with Supabase Auth/RLS/Edge Functions.
+The static release includes the public catalogue, profile/authentication flows and Owner CRUD for services, products, workshops and technicians. The Owner-only user administration Edge Function is deployed; the updated dashboard UI is being validated on the audit-fix branch. The full Media Library, editable site settings and backup/restore workflow are still pending.
 
 ## Supabase
 
 - Project: `sburxeuxkrilbfppxylm`
 - Region: `ap-northeast-1`
 - Auth provider: email/password only.
-- Database tables have RLS enabled. Verify each policy before enabling user-facing data operations.
-- Create the verified owner account through Supabase Auth, then assign the owner role using that actual Auth UUID. Never guess or commit a user UUID.
+- RLS is enabled on all 10 public application tables. Anonymous write grants have been revoked, role changes are Owner-only, and audit triggers are active.
+- The verified Owner account `3btechhub@gmail.com` already has the `owner` role. Never change or remove this primary Owner assignment.
 
 ## Validation
 
