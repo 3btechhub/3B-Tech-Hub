@@ -113,6 +113,23 @@ async function setMenuSession(session) {
 // Load authentication separately so a Supabase CDN issue cannot disable the menu.
 const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
 supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+async function applyPublicSiteSettings() {
+  if (document.querySelector("#owner-dashboard")) return;
+  const { data, error } = await supabase
+    .from("site_settings")
+    .select("setting_value")
+    .eq("setting_key", "site_profile")
+    .eq("is_public", true)
+    .maybeSingle();
+  if (error || !data?.setting_value || typeof data.setting_value !== "object") return;
+  const settings = data.setting_value;
+  const tagline = document.querySelector(".home-main p");
+  if (tagline && typeof settings.tagline === "string" && settings.tagline.trim()) tagline.textContent = settings.tagline;
+  const description = document.querySelector('meta[name="description"]');
+  if (description && typeof settings.description === "string" && settings.description.trim()) description.content = settings.description;
+}
+void applyPublicSiteSettings();
 if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   logoutMenuLink.disabled = true;
   const { error } = await supabase.auth.signOut();
@@ -889,6 +906,86 @@ if (mediaSearch) mediaSearch.addEventListener("input", renderMediaAssets);
 if (mediaTypeFilter) mediaTypeFilter.addEventListener("change", renderMediaAssets);
 if (mediaDateFilter) mediaDateFilter.addEventListener("change", renderMediaAssets);
 if (ownerDashboard && mediaItems) void loadMediaAssets();
+
+// Owner-only website profile settings stored as a single public configuration record.
+const siteSettingsForm = document.querySelector("#site-settings-form");
+const siteSettingsMessage = document.querySelector("#site-settings-message");
+
+async function loadSiteSettingsForm() {
+  if (!siteSettingsForm || currentDashboardRole !== "owner") return;
+  if (siteSettingsMessage) siteSettingsMessage.textContent = "Loading website settings…";
+  const { data, error } = await supabase
+    .from("site_settings")
+    .select("setting_value")
+    .eq("setting_key", "site_profile")
+    .maybeSingle();
+  if (error) {
+    if (siteSettingsMessage) siteSettingsMessage.textContent = error.message || "Could not load website settings.";
+    return;
+  }
+  const settings = data?.setting_value && typeof data.setting_value === "object" ? data.setting_value : {};
+  siteSettingsForm.elements.tagline.value = typeof settings.tagline === "string" ? settings.tagline : "our services and technical support";
+  siteSettingsForm.elements.description.value = typeof settings.description === "string" ? settings.description : "Three Brothers Tech Hub — technical services by region.";
+  siteSettingsForm.elements.contact_email.value = typeof settings.contact_email === "string" ? settings.contact_email : "";
+  siteSettingsForm.elements.contact_phone.value = typeof settings.contact_phone === "string" ? settings.contact_phone : "";
+  siteSettingsForm.elements.whatsapp_url.value = typeof settings.whatsapp_url === "string" ? settings.whatsapp_url : "";
+  if (siteSettingsMessage) siteSettingsMessage.textContent = "Website settings loaded.";
+}
+
+if (siteSettingsForm) {
+  siteSettingsForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (currentDashboardRole !== "owner") {
+      if (siteSettingsMessage) siteSettingsMessage.textContent = "Owner permission required.";
+      return;
+    }
+    const submit = document.querySelector("#site-settings-save");
+    const form = new FormData(siteSettingsForm);
+    const tagline = String(form.get("tagline") || "").trim();
+    const description = String(form.get("description") || "").trim();
+    const contactEmail = String(form.get("contact_email") || "").trim();
+    const contactPhone = String(form.get("contact_phone") || "").trim();
+    const whatsappUrl = String(form.get("whatsapp_url") || "").trim();
+    if (!tagline) {
+      if (siteSettingsMessage) siteSettingsMessage.textContent = "Homepage tagline is required.";
+      return;
+    }
+    if (whatsappUrl) {
+      try {
+        if (new URL(whatsappUrl).protocol !== "https:") throw new Error("HTTPS required");
+      } catch {
+        if (siteSettingsMessage) siteSettingsMessage.textContent = "WhatsApp URL must be a valid HTTPS address.";
+        return;
+      }
+    }
+    if (submit) submit.disabled = true;
+    if (siteSettingsMessage) siteSettingsMessage.textContent = "Saving website settings…";
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
+      const settingValue = {
+        tagline,
+        description,
+        contact_email: contactEmail,
+        contact_phone: contactPhone,
+        whatsapp_url: whatsappUrl,
+      };
+      const { error } = await supabase.from("site_settings").upsert({
+        setting_key: "site_profile",
+        setting_value: settingValue,
+        is_public: true,
+        updated_by: authData.user.id,
+      }, { onConflict: "setting_key" });
+      if (error) throw error;
+      if (siteSettingsMessage) siteSettingsMessage.textContent = "Website settings saved.";
+    } catch (error) {
+      if (siteSettingsMessage) siteSettingsMessage.textContent = error.message || "Could not save website settings.";
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  });
+}
+if (siteSettingsForm) void loadSiteSettingsForm();
 
 // Dashboard module tabs: all modules stay on one horizontal row.
 const dashboardTabs = Array.from(document.querySelectorAll("[data-dashboard-tab]"));
