@@ -240,3 +240,5 @@ body{background:var(--page-bg);color:var(--page-text)}
 .country-prompt .country-choice-list{display:grid;gap:9px;margin-top:18px}
 .country-prompt .country-choice-list button{min-height:45px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--page-text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .country-prompt .country-choice-list button:hover{background:var(--hover)}
+
+html:not([data-country-ready="true"]) body{visibility:hidden}
