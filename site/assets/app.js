@@ -502,6 +502,176 @@ if (ownerDashboard) {
 }
 
 
+// Owner-only user administration is performed by a JWT-verified Supabase Edge Function.
+const userInviteForm = document.querySelector("#user-invite-form");
+const userItems = document.querySelector("#user-admin-items");
+const userMessage = document.querySelector("#user-message");
+const roleSummaryList = document.querySelector("#role-summary-list");
+const userRefreshButton = document.querySelector("#user-refresh");
+
+async function callOwnerUsers(payload) {
+  const { data, error } = await supabase.functions.invoke("owner-users", { body: payload });
+  if (error) throw new Error(error.message || "User administration request failed.");
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
+function renderRoleSummary(users) {
+  if (!roleSummaryList) return;
+  roleSummaryList.replaceChildren();
+  const roles = ["owner", "admin", "manager", "editor", "staff", "customer"];
+  for (const role of roles) {
+    const row = document.createElement("article");
+    row.className = "technician-admin-row";
+    const count = users.filter((user) => user.role === role).length;
+    addTextElement(row, "strong", "", role.charAt(0).toUpperCase() + role.slice(1));
+    addTextElement(row, "span", "", String(count) + (count === 1 ? " account" : " accounts"));
+    roleSummaryList.append(row);
+  }
+}
+
+function renderUserList(users) {
+  if (!userItems) return;
+  userItems.replaceChildren();
+  if (!users.length) {
+    addTextElement(userItems, "p", "muted", "No accounts found.");
+    return;
+  }
+
+  const roles = ["customer", "staff", "editor", "manager", "admin"];
+  for (const user of users) {
+    const row = document.createElement("article");
+    row.className = "technician-admin-row";
+    const primary = document.createElement("div");
+    addTextElement(primary, "strong", "", user.email || "Unknown email");
+    const blocked = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
+    const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Never signed in";
+    addTextElement(primary, "span", "muted", [
+      user.role === "owner" ? "Owner" : (user.role || "Customer"),
+      blocked ? "Blocked" : "Active",
+      "Last sign-in: " + lastSignIn,
+    ].join(" · "));
+    row.append(primary);
+
+    const actions = document.createElement("div");
+    actions.className = "editor-actions";
+    const roleSelect = document.createElement("select");
+    roleSelect.setAttribute("aria-label", "Role for " + (user.email || user.id));
+    const ownerOption = document.createElement("option");
+    ownerOption.value = "owner";
+    ownerOption.textContent = "Owner";
+    ownerOption.disabled = true;
+    roleSelect.append(ownerOption);
+    for (const role of roles) {
+      const option = document.createElement("option");
+      option.value = role;
+      option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
+      roleSelect.append(option);
+    }
+    roleSelect.value = user.role || "customer";
+    roleSelect.disabled = user.role === "owner";
+    actions.append(roleSelect);
+
+    const saveRole = document.createElement("button");
+    saveRole.type = "button";
+    saveRole.textContent = "Save Role";
+    saveRole.disabled = user.role === "owner";
+    saveRole.addEventListener("click", async () => {
+      saveRole.disabled = true;
+      try {
+        await callOwnerUsers({ action: "set-role", userId: user.id, role: roleSelect.value });
+        if (userMessage) userMessage.textContent = "Role updated for " + user.email + ".";
+        await loadOwnerUsers();
+      } catch (error) {
+        if (userMessage) userMessage.textContent = error.message || "Could not update role.";
+      } finally {
+        saveRole.disabled = user.role === "owner";
+      }
+    });
+    actions.append(saveRole);
+
+    const statusButton = document.createElement("button");
+    statusButton.type = "button";
+    statusButton.className = "secondary-button";
+    statusButton.textContent = blocked ? "Unblock" : "Block";
+    statusButton.disabled = user.role === "owner";
+    statusButton.addEventListener("click", async () => {
+      statusButton.disabled = true;
+      try {
+        await callOwnerUsers({ action: "set-status", userId: user.id, blocked: !blocked });
+        if (userMessage) userMessage.textContent = user.email + (blocked ? " has been unblocked." : " has been blocked.");
+        await loadOwnerUsers();
+      } catch (error) {
+        if (userMessage) userMessage.textContent = error.message || "Could not change account status.";
+      } finally {
+        statusButton.disabled = user.role === "owner";
+      }
+    });
+    actions.append(statusButton);
+
+    const resetButton = document.createElement("button");
+    resetButton.type = "button";
+    resetButton.className = "secondary-button";
+    resetButton.textContent = "Send Password Reset";
+    resetButton.disabled = user.role === "owner";
+    resetButton.addEventListener("click", async () => {
+      resetButton.disabled = true;
+      try {
+        await callOwnerUsers({ action: "reset-password", userId: user.id });
+        if (userMessage) userMessage.textContent = "Password reset email sent to " + user.email + ".";
+      } catch (error) {
+        if (userMessage) userMessage.textContent = error.message || "Could not send password reset.";
+      } finally {
+        resetButton.disabled = user.role === "owner";
+      }
+    });
+    actions.append(resetButton);
+    row.append(actions);
+    userItems.append(row);
+  }
+}
+
+async function loadOwnerUsers() {
+  if (!ownerDashboard || !userItems) return;
+  if (userMessage) userMessage.textContent = "Loading users…";
+  try {
+    const result = await callOwnerUsers({ action: "list", page: 1, perPage: 50 });
+    const users = Array.isArray(result.users) ? result.users : [];
+    renderUserList(users);
+    renderRoleSummary(users);
+    const count = document.querySelector("#dashboard-users-count");
+    if (count) count.textContent = String(result.total ?? users.length);
+    if (userMessage) userMessage.textContent = "Showing " + users.length + " of " + (result.total ?? users.length) + " accounts.";
+  } catch (error) {
+    if (userMessage) userMessage.textContent = error.message || "Could not load users.";
+    if (userItems) userItems.replaceChildren();
+  }
+}
+
+if (userInviteForm) {
+  userInviteForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submit = document.querySelector("#user-invite-submit");
+    const form = new FormData(userInviteForm);
+    const email = String(form.get("email") || "").trim();
+    const role = String(form.get("role") || "customer");
+    if (submit) submit.disabled = true;
+    if (userMessage) userMessage.textContent = "Sending invitation…";
+    try {
+      await callOwnerUsers({ action: "invite", email, role });
+      userInviteForm.reset();
+      if (userMessage) userMessage.textContent = "Invitation sent to " + email + ".";
+      await loadOwnerUsers();
+    } catch (error) {
+      if (userMessage) userMessage.textContent = error.message || "Could not invite user.";
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  });
+}
+if (userRefreshButton) userRefreshButton.addEventListener("click", () => void loadOwnerUsers());
+if (ownerDashboard && userItems) void loadOwnerUsers();
+
 // Dashboard module tabs: all modules stay on one horizontal row.
 const dashboardTabs = document.querySelectorAll("[data-dashboard-tab]");
 const dashboardPanels = document.querySelectorAll("[data-dashboard-panel]");
