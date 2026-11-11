@@ -269,18 +269,16 @@ if (form) {
 const profile = document.querySelector("#profile-card");
 if (profile) {
   const status = document.querySelector("#profile-message");
+  const editButton = document.querySelector("#profile-edit-toggle");
+  const form = document.querySelector("#profile-edit-form");
+  const cancelButton = document.querySelector("#profile-edit-cancel");
   const fields = {
     name: document.querySelector("#profile-name"),
     email: document.querySelector("#profile-email"),
     phone: document.querySelector("#profile-phone"),
   };
-  const forms = {
-    name: document.querySelector("#edit-name-form"),
-    email: document.querySelector("#edit-email-form"),
-    phone: document.querySelector("#edit-phone-form"),
-    password: document.querySelector("#edit-password-form"),
-  };
   let currentUser = null;
+  let currentPhone = "";
 
   function profileMessage(text, kind = "") {
     status.textContent = text;
@@ -292,27 +290,22 @@ if (profile) {
     field.textContent = hasValue ? value : placeholder;
     field.classList.toggle("is-placeholder", !hasValue);
   }
-  function closeEditors() {
-    Object.values(forms).forEach((form) => { form.hidden = true; form.reset(); });
+  function closeEditor() {
+    form.hidden = true;
+    form.reset();
+    editButton.hidden = false;
   }
 
-  document.querySelectorAll("[data-edit]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const key = button.dataset.edit;
-      closeEditors();
-      const form = forms[key];
-      if (!form) return;
-      form.hidden = false;
-      if (key === "name") form.elements.name.value = fields.name.classList.contains("is-placeholder") ? "" : fields.name.textContent;
-      if (key === "email") form.elements.email.value = currentUser.email ?? "";
-      if (key === "phone") form.elements.phone.value = fields.phone.classList.contains("is-placeholder") ? "" : fields.phone.textContent;
-      form.querySelector("input")?.focus();
-      profileMessage("");
-    });
+  editButton.addEventListener("click", () => {
+    form.elements.name.value = currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "";
+    form.elements.email.value = currentUser.email || "";
+    form.elements.phone.value = currentPhone;
+    form.hidden = false;
+    editButton.hidden = true;
+    profileMessage("");
+    form.elements.name.focus();
   });
-  document.querySelectorAll("[data-cancel]").forEach((button) => {
-    button.addEventListener("click", () => closeEditors());
-  });
+  cancelButton.addEventListener("click", closeEditor);
 
   async function loadProfile() {
     const { data, error } = await supabase.auth.getUser();
@@ -329,65 +322,80 @@ if (profile) {
     if (profileError) {
       profileMessage("Could not load your phone number. Please refresh and try again.", "error");
     } else {
-      setProfileValue("phone", profileData?.phone || "", "Phone Number");
+      currentPhone = profileData?.phone || "";
+      setProfileValue("phone", currentPhone, "Phone Number");
     }
   }
 
-  async function saveForm(key, handler) {
-    const form = forms[key];
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const submit = form.querySelector('button[type="submit"]');
-      submit.disabled = true;
-      profileMessage("Saving…");
-      try {
-        await handler(new FormData(form));
-        closeEditors();
-        profileMessage(key === "email" ? "A confirmation link has been sent to your new email address. Verify it to complete the change." : key === "password" ? "Password changed successfully." : "Updated successfully.", "success");
-        await loadProfile();
-      } catch (error) {
-        profileMessage(error instanceof Error ? error.message : "Could not save changes. Please try again.", "error");
-      } finally {
-        submit.disabled = false;
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submit = form.querySelector('button[type="submit"]');
+    submit.disabled = true;
+    profileMessage("Saving…");
+    try {
+      const formData = new FormData(form);
+      const name = String(formData.get("name") || "").trim();
+      const email = String(formData.get("email") || "").trim().toLowerCase();
+      const phone = String(formData.get("phone") || "").trim();
+      const currentPassword = String(formData.get("currentPassword") || "");
+      const newPassword = String(formData.get("newPassword") || "");
+      const confirmPassword = String(formData.get("confirmPassword") || "");
+
+      if (!name) throw new Error("Enter your name.");
+      if (!email) throw new Error("Enter your email address.");
+      if (phone && !/^\\+?[0-9() .-]{7,24}$/.test(phone)) throw new Error("Enter a valid phone number.");
+      if (newPassword) {
+        if (newPassword.length < 8) throw new Error("New password must be at least 8 characters.");
+        if (newPassword !== confirmPassword) throw new Error("New passwords do not match.");
+        if (!currentPassword) throw new Error("Enter your current password to change it.");
+        const { error: verifyError } = await supabase.auth.signInWithPassword({ email: currentUser.email, password: currentPassword });
+        if (verifyError) throw new Error("Current password is incorrect.");
+      } else if (confirmPassword || currentPassword) {
+        throw new Error("To change password, enter current password, new password, and confirmation.");
       }
-    });
-  }
+
+      const { data: nameData, error: nameError } = await supabase.auth.updateUser({
+        data: { ...(currentUser.user_metadata || {}), display_name: name },
+      });
+      if (nameError) throw nameError;
+      currentUser = nameData.user;
+
+      const { error: phoneError } = await supabase.from("user_profiles").upsert(
+        { user_id: currentUser.id, phone: phone || null },
+        { onConflict: "user_id" },
+      );
+      if (phoneError) throw phoneError;
+      currentPhone = phone;
+
+      let emailPending = false;
+      if (email !== currentUser.email) {
+        const { error: emailError } = await supabase.auth.updateUser({ email });
+        if (emailError) throw emailError;
+        emailPending = true;
+      }
+      if (newPassword) {
+        const { error: passwordError } = await supabase.auth.updateUser({ password: newPassword });
+        if (passwordError) throw passwordError;
+      }
+
+      closeEditor();
+      await loadProfile();
+      profileMessage(
+        emailPending
+          ? "Profile saved. A confirmation link has been sent to your new email address."
+          : newPassword
+            ? "Profile and password saved successfully."
+            : "Profile saved successfully.",
+        "success",
+      );
+    } catch (error) {
+      profileMessage(error instanceof Error ? error.message : "Could not save changes. Please try again.", "error");
+    } finally {
+      submit.disabled = false;
+    }
+  });
 
   await loadProfile();
-  await saveForm("name", async (formData) => {
-    const name = String(formData.get("name") || "").trim();
-    if (!name) throw new Error("Enter your name.");
-    const { data, error } = await supabase.auth.updateUser({
-      data: { ...(currentUser.user_metadata || {}), display_name: name },
-    });
-    if (error) throw error;
-    currentUser = data.user;
-  });
-  await saveForm("email", async (formData) => {
-    const email = String(formData.get("email") || "").trim().toLowerCase();
-    if (!email || email === currentUser.email) throw new Error("Enter a different email address.");
-    const { error } = await supabase.auth.updateUser({ email });
-    if (error) throw error;
-  });
-  await saveForm("phone", async (formData) => {
-    const phone = String(formData.get("phone") || "").trim();
-    if (phone && !/^\+?[0-9() .-]{7,24}$/.test(phone)) throw new Error("Enter a valid phone number.");
-    const { error } = await supabase.from("user_profiles").upsert(
-      { user_id: currentUser.id, phone: phone || null },
-      { onConflict: "user_id" },
-    );
-    if (error) throw error;
-  });
-  await saveForm("password", async (formData) => {
-    const currentPassword = String(formData.get("currentPassword") || "");
-    const newPassword = String(formData.get("newPassword") || "");
-    const confirmPassword = String(formData.get("confirmPassword") || "");
-    if (newPassword.length < 8) throw new Error("New password must be at least 8 characters.");
-    if (newPassword !== confirmPassword) throw new Error("New passwords do not match.");
-    const { error } = await supabase.auth.updateUser({ password: newPassword, currentPassword });
-    if (error) throw error;
-  });
-
   const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
     if (!session) location.replace(new URL("login/", ROOT_URL).href);
   });
