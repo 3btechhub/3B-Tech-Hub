@@ -1,3 +1,5 @@
+import { headers } from "next/headers";
+
 type AppwriteRow = { $id?: string; [key: string]: unknown };
 
 async function configuration() {
