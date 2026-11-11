@@ -40,9 +40,9 @@ Vercel is intentionally excluded. Appwrite Sites is the production hosting and S
 
 ## 4. Application modules
 1. Public website: home, about, service categories, service details, products, blog, FAQ, reviews and contact.
-2. Service operations: booking requests, status tracking, customer communication and service history.
-3. Commerce foundation: product catalogue, inventory, cart/order capability and payment-provider integration when selected.
-4. Admin workspace: dashboard, page/content editor, navigation, theme, media, services, products, bookings, orders, customers, SEO, users/roles, settings, audit log and backups.
+2. Service catalogue: service information, categories and public service pages.
+3. Product catalogue: product information and direct customer contact; no order, checkout or payment module.
+4. Admin workspace: dashboard, service and product catalogues, workshops, technicians, media, users/roles, permissions, settings, audit log and backups.
 5. Integration layer: notifications, analytics, payment providers and AI services through server-side adapters.
 
 ## 5. Admin customization and publishing
@@ -100,7 +100,7 @@ Vercel is intentionally excluded. Appwrite Sites is the production hosting and S
 - Primary domain and DNS ownership.
 - Initial public languages and currencies.
 - Payment provider(s), if online payments are required.
-- Exact service locations, booking rules and notification channels.
+- Exact service locations and notification channels.
 - Legal/privacy policy requirements for operating markets.
 - Additional admin user identities and delegated role assignments.
 
