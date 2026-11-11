@@ -99,7 +99,7 @@ syncProfileMenu();
 supabase.auth.onAuthStateChange((_event, session) => {
   setMenuSession(session);
 });
-const ROOT_URL = new URL("../", import.meta.url);
+const ROOT_URL = new URL("https://3btechhub.github.io/3btechhub/");
 const form = document.querySelector("#auth-form");
 
 if (form) {
