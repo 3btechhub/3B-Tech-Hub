@@ -983,6 +983,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
       edit.addEventListener("click",()=>{
         productEditor.elements.id.value=item.id;
         productEditor.elements.name.value=item.name||"";
+        productEditor.elements.category_group.value=item.category_group||"mobile";
         productEditor.elements.category.value=item.category||"";
         productEditor.elements.description.value=item.description||"";
         productEditor.elements.country.value=item.country||"";
@@ -1003,6 +1004,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
   function resetProductForm(){
     productEditor.reset();productPhotoUrl="";previewImage(productPhotoPreview,"");
     productEditor.elements.country.value="";
+    productEditor.elements.category_group.value="mobile";
     document.querySelector("#product-form-title").textContent="Add Product";
     document.querySelector("#product-cancel").hidden=true;
   }
@@ -1015,10 +1017,12 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
         const name=String(form.get("name")||"").trim();
         const description=String(form.get("description")||"").trim();
         const category=String(form.get("category")||"").trim();
+        const categoryGroup=String(form.get("category_group")||"mobile");
+        if(!["mobile","satellite"].includes(categoryGroup))throw new Error("Select a valid product group.");
         const photo=await uploadContentPhoto(form.get("photo"),"products");
         if(!name)throw new Error("Name is required.");
         const slug=id?(productData.find(x=>x.id===id)?.slug||""):(name.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"product")+"-"+crypto.randomUUID().slice(0,8);
-        const item={slug,name,category:category||null,description,photo_url:photo||(id?(productData.find(x=>x.id===id)?.photo_url||null):null),country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,status:form.get("is_published")==="on"?"active":"draft"};
+        const item={slug,name,category_group:categoryGroup,category:category||null,description,photo_url:photo||(id?(productData.find(x=>x.id===id)?.photo_url||null):null),country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,status:form.get("is_published")==="on"?"active":"draft"};
         const query=id?supabase.from("products").update(item).eq("id",id):supabase.from("products").insert(item);
         const {error}=await query;if(error)throw error;
         resetProductForm();await loadIdentityEditors();editorMessage(productMessage,"Product saved.");
