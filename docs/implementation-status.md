@@ -44,6 +44,6 @@ Updated: 2026-11-12
 - [x] Added User, Role Summary and Permission Matrix panels to the Owner dashboard on the audit-fix branch.
 
 ## Explicitly not production-ready
-The old Next.js application under `src/` is not deployed by GitHub Pages. Its server routes and prototype modules must not be treated as active production features. No retired provider is part of the live architecture.
+The inactive Next.js/Appwrite prototype has been removed from the production branch. The audit backup branch preserves the pre-cleanup source. The live application is only the GitHub Pages frontend plus Supabase.
 
 Do not claim a backup is complete until a database export/archive exists and a restore test has passed. Do not claim a module is complete until it is connected to Supabase, protected by RLS and verified in the browser.
