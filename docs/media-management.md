@@ -12,9 +12,9 @@
 - Edit metadata and alternative text.
 - Copy public URLs.
 - Filter by type/date and search by name.
-- Soft-delete first; permanent deletion requires checking all product/service/workshop/technician references.
+- Delete only after checking product, service, workshop, technician and site-content references. A trash/restore workflow is not implemented yet.
 - Keep private assets inaccessible to anonymous visitors.
-- Audit upload, metadata update, visibility change, trash and restore actions.
+- Audit metadata updates and deletes through database triggers. Storage upload/delete audit correlation and trash/restore are not implemented yet.
 
 ## Safety
 - Validate MIME type, file size and file extension.
@@ -24,4 +24,4 @@
 - Never place service-role credentials in browser code.
 
 ## Status
-The Owner dashboard now includes a searchable Media Library backed by the existing public Storage bucket and metadata table. It lists existing bucket files, supports upload, filename/alt-text updates, type/date filters and URL copy, and blocks deletion when a catalogue or site-content record references the file. Browser-level verification is still pending.
+The Owner/Admin dashboard includes a searchable Media Library backed by the existing public Storage bucket and metadata table. It lists existing bucket files, supports upload, filename/alt-text updates, type/date filters and URL copy, and blocks deletion when a catalogue or site-content record references the file. Browser-level verification is still pending; there is no soft-delete/restore or private-media workflow.
