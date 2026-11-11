@@ -1,52 +1,41 @@
-# 3B TECH HUB
+# Three Brothers Technology Hub
 
-A clean, fast, dynamic and owner-controlled platform for electronics repair, technical services, products, bookings and customer support.
+The production website is a static, mobile-first frontend published by **GitHub Pages**. Supabase provides email/password authentication, PostgreSQL, Row Level Security and Storage.
 
-## Product requirements
+## Platform policy
+
+- GitHub: source repository, CI/CD and static website hosting through GitHub Pages.
+- Supabase: Auth, PostgreSQL, RLS, Storage and Edge Functions.
+- No Vercel, Appwrite, Cloudflare, or other hosting provider is used.
+
+## Website requirements
+
 - Homepage main content: only “Three Brothers Technology Hub”; keep the custom header and footer.
-- Login UI stays simple with email/password only. Google login is not used.
-- Mobile-first, accessible, SEO-friendly, lightweight and secure.
-- Owner approval before public publishing; content workflow: Draft → Preview → Approval → Publish.
-- Admin-editable content, navigation, theme, services, products, SEO and business settings where practical.
+- Login uses email and password only. Google OAuth is not included.
+- The login UI remains minimal: placeholder inputs and a simple submit button.
+- Supabase publishable key is public by design; all data access must be protected by RLS.
+- Never expose a Supabase secret/service-role key in the browser.
 
-## Technology
-- Web: Next.js App Router, React and TypeScript.
-- UI: Tailwind CSS and shared reusable components.
-- Database/Auth/Storage: Supabase PostgreSQL, Supabase Auth and Supabase Storage.
-- Dynamic hosting: Cloudflare Workers through the OpenNext adapter.
-- Source control and CI/CD: GitHub and GitHub Actions.
-- Testing: Vitest and Playwright.
-- Vercel and Appwrite are retired and must not be reintroduced.
+## Deploy
 
-## Repository
-- Repository: https://github.com/3btechhub/3B-Tech-Hub
-- Production branch: main
-- Migration work: launch/cloudflare-supabase
-- Supabase project: sburxeuxkrilbfppxylm (ap-northeast-1)
-- Cloudflare Worker name: 3b-tech-hub
+The `.github/workflows/deploy-pages.yml` workflow validates and publishes the `site/` directory. GitHub Pages must be configured to use GitHub Actions in repository Settings → Pages. The expected project-site URL is:
 
-## Local development
-1. Use Node.js 22.
-2. Copy .env.example to .env.local.
-3. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.
-4. Run npm install, then npm run dev.
+`https://3btechhub.github.io/3B-Tech-Hub/`
+
+The current static release contains the requested homepage and Supabase email/password authentication. Admin CMS, media management, bookings, and server-only API workflows are not yet migrated; they must not be exposed until implemented with Supabase Auth/RLS/Edge Functions.
+
+## Supabase
+
+- Project: `sburxeuxkrilbfppxylm`
+- Region: `ap-northeast-1`
+- Auth provider: email/password only.
+- Database tables have RLS enabled. Verify each policy before enabling user-facing data operations.
+- Create the verified owner account through Supabase Auth, then assign the owner role using that actual Auth UUID. Never guess or commit a user UUID.
 
 ## Validation
-- npm run typecheck
-- npm run lint
-- npm run test
-- npm run test:e2e
-- npm run cf:build
-- npm run cf:preview
 
-## Deployment
-The Cloudflare workflow requires GitHub Actions variable CLOUDFLARE_ACCOUNT_ID and secret CLOUDFLARE_API_TOKEN. The token should have only the Workers Scripts Edit permission for the intended account. Deployment runs from main after reviewed changes are merged.
-
-Before production launch, finish the Appwrite-to-Supabase route migration, configure and verify the owner role, run E2E tests and test the Worker preview. See docs/launch-checklist.md.
-
-## Security
-- RLS is enabled on every application table.
-- Never commit Supabase secret/service-role keys or customer data.
-- Publishable keys may be used in browser applications with correct RLS policies.
-- Keep private/authenticated responses out of shared CDN caches.
-- Use verified user IDs when assigning owner/admin roles; never guess IDs.
+- `npm run typecheck`
+- `npm run lint`
+- `npm run test`
+- `npm run test:e2e`
+- GitHub Pages workflow validates the deployed static assets.
