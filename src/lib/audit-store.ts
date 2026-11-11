@@ -6,7 +6,6 @@ export function isAuditStoreConfigured() {
   return Boolean(
     process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT
     && process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID
-    && process.env.APPWRITE_API_KEY
     && process.env.APPWRITE_DATABASE_ID
     && process.env.APPWRITE_AUDIT_TABLE_ID,
   );
