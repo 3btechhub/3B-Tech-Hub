@@ -78,6 +78,15 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szac";
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+async function syncProfileMenu() {
+  if (!profileMenuLink) return;
+  const { data } = await supabase.auth.getSession();
+  profileMenuLink.hidden = !data.session;
+}
+syncProfileMenu();
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (profileMenuLink) profileMenuLink.hidden = !session;
+});
 const ROOT_URL = new URL("../", import.meta.url);
 const form = document.querySelector("#auth-form");
 
