@@ -1,40 +1,44 @@
 # Implementation Status
 
-Updated: 2026-11-10
+Updated: 2026-11-12
 
-## Implemented in the development branch
-- [x] Next.js App Router, TypeScript, responsive public-site foundation and admin workspace.
-- [x] GitHub Actions CI configuration, Vitest unit tests and Playwright smoke-test configuration.
-- [x] Settings, media, content, audit and permission validation schemas with unit tests.
-- [x] Owner-gated admin authentication routes, Appwrite session verification, HttpOnly session cookie and logout flow.
-- [x] Structured content editor, draft persistence APIs, revision browser, saved-draft reopen/edit APIs and protected revision preview.
-- [x] Owner-only content workflow transitions, audit adapter and published-only public page renderer/API.
-- [x] Media Library UI, device upload, external HTTPS registration, metadata editing, soft-delete/restore and authenticated private-media preview.
-- [x] 50 MB media upload limit, MIME allowlist, basic file-signature validation and private-by-default uploaded objects.
-- [x] Media API pagination and title search; dashboard search and page navigation.
-- [x] Corrected Appwrite row lookup and deletion URL construction.
-- [x] Fixed Media Library pagination to filter trashed records server-side before totals are calculated.
-- [x] Aligned the application upload ceiling with Appwrite's exact 50,000,000-byte Storage limit.
-- [x] Added unit tests for Appwrite query pagination, title search, trash filtering and input bounds.
-- [x] Corrected Appwrite row deletion to use the configured endpoint.
-- [x] Applied server-side `deletedAt IS NULL` filtering before media pagination so page totals and results stay consistent.
-- [x] Server-only Appwrite adapter; APIs fail closed (503) when required production configuration is absent.
-- [x] Architecture, data model, security, content, media and Appwrite configuration documentation, including required media title full-text index.
+## Live platform
+- [x] GitHub Pages deploys the `site/` static frontend.
+- [x] Supabase project `sburxeuxkrilbfppxylm` is active and healthy.
+- [x] Supabase email/password authentication is used by the static frontend.
+- [x] RLS is enabled on all 10 public application tables.
+- [x] The Owner role is assigned to `3btechhub@gmail.com`.
+- [x] Six active services are present with the approved country routing.
+- [x] Products are stored in two groups: Mobile & Accessories and Satellite & TV Equipment.
+- [x] Product group selection and catalogue pagination regression fixes are being added on the audit-fix branch.
 
-## Remaining production work
-- [x] Reconnected Appwrite and verified the active Production project `3B Tech Hub` (region `fra`).
-- [x] Created and verified TablesDB `3btechhub-prod`, Content/Media/Audit tables, required columns/indexes and private Storage bucket `media`.
-- [ ] Configure least-privilege server API key and production environment variables; configure actual Owner user ID in ADMIN_OWNER_USER_IDS.
-- [ ] Run live Appwrite tests for login, content create/edit/approve/publish, media upload/read/update/trash/restore, audit persistence and rollback.
-- [ ] Add media usage/reference tracking before enabling permanent deletion.
-- [ ] Build thumbnail/optimized rendition generation and a security-reviewed CDN delivery policy; do not expose private uploads publicly by default.
-- [ ] Add distributed rate limiting, MFA and complete security review.
-- [ ] Review remaining moderate dependency audit findings against compatible upstream patches.
-- [ ] Verify GitHub Actions checks for the current development branch; the connector currently returns no commit status entries for the latest changes.
-- [ ] Connect/configure production hosting, secrets, domain and DNS.
-- [ ] Complete accessibility, responsive, SEO, performance, backup/restore and browser testing.
+## Implemented static-site modules
+- [x] Homepage, login and user profile.
+- [x] Service, product, workshop and technician catalogue rendering.
+- [x] Owner-only CRUD forms for services, products, workshops and technicians.
+- [x] Supabase Storage image uploads for catalogue records.
+- [ ] Dedicated Media Library CRUD and media usage tracking.
+- [ ] Owner user administration (invite, list, role assignment, block/unblock).
+- [ ] Dedicated role/permission administration UI.
+- [ ] Website settings UI connected to Supabase.
+- [ ] Complete backup/export and tested restore workflow.
 
-## Release controls
-- Development is targeted at the real production project, not a separate preview product.
-- Public launch, DNS changes, payment activation and destructive production operations still require explicit Owner approval.
-- Do not describe unavailable integrations or unrun tests as completed.
+## Database review findings
+- [ ] Revoke unnecessary anonymous write grants and review authenticated grants.
+- [ ] Restrict user-role mutations to the Owner, not any Admin.
+- [ ] Add append-only audit triggers for privileged data changes.
+- [ ] Add the missing workshop foreign-key indexes.
+- [ ] Add updated_at triggers for workshops and technicians.
+- [ ] Reconcile migration history with version-controlled SQL files.
+
+## CI and verification
+- [x] Static website file validation.
+- [x] JavaScript syntax validation.
+- [ ] Unit/regression tests for catalogue behavior.
+- [ ] Browser end-to-end tests for authentication and owner CRUD.
+- [ ] Automated accessibility, responsive and production smoke tests.
+
+## Explicitly not production-ready
+The old Next.js application under `src/` is not deployed by GitHub Pages. Its server routes and prototype modules must not be treated as active production features. No retired provider is part of the live architecture.
+
+Do not claim a backup is complete until a database export/archive exists and a restore test has passed. Do not claim a module is complete until it is connected to Supabase, protected by RLS and verified in the browser.
