@@ -6,6 +6,11 @@ const schema = z.object({ email: z.string().email().max(254) });
 const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.replace(/\/$/, "");
 const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
 
+function configuredOwnerId() {
+  return process.env.ADMIN_OWNER_USER_ID?.trim()
+    || (process.env.ADMIN_OWNER_USER_IDS ?? "").split(",").map((id) => id.trim()).filter(Boolean)[0];
+}
+
 export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
   if (!origin || origin !== request.nextUrl.origin) {
@@ -16,7 +21,7 @@ export async function POST(request: NextRequest) {
   }
   const parsed = schema.safeParse(await request.json().catch(() => null));
   const ownerEmail = process.env.ADMIN_OWNER_EMAIL?.trim().toLowerCase();
-  const ownerId = process.env.ADMIN_OWNER_USER_IDS?.split(",").map((id) => id.trim()).filter(Boolean)[0];
+  const ownerId = configuredOwnerId();
   if (!parsed.success || !ownerEmail || !ownerId || parsed.data.email.toLowerCase() !== ownerEmail) {
     return NextResponse.json({ error: "This email is not enabled for Owner sign-in." }, { status: 403 });
   }
