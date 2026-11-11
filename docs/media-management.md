@@ -24,4 +24,4 @@
 - Never place service-role credentials in browser code.
 
 ## Status
-The existing catalogue image upload path is live. A dedicated searchable Media Library, metadata CRUD, usage tracking and tested restore flow remain unfinished. Do not represent those capabilities as complete until they are connected to Supabase and verified.
+The Owner dashboard now includes a searchable Media Library backed by the existing public Storage bucket and metadata table. It lists existing bucket files, supports upload, filename/alt-text updates, type/date filters and URL copy, and blocks deletion when a catalogue or site-content record references the file. Browser-level verification is still pending.
