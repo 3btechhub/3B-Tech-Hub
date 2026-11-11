@@ -578,3 +578,19 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
   .product-group-card-icon { flex-basis:42px; width:42px; height:42px; font-size:22px; }
   .product-detail-type-list { grid-template-columns:1fr; }
 }
+
+
+
+/* Product category cards follow the same image-and-details pattern as Services, Workshops and Technicians. */
+.product-group-card-image {
+  display:block;
+  flex:0 0 48px;
+  width:48px;
+  height:48px;
+  border-radius:8px;
+  object-fit:cover;
+  background:var(--hover);
+}
+@media(max-width:520px) {
+  .product-group-card-image { flex-basis:42px; width:42px; height:42px; }
+}
