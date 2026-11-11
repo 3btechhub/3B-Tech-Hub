@@ -684,6 +684,8 @@ if (ownerDashboard && userItems) void loadOwnerUsers();
 const mediaUploadForm = document.querySelector("#media-upload-form");
 const mediaItems = document.querySelector("#media-admin-items");
 const mediaSearch = document.querySelector("#media-search");
+const mediaTypeFilter = document.querySelector("#media-type-filter");
+const mediaDateFilter = document.querySelector("#media-date-filter");
 const mediaMessage = document.querySelector("#media-message");
 let mediaAssetData = [];
 
@@ -695,7 +697,15 @@ function renderMediaAssets() {
   if (!mediaItems) return;
   mediaItems.replaceChildren();
   const search = String(mediaSearch?.value || "").trim().toLowerCase();
-  const visible = mediaAssetData.filter((item) => !search || String(item.file_name || "").toLowerCase().includes(search));
+  const type = String(mediaTypeFilter?.value || "all");
+  const days = String(mediaDateFilter?.value || "all");
+  const cutoff = days === "all" ? 0 : Date.now() - Number(days) * 24 * 60 * 60 * 1000;
+  const visible = mediaAssetData.filter((item) => {
+    const matchesSearch = !search || String(item.file_name || "").toLowerCase().includes(search);
+    const matchesType = type === "all" || item.content_type === type;
+    const matchesDate = !cutoff || new Date(item.created_at).getTime() >= cutoff;
+    return matchesSearch && matchesType && matchesDate;
+  });
   if (!visible.length) {
     addTextElement(mediaItems, "p", "muted", mediaAssetData.length ? "No matching images." : "No images uploaded yet.");
     return;
@@ -718,6 +728,12 @@ function renderMediaAssets() {
       (Number(item.size_bytes || 0) / 1024).toFixed(1) + " KB",
       item.created_at ? new Date(item.created_at).toLocaleDateString() : "",
     ].filter(Boolean).join(" · "));
+    const fileNameInput = document.createElement("input");
+    fileNameInput.type = "text";
+    fileNameInput.maxLength = 255;
+    fileNameInput.value = item.file_name || "";
+    fileNameInput.setAttribute("aria-label", "File name for " + item.file_name);
+    details.append(fileNameInput);
     const altInput = document.createElement("input");
     altInput.type = "text";
     altInput.maxLength = 250;
@@ -734,8 +750,9 @@ function renderMediaAssets() {
     save.addEventListener("click", async () => {
       save.disabled = true;
       try {
-        const { error } = await supabase.from("media_assets").update({ alt_text: altInput.value.trim() }).eq("id", item.id);
+        const { error } = await supabase.from("media_assets").update({ file_name: fileNameInput.value.trim().slice(0, 255), alt_text: altInput.value.trim() }).eq("id", item.id);
         if (error) throw error;
+        item.file_name = fileNameInput.value.trim().slice(0, 255);
         item.alt_text = altInput.value.trim();
         if (mediaMessage) mediaMessage.textContent = "Media details saved.";
       } catch (error) {
@@ -869,6 +886,8 @@ if (mediaUploadForm) {
   });
 }
 if (mediaSearch) mediaSearch.addEventListener("input", renderMediaAssets);
+if (mediaTypeFilter) mediaTypeFilter.addEventListener("change", renderMediaAssets);
+if (mediaDateFilter) mediaDateFilter.addEventListener("change", renderMediaAssets);
 if (ownerDashboard && mediaItems) void loadMediaAssets();
 
 // Dashboard module tabs: all modules stay on one horizontal row.
