@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 
 const modules = [
   { label: "Overview", href: "/admin" },
-  { label: "Order" },
-  { label: "Complaint" },
-  { label: "Request" },
-  { label: "Content", href: "/admin/content" },
+  { label: "Service", href: "/admin/content" },
+  { label: "Product" },
+  { label: "Workshop" },
+  { label: "Technician" },
   { label: "Media", href: "/admin/media" },
   { label: "User" },
   { label: "Role" },
