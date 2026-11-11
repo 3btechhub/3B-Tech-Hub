@@ -713,62 +713,65 @@ function renderProducts(products) {
     mobile: "Mobile & Accessories",
     satellite: "Satellite & TV Equipment"
   };
+  const groupIcons = { mobile: "📱", satellite: "📡" };
   const groupOrder = ["mobile", "satellite"];
-  const catalogue = document.createElement("div");
-  catalogue.className = "product-catalogue";
+  const groups = groupOrder.map(key => ({
+    key,
+    title: groupTitles[key],
+    products: visibleProducts.filter(product => product.category_group === key)
+  })).filter(group => group.products.length);
 
-  groupOrder.forEach(groupKey => {
-    const groupProducts = visibleProducts.filter(product => product.category_group === groupKey);
-    if (!groupProducts.length) return;
-
-    const group = document.createElement("section");
-    group.className = "product-group product-group-" + groupKey;
-
-    const header = document.createElement("div");
-    header.className = "product-group-header";
-    const headingWrap = document.createElement("div");
-    headingWrap.className = "product-group-heading-wrap";
-    const icon = addTextElement(headingWrap, "span", "product-group-icon", groupKey === "mobile" ? "📱" : "📡");
-    icon.setAttribute("aria-hidden", "true");
-    const heading = addTextElement(headingWrap, "h3", "product-group-title", groupTitles[groupKey]);
-    heading.id = "product-group-" + groupKey;
-    header.append(headingWrap);
-    const count = addTextElement(header, "span", "product-group-count", groupProducts.length + " types");
-    group.append(header);
-
-    const list = document.createElement("ul");
-    list.className = "product-group-list";
-    list.setAttribute("aria-labelledby", heading.id);
-    groupProducts.forEach(product => {
-      const item = document.createElement("li");
-      item.className = "product-group-item";
-      const marker = addTextElement(item, "span", "product-item-marker", "✓");
-      marker.setAttribute("aria-hidden", "true");
-      addTextElement(item, "span", "product-item-name", product.name);
-      list.append(item);
-    });
-    group.append(list);
-    catalogue.append(group);
-  });
-
-  // Keep any future/unmapped product groups visible without mixing them into known groups.
-  const knownGroups = new Set(groupOrder);
-  const otherProducts = visibleProducts.filter(product => !knownGroups.has(product.category_group));
+  const otherProducts = visibleProducts.filter(product => !groupOrder.includes(product.category_group));
   if (otherProducts.length) {
-    const group = document.createElement("section");
-    group.className = "product-group";
-    addTextElement(group, "h3", "product-group-title", "Other Products");
-    const list = document.createElement("ul");
-    list.className = "product-group-list";
-    otherProducts.forEach(product => {
-      const item = document.createElement("li");
-      item.className = "product-group-item";
-      item.textContent = product.name;
-      list.append(item);
-    });
-    group.append(list);
-    catalogue.append(group);
+    groups.push({ key: "other", title: "Other Products", products: otherProducts });
   }
+
+  let dialog = document.querySelector("#product-group-detail-dialog");
+  if (!dialog) {
+    dialog = document.createElement("dialog");
+    dialog.id = "product-group-detail-dialog";
+    dialog.className = "technician-detail-dialog product-detail-dialog";
+    dialog.innerHTML = '<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';
+    document.body.append(dialog);
+    dialog.querySelector(".technician-detail-close").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+  }
+
+  const detailBody = dialog.querySelector(".technician-detail-body");
+  const catalogue = document.createElement("div");
+  catalogue.className = "product-catalogue product-card-grid";
+
+  groups.forEach(group => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "product-group-card";
+    card.setAttribute("aria-label", "View " + group.title + " product types");
+    const icon = addTextElement(card, "span", "product-group-card-icon", groupIcons[group.key] || "📦");
+    icon.setAttribute("aria-hidden", "true");
+    const info = document.createElement("span");
+    info.className = "technician-card-info";
+    addTextElement(info, "strong", "", group.title);
+    addTextElement(info, "small", "", group.products.length + (group.products.length === 1 ? " type" : " types"));
+    addTextElement(info, "small", "technician-card-hint", "View details");
+    card.append(info);
+    card.addEventListener("click", () => {
+      detailBody.replaceChildren();
+      const detailIcon = addTextElement(detailBody, "span", "product-group-detail-icon", groupIcons[group.key] || "📦");
+      detailIcon.setAttribute("aria-hidden", "true");
+      addTextElement(detailBody, "h2", "", group.title);
+      addTextElement(detailBody, "p", "product-detail-description", "Product types");
+      const list = document.createElement("ul");
+      list.className = "product-detail-type-list";
+      group.products.forEach(product => {
+        const item = document.createElement("li");
+        item.textContent = product.name;
+        list.append(item);
+      });
+      detailBody.append(list);
+      dialog.showModal();
+    });
+    catalogue.append(card);
+  });
 
   target.append(catalogue);
   if (homepageProducts) homepageProducts.hidden = !catalogue.children.length;
