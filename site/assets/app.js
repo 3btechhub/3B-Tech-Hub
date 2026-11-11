@@ -1,4 +1,5 @@
 const menuButton = document.querySelector(".menu-trigger");
+const siteMenu = document.querySelector("#site-menu");
 const profileMenuLink = document.querySelector("#profile-menu-link");
 const themeToggle = document.querySelector("#theme-toggle");
 const languageToggle = document.querySelector("#language-toggle");
