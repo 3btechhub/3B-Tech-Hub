@@ -1,5 +1,62 @@
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
+const profileMenuLink = document.querySelector("#profile-menu-link");
+const themeToggle = document.querySelector("#theme-toggle");
+const languageToggle = document.querySelector("#language-toggle");
+const languageCode = document.querySelector("#language-code");
+const savedTheme = localStorage.getItem("3b-theme");
+const savedLanguage = localStorage.getItem("3b-language") || "en";
+document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
+document.documentElement.lang = savedLanguage;
+const translations = {
+  en: {home:"Home",login:"Login",profile:"Profile",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
+  bn: {home:"হোম",login:"লগইন",profile:"প্রোফাইল",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"}
+};
+function applyLanguage(language) {
+  const lang = language === "bn" ? "bn" : "en";
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-label]").forEach((element) => {
+    const key = element.dataset.label;
+    if (translations[lang][key]) element.textContent = translations[lang][key];
+  });
+  if (languageCode) languageCode.textContent = lang.toUpperCase();
+  localStorage.setItem("3b-language", lang);
+}
+function applyTheme(theme) {
+  const dark = theme === "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  if (themeToggle) {
+    themeToggle.textContent = dark ? "☀" : "☾";
+    themeToggle.setAttribute("aria-label", dark ? translations[document.documentElement.lang].light : translations[document.documentElement.lang].dark);
+  }
+  localStorage.setItem("3b-theme", dark ? "dark" : "light");
+}
+applyLanguage(savedLanguage);
+applyTheme(savedTheme === "dark" ? "dark" : "light");
+if (themeToggle) themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+if (languageToggle) languageToggle.addEventListener("click", () => {
+  const next = document.documentElement.lang === "bn" ? "en" : "bn";
+  applyLanguage(next);
+  applyTheme(document.documentElement.dataset.theme);
+});
+if (menuButton && siteMenu) {
+  menuButton.addEventListener("click", () => {
+    const opening = siteMenu.hidden;
+    siteMenu.hidden = !opening;
+    menuButton.setAttribute("aria-expanded", String(opening));
+    menuButton.setAttribute("aria-label", opening ? "Close menu" : "Open menu");
+  });
+  document.addEventListener("click", (event) => {
+    if (!siteMenu.hidden && !siteMenu.contains(event.target) && !menuButton.contains(event.target)) {
+      siteMenu.hidden = true;
+      menuButton.setAttribute("aria-expanded", "false");
+      menuButton.setAttribute("aria-label", "Open menu");
+    }
+  });
+}
+
+
+const siteMenu = document.querySelector("#site-menu");
 if (menuButton && siteMenu) {
   menuButton.addEventListener("click", () => {
     const opening = siteMenu.hidden;
