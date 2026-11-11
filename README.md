@@ -25,7 +25,7 @@ The `.github/workflows/deploy-pages.yml` workflow validates and publishes the `s
 
 `https://3btechhub.github.io/3btechhub/`
 
-The static release includes the public catalogue, profile/authentication flows and Owner CRUD for services, products, workshops and technicians. The Owner-only user administration Edge Function is deployed; the updated dashboard UI is being validated on the audit-fix branch. The full Media Library, editable site settings and backup/restore workflow are still pending.
+The static release includes the public catalogue, profile/authentication flows, Owner/Admin catalogue CRUD, a searchable Supabase Media Library, Owner-only user administration and website profile settings. A complete content revision/page-builder workflow and a full database-plus-Storage backup/restore process remain pending.
 
 ## Supabase
 
