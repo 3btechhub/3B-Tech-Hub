@@ -120,14 +120,15 @@ if (form) {
 
   function render() {
     const signup = mode === "signup";
-    const recovery = mode === "recovery";
-    submit.textContent = recovery ? "Verify Code & Reset Password" : signup ? "Create Account" : "Login";
+    const recovery = mode === "recovery" || mode === "recovery-link";
+    const recoveryLink = mode === "recovery-link";
+    submit.textContent = recoveryLink ? "Update Password" : recovery ? "Verify Code & Reset Password" : signup ? "Create Account" : "Login";
     toggle.textContent = signup ? "Login Account" : "Create Account";
     toggle.disabled = recovery;
     forgot.disabled = recovery;
-    emailInput.readOnly = recovery;
-    otpInput.hidden = !recovery;
-    otpInput.required = recovery;
+    emailInput.readOnly = mode === "recovery";
+    otpInput.hidden = mode !== "recovery";
+    otpInput.required = mode === "recovery";
     passwordInput.autocomplete = recovery || signup ? "new-password" : "current-password";
     passwordInput.setAttribute("aria-label", recovery ? "New Password" : "Password");
     passwordInput.placeholder = recovery ? "New Password" : "Password";
@@ -151,7 +152,9 @@ if (form) {
     forgot.disabled = true;
     showMessage("Sending verification code…");
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {\n        redirectTo: new URL("login/?recovery=1", ROOT_URL).href,\n      });
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: new URL("login/?recovery=1", ROOT_URL).href,
+      });
       if (error) throw error;
       recoveryEmail = email;
       mode = "recovery";
@@ -186,7 +189,14 @@ if (form) {
     submit.disabled = true;
     showMessage(mode === "recovery" ? "Verifying code and updating password…" : mode === "signup" ? "Creating account…" : "Signing in…");
     try {
-      if (mode === "recovery") {
+      if (mode === "recovery-link") {
+        const { error: updateError } = await supabase.auth.updateUser({ password });
+        if (updateError) throw updateError;
+        await supabase.auth.signOut();
+        mode = "login";
+        render();
+        showMessage("Password updated successfully. You can now log in with your new password.", "success");
+      } else if (mode === "recovery") {
         const { error: verifyError } = await supabase.auth.verifyOtp({
           email: recoveryEmail,
           token: otpInput.value.trim(),
@@ -242,6 +252,18 @@ if (form) {
   });
 
   render();
+  supabase.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY" && session) {
+      mode = "recovery-link";
+      recoveryEmail = session.user.email || "";
+      emailInput.value = recoveryEmail;
+      emailInput.readOnly = true;
+      otpInput.value = "";
+      passwordInput.value = "";
+      render();
+      showMessage("Enter your new password to finish resetting your account.", "success");
+    }
+  });
 }
 
 const profile = document.querySelector("#profile-card");
