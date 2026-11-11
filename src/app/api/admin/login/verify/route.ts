@@ -10,6 +10,13 @@ const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT?.replace(/\/$/, "");
 const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
 const cookieName = () => projectId ? `a_session_${projectId}` : "";
 
+function configuredOwnerIds() {
+  return [
+    ...(process.env.ADMIN_OWNER_USER_IDS ?? "").split(","),
+    process.env.ADMIN_OWNER_USER_ID ?? "",
+  ].map((id) => id.trim()).filter(Boolean);
+}
+
 export async function POST(request: NextRequest) {
   const origin = request.headers.get("origin");
   if (!origin || origin !== request.nextUrl.origin) {
@@ -19,8 +26,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Authentication is not configured." }, { status: 503 });
   }
   const parsed = schema.safeParse(await request.json().catch(() => null));
-  const allowedIds = (process.env.ADMIN_OWNER_USER_IDS ?? "").split(",").map((id) => id.trim()).filter(Boolean);
-  if (!parsed.success || !allowedIds.includes(parsed.data.userId)) {
+  if (!parsed.success || !configuredOwnerIds().includes(parsed.data.userId)) {
     return NextResponse.json({ error: "Invalid Owner sign-in request." }, { status: 403 });
   }
 
