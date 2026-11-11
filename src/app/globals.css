@@ -1073,3 +1073,40 @@ body input.control--lg, body select.control--lg, body textarea.control--lg {
   font-size:13px; font-weight:600; text-align:center;
 }
 .auth-secondary-button:hover,.auth-google-button:hover { background:var(--surface-muted); }
+
+
+/* Simple homepage and login presentation */
+.home-clean-surface { display:grid; place-items:center; min-height:clamp(220px, 42vh, 480px); }
+.home-clean-content { text-align:center; }
+.home-clean-content h1 { margin:0; font-size:clamp(24px, 4vw, 38px)!important; font-weight:700; }
+.auth-login-form {
+  width:min(380px,100%)!important;
+  gap:12px!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.auth-login-form > input {
+  min-height:48px!important;
+  border:1px solid var(--border)!important;
+  border-radius:8px!important;
+  background:var(--surface)!important;
+  padding:10px 12px!important;
+}
+.auth-login-submit {
+  width:100%!important;
+  min-height:48px!important;
+  border-radius:8px!important;
+  font-size:15px!important;
+}
+.auth-secondary-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.auth-secondary-button {
+  display:flex; align-items:center; justify-content:center;
+  min-height:42px; padding:8px 10px;
+  border:1px solid var(--border); border-radius:8px;
+  background:var(--surface); color:var(--foreground);
+  font-size:14px; font-weight:500; text-align:center;
+}
+.auth-google-button { display:none!important; }
