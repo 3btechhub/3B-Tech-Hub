@@ -27,6 +27,7 @@ const profileMenuLink = document.querySelector("#profile-menu-link");
 const dashboardMenuLink = document.querySelector("#dashboard-menu-link");
 const themeToggle = document.querySelector("#theme-toggle");
 const languageSelect = document.querySelector("#language-select");
+const regionSelect = document.querySelector("#region-select");
 const savedTheme = localStorage.getItem("3b-theme");
 const routeDefaultLanguage = activeCountry.region === "bd" ? "bn" : activeCountry.region === "saudi" ? "ar" : "en";
 const languageStorageKey = "3b-language-" + activeCountry.region;
@@ -58,6 +59,13 @@ function applyTheme(theme) {
   localStorage.setItem("3b-theme", dark ? "dark" : "light");
 }
 applyLanguage(savedLanguage);
+if (regionSelect) regionSelect.value = activeCountry.region;
+if (regionSelect) regionSelect.addEventListener("change", () => {
+  const region = regionSelect.value;
+  if (["bd", "saudi", "global"].includes(region) && region !== activeCountry.region) {
+    window.location.assign("/3btechhub/" + region + "/");
+  }
+});
 applyTheme(savedTheme === "dark" ? "dark" : "light");
 if (themeToggle) themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
 if (languageSelect) languageSelect.addEventListener("change", () => {
