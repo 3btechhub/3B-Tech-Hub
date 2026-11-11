@@ -737,7 +737,7 @@ async function loadHomepageIdentity() {
   if (!homepageTechnicians && !homepageWorkshops && !homepageProducts) return;
   const [{ data: settings, error: settingsError }, { data: workshops, error: workshopsError }, { data: products, error: productsError }] = await Promise.all([
     supabase.from("site_settings").select("setting_key,setting_value").eq("is_public", true).eq("setting_key", "technicians"),
-    supabase.from("workshops").select("*").eq("status", "published").order("workshop_date", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
+    supabase.from("workshops").select("*").eq("status", "published").order("created_at", { ascending: false }),
     supabase.from("products").select("*").eq("status", "active").order("updated_at", { ascending: false })
   ]);
   if (settingsError) console.warn("Homepage technician content unavailable:", settingsError.message);
