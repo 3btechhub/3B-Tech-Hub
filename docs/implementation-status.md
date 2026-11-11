@@ -17,7 +17,7 @@ Updated: 2026-11-12
 - [x] Service, product, workshop and technician catalogue rendering.
 - [x] Owner-only CRUD forms for services, products, workshops and technicians.
 - [x] Supabase Storage image uploads for catalogue records.
-- [ ] Dedicated Media Library CRUD and media usage tracking.
+- [x] Dedicated Media Library with Storage listing, upload, metadata CRUD, filters and reference-safe deletion (browser verification pending).
 - [ ] Owner user administration (invite, list, role assignment, block/unblock).
 - [ ] Dedicated role/permission administration UI.
 - [x] Owner-only website profile settings connected to Supabase; public homepage tagline and meta description read the public settings record.
@@ -41,7 +41,7 @@ Updated: 2026-11-12
 - [x] Reconciled all 11 version-controlled migration files to the exact versions and SQL statements recorded in Supabase migration history.
 - [x] Applied and verified least-privilege grants, Owner-only role policies, protected primary Owner, audit triggers, workshop indexes and timestamp triggers.
 - [x] Deployed JWT-verified `owner-users` Edge Function for Owner-only invitations, role changes, account blocking/unblocking and password-reset emails.
-- [x] Added User, Role Summary and Permission Matrix panels to the Owner dashboard on the audit-fix branch.
+- [x] Added User, Role Summary and Permission Matrix panels to the Owner dashboard.
 
 ## Explicitly not production-ready
 The inactive Next.js/Appwrite prototype has been removed from the production branch. The audit backup branch preserves the pre-cleanup source. The live application is only the GitHub Pages frontend plus Supabase.
