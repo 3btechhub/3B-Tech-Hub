@@ -254,6 +254,12 @@ if (profile) {
     status.textContent = text;
     status.dataset.kind = kind;
   }
+  function setProfileValue(key, value, placeholder) {
+    const field = fields[key];
+    const hasValue = Boolean(String(value || "").trim());
+    field.textContent = hasValue ? value : placeholder;
+    field.classList.toggle("is-placeholder", !hasValue);
+  }
   function closeEditors() {
     Object.values(forms).forEach((form) => { form.hidden = true; form.reset(); });
   }
@@ -265,9 +271,9 @@ if (profile) {
       const form = forms[key];
       if (!form) return;
       form.hidden = false;
-      if (key === "name") form.elements.name.value = fields.name.textContent === "—" ? "" : fields.name.textContent;
+      if (key === "name") form.elements.name.value = fields.name.classList.contains("is-placeholder") ? "" : fields.name.textContent;
       if (key === "email") form.elements.email.value = currentUser.email ?? "";
-      if (key === "phone") form.elements.phone.value = fields.phone.textContent === "—" ? "" : fields.phone.textContent;
+      if (key === "phone") form.elements.phone.value = fields.phone.classList.contains("is-placeholder") ? "" : fields.phone.textContent;
       form.querySelector("input")?.focus();
       profileMessage("");
     });
@@ -283,14 +289,15 @@ if (profile) {
       return;
     }
     currentUser = data.user;
-    fields.name.textContent = currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "—";
-    fields.email.textContent = currentUser.email || "—";
+    const name = currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "";
+    setProfileValue("name", name, "Name");
+    setProfileValue("email", currentUser.email || "", "Email");
     const { data: profileData, error: profileError } = await supabase
       .from("user_profiles").select("phone").eq("user_id", currentUser.id).maybeSingle();
     if (profileError) {
       profileMessage("Could not load your phone number. Please refresh and try again.", "error");
     } else {
-      fields.phone.textContent = profileData?.phone || "—";
+      setProfileValue("phone", profileData?.phone || "", "Phone Number");
     }
   }
 
