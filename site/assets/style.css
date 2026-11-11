@@ -455,3 +455,8 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
     flex-basis:42px; width:42px; height:42px;
   }
 }
+
+
+.home-products-section{margin:54px 0 0;padding-top:30px;border-top:1px solid var(--line)}
+.product-detail-description{margin:0;color:var(--muted);font-size:14px;line-height:1.7;white-space:pre-line}
+@media(max-width:600px){.home-products-section{margin-top:38px;padding-top:24px}}
