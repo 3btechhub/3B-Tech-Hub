@@ -30,22 +30,37 @@
   </header>
   <main class="auth-main">
     <section id="profile-card" class="profile-form">
-      <div class="profile-row"><strong>Name</strong><span id="profile-name">Loading…</span></div>
-      <div class="profile-row"><strong>Email</strong><span id="profile-email">Loading…</span></div>
-      <div class="profile-row"><strong>Phone Number</strong><span id="profile-phone">Loading…</span></div>
-      <div class="profile-row"><strong>Password</strong><span aria-label="Password is hidden">••••••••</span></div>
-      <button class="profile-edit" id="profile-edit-toggle" type="button">Edit Profile</button>
-      <form class="profile-edit-form" id="profile-edit-form" hidden>
-        <label>Name<input name="name" type="text" maxlength="80" placeholder="Name" aria-label="Name" required></label>
-        <label>Email<input name="email" type="email" maxlength="254" placeholder="Email" aria-label="Email" required></label>
-        <label>Phone Number<input name="phone" type="tel" maxlength="24" placeholder="Phone Number" aria-label="Phone Number"></label>
-        <fieldset class="profile-password-fields">
-          <legend>Password</legend>
-          <input name="currentPassword" type="password" autocomplete="current-password" placeholder="Current Password (only when changing password)" aria-label="Current Password">
-          <input name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="New Password (leave blank to keep current)" aria-label="New Password">
+      <form class="profile-inline-form" id="profile-edit-form">
+        <div class="profile-row">
+          <strong>Name</strong>
+          <span class="profile-value" id="profile-name">Loading…</span>
+          <input data-profile-field="name" type="text" maxlength="80" aria-label="Name" required hidden>
+          <button class="profile-inline-edit" type="button" data-edit-field="name">Edit</button>
+        </div>
+        <div class="profile-row">
+          <strong>Email</strong>
+          <span class="profile-value" id="profile-email">Loading…</span>
+          <input data-profile-field="email" type="email" maxlength="254" aria-label="Email" required hidden>
+          <button class="profile-inline-edit" type="button" data-edit-field="email">Edit</button>
+        </div>
+        <div class="profile-row">
+          <strong>Phone Number</strong>
+          <span class="profile-value" id="profile-phone">Loading…</span>
+          <input data-profile-field="phone" type="tel" maxlength="24" aria-label="Phone Number" hidden>
+          <button class="profile-inline-edit" type="button" data-edit-field="phone">Edit</button>
+        </div>
+        <div class="profile-row">
+          <strong>Password</strong>
+          <span class="profile-value" aria-label="Password is hidden">••••••••</span>
+          <button class="profile-inline-edit" id="profile-password-edit" type="button">Edit</button>
+        </div>
+        <fieldset class="profile-password-fields" id="profile-password-fields" hidden>
+          <legend>Change Password</legend>
+          <input name="currentPassword" type="password" autocomplete="current-password" placeholder="Current Password" aria-label="Current Password">
+          <input name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="New Password" aria-label="New Password">
           <input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="Confirm New Password" aria-label="Confirm New Password">
         </fieldset>
-        <div class="profile-form-actions"><button type="submit">Update / Save</button></div>
+        <div class="profile-form-actions"><button id="profile-save" type="submit" hidden>Update / Save</button></div>
       </form>
       <p id="profile-message" class="auth-message" role="status" aria-live="polite"></p>
     </section>
