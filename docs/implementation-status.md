@@ -20,7 +20,7 @@ Updated: 2026-11-12
 - [ ] Dedicated Media Library CRUD and media usage tracking.
 - [ ] Owner user administration (invite, list, role assignment, block/unblock).
 - [ ] Dedicated role/permission administration UI.
-- [ ] Website settings UI connected to Supabase.
+- [x] Owner-only website profile settings connected to Supabase; public homepage tagline and meta description read the public settings record.
 - [ ] Complete backup/export and tested restore workflow.
 
 ## Database review findings
