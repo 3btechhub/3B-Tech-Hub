@@ -1,4 +1,6 @@
-# Three Brothers Technology Hub
+# 3B TECH HUB
+
+**3B TECH HUB** is the official brand name. Full descriptive name: Three Brothers Technology Hub.
 
 The production website is a static, mobile-first frontend published by **GitHub Pages**. Supabase provides email/password authentication, PostgreSQL, Row Level Security and Storage.
 
@@ -10,7 +12,8 @@ The production website is a static, mobile-first frontend published by **GitHub 
 
 ## Website requirements
 
-- Homepage main content: only “Three Brothers Technology Hub”; keep the custom header and footer.
+- Official brand name across the website: **3B TECH HUB**.
+- Homepage main content: “3B TECH HUB”; keep the custom header and footer.
 - Login uses email and password only. Google OAuth is not included.
 - The login UI remains minimal: placeholder inputs and a simple submit button.
 - Supabase publishable key is public by design; all data access must be protected by RLS.
