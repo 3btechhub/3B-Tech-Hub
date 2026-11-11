@@ -8,7 +8,7 @@ export async function POST(request:NextRequest){
  const parsed=schema.safeParse(await request.json().catch(()=>null));if(!endpoint||!projectId)return NextResponse.json({error:"Authentication is not configured."},{status:503});
  if(!parsed.success)return NextResponse.json({error:"Enter the email verification code."},{status:400});
  try{
-  const upstream=await fetch(endpoint+"/account/tokens/email/verify",{method:"POST",headers:{"Content-Type":"application/json","X-Appwrite-Project":projectId},body:JSON.stringify(parsed.data),cache:"no-store"});
+  const upstream=await fetch(endpoint+"/account/sessions/token",{method:"PUT",headers:{"Content-Type":"application/json","X-Appwrite-Project":projectId},body:JSON.stringify(parsed.data),cache:"no-store"});
   if(!upstream.ok)return NextResponse.json({error:"Verification code is invalid or expired."},{status:400});
   const session=await upstream.json() as {secret?:string;userId?:string};
   if(!session.secret)return NextResponse.json({error:"Email verification did not create a session."},{status:502});
