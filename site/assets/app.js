@@ -269,8 +269,8 @@ if (form) {
 const profile = document.querySelector("#profile-card");
 if (profile) {
   const status = document.querySelector("#profile-message");
-  const editButton = document.querySelector("#profile-edit-toggle");
   const form = document.querySelector("#profile-edit-form");
+  const saveButton = document.querySelector("#profile-save");
   const fields = {
     name: document.querySelector("#profile-name"),
     email: document.querySelector("#profile-email"),
@@ -289,20 +289,29 @@ if (profile) {
     field.textContent = hasValue ? value : placeholder;
     field.classList.toggle("is-placeholder", !hasValue);
   }
-  function closeEditor() {
-    form.hidden = true;
-    form.reset();
-    editButton.hidden = false;
-  }
-
-  editButton.addEventListener("click", () => {
-    form.elements.name.value = currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "";
-    form.elements.email.value = currentUser.email || "";
-    form.elements.phone.value = currentPhone;
-    form.hidden = false;
-    editButton.hidden = true;
+  function enableInlineEdit(button) {
+    const row = button.closest(".profile-row");
+    const input = row.querySelector("input[data-profile-field]");
+    if (!input) return;
+    if (input.dataset.profileField === "name") input.value = currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "";
+    if (input.dataset.profileField === "email") input.value = currentUser.email || "";
+    if (input.dataset.profileField === "phone") input.value = currentPhone;
+    row.querySelector(".profile-value").hidden = true;
+    button.hidden = true;
+    input.hidden = false;
+    saveButton.hidden = false;
+    input.focus();
     profileMessage("");
-    form.elements.name.focus();
+  }
+  profile.querySelectorAll("[data-edit-field]").forEach((button) => {
+    button.addEventListener("click", () => enableInlineEdit(button));
+  });
+  document.querySelector("#profile-password-edit").addEventListener("click", (event) => {
+    const fieldsBox = document.querySelector("#profile-password-fields");
+    fieldsBox.hidden = false;
+    event.currentTarget.hidden = true;
+    saveButton.hidden = false;
+    fields.elements.currentPassword.focus();
   });
 
   async function loadProfile() {
@@ -327,21 +336,23 @@ if (profile) {
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const submit = form.querySelector('button[type="submit"]');
-    submit.disabled = true;
+    saveButton.disabled = true;
     profileMessage("Saving…");
     try {
-      const formData = new FormData(form);
-      const name = String(formData.get("name") || "").trim();
-      const email = String(formData.get("email") || "").trim().toLowerCase();
-      const phone = String(formData.get("phone") || "").trim();
-      const currentPassword = String(formData.get("currentPassword") || "");
-      const newPassword = String(formData.get("newPassword") || "");
-      const confirmPassword = String(formData.get("confirmPassword") || "");
+      const data = new FormData(form);
+      const nameInput = form.querySelector('[data-profile-field="name"]');
+      const emailInput = form.querySelector('[data-profile-field="email"]');
+      const phoneInput = form.querySelector('[data-profile-field="phone"]');
+      const name = nameInput && !nameInput.hidden ? nameInput.value.trim() : (currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "");
+      const email = emailInput && !emailInput.hidden ? emailInput.value.trim().toLowerCase() : (currentUser.email || "");
+      const phone = phoneInput && !phoneInput.hidden ? phoneInput.value.trim() : currentPhone;
+      const currentPassword = String(data.get("currentPassword") || "");
+      const newPassword = String(data.get("newPassword") || "");
+      const confirmPassword = String(data.get("confirmPassword") || "");
 
       if (!name) throw new Error("Enter your name.");
       if (!email) throw new Error("Enter your email address.");
-      if (phone && !/^\\+?[0-9() .-]{7,24}$/.test(phone)) throw new Error("Enter a valid phone number.");
+      if (phone && !/^\+?[0-9() .-]{7,24}$/.test(phone)) throw new Error("Enter a valid phone number.");
       if (newPassword) {
         if (newPassword.length < 8) throw new Error("New password must be at least 8 characters.");
         if (newPassword !== confirmPassword) throw new Error("New passwords do not match.");
@@ -376,7 +387,15 @@ if (profile) {
         if (passwordError) throw passwordError;
       }
 
-      closeEditor();
+      form.querySelectorAll("[data-profile-field]").forEach((input) => {
+        input.hidden = true;
+        input.closest(".profile-row").querySelector(".profile-value").hidden = false;
+        input.closest(".profile-row").querySelector("[data-edit-field]").hidden = false;
+      });
+      document.querySelector("#profile-password-fields").hidden = true;
+      document.querySelector("#profile-password-edit").hidden = false;
+      form.reset();
+      saveButton.hidden = true;
       await loadProfile();
       profileMessage(
         emailPending
@@ -389,7 +408,7 @@ if (profile) {
     } catch (error) {
       profileMessage(error instanceof Error ? error.message : "Could not save changes. Please try again.", "error");
     } finally {
-      submit.disabled = false;
+      saveButton.disabled = false;
     }
   });
 
