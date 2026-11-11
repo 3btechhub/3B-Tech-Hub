@@ -701,36 +701,65 @@ function renderProducts(products) {
   if (!target) return;
   target.replaceChildren();
   const region = activeCountry.region;
-  const visibleProducts = (products || []).filter(item => region === "global" || !item.country || item.country === "global" || item.country === region);
+  const visibleProducts = (products || []).filter(item =>
+    region === "global" || !item.country || item.country === "global" || item.country === region
+  );
   if (!visibleProducts.length) {
     if (homepageProducts) homepageProducts.hidden = true;
     return;
   }
-  const list = document.createElement("div");
-  list.className = "product-type-list";
-  visibleProducts.forEach(product => {
-    const card = document.createElement("article");
-    card.className = "product-type-card";
-    if (product.photo_url) {
-      const image = document.createElement("img");
-      image.src = product.photo_url;
-      image.alt = product.name;
-      image.loading = "lazy";
-      image.className = "product-type-image";
-      card.append(image);
-    } else {
-      const icon = document.createElement("span");
-      icon.className = "product-type-icon";
-      icon.setAttribute("aria-hidden", "true");
-      icon.textContent = "📦";
-      card.append(icon);
-    }
-    addTextElement(card, "h3", "product-type-name", product.name);
-    if (product.category) addTextElement(card, "p", "product-type-category", product.category);
-    list.append(card);
+
+  const groupTitles = {
+    mobile: "Mobile & Accessories",
+    satellite: "Satellite & TV Equipment"
+  };
+  const groupOrder = ["mobile", "satellite"];
+  const catalogue = document.createElement("div");
+  catalogue.className = "product-catalogue";
+
+  groupOrder.forEach(groupKey => {
+    const groupProducts = visibleProducts.filter(product => product.category_group === groupKey);
+    if (!groupProducts.length) return;
+
+    const group = document.createElement("section");
+    group.className = "product-group";
+    const heading = addTextElement(group, "h3", "product-group-title", groupTitles[groupKey]);
+    heading.id = "product-group-" + groupKey;
+
+    const list = document.createElement("ul");
+    list.className = "product-group-list";
+    list.setAttribute("aria-labelledby", heading.id);
+    groupProducts.forEach(product => {
+      const item = document.createElement("li");
+      item.className = "product-group-item";
+      item.textContent = product.name;
+      list.append(item);
+    });
+    group.append(list);
+    catalogue.append(group);
   });
-  target.append(list);
-  if (homepageProducts) homepageProducts.hidden = false;
+
+  // Keep any future/unmapped product groups visible without mixing them into known groups.
+  const knownGroups = new Set(groupOrder);
+  const otherProducts = visibleProducts.filter(product => !knownGroups.has(product.category_group));
+  if (otherProducts.length) {
+    const group = document.createElement("section");
+    group.className = "product-group";
+    addTextElement(group, "h3", "product-group-title", "Other Products");
+    const list = document.createElement("ul");
+    list.className = "product-group-list";
+    otherProducts.forEach(product => {
+      const item = document.createElement("li");
+      item.className = "product-group-item";
+      item.textContent = product.name;
+      list.append(item);
+    });
+    group.append(list);
+    catalogue.append(group);
+  }
+
+  target.append(catalogue);
+  if (homepageProducts) homepageProducts.hidden = !catalogue.children.length;
 }
 
 async function loadPublicServices() {
