@@ -254,3 +254,31 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 .site-menu .theme-tool{display:flex;align-items:center;justify-content:flex-start;gap:9px;font-size:14px}
 .site-menu .theme-tool span{font-size:14px}
 @media(max-width:480px){.site-menu{min-width:250px;max-width:calc(100vw - 28px)}}
+
+
+/* Keep language and country choices inline inside the menu on mobile */
+#language-select,#region-select{
+  display:block;
+  width:100%;
+  max-width:none;
+  min-width:0;
+  height:auto;
+  min-height:0;
+  padding:5px 8px;
+  overflow-y:auto;
+  appearance:auto;
+  -webkit-appearance:listbox;
+  font-size:13px;
+  line-height:1.35;
+  background:var(--surface);
+  color:var(--page-text);
+  border:1px solid var(--line);
+  border-radius:7px;
+}
+#language-select option,#region-select option{
+  min-height:25px;
+  padding:5px 7px;
+  background:var(--surface);
+  color:var(--page-text);
+}
+.menu-tools{display:grid;grid-template-columns:1fr;align-items:stretch;gap:8px}
