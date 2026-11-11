@@ -45,19 +45,21 @@
 
 
     <section class="dashboard-module-panel" id="panel-services" role="tabpanel" aria-labelledby="tab-services" data-dashboard-panel="services" hidden>
-      <div class="dashboard-function-grid" aria-label="Service Pages Management functions">
-        <article class="dashboard-function-card"><h2>Service Page List & Preview</h2></article>
-        <article class="dashboard-function-card"><h2>Create Service Page</h2></article>
-        <article class="dashboard-function-card"><h2>Edit Service Name & Category</h2></article>
-        <article class="dashboard-function-card"><h2>Optional Cover Image & Gallery</h2></article>
-        <article class="dashboard-function-card"><h2>Add Short & Full Description</h2></article>
-        <article class="dashboard-function-card"><h2>Set Service Page URL / Slug</h2></article>
-        <article class="dashboard-function-card"><h2>Publish / Unpublish</h2></article>
-        <article class="dashboard-function-card"><h2>Show / Hide Homepage Service Card</h2></article>
-        <article class="dashboard-function-card"><h2>Edit / Delete Service Page</h2></article>
-        <article class="dashboard-function-card"><h2>Manage Service Content</h2></article>
-      </div>
-      
+      <form id="service-form" class="content-editor-form">
+        <h2 id="service-form-title">Add Service</h2>
+        <p class="muted">Name is required. All other fields are optional.</p>
+        <input type="hidden" name="id">
+        <label>Name<input name="name" maxlength="160" required></label>
+        <label>Description (optional)<textarea name="description" rows="4" maxlength="2000"></textarea></label>
+        <label>Category (optional)<input name="category" maxlength="120"></label>
+        <label>Country (optional)<select name="country"><option value="global">Global</option><option value="bd">Bangladesh (BD)</option><option value="saudi">Saudi Arabia (Saudi)</option></select></label>
+        <label>Image (optional)<input name="photo" type="file" accept="image/*"></label>
+        <div class="editor-preview" id="service-photo-preview"></div>
+        <label><input name="is_published" type="checkbox" checked> Publish Service</label>
+        <div class="editor-actions"><button type="submit" id="service-save">Save Service</button><button type="button" id="service-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
+        <p class="editor-message" id="service-message" role="status"></p>
+      </form>
+      <div class="technician-admin-list"><h2>Service List</h2><div id="service-admin-items"></div></div>
     </section>
     <section class="dashboard-module-panel" id="panel-media" role="tabpanel" aria-labelledby="tab-media" data-dashboard-panel="media" hidden>
       <div class="dashboard-function-grid" aria-label="Media Library functions">
@@ -99,22 +101,17 @@
     </section>
     <section class="dashboard-module-panel" id="panel-workshop" role="tabpanel" aria-labelledby="tab-workshop" data-dashboard-panel="workshop" hidden>
       <form id="workshop-form" class="content-editor-form">
-        <h2 id="workshop-form-title">Add Workshop</h2>
-        <p class="muted">Only the workshop title is required. Date, time, venue, trainer, contact details, description and image are optional.</p>
+        <h2 id="workshop-form-title">Add Workshop</h2><p class="muted">Name is required. All other fields are optional.</p>
         <input type="hidden" name="id">
-        <label>Workshop title<input name="title" maxlength="160" required></label>
+        <label>Name<input name="title" maxlength="160" required></label>
         <label>Description (optional)<textarea name="description" rows="4" maxlength="2000"></textarea></label>
-        <label>Date (optional)<input name="date" type="date"></label>
-        <label>Time (optional)<input name="time" type="time"></label>
-        <label>Show on country route (optional)<select name="country"><option value="global">Global (default)</option><option value="bd">Bangladesh only</option><option value="saudi">Saudi Arabia only</option></select></label>
-        <label>Venue / location (optional)<input name="location" maxlength="240"></label>
-        <label>Trainer / instructor (optional)<input name="trainer" maxlength="160"></label>
-        <label>Phone (optional)<input name="phone" type="tel" maxlength="40"></label>
-        <label>WhatsApp number (optional)<input name="whatsapp" type="tel" maxlength="40"></label>
-        <label>Workshop image (optional)<input name="photo" type="file" accept="image/*"></label>
+        <label>Category (optional)<input name="category" maxlength="120"></label>
+        <label>Country (optional)<select name="country"><option value="global">Global</option><option value="bd">Bangladesh (BD)</option><option value="saudi">Saudi Arabia (Saudi)</option></select></label>
+        <label>Location (optional)<input name="location" maxlength="240"></label>
+        <label>Image (optional)<input name="photo" type="file" accept="image/*"></label>
         <div class="editor-preview" id="workshop-photo-preview"></div>
         <label id="workshop-remove-photo-wrap" hidden><input name="remove_photo" type="checkbox"> Remove current image</label>
-        <label><input name="is_published" type="checkbox" checked> Publish workshop on the website</label>
+        <label><input name="is_published" type="checkbox" checked> Publish Workshop</label>
         <div class="editor-actions"><button type="submit" id="workshop-save">Save Workshop</button><button type="button" id="workshop-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
         <p class="editor-message" id="workshop-message" role="status"></p>
       </form>
@@ -122,14 +119,15 @@
     </section>
     <section class="dashboard-module-panel" id="panel-technician" role="tabpanel" aria-labelledby="tab-technician" data-dashboard-panel="technician" hidden>
       <form id="technician-form" class="content-editor-form">
-        <h2 id="technician-form-title">Add Technician</h2><p class="muted">Only the technician name is required. All other details can be added later.</p>
+        <h2 id="technician-form-title">Add Technician</h2><p class="muted">Name is required. All other fields are optional.</p>
         <input type="hidden" name="id">
-        <label>Technician name<input name="name" maxlength="120" required></label>
-        <label>Expertise / skill (optional)<input name="specialty" maxlength="160"></label>
-        <label>Show on country route (optional)<select name="country"><option value="global">Global (default)</option><option value="bd">Bangladesh only</option><option value="saudi">Saudi Arabia only</option></select></label>
-        <label>Phone (optional)<input name="phone" type="tel" maxlength="40"></label>
-        <label>WhatsApp number (optional)<input name="whatsapp" type="tel" maxlength="40"></label>
-        <label>Technician photo (optional)<input name="photo" type="file" accept="image/*"></label>
+        <label>Name<input name="name" maxlength="120" required></label>
+        <label>Description (optional)<textarea name="description" rows="4" maxlength="2000"></textarea></label>
+        <label>Category (optional)<input name="category" maxlength="160"></label>
+        <label>Country (optional)<select name="country"><option value="global">Global</option><option value="bd">Bangladesh (BD)</option><option value="saudi">Saudi Arabia (Saudi)</option></select></label>
+        <label>Phone Number (optional)<input name="phone" type="tel" maxlength="40"></label>
+        <label>WhatsApp Number (optional)<input name="whatsapp" type="tel" maxlength="40"></label>
+        <label>Image (optional)<input name="photo" type="file" accept="image/*"></label>
         <div class="editor-preview" id="technician-photo-preview"></div>
         <div class="editor-actions"><button type="submit" id="technician-save">Save Technician</button><button type="button" id="technician-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
         <p class="editor-message" id="technician-message" role="status"></p>
@@ -138,13 +136,16 @@
     </section>
     <section class="dashboard-module-panel" id="panel-products" role="tabpanel" aria-labelledby="tab-products" data-dashboard-panel="products" hidden>
       <form id="product-form" class="content-editor-form">
-        <h2 id="product-form-title">Add Product Type</h2>
-        <p class="muted">Type-ই ওয়েবসাইটে Product Card হিসেবে দেখাবে। নির্দিষ্ট Brand, Model, Price, Stock বা ছবি প্রয়োজন নেই।</p>
+        <h2 id="product-form-title">Add Product</h2>
+        <p class="muted">Name is required. All other fields are optional.</p>
         <input type="hidden" name="id">
-        <label>Type<input name="name" maxlength="120" required placeholder="যেমন: Battery"></label>
-        <label>Category<input name="category" maxlength="120" required placeholder="যেমন: Phone"></label>
-        <label>Route<select name="country"><option value="global">Global</option><option value="bd">Bangladesh (BD)</option><option value="saudi">Saudi Arabia (Saudi)</option></select></label>
-        <label><input name="is_published" type="checkbox" checked> Publish Product Type on the website</label>
+        <label>Name<input name="name" maxlength="120" required></label>
+        <label>Description (optional)<textarea name="description" rows="4" maxlength="2000"></textarea></label>
+        <label>Category (optional)<input name="category" maxlength="120"></label>
+        <label>Country (optional)<select name="country"><option value="global">Global</option><option value="bd">Bangladesh (BD)</option><option value="saudi">Saudi Arabia (Saudi)</option></select></label>
+        <label>Image (optional)<input name="photo" type="file" accept="image/*"></label>
+        <div class="editor-preview" id="product-photo-preview"></div>
+        <label><input name="is_published" type="checkbox" checked> Publish Product</label>
         <div class="editor-actions"><button type="submit" id="product-save">Save Product</button><button type="button" id="product-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
         <p class="editor-message" id="product-message" role="status"></p>
       </form>
