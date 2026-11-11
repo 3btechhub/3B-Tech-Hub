@@ -681,3 +681,4 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
   .product-showcase-title{font-size:13px}
   .product-showcase-arrow{right:9px;bottom:9px;width:24px;height:24px}
 }
+\n\n/* Products: progressively reveal additional product cards */\n.product-more-button{grid-column:1/-1;justify-self:center;min-width:110px;min-height:40px;padding:8px 22px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--page-text);font:inherit;font-weight:600;cursor:pointer}\n.product-more-button:hover,.product-more-button:focus-visible{background:var(--hover);border-color:var(--page-text)}\n
