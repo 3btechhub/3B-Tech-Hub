@@ -28,6 +28,8 @@
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" aria-controls="panel-user" aria-selected="false" data-dashboard-tab="user" tabindex="-1">User</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" aria-controls="panel-role" aria-selected="false" data-dashboard-tab="role" tabindex="-1">Role</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" aria-controls="panel-permission" aria-selected="false" data-dashboard-tab="permission" tabindex="-1">Permission</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-company" aria-controls="panel-company" aria-selected="false" data-dashboard-tab="company" tabindex="-1">Company Profile</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-technician" aria-controls="panel-technician" aria-selected="false" data-dashboard-tab="technician" tabindex="-1">Technician</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-dashboard-tab="settings" tabindex="-1">Settings</button>
     </nav>
     <section class="dashboard-module-panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-dashboard-panel="overview">
@@ -121,6 +123,35 @@
         <article class="dashboard-function-card"><h2>Add / Remove Permission</h2></article>
         <article class="dashboard-function-card"><h2>Verify Access</h2></article>
       </div>
+    </section>
+    <section class="dashboard-module-panel" id="panel-company" role="tabpanel" aria-labelledby="tab-company" data-dashboard-panel="company" hidden>
+      <form id="company-profile-form" class="content-editor-form">
+        <h2>Company Profile</h2>
+        <label>Company name<input name="name" maxlength="120" required></label>
+        <label>Short introduction<textarea name="description" rows="4" maxlength="1200"></textarea></label>
+        <label>Office / shop address<textarea name="address" rows="2" maxlength="500"></textarea></label>
+        <label>Phone<input name="phone" type="tel" maxlength="40"></label>
+        <label>WhatsApp number<input name="whatsapp" type="tel" maxlength="40"></label>
+        <label>Google Maps link<input name="maps_url" type="url" placeholder="https://maps.google.com/..."></label>
+        <label>Company photo<input name="photo" type="file" accept="image/*"></label>
+        <div class="editor-preview" id="company-photo-preview"></div>
+        <button type="submit">Save Company Profile</button><p class="editor-message" id="company-profile-message" role="status"></p>
+      </form>
+    </section>
+    <section class="dashboard-module-panel" id="panel-technician" role="tabpanel" aria-labelledby="tab-technician" data-dashboard-panel="technician" hidden>
+      <form id="technician-form" class="content-editor-form">
+        <h2 id="technician-form-title">Add Technician</h2>
+        <input type="hidden" name="id">
+        <label>Technician name<input name="name" maxlength="120" required></label>
+        <label>Expertise / skill<input name="specialty" maxlength="160" required></label>
+        <label>Phone<input name="phone" type="tel" maxlength="40"></label>
+        <label>WhatsApp number<input name="whatsapp" type="tel" maxlength="40"></label>
+        <label>Technician photo<input name="photo" type="file" accept="image/*"></label>
+        <div class="editor-preview" id="technician-photo-preview"></div>
+        <div class="editor-actions"><button type="submit" id="technician-save">Save Technician</button><button type="button" id="technician-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
+        <p class="editor-message" id="technician-message" role="status"></p>
+      </form>
+      <div class="technician-admin-list"><h2>Technician List</h2><div id="technician-admin-items"></div></div>
     </section>
     <section class="dashboard-module-panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-dashboard-panel="settings" hidden>
       <div class="dashboard-function-grid" aria-label="Dashboard Settings functions">
