@@ -200,11 +200,23 @@ if (form) {
           options: { emailRedirectTo: new URL("login/", ROOT_URL).href },
         });
         if (error) throw error;
-        if (!data.session) {
-          showMessage("If this email is not registered yet, check your inbox to confirm your account. If you already have an account, use Login or Forgot password.", "success");
-        } else {
+        if (data.session) {
           showMessage("Account created successfully.", "success");
           location.assign(new URL("profile/", ROOT_URL).href);
+        } else {
+          // With email confirmation enabled, Supabase may return no session for
+          // both a new signup and an already-registered email. Try signing in
+          // with the exact same credentials: only a matching existing password
+          // can establish a session for the existing account.
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+          if (!loginError && loginData.session) {
+            showMessage("This email already has an account. You are now logged in to that account.", "success");
+            location.assign(new URL("profile/", ROOT_URL).href);
+          } else if (loginError && /email not confirmed/i.test(loginError.message)) {
+            showMessage("Check your inbox to confirm your new account before logging in.", "success");
+          } else {
+            showMessage("This email may already have an account. Use the correct password, or choose Login or Forgot password.", "error");
+          }
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
