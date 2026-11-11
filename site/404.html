@@ -15,9 +15,11 @@
       <span></span><span></span><span></span>
     </button>
     <nav class="site-menu" id="site-menu" aria-label="Site menu" hidden>
-      <a href="./" data-label="home">Home</a>
-      <a href="./login/" data-label="login">Login</a>
-      <a href="./profile/" data-label="profile" id="profile-menu-link" hidden>Profile</a>
+      <a class="menu-link" href="./" data-label="home">Home</a>
+      <a class="menu-link" href="./profile/" data-label="profile" id="profile-menu-link" hidden>Profile</a>
+      <a class="menu-link" href="./services/" data-label="services">Services</a>
+      <a class="menu-link" href="./login/" data-label="login" id="login-menu-link">Login</a>
+      <button class="menu-link" type="button" data-label="logout" id="logout-menu-link" hidden>Logout</button>
       <div class="menu-tools">
         <button class="menu-tool" id="theme-toggle" type="button" aria-label="Switch to dark mode" title="Dark / Light">☾</button>
         <button class="menu-tool" id="language-toggle" type="button" aria-label="Change language" title="Language">◎ <span id="language-code">EN</span></button>
