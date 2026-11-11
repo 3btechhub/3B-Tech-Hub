@@ -700,9 +700,11 @@ function renderProducts(products) {
   const target = document.querySelector("#products-list");
   if (!target) return;
   target.replaceChildren();
+
   const region = activeCountry.region;
   const visibleProducts = (products || []).filter(item =>
-    region === "global" || !item.country || item.country === "global" || item.country === region
+    item && item.name &&
+    (region === "global" || !item.country || item.country === "global" || item.country === region)
   );
   if (!visibleProducts.length) {
     if (homepageProducts) homepageProducts.hidden = true;
@@ -713,21 +715,12 @@ function renderProducts(products) {
     mobile: "Mobile & Accessories",
     satellite: "Satellite & TV Equipment"
   };
-  const groupIcons = { mobile: "📱", satellite: "📡" };
-  const groupOrder = ["mobile", "satellite"];
-  const groups = groupOrder.map(key => ({
-    key,
-    title: groupTitles[key],
-    products: visibleProducts.filter(product => product.category_group === key)
-  })).filter(group => group.products.length);
+  const getGroupTitle = item => groupTitles[item.category_group] || item.category || "Other Products";
 
-  const otherProducts = visibleProducts.filter(product => !groupOrder.includes(product.category_group));
-  if (otherProducts.length) groups.push({ key: "other", title: "Other Products", products: otherProducts });
-
-  let dialog = document.querySelector("#product-group-detail-dialog");
+  let dialog = document.querySelector("#product-detail-dialog");
   if (!dialog) {
     dialog = document.createElement("dialog");
-    dialog.id = "product-group-detail-dialog";
+    dialog.id = "product-detail-dialog";
     dialog.className = "technician-detail-dialog product-detail-dialog";
     dialog.innerHTML = '<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';
     document.body.append(dialog);
@@ -736,63 +729,70 @@ function renderProducts(products) {
   }
 
   const detailBody = dialog.querySelector(".technician-detail-body");
-  const catalogue = document.createElement("div");
-  catalogue.className = "product-card-grid";
+  const grid = document.createElement("div");
+  grid.className = "service-card-grid product-service-card-grid";
 
-  groups.forEach(group => {
-    const representative = group.products.find(product => product.photo_url);
+  visibleProducts.forEach(product => {
     const card = document.createElement("button");
     card.type = "button";
-    card.className = "product-group-card";
-    card.setAttribute("aria-label", "View " + group.title + " product types");
+    card.className = "service-card product-service-card";
+    card.setAttribute("aria-label", "View " + product.name + " details");
 
-    if (representative) {
+    if (product.photo_url) {
       const image = document.createElement("img");
-      image.className = "product-group-card-image";
-      image.src = representative.photo_url;
+      image.src = product.photo_url;
       image.alt = "";
       image.loading = "lazy";
+      image.className = "service-card-image";
       card.append(image);
     } else {
-      const icon = addTextElement(card, "span", "product-group-card-icon", groupIcons[group.key] || "📦");
+      const icon = document.createElement("span");
+      icon.className = "service-icon";
       icon.setAttribute("aria-hidden", "true");
+      icon.textContent = product.category_group === "satellite" ? "📡" : "📱";
+      card.append(icon);
     }
 
     const info = document.createElement("span");
-    info.className = "technician-card-info";
-    addTextElement(info, "strong", "", group.title);
-    addTextElement(info, "small", "", group.products.length + (group.products.length === 1 ? " type" : " types"));
-    addTextElement(info, "small", "technician-card-hint", "View details");
+    const title = document.createElement("strong");
+    title.textContent = product.name;
+    info.append(title);
+    const group = document.createElement("small");
+    group.textContent = getGroupTitle(product);
+    info.append(group);
+    if (product.description) {
+      const description = document.createElement("small");
+      description.textContent = product.description;
+      info.append(description);
+    }
     card.append(info);
+
+    const arrow = document.createElement("span");
+    arrow.className = "service-arrow";
+    arrow.setAttribute("aria-hidden", "true");
+    arrow.textContent = "↗";
+    card.append(arrow);
+
     card.addEventListener("click", () => {
       detailBody.replaceChildren();
-      if (representative) {
+      if (product.photo_url) {
         const image = document.createElement("img");
+        image.src = product.photo_url;
+        image.alt = product.name;
         image.className = "technician-detail-photo";
-        image.src = representative.photo_url;
-        image.alt = group.title;
         detailBody.append(image);
-      } else {
-        const detailIcon = addTextElement(detailBody, "span", "product-group-detail-icon", groupIcons[group.key] || "📦");
-        detailIcon.setAttribute("aria-hidden", "true");
       }
-      addTextElement(detailBody, "h2", "", group.title);
-      addTextElement(detailBody, "p", "product-detail-description", "Product types");
-      const list = document.createElement("ul");
-      list.className = "product-detail-type-list";
-      group.products.forEach(product => {
-        const item = document.createElement("li");
-        item.textContent = product.name;
-        list.append(item);
-      });
-      detailBody.append(list);
+      addTextElement(detailBody, "h2", "", product.name);
+      addTextElement(detailBody, "p", "technician-detail-specialty", getGroupTitle(product));
+      if (product.description) addTextElement(detailBody, "p", "technician-detail-specialty", product.description);
       dialog.showModal();
     });
-    catalogue.append(card);
+
+    grid.append(card);
   });
 
-  target.append(catalogue);
-  if (homepageProducts) homepageProducts.hidden = !catalogue.children.length;
+  target.append(grid);
+  if (homepageProducts) homepageProducts.hidden = !grid.children.length;
 }
 
 async function loadPublicServices() {
