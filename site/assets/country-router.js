@@ -34,7 +34,7 @@
     return;
   }
   const pathRegion = regionFromPath();
-  if (pathRegion === "bd" || pathRegion === "saudi" || pathRegion === "ksa") {
+  if (pathRegion === "bd" || pathRegion === "saudi" || pathRegion === "ksa" || pathRegion === "global") {
     if (pathRegion === "ksa") { window.location.replace(BASE + "saudi/"); return; }
     applyContext(pathRegion, "url");
     window.countryContextReady = Promise.resolve(window.siteCountry);
@@ -48,7 +48,7 @@
     settled = true;
     const context = applyContext(region, source);
     resolveContext(context);
-    if (path === BASE + "global/" && (region === "bd" || region === "saudi")) routeHome(region);
+
   };
   const showPrompt = () => {
     if (settled) return;
