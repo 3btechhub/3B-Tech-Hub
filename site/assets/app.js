@@ -93,14 +93,15 @@ const ROOT_URL = new URL("../", import.meta.url);
 const form = document.querySelector("#auth-form");
 
 if (form) {
-  const params = new URLSearchParams(location.search);
   const message = document.querySelector("#auth-message");
   const submit = document.querySelector("#auth-submit");
   const toggle = document.querySelector("#toggle-signup");
   const forgot = document.querySelector("#forgot-password");
+  const emailInput = form.elements.email;
   const passwordInput = form.elements.password;
-  let mode = params.get("mode") === "signup" ? "signup" : params.get("mode") === "recovery" ? "recovery" : "login";
-  let recoveryReady = false;
+  const otpInput = form.elements.otp;
+  let mode = "login";
+  let recoveryEmail = "";
 
   function showMessage(text, kind = "") {
     message.textContent = text;
@@ -110,15 +111,18 @@ if (form) {
   function render() {
     const signup = mode === "signup";
     const recovery = mode === "recovery";
-    submit.textContent = recovery ? "Update Password" : signup ? "Create Account" : "Login";
+    submit.textContent = recovery ? "Verify Code & Reset Password" : signup ? "Create Account" : "Login";
     toggle.textContent = signup ? "Login Account" : "Create Account";
     toggle.disabled = recovery;
     forgot.disabled = recovery;
+    emailInput.readOnly = recovery;
+    otpInput.hidden = !recovery;
+    otpInput.required = recovery;
     passwordInput.autocomplete = recovery || signup ? "new-password" : "current-password";
-    passwordInput.setAttribute("aria-label", "Password");
-    passwordInput.placeholder = "Password";
+    passwordInput.setAttribute("aria-label", recovery ? "New Password" : "Password");
+    passwordInput.placeholder = recovery ? "New Password" : "Password";
     passwordInput.required = true;
-    if (recovery) passwordInput.focus();
+    if (recovery) otpInput.focus();
   }
 
   toggle.addEventListener("click", () => {
@@ -129,63 +133,66 @@ if (form) {
   });
 
   forgot.addEventListener("click", async () => {
-    const email = form.elements.email.value.trim();
+    const email = emailInput.value.trim();
     if (!email) {
-      form.elements.email.focus();
+      emailInput.focus();
       return showMessage("Enter your email address first.", "error");
     }
     forgot.disabled = true;
-    showMessage("Sending reset link…");
+    showMessage("Sending verification code…");
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: new URL("login/?mode=recovery", ROOT_URL).href,
-      });
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
       if (error) throw error;
-      showMessage("If this email is registered, a password reset link has been sent.", "success");
-    } catch (error) {
-      showMessage(error instanceof Error ? error.message : "Could not send the reset link. Please try again.", "error");
-    } finally {
-      forgot.disabled = mode === "recovery";
-    }
-  });
-
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "PASSWORD_RECOVERY" && session) {
-      recoveryReady = true;
+      recoveryEmail = email;
       mode = "recovery";
+      otpInput.value = "";
+      passwordInput.value = "";
       render();
-      showMessage("Enter your new password.", "success");
+      showMessage("A verification code has been sent to your email. Enter the code and your new password.", "success");
+    } catch (error) {
+      forgot.disabled = false;
+      showMessage(error instanceof Error ? error.message : "Could not send the verification code. Please try again.", "error");
     }
   });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const email = form.elements.email.value.trim();
+    const email = emailInput.value.trim();
     const password = passwordInput.value;
 
-    if (mode !== "recovery" && !email) {
-      form.elements.email.focus();
+    if (!email && mode !== "recovery") {
+      emailInput.focus();
       return showMessage("Enter your email address.", "error");
     }
     if (password.length < 8) {
       passwordInput.focus();
       return showMessage("Password must be at least 8 characters.", "error");
     }
-    if (mode === "recovery" && !recoveryReady) {
-      return showMessage("This password reset link is invalid or expired. Request a new link.", "error");
+    if (mode === "recovery" && !/^\d{6,8}$/.test(otpInput.value.trim())) {
+      otpInput.focus();
+      return showMessage("Enter the verification code from your email.", "error");
     }
 
     submit.disabled = true;
-    showMessage(mode === "recovery" ? "Updating password…" : mode === "signup" ? "Creating account…" : "Signing in…");
+    showMessage(mode === "recovery" ? "Verifying code and updating password…" : mode === "signup" ? "Creating account…" : "Signing in…");
     try {
       if (mode === "recovery") {
-        const { error } = await supabase.auth.updateUser({ password });
-        if (error) throw error;
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          email: recoveryEmail,
+          token: otpInput.value.trim(),
+          type: "recovery",
+        });
+        if (verifyError) throw verifyError;
+        const { error: updateError } = await supabase.auth.updateUser({ password });
+        if (updateError) throw updateError;
+        await supabase.auth.signOut();
         mode = "login";
-        recoveryReady = false;
+        recoveryEmail = "";
+        otpInput.value = "";
         passwordInput.value = "";
+        emailInput.readOnly = false;
         render();
-        showMessage("Password updated successfully.", "success");
+        showMessage("Password updated successfully. You can now log in with your new password.", "success");
       } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -213,9 +220,6 @@ if (form) {
   });
 
   render();
-  if (mode === "recovery") {
-    showMessage("Open the password reset link from your email to continue.", "success");
-  }
 }
 
 const profile = document.querySelector("#profile-card");
