@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { getPublicSiteSettings } from "@/lib/public-site-settings";
+import SiteShell from "@/components/site-shell";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
 
@@ -52,7 +53,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang={settings.defaultLocale}>
       <body>
-        {children}
+        <SiteShell siteName={settings.siteName} navigationItems={settings.navigationItems}>{children}</SiteShell>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, "\\u003c") }}
