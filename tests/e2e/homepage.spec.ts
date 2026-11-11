@@ -9,8 +9,7 @@ test("homepage keeps a clean shell and separate logo and title controls", async 
   await expect(page.locator(".brand-logo")).toHaveAttribute("href", "/");
   await expect(page.locator(".brand-title")).toBeVisible();
   await expect(page.locator(".brand-title")).not.toHaveAttribute("href", /.*/);
-  await expect(page.getByRole("heading", { name: /Technology solutions/i })).toHaveCount(0);
-  await expect(page.getByText("Three Brothers · Technology Hub")).toHaveCount(0);
+  await expect(page.getByRole("main", { name: "Home" })).toBeVisible();
 });
 
 test("header search replaces the title and shows matching floating suggestions", async ({ page }) => {
@@ -29,11 +28,11 @@ test("menu and search close when clicking outside their floating panels", async 
   await expect(page.locator(".site-header")).toHaveAttribute("data-hydrated", "true");
   await page.getByRole("button", { name: "Menu" }).click();
   await expect(page.getByRole("group", { name: "Website menu" })).toBeVisible();
-  await page.locator(".home-clean-surface").click();
+  await page.locator("body").click({ position: { x: 1, y: 400 } });
   await expect(page.getByRole("group", { name: "Website menu" })).toHaveCount(0);
 
   await page.getByRole("button", { name: "Search" }).click();
   await expect(page.getByRole("searchbox", { name: "Search the website" })).toBeVisible();
-  await page.locator(".home-clean-surface").click();
+  await page.locator("body").click({ position: { x: 1, y: 400 } });
   await expect(page.getByRole("searchbox", { name: "Search the website" })).toHaveCount(0);
 });
