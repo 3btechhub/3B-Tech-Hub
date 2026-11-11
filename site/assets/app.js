@@ -1,4 +1,23 @@
 await window.countryContextReady;
+
+// Make country context available before the rest of the application runs.
+const activeCountry = window.siteCountry;
+const currentPath = window.location.pathname;
+const serviceCountryRules = {
+  "tv-repair": "bd",
+  "mobile-repair": "bd",
+  "mobile-parts-sell": "bd",
+  "satellite-dish-installation": "ksa",
+  "satellite-dish-servicing": "ksa",
+  "satellite-dish-parts-sell": "ksa"
+};
+const serviceMatch = currentPath.match(/\\/services\\/([^/]+)\\/?$/);
+if (serviceMatch && serviceCountryRules[serviceMatch[1]] && serviceCountryRules[serviceMatch[1]] !== activeCountry.region) {
+  window.location.replace("/3btechhub/" + activeCountry.region + "/");
+}
+document.querySelectorAll("[data-country-region]").forEach((section) => {
+  section.hidden = section.dataset.countryRegion !== activeCountry.region;
+});
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const profileMenuLink = document.querySelector("#profile-menu-link");
