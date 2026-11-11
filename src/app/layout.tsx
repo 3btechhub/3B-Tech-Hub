@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { getPublicSiteSettings } from "@/lib/public-site-settings";
 
-const siteUrl = "https://3btechhub.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getPublicSiteSettings();
@@ -11,14 +11,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const images = settings.ogImageUrl ? [{ url: settings.ogImageUrl }] : undefined;
 
   return {
-    metadataBase: new URL(siteUrl),
+    metadataBase: siteUrl ? new URL(siteUrl) : undefined,
     title: { default: title, template: `%s | ${settings.siteName}` },
     description,
     applicationName: settings.siteName,
-    alternates: { canonical: "/" },
+    ...(siteUrl ? { alternates: { canonical: "/" } } : {}),
     openGraph: {
       type: "website",
-      url: siteUrl,
+      ...(siteUrl ? { url: siteUrl } : {}),
       siteName: settings.siteName,
       title,
       description,
@@ -42,7 +42,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     "@type": "Organization",
     name: settings.siteName,
     alternateName: "Three Brothers Technology Hub",
-    url: siteUrl,
+    ...(siteUrl ? { url: siteUrl } : {}),
     description: settings.description,
     email: settings.contactEmail || undefined,
     telephone: settings.contactPhone || undefined,
