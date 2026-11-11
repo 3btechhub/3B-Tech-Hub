@@ -10,7 +10,7 @@ Updated: 2026-11-12
 - [x] The Owner role is assigned to `3btechhub@gmail.com`.
 - [x] Six active services are present with the approved country routing.
 - [x] Products are stored in two groups: Mobile & Accessories and Satellite & TV Equipment.
-- [x] Product group selection and catalogue pagination regression fixes are being added on the audit-fix branch.
+- [x] Product group selection and More pagination fixes are merged to `main`.
 
 ## Implemented static-site modules
 - [x] Homepage, login and user profile.
@@ -18,10 +18,10 @@ Updated: 2026-11-12
 - [x] Owner-only CRUD forms for services, products, workshops and technicians.
 - [x] Supabase Storage image uploads for catalogue records.
 - [x] Dedicated Media Library with Storage listing, upload, metadata CRUD, filters and reference-safe deletion (browser verification pending).
-- [ ] Owner user administration (invite, list, role assignment, block/unblock).
-- [ ] Dedicated role/permission administration UI.
+- [x] Owner user administration (invite, list, role assignment, block/unblock and password reset) through the deployed JWT-verified Edge Function and dashboard UI.
+- [x] Role assignment and role summary; Permission Matrix is read-only (custom per-role permission editing is not implemented).
 - [x] Owner-only website profile settings connected to Supabase; public homepage tagline and meta description read the public settings record.
-- [ ] Complete backup/export and tested restore workflow.
+- [ ] Complete Supabase database + Storage export and tested restore workflow (not available through the connected tools).
 
 ## Database review findings
 - [x] Revoke unnecessary anonymous write grants and review authenticated grants.
@@ -34,7 +34,7 @@ Updated: 2026-11-12
 ## CI and verification
 - [x] Static website file validation.
 - [x] JavaScript syntax validation.
-- [x] Unit/regression tests for catalogue behavior (CI run pending).
+- [x] Unit/regression tests for catalogue behavior (GitHub Actions CI passed).
 - [ ] Browser end-to-end tests for authentication and owner CRUD.
 - [ ] Automated accessibility, responsive and production smoke tests.
 
@@ -42,6 +42,8 @@ Updated: 2026-11-12
 - [x] Applied and verified least-privilege grants, Owner-only role policies, protected primary Owner, audit triggers, workshop indexes and timestamp triggers.
 - [x] Deployed JWT-verified `owner-users` Edge Function for Owner-only invitations, role changes, account blocking/unblocking and password-reset emails.
 - [x] Added User, Role Summary and Permission Matrix panels to the Owner dashboard.
+
+- [ ] Full dynamic page/content revision editor for `site_content`.
 
 ## Explicitly not production-ready
 The inactive Next.js/Appwrite prototype has been removed from the production branch. The audit backup branch preserves the pre-cleanup source. The live application is only the GitHub Pages frontend plus Supabase.

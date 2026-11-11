@@ -25,7 +25,7 @@ Before release verify:
 - Audit events are created for privileged mutations.
 
 ## Backup and recovery
-- The repository backup branch protects source code only; it does not include Supabase data or Storage objects.
+- `backup/2026-11-12-pre-audit-fixes` preserves the pre-cleanup source; `backup/2026-11-12-post-fixes` preserves the merged code. Both protect source code only, not Supabase data or Storage objects.
 - The connector used for this audit does not expose a full database backup/export or restore operation.
 - Do not label a source branch as a complete project backup.
 - Before destructive database work, create a Supabase dashboard backup/export using an available plan-supported method and verify that it can be restored.
