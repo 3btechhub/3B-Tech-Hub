@@ -635,7 +635,7 @@ function renderWorkshops(items) {
   if (!dialog) {
     dialog = document.createElement("dialog");
     dialog.id = "workshop-detail-dialog";
-    dialog.className = "technician-detail-dialog";
+    dialog.className = "technician-detail-dialog workshop-detail-dialog";
     dialog.innerHTML = '<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';
     document.body.append(dialog);
     dialog.querySelector(".technician-detail-close").addEventListener("click", () => dialog.close());
