@@ -271,7 +271,6 @@ if (profile) {
   const status = document.querySelector("#profile-message");
   const editButton = document.querySelector("#profile-edit-toggle");
   const form = document.querySelector("#profile-edit-form");
-  const cancelButton = document.querySelector("#profile-edit-cancel");
   const fields = {
     name: document.querySelector("#profile-name"),
     email: document.querySelector("#profile-email"),
@@ -305,7 +304,6 @@ if (profile) {
     profileMessage("");
     form.elements.name.focus();
   });
-  cancelButton.addEventListener("click", closeEditor);
 
   async function loadProfile() {
     const { data, error } = await supabase.auth.getUser();
