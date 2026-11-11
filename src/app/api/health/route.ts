@@ -18,7 +18,10 @@ export async function GET() {
     settings: isSettingsStoreConfigured(),
     audit: isAuditStoreConfigured(),
     mediaBucket: Boolean(process.env.APPWRITE_MEDIA_BUCKET_ID),
-    owner: (process.env.ADMIN_OWNER_USER_IDS ?? "").split(",").some((id) => id.trim().length > 0),
+    owner: Boolean(
+      process.env.ADMIN_OWNER_USER_ID?.trim()
+      || process.env.ADMIN_OWNER_USER_IDS?.split(",").some((id) => id.trim().length > 0),
+    ),
   };
 
   const checks = Object.fromEntries(
