@@ -42,7 +42,6 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     "@context": "https://schema.org",
     "@type": "Organization",
     name: settings.siteName,
-    alternateName: "Three Brothers Technology Hub",
     ...(siteUrl ? { url: siteUrl } : {}),
     description: settings.description,
     email: settings.contactEmail || undefined,
