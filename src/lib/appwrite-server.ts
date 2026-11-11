@@ -6,7 +6,9 @@ async function configuration() {
   const requestHeaders = await headers();
   const endpoint = (process.env.APPWRITE_SITE_API_ENDPOINT ?? process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT)?.replace(/\/$/, "");
   const projectId = process.env.APPWRITE_SITE_PROJECT_ID ?? process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
-  const apiKey = requestHeaders.get("x-appwrite-key") ?? process.env.APPWRITE_SITE_API_KEY;
+  // Prefer Appwrite Sites' scoped SSR key. The explicit secret Site variable is
+  // a fallback for runtimes where the injected header is not available.
+  const apiKey = requestHeaders.get("x-appwrite-key") ?? process.env.APPWRITE_API_KEY ?? process.env.APPWRITE_SITE_API_KEY;
   if (!endpoint || !projectId || !apiKey) return null;
   return { endpoint, projectId, apiKey };
 }
@@ -151,7 +153,7 @@ export async function updateAppwriteRow(tableId: string, rowId: string, data: Re
   const databaseId = process.env.APPWRITE_DATABASE_ID;
   if (!config || !databaseId) throw new Error("APPWRITE_SERVER_CONFIGURATION_MISSING");
   return appwriteRequest<AppwriteRow>(
-    `/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`,
+    `${config.endpoint}/tablesdb/${encodeURIComponent(databaseId)}/tables/${encodeURIComponent(tableId)}/rows/${encodeURIComponent(rowId)}`,
     { method: "PATCH", body: JSON.stringify({ data }) },
   );
 }
