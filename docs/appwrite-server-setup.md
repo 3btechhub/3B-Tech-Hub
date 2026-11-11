@@ -41,10 +41,15 @@ Create a private bucket initially. Enforce the 50 MB maximum and allowed image/v
 - Protected server-rendered preview of a saved content revision under the authenticated admin route.
 
 ## Production resources provisioned
+- Appwrite organization: `6af42ab900326531f6d7` (Free plan).
+- Appwrite project: `6af42ac200285a12f46f` (`3B TECH HUB`, Frankfurt).
+- Appwrite Site: `6af42bee00054722f545`; production hostname `https://3btechhub.appwrite.network`.
 - TablesDB database `3btechhub-prod` is ready.
-- `content`, `media_assets` and `audit_logs` tables are provisioned with private table permissions.
-- Content unique index (`slug`, `locale`, `revision`), media title full-text index, media type/trash indexes and audit lookup indexes are available.
+- `content`, `media_assets`, `audit_logs` and `site_settings` tables are provisioned with private table permissions. The settings table stores the validated JSON payload in the `settings` field on row `global`; audit rows include the `outcome` field.
+- Content unique index (`slug`, `locale`, `revision`), media title full-text index, media trash index, audit chronological index and settings key unique index are provisioned.
 - Private Storage bucket `media` is enabled with per-file security, encryption, antivirus, image transformations and a 50,000,000-byte maximum upload size.
+- Site adapter is configured for Next.js SSR with scoped TablesDB and Storage access; production environment variables point to the new project.
+- Owner OTP identity is provisioned for the configured owner account; the owner ID is stored as a secret Site variable.
 
 ## Remaining work
 Media usage tracking and reference-safe permanent deletion, generated thumbnail/optimized rendition pipeline and reviewed CDN delivery remain pending. Content draft browsing is currently bounded and needs server-side pagination/search for large sites. Strong optimistic concurrency for concurrent revision creation and non-owner role profiles remain pending. Live Appwrite integration still requires production runtime and end-to-end verification.
