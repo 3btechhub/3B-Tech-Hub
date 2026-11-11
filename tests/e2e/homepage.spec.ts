@@ -1,12 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-test("homepage has no main content but keeps the site header and footer", async ({ page }) => {
+test("homepage displays the requested title and keeps the site header and footer", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".site-header")).toBeVisible();
   await expect(page.locator(".site-footer")).toBeVisible();
-  await expect(page.locator("main")).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Three Brothers Technology Hub" })).toBeVisible();
 });
-
 
 test("public search trigger changes into a close control", async ({ page }) => {
   await page.goto("/gallery", { waitUntil: "networkidle" });
@@ -19,9 +18,10 @@ test("public search trigger changes into a close control", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Search" })).toBeVisible();
 });
 
-test("owner login provides email and password fields", async ({ page }) => {
+test("login stays simple and does not offer Google authentication", async ({ page }) => {
   await page.goto("/login");
-  await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
   await expect(page.getByLabel("Email")).toHaveAttribute("type", "email");
   await expect(page.getByLabel("Password")).toHaveAttribute("type", "password");
+  await expect(page.getByRole("button", { name: "Login" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Google/i })).toHaveCount(0);
 });
