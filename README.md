@@ -30,8 +30,8 @@ Vercel is not part of the deployment architecture. Production hosting and server
 - Storage bucket: `media`
 - Deployment is connected to GitHub VCS and is built with `npm install` and `npm run build`.
 - The Appwrite Site uses the Next.js SSR adapter and Node.js 22.
-- Server-only Appwrite credentials are stored as secret Site variables; never commit them to this repository.
-- The Owner account must be created in Appwrite Auth and its exact user ID added to `ADMIN_OWNER_USER_IDS` before admin sign-in is enabled.
+- Keep `APPWRITE_API_KEY` in Appwrite Site Variables as a secret, never in Global Variables or Git. The Appwrite Sites scoped `x-appwrite-key` header is preferred at runtime; the secret variable is a fallback.
+- The exact Owner Auth user ID is configured in the secret `ADMIN_OWNER_USER_ID` Site variable. `ADMIN_OWNER_USER_IDS` remains supported for multiple owners.
 - A successful build does not by itself prove that every authenticated workflow or integration is operational; use the health endpoint and release checklist below.
 
 ## Local development
