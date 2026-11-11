@@ -62,3 +62,20 @@ body{background:var(--page-bg);color:var(--page-text)}
 .profile-form .auth-message { margin-top:10px; }
 
 .profile-row .is-placeholder { color:#888; }
+
+
+/* Owner dashboard */
+.dashboard-main{flex:1;width:min(1080px,100%);margin:0 auto;padding:34px 22px 48px}
+.dashboard-heading{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:24px}
+.dashboard-heading h1{margin:0;font-size:clamp(25px,4vw,34px)}
+.dashboard-heading p{margin:7px 0 0;color:var(--muted);font-size:14px}
+.dashboard-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px}
+.dashboard-card{padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.dashboard-card h2{margin:0 0 14px;font-size:15px;font-weight:600}
+.dashboard-count{font-size:28px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}
+.dashboard-card p{margin:8px 0 0;color:var(--muted);font-size:13px}
+.dashboard-message{min-height:20px;margin:18px 0 0;color:var(--muted);font-size:13px}
+.dashboard-message[data-kind=error]{color:#9b1c1c}
+.dashboard-message[data-kind=success]{color:#176b36}
+.dashboard-owner{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+@media(max-width:480px){.dashboard-main{padding:26px 16px 36px}.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-card{padding:14px}.dashboard-count{font-size:24px}}
