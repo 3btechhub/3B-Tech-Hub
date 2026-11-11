@@ -33,20 +33,17 @@
       <form class="profile-inline-form" id="profile-edit-form">
         <div class="profile-row">
           <strong>Name</strong>
-          <span class="profile-value" id="profile-name">Loading…</span>
-          <input data-profile-field="name" type="text" maxlength="80" aria-label="Name" required hidden>
+          <span class="profile-value" id="profile-name" data-profile-field="name" contenteditable="false" role="textbox" aria-label="Name">Loading…</span>
           <button class="profile-inline-edit" type="button" data-edit-field="name">Edit</button>
         </div>
         <div class="profile-row">
           <strong>Email</strong>
-          <span class="profile-value" id="profile-email">Loading…</span>
-          <input data-profile-field="email" type="email" maxlength="254" aria-label="Email" required hidden>
+          <span class="profile-value" id="profile-email" data-profile-field="email" contenteditable="false" role="textbox" aria-label="Email">Loading…</span>
           <button class="profile-inline-edit" type="button" data-edit-field="email">Edit</button>
         </div>
         <div class="profile-row">
           <strong>Phone Number</strong>
-          <span class="profile-value" id="profile-phone">Loading…</span>
-          <input data-profile-field="phone" type="tel" maxlength="24" aria-label="Phone Number" hidden>
+          <span class="profile-value" id="profile-phone" data-profile-field="phone" contenteditable="false" role="textbox" aria-label="Phone Number">Loading…</span>
           <button class="profile-inline-edit" type="button" data-edit-field="phone">Edit</button>
         </div>
         <div class="profile-row">
