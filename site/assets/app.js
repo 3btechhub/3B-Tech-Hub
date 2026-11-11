@@ -108,10 +108,6 @@ if (form) {
   }
   function render() {
     const signup = mode === "signup";
-    title.textContent = signup ? "Create account" : "Login";
-    description.textContent = signup
-      ? "Create an account with your email and password."
-      : "Sign in with your email address and password.";
     submit.textContent = signup ? "Create account" : "Login";
     toggle.textContent = signup ? "Back to login" : "Create account";
     forgot.hidden = signup;
