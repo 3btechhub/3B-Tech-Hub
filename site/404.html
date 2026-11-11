@@ -14,14 +14,18 @@
       <span></span><span></span><span></span>
     </button>
     <nav class="site-menu" id="site-menu" aria-label="Site menu" hidden>
-      <a href="./">Home</a>
-      <a href="./login/">Login</a>
-      <a href="./profile/">Profile</a>
+      <a href="./" data-label="home">Home</a>
+      <a href="./login/" data-label="login">Login</a>
+      <a href="./profile/" data-label="profile" id="profile-menu-link" hidden>Profile</a>
+      <div class="menu-tools">
+        <button class="menu-tool" id="theme-toggle" type="button" aria-label="Switch to dark mode" title="Dark / Light">☾</button>
+        <button class="menu-tool" id="language-toggle" type="button" aria-label="Change language" title="Language">◎ <span id="language-code">EN</span></button>
+      </div>
     </nav>
   </header>
   <main class="home-main">
     <div><h1>Page not found</h1><p><a href="./">Return to 3B TECH HUB</a></p></div>
   </main>
-  <footer class="site-footer"><span>3B TECH HUB</span><a href="./login/">Account login</a></footer>
+  <footer class="site-footer"><span>3B TECH HUB</span><a href="./login/" data-label="accountLogin">Account login</a></footer>
 </body>
 </html>
