@@ -113,6 +113,23 @@ async function setMenuSession(session) {
 // Load authentication separately so a Supabase CDN issue cannot disable the menu.
 const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
 supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+async function applyPublicSiteSettings() {
+  if (document.querySelector("#owner-dashboard")) return;
+  const { data, error } = await supabase
+    .from("site_settings")
+    .select("setting_value")
+    .eq("setting_key", "site_profile")
+    .eq("is_public", true)
+    .maybeSingle();
+  if (error || !data?.setting_value || typeof data.setting_value !== "object") return;
+  const settings = data.setting_value;
+  const tagline = document.querySelector(".home-main p");
+  if (tagline && typeof settings.tagline === "string" && settings.tagline.trim()) tagline.textContent = settings.tagline;
+  const description = document.querySelector('meta[name="description"]');
+  if (description && typeof settings.description === "string" && settings.description.trim()) description.content = settings.description;
+}
+void applyPublicSiteSettings();
 if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   logoutMenuLink.disabled = true;
   const { error } = await supabase.auth.signOut();
@@ -750,9 +767,27 @@ function renderMediaAssets() {
     save.addEventListener("click", async () => {
       save.disabled = true;
       try {
-        const { error } = await supabase.from("media_assets").update({ file_name: fileNameInput.value.trim().slice(0, 255), alt_text: altInput.value.trim() }).eq("id", item.id);
-        if (error) throw error;
-        item.file_name = fileNameInput.value.trim().slice(0, 255);
+        const fileName = fileNameInput.value.trim().slice(0, 255);
+        if (!fileName) throw new Error("File name is required.");
+        const changes = { file_name: fileName, alt_text: altInput.value.trim() };
+        if (item.id) {
+          const { error } = await supabase.from("media_assets").update(changes).eq("id", item.id);
+          if (error) throw error;
+        } else {
+          const { data: authData, error: authError } = await supabase.auth.getUser();
+          if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
+          const { data, error } = await supabase.from("media_assets").insert({
+            ...changes,
+            storage_path: item.storage_path,
+            content_type: item.content_type || "application/octet-stream",
+            size_bytes: Number(item.size_bytes || 0),
+            is_public: true,
+            uploaded_by: authData.user.id,
+          }).select("id").single();
+          if (error) throw error;
+          item.id = data.id;
+        }
+        item.file_name = fileName;
         item.alt_text = altInput.value.trim();
         if (mediaMessage) mediaMessage.textContent = "Media details saved.";
       } catch (error) {
@@ -791,10 +826,19 @@ function renderMediaAssets() {
           if (error) throw error;
           if (data?.length) throw new Error("This image is still used by " + table + ". Change that record's image before deleting it.");
         }
+        const { data: contentRows, error: contentError } = await supabase.from("site_content").select("id,body").limit(100);
+        if (contentError) throw contentError;
+        const isUsedInContent = (contentRows || []).some((entry) => {
+          const serialized = JSON.stringify(entry.body || {});
+          return serialized.includes(publicUrl) || serialized.includes(item.storage_path);
+        });
+        if (isUsedInContent) throw new Error("This image is still used by website content.");
         const { error: storageError } = await supabase.storage.from("site-media").remove([item.storage_path]);
         if (storageError) throw storageError;
-        const { error: metadataError } = await supabase.from("media_assets").delete().eq("id", item.id);
-        if (metadataError) throw metadataError;
+        if (item.id) {
+          const { error: metadataError } = await supabase.from("media_assets").delete().eq("id", item.id);
+          if (metadataError) throw metadataError;
+        }
         mediaAssetData = mediaAssetData.filter((entry) => entry.id !== item.id);
         renderMediaAssets();
         if (mediaMessage) mediaMessage.textContent = "Image deleted.";
@@ -810,22 +854,66 @@ function renderMediaAssets() {
   }
 }
 
+async function listMediaStorageFiles(folder = "", depth = 0) {
+  if (depth > 5) return [];
+  const files = [];
+  for (let offset = 0; offset < 1000; offset += 100) {
+    const { data, error } = await supabase.storage.from("site-media").list(folder, {
+      limit: 100,
+      offset,
+      sortBy: { column: "name", order: "asc" },
+    });
+    if (error) throw error;
+    for (const entry of data || []) {
+      const path = folder ? folder + "/" + entry.name : entry.name;
+      if (!entry.id && !entry.metadata) {
+        files.push(...await listMediaStorageFiles(path, depth + 1));
+      } else {
+        files.push({
+          storage_path: path,
+          storage_name: entry.name,
+          storage_metadata: entry.metadata || {},
+          storage_created_at: entry.created_at || null,
+        });
+      }
+    }
+    if (!data || data.length < 100) break;
+  }
+  return files;
+}
+
 async function loadMediaAssets() {
   if (!ownerDashboard || !mediaItems) return;
   if (mediaMessage) mediaMessage.textContent = "Loading media…";
-  const { data, error } = await supabase
-    .from("media_assets")
-    .select("id,storage_path,file_name,content_type,size_bytes,alt_text,is_public,uploaded_by,created_at")
-    .eq("is_public", true)
-    .order("created_at", { ascending: false })
-    .limit(100);
-  if (error) {
+  try {
+    const [{ data: metadata, error: metadataError }, storageFiles] = await Promise.all([
+      supabase.from("media_assets")
+        .select("id,storage_path,file_name,content_type,size_bytes,alt_text,is_public,uploaded_by,created_at")
+        .eq("is_public", true)
+        .order("created_at", { ascending: false })
+        .limit(1000),
+      listMediaStorageFiles(),
+    ]);
+    if (metadataError) throw metadataError;
+    const metadataByPath = new Map((metadata || []).map((item) => [item.storage_path, item]));
+    mediaAssetData = storageFiles.map((file) => {
+      const saved = metadataByPath.get(file.storage_path) || {};
+      return {
+        ...saved,
+        storage_path: file.storage_path,
+        file_name: saved.file_name || file.storage_name,
+        content_type: saved.content_type || file.storage_metadata.mimetype || "",
+        size_bytes: saved.size_bytes ?? file.storage_metadata.size ?? 0,
+        alt_text: saved.alt_text || "",
+        created_at: saved.created_at || file.storage_created_at,
+        is_public: true,
+      };
+    }).sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    renderMediaAssets();
+    if (mediaMessage) mediaMessage.textContent = "Showing " + mediaAssetData.length + " media assets.";
+  } catch (error) {
     if (mediaMessage) mediaMessage.textContent = error.message || "Could not load Media Library.";
-    return;
   }
-  mediaAssetData = data || [];
-  renderMediaAssets();
-  if (mediaMessage) mediaMessage.textContent = "Showing " + mediaAssetData.length + " media assets.";
 }
 
 if (mediaUploadForm) {
@@ -889,6 +977,86 @@ if (mediaSearch) mediaSearch.addEventListener("input", renderMediaAssets);
 if (mediaTypeFilter) mediaTypeFilter.addEventListener("change", renderMediaAssets);
 if (mediaDateFilter) mediaDateFilter.addEventListener("change", renderMediaAssets);
 if (ownerDashboard && mediaItems) void loadMediaAssets();
+
+// Owner-only website profile settings stored as a single public configuration record.
+const siteSettingsForm = document.querySelector("#site-settings-form");
+const siteSettingsMessage = document.querySelector("#site-settings-message");
+
+async function loadSiteSettingsForm() {
+  if (!siteSettingsForm || currentDashboardRole !== "owner") return;
+  if (siteSettingsMessage) siteSettingsMessage.textContent = "Loading website settings…";
+  const { data, error } = await supabase
+    .from("site_settings")
+    .select("setting_value")
+    .eq("setting_key", "site_profile")
+    .maybeSingle();
+  if (error) {
+    if (siteSettingsMessage) siteSettingsMessage.textContent = error.message || "Could not load website settings.";
+    return;
+  }
+  const settings = data?.setting_value && typeof data.setting_value === "object" ? data.setting_value : {};
+  siteSettingsForm.elements.tagline.value = typeof settings.tagline === "string" ? settings.tagline : "our services and technical support";
+  siteSettingsForm.elements.description.value = typeof settings.description === "string" ? settings.description : "Three Brothers Tech Hub — technical services by region.";
+  siteSettingsForm.elements.contact_email.value = typeof settings.contact_email === "string" ? settings.contact_email : "";
+  siteSettingsForm.elements.contact_phone.value = typeof settings.contact_phone === "string" ? settings.contact_phone : "";
+  siteSettingsForm.elements.whatsapp_url.value = typeof settings.whatsapp_url === "string" ? settings.whatsapp_url : "";
+  if (siteSettingsMessage) siteSettingsMessage.textContent = "Website settings loaded.";
+}
+
+if (siteSettingsForm) {
+  siteSettingsForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (currentDashboardRole !== "owner") {
+      if (siteSettingsMessage) siteSettingsMessage.textContent = "Owner permission required.";
+      return;
+    }
+    const submit = document.querySelector("#site-settings-save");
+    const form = new FormData(siteSettingsForm);
+    const tagline = String(form.get("tagline") || "").trim();
+    const description = String(form.get("description") || "").trim();
+    const contactEmail = String(form.get("contact_email") || "").trim();
+    const contactPhone = String(form.get("contact_phone") || "").trim();
+    const whatsappUrl = String(form.get("whatsapp_url") || "").trim();
+    if (!tagline) {
+      if (siteSettingsMessage) siteSettingsMessage.textContent = "Homepage tagline is required.";
+      return;
+    }
+    if (whatsappUrl) {
+      try {
+        if (new URL(whatsappUrl).protocol !== "https:") throw new Error("HTTPS required");
+      } catch {
+        if (siteSettingsMessage) siteSettingsMessage.textContent = "WhatsApp URL must be a valid HTTPS address.";
+        return;
+      }
+    }
+    if (submit) submit.disabled = true;
+    if (siteSettingsMessage) siteSettingsMessage.textContent = "Saving website settings…";
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
+      const settingValue = {
+        tagline,
+        description,
+        contact_email: contactEmail,
+        contact_phone: contactPhone,
+        whatsapp_url: whatsappUrl,
+      };
+      const { error } = await supabase.from("site_settings").upsert({
+        setting_key: "site_profile",
+        setting_value: settingValue,
+        is_public: true,
+        updated_by: authData.user.id,
+      }, { onConflict: "setting_key" });
+      if (error) throw error;
+      if (siteSettingsMessage) siteSettingsMessage.textContent = "Website settings saved.";
+    } catch (error) {
+      if (siteSettingsMessage) siteSettingsMessage.textContent = error.message || "Could not save website settings.";
+    } finally {
+      if (submit) submit.disabled = false;
+    }
+  });
+}
+if (siteSettingsForm) void loadSiteSettingsForm();
 
 // Dashboard module tabs: all modules stay on one horizontal row.
 const dashboardTabs = Array.from(document.querySelectorAll("[data-dashboard-tab]"));
