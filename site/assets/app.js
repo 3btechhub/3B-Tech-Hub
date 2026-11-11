@@ -109,7 +109,7 @@ if (form) {
   function render() {
     const signup = mode === "signup";
     submit.textContent = signup ? "Create account" : "Login";
-    toggle.textContent = signup ? "Back to login" : "Create account";
+    toggle.textContent = signup ? "Login Account" : "Create account";
     forgot.hidden = signup;
     showMessage("");
   }
