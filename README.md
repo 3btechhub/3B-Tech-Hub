@@ -9,27 +9,52 @@ A scalable, owner-controlled digital platform for electronics repair, technical 
 - Secure by default: least privilege, server-side authorization, validated inputs and protected secrets.
 - Modular and API-first so future mobile apps, integrations and AI capabilities can reuse the platform.
 
-## Planned technology
-- **Web:** Next.js (App Router), React, TypeScript
-- **UI:** Tailwind CSS, shadcn/ui
-- **Backend:** Appwrite Auth, TablesDB, Storage and Functions
-- **Hosting:** Vercel (production web hosting)
+## Technology
+- **Web:** Next.js App Router, React and TypeScript
+- **UI:** Tailwind CSS and shared reusable UI components
+- **Backend:** Appwrite Auth, TablesDB and Storage
+- **Hosting / SSR:** Appwrite Sites (Next.js SSR, Node.js 22)
 - **Source control / CI:** GitHub and GitHub Actions
 - **Testing:** Vitest and Playwright
-- **Security / edge:** Appwrite permissions, server-side role checks, Cloudflare
-- **SEO:** Next.js metadata, sitemap, robots and Schema.org structured data
+- **SEO:** Next.js metadata, sitemap, robots and structured data
 
-## Repository status
-This repository is being initialized. Architecture and data-model decisions are documented under `docs/`. Appwrite resources and production hosting are not yet provisioned.
+Vercel is not part of the deployment architecture. Production hosting and server rendering are provided by Appwrite Sites.
+
+## Repository and deployment
+- Repository: [3btechhub/3B-Tech-Hub](https://github.com/3btechhub/3B-Tech-Hub)
+- Production branch: `main`
+- Appwrite Site: `3b-tech-hub`
+- Appwrite project: `6af2e894001db846da6a`
+- Appwrite database: `3btechhub-prod`
+- Storage bucket: `media`
+- Deployment is connected to GitHub VCS and is built with `npm install` and `npm run build`.
+- The Appwrite Site uses the Next.js SSR adapter and Node.js 22.
+- A successful build does not by itself prove that every authenticated workflow or integration is operational; use the health endpoint and release checklist below.
+
+## Local development
+1. Install Node.js 22.
+2. Copy `.env.example` to `.env.local`.
+3. Fill the Appwrite values using the Appwrite Console. Never commit real credentials.
+4. Run `npm install`.
+5. Run `npm run dev`.
+
+## Validation commands
+- `npm run typecheck`
+- `npm run lint`
+- `npm run test`
+- `npm run test:e2e`
+- `npm run build`
+
+## Production health and release
+- Health endpoint: `/api/health`
+- A healthy response requires the Content, Media, Settings and Audit TablesDB checks to connect.
+- Verify Owner login, content draft CRUD, media upload/preview/delete, settings save/reload and audit events before declaring a release production-ready.
+- Keep the Appwrite API key server-only and grant only the scopes required by the SSR application.
+- Keep a known-good Appwrite deployment available for rollback. Do not delete historical deployments or production data as part of routine releases.
 
 ## Documentation
 - [Architecture](docs/architecture.md)
 - [Data model](docs/data-model.md)
 
-## Environments
-- Local development: planned
-- Preview: planned; approval required before production promotion
-- Production: planned; no live deployment has been made
-
 ## Security
-Never commit API keys, secrets, credentials, customer personal data, or production environment files. Use environment variables in the hosting provider and server-side code only.
+Never commit API keys, secrets, credentials, customer personal data, or production environment files. Use Appwrite Site secret variables for server-only values. Only public endpoint/project identifiers may use `NEXT_PUBLIC_*` variables.
