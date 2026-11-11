@@ -30,12 +30,50 @@ drop policy if exists roles_owner_delete on public.user_roles;
 
 create policy roles_owner_insert
   on public.user_roles for insert to authenticated
-  with check (private.is_site_owner());
+  with check (private.is_site_owner() and role <> 'owner');
 
 create policy roles_owner_update
   on public.user_roles for update to authenticated
   using (private.is_site_owner())
-  with check (private.is_site_owner());
+  with check (private.is_site_owner() and role <> 'owner');
+
+-- Protect the designated primary Owner account from demotion or deletion.
+create or replace function private.protect_primary_owner_role()
+returns trigger
+language plpgsql
+security definer
+set search_path = pg_catalog, public, auth
+as $
+declare
+  primary_owner boolean;
+begin
+  if old.role = 'owner' then
+    select lower(email) = '3btechhub@gmail.com'
+      into primary_owner
+    from auth.users
+    where id = old.user_id;
+
+    if coalesce(primary_owner, false) then
+      raise exception 'The primary Owner role cannot be changed or removed';
+    end if;
+    if tg_op = 'DELETE' then
+      raise exception 'Owner role assignments cannot be deleted';
+    end if;
+    if new.role <> 'owner' or new.user_id <> old.user_id then
+      raise exception 'Owner role assignments cannot be changed';
+    end if;
+  end if;
+
+  if tg_op = 'DELETE' then return old; end if;
+  return new;
+end;
+$;
+
+revoke all on function private.protect_primary_owner_role() from public, anon, authenticated;
+drop trigger if exists protect_primary_owner_role on public.user_roles;
+create trigger protect_primary_owner_role
+  before update or delete on public.user_roles
+  for each row execute function private.protect_primary_owner_role();
 
 create policy roles_owner_delete
   on public.user_roles for delete to authenticated
