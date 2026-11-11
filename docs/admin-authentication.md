@@ -1,31 +1,33 @@
 # Admin Authentication and Authorization
 
-## Session authentication
-- Appwrite email/password session creation occurs in a server route.
-- Session secret is stored in an HttpOnly, SameSite=Lax cookie; Secure is enabled in production.
-- /admin routes verify the session against Appwrite and require an exact server-side Owner ID allowlist.
-- Owner access is deny-by-default. No public admin registration exists.
+## Production identity
+- Supabase Auth email/password is the identity provider.
+- The static site uses the public publishable key only.
+- The authenticated user's UUID comes from the verified Supabase session.
+- `3btechhub@gmail.com` is the highest-authority Owner; its Owner role is stored in `public.user_roles`.
+- No browser-supplied email, role or user UUID is sufficient authorization by itself.
 
-## Role policy
-- The role permission matrix is centralized in src/lib/permissions.ts.
-- Owner is the only role permitted to approve/publish content or manage users.
-- Admin, Manager and Staff receive progressively limited permissions.
-- The matrix is policy code only: non-owner roles must not be assigned until trusted server-side role profiles and resource-level enforcement are implemented.
+## Access rules
+- Owner: full authority, including role assignment and system-level actions.
+- Admin: only explicitly delegated catalogue/content operations; cannot grant or modify Owner roles.
+- Manager/Editor/Staff: no authority unless a matching RLS policy and tested workflow explicitly grants it.
+- Customer: own profile only.
+- Anonymous visitor: public active/published content only.
 
-## Audit event contract
-- src/lib/audit-schema.ts defines bounded event fields and allowed action/outcome values.
-- Validation rejects unknown roles/actions and oversized metadata.
-- Do not record passwords, session secrets, API keys, complete request bodies, or payment data.
-- An Appwrite audit append adapter is implemented and privileged content/media APIs require audit storage to be configured. Actual audit writes have not yet been verified against a provisioned Appwrite table; do not claim live audit logging until preview integration tests pass.
+## Enforcement
+- Every exposed table has RLS enabled.
+- UPDATE policies must include both `USING` and `WITH CHECK`.
+- Role-management writes must be Owner-only.
+- Public visitors must not have INSERT, UPDATE or DELETE table privileges.
+- Never authorize from user-editable metadata or hidden UI controls.
+- Never expose Supabase secret/service-role keys in client code.
 
-## Hosting environment
-- NEXT_PUBLIC_APPWRITE_ENDPOINT
-- NEXT_PUBLIC_APPWRITE_PROJECT_ID
-- ADMIN_OWNER_USER_IDS — comma-separated exact Appwrite user IDs; server-only.
+## Audit events
+- Record actor UUID, action, resource type, resource ID and changed column names.
+- Never store passwords, tokens, API keys, complete profile rows or other unnecessary personal data.
+- Audit records are append-only for application roles and readable only by authorized admins.
 
-## Remaining production hardening
-- Configure distributed edge/WAF rate limiting for /api/admin/login.
-- Verify Appwrite session behavior and allowed origins in a preview deployment.
-- Add MFA and trusted role profile storage before delegating roles.
-- Persist audit events in an append-only Appwrite collection/table after schema and permissions are reviewed.
-- Configure Appwrite project platform origins to actual preview and production domains.
+## Remaining
+- Owner-only user invitation and status management require a reviewed Supabase Edge Function using the platform service role in server runtime only.
+- Role and permission UI must call a server-verified Owner workflow.
+- Add tests for both allowed and denied requests, including attempts by an Admin to promote itself or another account to Owner.
