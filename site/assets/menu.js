@@ -2,6 +2,15 @@
   const button = document.querySelector(".menu-trigger");
   const menu = document.querySelector("#site-menu");
   const regionSelect = document.querySelector("#region-select");
+  const languageSelect = document.querySelector("#language-select");
+  // Render both selectors as compact inline option lists instead of the
+  // mobile browser's full-screen native picker.
+  [languageSelect, regionSelect].forEach((select) => {
+    if (select) {
+      select.size = 3;
+      select.setAttribute("aria-label", select.id === "language-select" ? "Language options" : "Country options");
+    }
+  });
   if (regionSelect) {
     const pathParts = window.location.pathname.split("/").filter(Boolean);
     const routeIndex = pathParts.indexOf("3btechhub");
