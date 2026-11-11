@@ -22,7 +22,7 @@ export function ContentEditor() {
   const [draft, setDraft] = useState<PageRevision>(initialDraft);
   const [editingRevisionId, setEditingRevisionId] = useState<string | null>(null);
   const [revisionIdInput, setRevisionIdInput] = useState("");
-  const [notice, setNotice] = useState("Draft editor — save requires configured Appwrite storage.");
+  const [notice, setNotice] = useState("Draft editor — save requires Owner sign-in and available Appwrite storage.");
   const [savedRevisionId, setSavedRevisionId] = useState<string | null>(null);
   const validation = useMemo(() => pageRevisionSchema.safeParse(draft), [draft]);
   const hero = draft.sections.find((section) => section.type === "hero");
@@ -41,7 +41,7 @@ export function ContentEditor() {
 
   function updateSeo(field: "title" | "description", value: string) {
     setDraft((current) => ({ ...current, seo: { ...current.seo, [field]: value } }));
-    setNotice("Unsaved local changes. Persistent saving is not enabled yet.");
+    setNotice("Unsaved local changes.");
   }
 
   async function loadSavedRevision() {
@@ -51,7 +51,7 @@ export function ContentEditor() {
     try {
       const response = await fetch(`/api/admin/content/drafts/${encodeURIComponent(id)}`, { cache: "no-store" });
       const body = await response.json();
-      if (!response.ok) throw new Error(body.error ?? "Revision could not be be loaded.");
+      if (!response.ok) throw new Error(body.error ?? "Revision could not be loaded.");
       const parsed = pageRevisionSchema.safeParse(body.revision);
       if (!parsed.success) throw new Error("Saved revision has invalid content.");
       if (parsed.data.status !== "draft") throw new Error("Only draft revisions can be reopened for editing.");
@@ -108,8 +108,8 @@ export function ContentEditor() {
           {!validation.success && <p className="validation-error" role="alert">{validation.error.issues[0]?.message ?? "Please check the page fields."}</p>}
           {validation.success && <p className="validation-success">All current page fields pass validation.</p>}
         </section>
-        <section className="preview-panel" aria-label="Live page preview">
-          <div className="preview-top"><span>LIVE PREVIEW</span><span>Desktop · Draft</span></div>
+        <section className="preview-panel" aria-label="Draft page preview">
+          <div className="preview-top"><span>DRAFT PREVIEW</span><span>Desktop · Draft</span></div>
           <div className="preview-site">
             <div className="preview-nav"><strong>3B TECH HUB</strong><span>Services　 About　 Contact</span></div>
             <div className="preview-hero"><span className="preview-eyebrow">THREE BROTHERS · TECHNOLOGY HUB</span><h2>{hero?.heading || "Your homepage headline"}</h2><p>{hero?.subheading || "Your homepage introduction will appear here."}</p><span className="preview-cta button secondary">{cta?.type === "cta" ? cta.actionLabel : "Contact us"} ↗</span></div>
