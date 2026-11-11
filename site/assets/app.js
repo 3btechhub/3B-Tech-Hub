@@ -733,6 +733,46 @@ function renderProducts(products) {
   if (homepageProducts) homepageProducts.hidden = false;
 }
 
+async function loadPublicServices() {
+  if (!currentPath.includes("/services/")) return;
+  const { data, error } = await supabase.from("services").select("slug,name,description,category,country,photo_url").eq("status","active").order("name");
+  if (error) { console.warn("Service content unavailable:", error.message); return; }
+  const services = data || [];
+  const listing = document.querySelector(".services-index");
+  if (listing) {
+    listing.querySelectorAll(".service-country").forEach(section => {
+      const region = section.dataset.countryRegion;
+      const grid = section.querySelector(".service-card-grid");
+      if (!grid) return;
+      grid.replaceChildren();
+      services.filter(item => !item.country || item.country === "global" || item.country === region).forEach(item => {
+        const link = document.createElement("a"); link.className = "service-card"; link.href = "./" + item.slug + "/";
+        if (item.photo_url) { const img=document.createElement("img"); img.src=item.photo_url; img.alt=""; img.loading="lazy"; img.className="service-card-image"; link.append(img); }
+        else { const icon=document.createElement("span"); icon.className="service-icon"; icon.setAttribute("aria-hidden","true"); icon.textContent="🛠️"; link.append(icon); }
+        const info=document.createElement("span"); const title=document.createElement("strong"); title.textContent=item.name; info.append(title);
+        if(item.description){const desc=document.createElement("small");desc.textContent=item.description;info.append(desc);}
+        if(item.category){const cat=document.createElement("small");cat.textContent=item.category;info.append(cat);}
+        link.append(info); const arrow=document.createElement("span");arrow.className="service-arrow";arrow.setAttribute("aria-hidden","true");arrow.textContent="↗";link.append(arrow);grid.append(link);
+      });
+      section.hidden = grid.children.length === 0;
+    });
+    return;
+  }
+  const detail = document.querySelector(".service-detail-main");
+  if (detail) {
+    const slug = currentPath.split("/").filter(Boolean).pop();
+    const item = services.find(service => service.slug === slug);
+    if (!item) return;
+    detail.replaceChildren();
+    addTextElement(detail,"h1","",item.name);
+    if(item.description)addTextElement(detail,"p","",item.description);
+    if(item.category)addTextElement(detail,"p","service-detail-category",item.category);
+    if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt=item.name;img.className="service-detail-image";detail.append(img);}
+    const back=document.createElement("a");back.className="service-back-link";back.href="../../services/";back.textContent="Explore all services";detail.append(back);
+  }
+}
+loadPublicServices();
+
 async function loadHomepageIdentity() {
   if (!homepageTechnicians && !homepageWorkshops && !homepageProducts) return;
   const [{ data: technicians, error: techniciansError }, { data: workshops, error: workshopsError }, { data: products, error: productsError }] = await Promise.all([
