@@ -7,9 +7,9 @@ const serviceCountryRules = {
   "tv-repair": "bd",
   "mobile-repair": "bd",
   "mobile-parts-sell": "bd",
-  "satellite-dish-installation": "ksa",
-  "satellite-dish-servicing": "ksa",
-  "satellite-dish-parts-sell": "ksa"
+  "satellite-dish-installation": "saudi",
+  "satellite-dish-servicing": "saudi",
+  "satellite-dish-parts-sell": "saudi"
 };
 const servicePrefix = "/3btechhub/services/";
 if (currentPath.startsWith(servicePrefix)) {
