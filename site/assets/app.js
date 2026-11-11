@@ -63,10 +63,19 @@ function closeSiteMenu() {
   menuButton.setAttribute("aria-expanded", "false");
   menuButton.setAttribute("aria-label", "Open menu");
 }
-function setMenuSession(session) {
+async function setMenuSession(session) {
   if (profileMenuLink) profileMenuLink.hidden = !session;
   if (loginMenuLink) loginMenuLink.hidden = !!session;
   if (logoutMenuLink) logoutMenuLink.hidden = !session;
+  if (dashboardMenuLink) {
+    dashboardMenuLink.hidden = true;
+    if (session?.user?.id) {
+      const { data, error } = await supabase
+        .from("user_roles").select("role")
+        .eq("user_id", session.user.id).eq("role", "owner").maybeSingle();
+      if (!error && data?.role === "owner") dashboardMenuLink.hidden = false;
+    }
+  }
 }
 // Load authentication separately so a Supabase CDN issue cannot disable the menu.
 const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
