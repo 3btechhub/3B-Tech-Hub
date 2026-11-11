@@ -3,19 +3,62 @@
   const menu = document.querySelector("#site-menu");
   const regionSelect = document.querySelector("#region-select");
   const languageSelect = document.querySelector("#language-select");
-  // Render both selectors as compact inline option lists instead of the
-  // mobile browser's full-screen native picker.
-  [languageSelect, regionSelect].forEach((select) => {
-    if (select) {
-      select.size = 3;
-      select.setAttribute("aria-label", select.id === "language-select" ? "Language options" : "Country options");
-    }
-  });
+
+  // Keep the real selects for the existing app logic, but expose compact
+  // custom dropdowns that expand only when the user taps their heading.
+  const makeDropdown = (select, title) => {
+    if (!select || select.dataset.customDropdown === "true") return;
+    select.dataset.customDropdown = "true";
+    const wrapper = document.createElement("div");
+    wrapper.className = "menu-dropdown";
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "menu-tool menu-dropdown-trigger";
+    trigger.setAttribute("aria-expanded", "false");
+    const panel = document.createElement("div");
+    panel.className = "menu-dropdown-options";
+    panel.hidden = true;
+    const update = () => {
+      const selected = select.options[select.selectedIndex];
+      trigger.textContent = title + ": " + (selected ? selected.textContent.replace(/^(Language|Country):\\s*/, "") : "");
+      panel.querySelectorAll("button").forEach((option) => {
+        const active = option.dataset.value === select.value;
+        option.setAttribute("aria-pressed", String(active));
+        option.classList.toggle("is-selected", active);
+      });
+    };
+    Array.from(select.options).forEach((option) => {
+      const item = document.createElement("button");
+      item.type = "button";
+      item.className = "menu-dropdown-option";
+      item.textContent = option.textContent.replace(/^(Language|Country):\\s*/, "");
+      item.dataset.value = option.value;
+      item.addEventListener("click", () => {
+        select.value = option.value;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        update();
+        panel.hidden = true;
+        trigger.setAttribute("aria-expanded", "false");
+      });
+      panel.appendChild(item);
+    });
+    trigger.addEventListener("click", () => {
+      const opening = panel.hidden;
+      panel.hidden = !opening;
+      trigger.setAttribute("aria-expanded", String(opening));
+    });
+    select.insertAdjacentElement("afterend", wrapper);
+    wrapper.append(trigger, panel);
+    select.hidden = true;
+    select.addEventListener("change", update);
+    update();
+  };
+
+  const pathParts = window.location.pathname.split("/").filter(Boolean);
+  const routeIndex = pathParts.indexOf("3btechhub");
+  const pathRegion = routeIndex >= 0 ? pathParts[routeIndex + 1] : null;
+  const activeRegion = window.siteCountry?.region || (["bd", "saudi", "global"].includes(pathRegion) ? pathRegion : "global");
   if (regionSelect) {
-    const pathParts = window.location.pathname.split("/").filter(Boolean);
-    const routeIndex = pathParts.indexOf("3btechhub");
-    const pathRegion = routeIndex >= 0 ? pathParts[routeIndex + 1] : null;
-    const activeRegion = window.siteCountry?.region || (["bd", "saudi", "global"].includes(pathRegion) ? pathRegion : "global");
     regionSelect.value = activeRegion;
     const goToRegion = () => {
       const region = regionSelect.value;
@@ -26,6 +69,9 @@
     regionSelect.addEventListener("change", goToRegion);
     regionSelect.addEventListener("input", goToRegion);
   }
+  makeDropdown(languageSelect, "Language");
+  makeDropdown(regionSelect, "Country");
+
   if (!button || !menu) return;
   const closeMenu = () => {
     menu.hidden = true;
