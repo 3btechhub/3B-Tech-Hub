@@ -435,11 +435,6 @@ if (profile) {
 // Owner-only dashboard: the database role is checked again on the page itself.
 const ownerDashboard = document.querySelector("#owner-dashboard");
 if (ownerDashboard) {
-  const dashboardMessage = document.querySelector("#dashboard-message");
-  const showDashboardMessage = (message, kind = "") => {
-    dashboardMessage.textContent = message;
-    dashboardMessage.dataset.kind = kind;
-  };
   const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError || !authData.user) {
     location.replace(new URL("login/", ROOT_URL).href);
@@ -468,9 +463,6 @@ if (ownerDashboard) {
         if (element) element.textContent = error ? "—" : String(count ?? 0);
         return !error;
       }));
-      showDashboardMessage(results.every(Boolean)
-        ? "Owner access verified. Dashboard data loaded."
-        : "Owner access verified. Some totals could not be loaded; check table permissions.", results.every(Boolean) ? "success" : "error");
     }
   }
   supabase.auth.onAuthStateChange((_event, session) => {
