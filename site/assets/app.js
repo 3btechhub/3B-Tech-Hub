@@ -1,6 +1,7 @@
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const profileMenuLink = document.querySelector("#profile-menu-link");
+const dashboardMenuLink = document.querySelector("#dashboard-menu-link");
 const themeToggle = document.querySelector("#theme-toggle");
 const languageToggle = document.querySelector("#language-toggle");
 const languageCode = document.querySelector("#language-code");
@@ -9,8 +10,8 @@ const savedLanguage = localStorage.getItem("3b-language") || "en";
 document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
 document.documentElement.lang = savedLanguage;
 const translations = {
-  en: {home:"Home",profile:"Profile",services:"Services",login:"Login",logout:"Logout",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
-  bn: {home:"হোম",profile:"প্রোফাইল",services:"সার্ভিস",login:"লগইন",logout:"লগআউট",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"}
+  en: {home:"Home",profile:"Profile",services:"Services",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
+  bn: {home:"হোম",profile:"প্রোফাইল",services:"সার্ভিস",login:"লগইন",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"}
 };
 function applyLanguage(language) {
   const lang = language === "bn" ? "bn" : "en";
@@ -360,4 +361,51 @@ if (profile) {
     if (!session) location.replace(new URL("login/", ROOT_URL).href);
   });
   window.addEventListener("pagehide", () => authListener.subscription.unsubscribe(), { once: true });
+}
+
+
+// Owner-only dashboard: the database role is checked again on the page itself.
+const ownerDashboard = document.querySelector("#owner-dashboard");
+if (ownerDashboard) {
+  const dashboardMessage = document.querySelector("#dashboard-message");
+  const showDashboardMessage = (message, kind = "") => {
+    dashboardMessage.textContent = message;
+    dashboardMessage.dataset.kind = kind;
+  };
+  const { data: authData, error: authError } = await supabase.auth.getUser();
+  if (authError || !authData.user) {
+    location.replace(new URL("login/", ROOT_URL).href);
+  } else {
+    const { data: ownerRole, error: roleError } = await supabase
+      .from("user_roles").select("role")
+      .eq("user_id", authData.user.id).eq("role", "owner").maybeSingle();
+    if (roleError || ownerRole?.role !== "owner") {
+      location.replace(new URL("profile/", ROOT_URL).href);
+    } else {
+      const ownerEmail = document.querySelector("#dashboard-owner-email");
+      if (ownerEmail) ownerEmail.textContent = authData.user.email || "";
+      const resources = [
+        ["site_content", "dashboard-content-count"],
+        ["services", "dashboard-services-count"],
+        ["products", "dashboard-products-count"],
+        ["service_bookings", "dashboard-bookings-count"],
+        ["user_roles", "dashboard-users-count"],
+        ["media_assets", "dashboard-media-count"],
+        ["site_settings", "dashboard-settings-count"],
+        ["audit_logs", "dashboard-audit-count"],
+      ];
+      const results = await Promise.all(resources.map(async ([table, target]) => {
+        const { count, error } = await supabase.from(table).select("*", { count: "exact", head: true });
+        const element = document.getElementById(target);
+        if (element) element.textContent = error ? "—" : String(count ?? 0);
+        return !error;
+      }));
+      showDashboardMessage(results.every(Boolean)
+        ? "Owner access verified. Dashboard data loaded."
+        : "Owner access verified. Some totals could not be loaded; check table permissions.", results.every(Boolean) ? "success" : "error");
+    }
+  }
+  supabase.auth.onAuthStateChange((_event, session) => {
+    if (!session) location.replace(new URL("login/", ROOT_URL).href);
+  });
 }
