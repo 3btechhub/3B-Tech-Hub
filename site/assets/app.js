@@ -39,11 +39,9 @@ if (languageToggle) languageToggle.addEventListener("click", () => {
   applyLanguage(next);
   applyTheme(document.documentElement.dataset.theme);
 });
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szac";
-const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+let supabase;
 const loginMenuLink = document.querySelector("#login-menu-link");
 const logoutMenuLink = document.querySelector("#logout-menu-link");
 
@@ -86,6 +84,10 @@ if (menuButton && siteMenu) {
     if (event.key === "Escape") closeSiteMenu();
   });
 }
+
+// Load authentication separately so a Supabase CDN issue cannot disable the menu.
+const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   logoutMenuLink.disabled = true;
   const { error } = await supabase.auth.signOut();
