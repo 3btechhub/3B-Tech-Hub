@@ -730,45 +730,42 @@ function renderProducts(products) {
 
   const detailBody = dialog.querySelector(".technician-detail-body");
   const grid = document.createElement("div");
-  grid.className = "service-card-grid product-service-card-grid";
+  grid.className = "product-showcase-grid";
 
   visibleProducts.forEach(product => {
     const card = document.createElement("button");
     card.type = "button";
-    card.className = "service-card product-service-card";
+    card.className = "product-showcase-card";
     card.setAttribute("aria-label", "View " + product.name + " details");
 
+    const visual = document.createElement("span");
+    visual.className = "product-showcase-visual";
     if (product.photo_url) {
       const image = document.createElement("img");
       image.src = product.photo_url;
       image.alt = "";
       image.loading = "lazy";
-      image.className = "service-card-image";
-      card.append(image);
+      visual.append(image);
     } else {
       const icon = document.createElement("span");
-      icon.className = "service-icon";
       icon.setAttribute("aria-hidden", "true");
       icon.textContent = product.category_group === "satellite" ? "📡" : "📱";
-      card.append(icon);
+      visual.append(icon);
     }
+    card.append(visual);
 
-    const info = document.createElement("span");
-    const title = document.createElement("strong");
-    title.textContent = product.name;
-    info.append(title);
-    const group = document.createElement("small");
+    const group = document.createElement("span");
+    group.className = "product-showcase-group";
     group.textContent = getGroupTitle(product);
-    info.append(group);
-    if (product.description) {
-      const description = document.createElement("small");
-      description.textContent = product.description;
-      info.append(description);
-    }
-    card.append(info);
+    card.append(group);
+
+    const title = document.createElement("strong");
+    title.className = "product-showcase-title";
+    title.textContent = product.name;
+    card.append(title);
 
     const arrow = document.createElement("span");
-    arrow.className = "service-arrow";
+    arrow.className = "product-showcase-arrow";
     arrow.setAttribute("aria-hidden", "true");
     arrow.textContent = "↗";
     card.append(arrow);
@@ -781,10 +778,15 @@ function renderProducts(products) {
         image.alt = product.name;
         image.className = "technician-detail-photo";
         detailBody.append(image);
+      } else {
+        const icon = document.createElement("div");
+        icon.className = "product-detail-icon";
+        icon.textContent = product.category_group === "satellite" ? "📡" : "📱";
+        detailBody.append(icon);
       }
       addTextElement(detailBody, "h2", "", product.name);
       addTextElement(detailBody, "p", "technician-detail-specialty", getGroupTitle(product));
-      if (product.description) addTextElement(detailBody, "p", "technician-detail-specialty", product.description);
+      if (product.description) addTextElement(detailBody, "p", "product-detail-description", product.description);
       dialog.showModal();
     });
 
