@@ -31,8 +31,10 @@ jobs:
         run: |
           test -s site/index.html
           test -s site/login/index.html
+          test -s site/profile/index.html
           test -s site/assets/style.css
           test -s site/assets/app.js
+          test -s site/404.html
           node --check site/assets/app.js
           grep -q "Three Brothers Technology Hub" site/index.html
 
@@ -47,6 +49,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Upload website artifact
         uses: actions/upload-pages-artifact@v3
         with:
