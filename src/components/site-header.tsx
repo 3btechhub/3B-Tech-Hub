@@ -24,7 +24,6 @@ function SearchIcon() {
 }
 
 export default function SiteHeader({ siteName, navigationItems }: Props) {
-  const [hydrated, setHydrated] = useState(false);
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -35,9 +34,10 @@ export default function SiteHeader({ siteName, navigationItems }: Props) {
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setHydrated(true);
+    headerRef.current?.setAttribute("data-hydrated", "true");
   }, []);
 
   useEffect(() => {
@@ -100,7 +100,7 @@ export default function SiteHeader({ siteName, navigationItems }: Props) {
     : searchItems.slice(0, 5);
 
   return (
-    <header className="site-header" data-hydrated={hydrated ? "true" : "false"}>
+    <header ref={headerRef} className="site-header" data-hydrated="false">
       <nav className="container header-inner" aria-label="Main navigation">
         <div className="header-brand-group">
           <Link className="brand-logo" href="/" aria-label={siteName + " home"} onClick={() => { closeMenu(); closeSearch(); }}>
