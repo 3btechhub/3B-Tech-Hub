@@ -11,6 +11,7 @@
     const goToRegion = () => {
       const region = regionSelect.value;
       if (!["bd", "saudi", "global"].includes(region) || region === activeRegion) return;
+      try { localStorage.setItem("3b-country-manual", region); } catch (_) {}
       window.location.href = "/3btechhub/" + region + "/";
     };
     regionSelect.addEventListener("change", goToRegion);
