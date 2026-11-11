@@ -22,8 +22,9 @@ export default function LoginPage() {
 
   const endpoint=(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT??"https://cloud.appwrite.io/v1").replace(/\/$/,"");
   const project=process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID??"";
-  const callback=typeof window!=="undefined"?window.location.origin+"/login/google/callback":"";
-  const googleUrl=project?endpoint+"/account/sessions/oauth2/google?project="+encodeURIComponent(project)+"&success="+encodeURIComponent(callback)+"&failure="+encodeURIComponent(window.location.origin+"/login?google=failed"):"#";
+  const origin=typeof window!=="undefined"?window.location.origin:"";
+  const callback=origin+"/login/google/callback";
+  const googleUrl=project&&origin?endpoint+"/account/sessions/oauth2/google?project="+encodeURIComponent(project)+"&success="+encodeURIComponent(callback)+"&failure="+encodeURIComponent(origin+"/login?google=failed"):"#";
 
   return (
     <main className="auth-page">
