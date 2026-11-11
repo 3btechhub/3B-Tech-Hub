@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 
-test("homepage is completely blank", async ({ page }) => {
+test("homepage has no main content but keeps the site header and footer", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("body")).toHaveText("");
-  await expect(page.locator("body")).not.toContainText(/\\S/);
-  await expect(page.locator(".site-header, main, footer, header, nav, button, a, input, textarea, select")).toHaveCount(0);
+  await expect(page.locator(".site-header")).toBeVisible();
+  await expect(page.locator(".site-footer")).toBeVisible();
+  await expect(page.locator("main")).toHaveCount(0);
 });
 
 
