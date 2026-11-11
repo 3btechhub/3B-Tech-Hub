@@ -1026,3 +1026,50 @@ body input.control--lg, body select.control--lg, body textarea.control--lg {
   .header-search-input { width:clamp(90px, 30vw, 170px)!important; max-width:35vw!important; }
   .search-suggestions { left:50px!important; width:clamp(90px, 30vw, 170px)!important; max-width:calc(100vw - 100px)!important; }
 }
+
+
+/* Global input placeholder system */
+:where(input, textarea, select)::placeholder {
+  color: var(--muted) !important;
+  opacity: .78;
+  font: inherit;
+}
+:where(input, textarea, select):focus::placeholder { opacity: .48; }
+
+/* Compact, consistent menu link rhythm */
+.site-header .simple-menu-links { gap: 0 !important; }
+.site-header .simple-menu-link {
+  min-height: 36px !important;
+  padding: 6px 10px !important;
+  line-height: 1.35 !important;
+}
+.site-header .simple-menu-links > form > button { min-height: 36px !important; }
+
+/* Focused email/password login layout */
+.auth-login-form {
+  width: min(390px, 100%) !important;
+  gap: 12px !important;
+  padding: clamp(20px, 4vw, 30px) !important;
+}
+.auth-login-form > input {
+  min-height: 50px !important;
+  border-radius: 10px !important;
+  padding-inline: 15px !important;
+}
+.auth-google-button {
+  display:flex; align-items:center; justify-content:center; gap:11px;
+  width:100%; min-height:48px; padding:10px 14px;
+  border:1px solid var(--border); border-radius:10px;
+  color:var(--foreground); background:var(--surface);
+  font-size:15px; font-weight:600;
+}
+.auth-google-button svg { width:21px; height:21px; flex:0 0 21px; }
+.auth-login-submit { width:100% !important; min-height:52px !important; font-size:16px !important; }
+.auth-secondary-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.auth-secondary-button {
+  display:flex; align-items:center; justify-content:center;
+  min-height:42px; padding:8px 10px; border:1px solid var(--border);
+  border-radius:9px; background:var(--surface); color:var(--foreground);
+  font-size:13px; font-weight:600; text-align:center;
+}
+.auth-secondary-button:hover,.auth-google-button:hover { background:var(--surface-muted); }
