@@ -11,7 +11,7 @@ This document distinguishes the four provisioned Appwrite TablesDB tables from f
 | `media_assets` | Media metadata | Storage file references and media details |
 | `site_settings` | Site configuration | Persisted global settings |
 
-The production database ID is `3btechhub-prod`. All four tables are enabled. Their current row-security configuration is disabled; this must remain paired with server-only API-key access and strict server-side authorization. Do not grant direct public/client access to these tables.
+The production database ID is `3btechhub-prod`. All four tables are enabled with row-level security enabled and empty table permissions (deny by default). The production application accesses these tables only through server-side route handlers using the narrowly scoped Appwrite Site key. Do not grant direct public/client access to these tables.
 
 ## Design rules
 - Use stable IDs; do not expose sequential internal identifiers.
