@@ -62,13 +62,18 @@
       <div class="technician-admin-list"><h2>Service List</h2><div id="service-admin-items"></div></div>
     </section>
     <section class="dashboard-module-panel" id="panel-media" role="tabpanel" aria-labelledby="tab-media" data-dashboard-panel="media" hidden>
-      <div class="dashboard-function-grid" aria-label="Media Library functions">
-        <article class="dashboard-function-card"><h2>Upload Files</h2></article>
-        <article class="dashboard-function-card"><h2>Media Gallery & Preview</h2></article>
-        <article class="dashboard-function-card"><h2>Edit File Name & Details</h2></article>
-        <article class="dashboard-function-card"><h2>Delete File</h2></article>
-        <article class="dashboard-function-card"><h2>Filter by File Type & Date</h2></article>
-        <article class="dashboard-function-card"><h2>Copy Media URL</h2></article>
+      <form id="media-upload-form" class="content-editor-form">
+        <h2>Upload Media</h2>
+        <p class="muted">Public image assets only. Maximum file size: 10 MB.</p>
+        <label>Image File<input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" required></label>
+        <label>Alternative Text (optional)<input name="alt_text" maxlength="250"></label>
+        <div class="editor-actions"><button type="submit" id="media-upload-submit">Upload Image</button></div>
+        <p class="editor-message" id="media-message" role="status"></p>
+      </form>
+      <div class="technician-admin-list">
+        <h2>Media Library</h2>
+        <label>Search by file name<input id="media-search" type="search" maxlength="80" placeholder="Search images…"></label>
+        <div id="media-admin-items"></div>
       </div>
     </section>
     <section class="dashboard-module-panel" id="panel-user" role="tabpanel" aria-labelledby="tab-user" data-dashboard-panel="user" hidden>
