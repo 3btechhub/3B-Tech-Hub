@@ -9,7 +9,7 @@ body{background:var(--page-bg);color:var(--page-text)}
 .site-menu a{color:var(--page-text)}
 .menu-tools{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);margin-top:5px;padding:8px 4px 2px}
 .menu-tool{min-height:38px;flex:1;border:0;border-radius:7px;background:transparent;color:var(--page-text);cursor:pointer;font-size:17px}
-#language-toggle{display:flex;align-items:center;justify-content:center;gap:7px;font-size:14px}
+#language-select{min-width:112px;max-width:150px;padding:0 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--page-text);font:inherit;font-size:14px;cursor:pointer}
 .site-footer{border-color:var(--line);color:var(--muted)}
 .muted{color:var(--muted)}
 .auth-form input{background:var(--surface);color:var(--page-text);border-color:var(--line)}
