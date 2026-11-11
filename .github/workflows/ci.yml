@@ -28,6 +28,8 @@ jobs:
           test -s site/404.html
       - name: Validate JavaScript syntax
         run: node --input-type=module --check < site/assets/app.js
+      - name: Run product catalogue unit tests
+        run: node --test tests/product-catalog.test.mjs
       - name: Validate static routes and required branding
         run: |
           grep -q "3B TECH HUB" site/index.html
