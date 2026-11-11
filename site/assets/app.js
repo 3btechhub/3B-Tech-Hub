@@ -766,7 +766,9 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor)) {
     if(error)throw error;
   }
   async function uploadContentPhoto(file,folder){
-    if(!file)return "";
+    // Browsers return an empty File object when no file was selected.
+    // Treat it as no upload so image selection stays optional.
+    if(!file || !file.name || file.size===0)return "";
     if(!file.type.startsWith("image/"))throw new Error("Please select an image file.");
     if(file.size>5*1024*1024)throw new Error("Image size must be 5 MB or less.");
     const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
