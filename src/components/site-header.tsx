@@ -30,7 +30,9 @@ export default function SiteHeader({ siteName, navigationItems }: Props) {
   const [role, setRole] = useState<Role>("visitor");
   const [theme, setTheme] = useState<"light" | "dark">(() => typeof window === "undefined" ? "light" : window.localStorage.getItem("3b-theme") === "dark" ? "dark" : "light");
   const [language, setLanguage] = useState<"en" | "bn">(() => typeof window === "undefined" ? "en" : window.localStorage.getItem("3b-language") === "bn" ? "bn" : "en");
-  const headerRef = useRef<HTMLElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -55,10 +57,9 @@ export default function SiteHeader({ siteName, navigationItems }: Props) {
   useEffect(() => {
     if (!open && !searchOpen) return;
     const onPointerDown = (event: PointerEvent) => {
-      if (event.target instanceof Node && !headerRef.current?.contains(event.target)) {
-        setOpen(false);
-        setSearchOpen(false);
-      }
+      if (!(event.target instanceof Node)) return;
+      if (open && !menuRef.current?.contains(event.target) && !menuTriggerRef.current?.contains(event.target)) setOpen(false);
+      if (searchOpen && !searchRef.current?.contains(event.target)) setSearchOpen(false);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -94,7 +95,7 @@ export default function SiteHeader({ siteName, navigationItems }: Props) {
     : searchItems.slice(0, 5);
 
   return (
-    <header className="site-header" ref={headerRef}>
+    <header className="site-header">
       <nav className="container header-inner" aria-label="Main navigation">
         <div className="header-brand-group">
           <Link className="brand-logo" href="/" aria-label={siteName + " home"} onClick={() => { closeMenu(); closeSearch(); }}>
@@ -104,7 +105,7 @@ export default function SiteHeader({ siteName, navigationItems }: Props) {
         </div>
 
         <div className="header-actions">
-          <div className={"header-search " + (searchOpen ? "is-open" : "")}>
+          <div className={"header-search " + (searchOpen ? "is-open" : "")} ref={searchRef}>
             <button type="button" className="header-search-trigger" aria-label={searchOpen ? "Close search" : "Search"} aria-expanded={searchOpen} onClick={() => { setOpen(false); setSearchOpen((value) => !value); setSearch(""); }}>
               {searchOpen ? <span className="search-close-mark" aria-hidden="true">×</span> : <SearchIcon />}
             </button>
@@ -121,14 +122,14 @@ export default function SiteHeader({ siteName, navigationItems }: Props) {
             )}
           </div>
 
-          <button type="button" className="menu-trigger" aria-expanded={open} aria-controls="site-floating-menu" onClick={() => { setSearchOpen(false); setSearch(""); setOpen((value) => !value); }}>
+          <button ref={menuTriggerRef} type="button" className="menu-trigger" aria-expanded={open} aria-controls="site-floating-menu" onClick={() => { setSearchOpen(false); setSearch(""); setOpen((value) => !value); }}>
             <span className={"menu-trigger-icon " + (open ? "is-open" : "")} aria-hidden="true"><span /><span /><span /></span>
             <span>{open ? "Close" : "Menu"}</span>
           </button>
         </div>
       </nav>
       {open && (
-        <div className="floating-menu simple-menu" id="site-floating-menu" role="group" aria-label="Website menu">
+        <div ref={menuRef} className="floating-menu simple-menu" id="site-floating-menu" role="group" aria-label="Website menu">
           <div className="simple-menu-links">
             <Link className="simple-menu-link" href="/" onClick={closeMenu}>Home</Link>
             {loggedIn && <Link className="simple-menu-link" href="/profile" onClick={closeMenu}>Profile</Link>}
