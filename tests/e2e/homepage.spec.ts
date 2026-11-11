@@ -1,38 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-
-test("homepage keeps a clean shell and separate logo and title controls", async ({ page }) => {
+test("homepage is completely blank", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator(".site-header")).toHaveAttribute("data-hydrated", "true");
-  await expect(page).toHaveTitle(/3B TECH HUB/);
-  await expect(page.getByRole("navigation", { name: "Main navigation" })).toBeVisible();
-  await expect(page.locator(".brand-logo")).toHaveAttribute("href", "/");
-  await expect(page.locator(".brand-title")).toBeVisible();
-  await expect(page.locator(".brand-title")).not.toHaveAttribute("href", /.*/);
-  await expect(page.getByRole("main", { name: "Home" })).toBeVisible();
-});
-
-test("header search replaces the title and shows matching floating suggestions", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-  await expect(page.locator(".site-header")).toHaveAttribute("data-hydrated", "true");
-  await page.getByRole("button", { name: "Search" }).click();
-  await expect(page.locator(".brand-title")).toHaveCount(0);
-  const input = page.getByRole("searchbox", { name: "Search the website" });
-  await expect(input).toBeFocused();
-  await input.fill("Gallery");
-  await expect(page.getByRole("listbox", { name: "Search suggestions" }).getByRole("option", { name: "Gallery" })).toBeVisible();
-});
-
-test("menu and search close when clicking outside their floating panels", async ({ page }) => {
-  await page.goto("/", { waitUntil: "networkidle" });
-  await expect(page.locator(".site-header")).toHaveAttribute("data-hydrated", "true");
-  await page.getByRole("button", { name: "Menu" }).click();
-  await expect(page.getByRole("group", { name: "Website menu" })).toBeVisible();
-  await page.locator("body").click({ position: { x: 1, y: 400 } });
-  await expect(page.getByRole("group", { name: "Website menu" })).toHaveCount(0);
-
-  await page.getByRole("button", { name: "Search" }).click();
-  await expect(page.getByRole("searchbox", { name: "Search the website" })).toBeVisible();
-  await page.locator("body").click({ position: { x: 1, y: 400 } });
-  await expect(page.getByRole("searchbox", { name: "Search the website" })).toHaveCount(0);
+  await expect(page.locator("body")).toHaveText("");
+  await expect(page.locator("body")).not.toContainText(/\\S/);
+  await expect(page.locator(".site-header, main, footer, header, nav, button, a, input, textarea, select")).toHaveCount(0);
 });
