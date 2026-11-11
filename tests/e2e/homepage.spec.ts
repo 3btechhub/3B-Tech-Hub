@@ -1,5 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+test.beforeEach(async ({ page }) => {
+  page.on("pageerror", (error) => console.log(`[browser:pageerror] ${error.stack ?? error.message}`));
+  page.on("console", (message) => { if (message.type() === "error") console.log(`[browser:console] ${message.text()}`); });
+  page.on("requestfailed", (request) => console.log(`[browser:requestfailed] ${request.url()} ${request.failure()?.errorText ?? ""}`));
+});
+
 test("homepage keeps a clean shell and separate logo and title controls", async ({ page }) => {
   await page.goto("/");
   await expect(page.locator(".site-header")).toHaveAttribute("data-hydrated", "true");
