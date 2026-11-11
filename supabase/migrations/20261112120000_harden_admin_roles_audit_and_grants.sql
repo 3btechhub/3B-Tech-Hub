@@ -43,7 +43,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = pg_catalog, public, auth
-as $
+as $protect$
 declare
   primary_owner boolean;
 begin
@@ -67,7 +67,7 @@ begin
   if tg_op = 'DELETE' then return old; end if;
   return new;
 end;
-$;
+$protect$;
 
 revoke all on function private.protect_primary_owner_role() from public, anon, authenticated;
 drop trigger if exists protect_primary_owner_role on public.user_roles;
