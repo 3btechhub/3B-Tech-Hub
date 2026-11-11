@@ -29,22 +29,25 @@ const themeToggle = document.querySelector("#theme-toggle");
 const languageToggle = document.querySelector("#language-toggle");
 const languageCode = document.querySelector("#language-code");
 const savedTheme = localStorage.getItem("3b-theme");
-const savedLanguage = localStorage.getItem("3b-language") || "en";
+const routeDefaultLanguage = activeCountry.region === "bd" ? "bn" : activeCountry.region === "saudi" ? "ar" : "en";
+const languageStorageKey = "3b-language-" + activeCountry.region;
+const savedLanguage = localStorage.getItem(languageStorageKey) || routeDefaultLanguage;
 document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
-document.documentElement.lang = savedLanguage;
 const translations = {
   en: {home:"Home",profile:"Profile",services:"Services",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
-  bn: {home:"হোম",profile:"প্রোফাইল",services:"সার্ভিস",login:"লগইন",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"}
+  bn: {home:"হোম",profile:"প্রোফাইল",services:"সার্ভিস",login:"লগইন",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"},
+  ar: {home:"الرئيسية",profile:"الملف الشخصي",services:"الخدمات",login:"تسجيل الدخول",logout:"تسجيل الخروج",dashboard:"لوحة التحكم",accountLogin:"تسجيل الدخول إلى الحساب",dark:"تفعيل الوضع الداكن",light:"تفعيل الوضع الفاتح"}
 };
 function applyLanguage(language) {
-  const lang = language === "bn" ? "bn" : "en";
+  const lang = ["bn", "ar"].includes(language) ? language : "en";
   document.documentElement.lang = lang;
+  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   document.querySelectorAll("[data-label]").forEach((element) => {
     const key = element.dataset.label;
     if (translations[lang][key]) element.textContent = translations[lang][key];
   });
   if (languageCode) languageCode.textContent = lang.toUpperCase();
-  localStorage.setItem("3b-language", lang);
+  localStorage.setItem(languageStorageKey, lang);
 }
 function applyTheme(theme) {
   const dark = theme === "dark";
@@ -59,7 +62,9 @@ applyLanguage(savedLanguage);
 applyTheme(savedTheme === "dark" ? "dark" : "light");
 if (themeToggle) themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
 if (languageToggle) languageToggle.addEventListener("click", () => {
-  const next = document.documentElement.lang === "bn" ? "en" : "bn";
+  const order = activeCountry.region === "bd" ? ["bn", "en", "ar"] : activeCountry.region === "saudi" ? ["ar", "en", "bn"] : ["en", "bn", "ar"];
+  const current = document.documentElement.lang;
+  const next = order[(order.indexOf(current) + 1) % order.length];
   applyLanguage(next);
   applyTheme(document.documentElement.dataset.theme);
 });
