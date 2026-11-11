@@ -50,5 +50,4 @@ PostgreSQL + RLS policies + Storage policies
 5. Merge only a passing change to `main`.
 6. Confirm the GitHub Pages deployment and smoke-test the public site.
 
-## Legacy source boundary
-The repository still contains an older, unshipped Next.js prototype under `src/`. GitHub Pages publishes only `site/`; the prototype is not the production runtime and must not be connected to a retired hosting or backend provider. Keep its status explicit until its code is either migrated safely to the approved stack or removed in a separately reviewed cleanup.
+The previously unshipped Next.js/Appwrite prototype and its server routes have been removed from the production branch. The approved live architecture is only the GitHub Pages static frontend and Supabase services. The pre-cleanup source is preserved in the backup branch created before these fixes; do not restore or reconnect the retired prototype.
