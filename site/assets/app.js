@@ -48,9 +48,9 @@ const logoutMenuLink = document.querySelector("#logout-menu-link");
 // Hide the menu link for the page currently being viewed.
 function hideCurrentPageMenuLink() {
   if (!siteMenu) return;
-  const currentPath = location.pathname.replace(/\\/+$/, "") || "/";
+  const currentPath = location.pathname.replace(/\/+$/, "") || "/";
   siteMenu.querySelectorAll('a.menu-link[href]').forEach((link) => {
-    const targetPath = new URL(link.getAttribute("href"), location.href).pathname.replace(/\\/+$/, "") || "/";
+    const targetPath = new URL(link.getAttribute("href"), location.href).pathname.replace(/\/+$/, "") || "/";
     if (targetPath === currentPath) link.hidden = true;
   });
 }
