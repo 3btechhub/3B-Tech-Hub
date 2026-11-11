@@ -53,7 +53,7 @@ function applyTheme(theme) {
   const dark = theme === "dark";
   document.documentElement.dataset.theme = dark ? "dark" : "light";
   if (themeToggle) {
-    themeToggle.textContent = dark ? "☀" : "☾";
+    if (themeToggle.firstChild) themeToggle.firstChild.nodeValue = dark ? "☀ " : "☾ ";
     themeToggle.setAttribute("aria-label", dark ? translations[document.documentElement.lang].light : translations[document.documentElement.lang].dark);
   }
   localStorage.setItem("3b-theme", dark ? "dark" : "light");
