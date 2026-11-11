@@ -534,6 +534,7 @@ dashboardTabs.forEach((tab, index) => {
 // Homepage workshop and technician content, managed from the owner dashboard.
 const homepageTechnicians = document.querySelector("#technicians-section");
 const homepageWorkshops = document.querySelector("#workshops-section");
+const homepageProducts = document.querySelector("#products-section");
 function safeExternalLink(value) {
   try { const url = new URL(value); return ["http:", "https:"].includes(url.protocol) ? url.href : ""; }
   catch { return ""; }
@@ -712,23 +713,37 @@ function renderWorkshops(items) {
   });
   if (target.children.length && homepageWorkshops) homepageWorkshops.hidden = false;
 }
+function renderProducts(items) {
+  const target=document.querySelector("#products-list");if(!target||!Array.isArray(items))return;target.replaceChildren();
+  let dialog=document.querySelector("#product-detail-dialog");
+  if(!dialog){dialog=document.createElement("dialog");dialog.id="product-detail-dialog";dialog.className="technician-detail-dialog product-detail-dialog";dialog.innerHTML='<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';document.body.append(dialog);dialog.querySelector(".technician-detail-close").addEventListener("click",()=>dialog.close());dialog.addEventListener("click",event=>{if(event.target===dialog)dialog.close();});}
+  const body=dialog.querySelector(".technician-detail-body");
+  const openDetails=item=>{body.replaceChildren();if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt=item.name;img.className="technician-detail-photo";body.append(img);}else{const icon=document.createElement("span");icon.className="workshop-detail-fallback";icon.setAttribute("aria-hidden","true");icon.textContent="📦";body.append(icon);}addTextElement(body,"h2","",item.name);if(item.category)addTextElement(body,"p","technician-detail-specialty",item.category);if(item.description)addTextElement(body,"p","product-detail-description",item.description);const contacts=document.createElement("div");contacts.className="technician-detail-contacts";if(item.phone){const a=document.createElement("a");a.href="tel:"+item.phone.replace(/[^+\\d]/g,"");a.textContent="Call";contacts.append(a);}if(item.whatsapp){const a=document.createElement("a");a.href="https://wa.me/"+item.whatsapp.replace(/\\D/g,"");a.target="_blank";a.rel="noopener noreferrer";a.textContent="WhatsApp";contacts.append(a);}if(contacts.children.length)body.append(contacts);dialog.showModal();};
+  items.filter(item=>item&&item.name&&(activeCountry.region==="global"||(item.country||"global")===activeCountry.region)).forEach(item=>{const card=document.createElement("button");card.type="button";card.className="technician-card product-card";card.setAttribute("aria-label","View "+item.name+" product details");if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt="";img.loading="lazy";card.append(img);}else{const icon=document.createElement("span");icon.className="technician-card-placeholder";icon.setAttribute("aria-hidden","true");icon.textContent="📦";card.append(icon);}const info=document.createElement("span");info.className="technician-card-info";addTextElement(info,"strong","",item.name);if(item.category)addTextElement(info,"small","",item.category);addTextElement(info,"small","technician-card-hint","View details");card.append(info);card.addEventListener("click",()=>openDetails(item));target.append(card);});
+  if(target.children.length&&homepageProducts)homepageProducts.hidden=false;
+}
+
 async function loadHomepageIdentity() {
-  if (!homepageTechnicians && !homepageWorkshops) return;
-  const [{ data: settings, error: settingsError }, { data: workshops, error: workshopsError }] = await Promise.all([
+  if (!homepageTechnicians && !homepageWorkshops && !homepageProducts) return;
+  const [{ data: settings, error: settingsError }, { data: workshops, error: workshopsError }, { data: products, error: productsError }] = await Promise.all([
     supabase.from("site_settings").select("setting_key,setting_value").eq("is_public", true).eq("setting_key", "technicians"),
-    supabase.from("workshops").select("*").eq("status", "published").order("workshop_date", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false })
+    supabase.from("workshops").select("*").eq("status", "published").order("workshop_date", { ascending: true, nullsFirst: false }).order("created_at", { ascending: false }),
+    supabase.from("products").select("*").eq("status", "active").order("updated_at", { ascending: false })
   ]);
   if (settingsError) console.warn("Homepage technician content unavailable:", settingsError.message);
   else for (const row of settings || []) if (row.setting_key === "technicians") renderTechnicians(row.setting_value || []);
   if (workshopsError) console.warn("Homepage workshop content unavailable:", workshopsError.message);
   else renderWorkshops(workshops || []);
+  if (productsError) console.warn("Homepage product content unavailable:", productsError.message);
+  else renderProducts(products || []);
 }
 loadHomepageIdentity();
 
 // Owner-only Workshop and Technician editors.
 const workshopEditor=document.querySelector("#workshop-form");
 const technicianEditor=document.querySelector("#technician-form");
-if(ownerDashboard && (workshopEditor || technicianEditor)) {
+const productEditor=document.querySelector("#product-form");
+if(ownerDashboard && (workshopEditor || technicianEditor || productEditor)) {
   const technicianMessage=document.querySelector("#technician-message");
   const technicianItems=document.querySelector("#technician-admin-items");
   const technicianPhotoPreview=document.querySelector("#technician-photo-preview");
@@ -736,9 +751,14 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
   let technicianPhotoUrl="";
   let workshopData=[];
   let workshopPhotoUrl="";
+  let productData=[];
+  let productPhotoUrl="";
   const workshopMessage=document.querySelector("#workshop-message");
   const workshopItems=document.querySelector("#workshop-admin-items");
   const workshopPhotoPreview=document.querySelector("#workshop-photo-preview");
+  const productMessage=document.querySelector("#product-message");
+  const productItems=document.querySelector("#product-admin-items");
+  const productPhotoPreview=document.querySelector("#product-photo-preview");
   const editorMessage=(node,message,isError=false)=>{if(!node)return;node.textContent=message;node.dataset.kind=isError?"error":"success";};
   async function saveSetting(key,value){
     const {data:userData}=await supabase.auth.getUser();
@@ -761,16 +781,20 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
     if(url){const img=document.createElement("img");img.src=url;img.alt="Selected image preview";container.append(img);}
   }
   async function loadIdentityEditors(){
-    const [{data:workshops,error:workshopError},{data:settings,error:settingsError}] = await Promise.all([
+    const [{data:workshops,error:workshopError},{data:settings,error:settingsError},{data:products,error:productError}] = await Promise.all([
       supabase.from("workshops").select("*").order("created_at",{ascending:false}),
-      supabase.from("site_settings").select("setting_key,setting_value").eq("setting_key","technicians")
+      supabase.from("site_settings").select("setting_key,setting_value").eq("setting_key","technicians"),
+      supabase.from("products").select("*").order("updated_at",{ascending:false})
     ]);
     if(workshopError){editorMessage(workshopMessage,workshopError.message,true);return;}
     if(settingsError){editorMessage(technicianMessage,settingsError.message,true);return;}
+    if(productError){editorMessage(productMessage,productError.message,true);return;}
     workshopData=workshops||[];
+    productData=products||[];
     for(const row of settings||[])if(row.setting_key==="technicians")technicianData=Array.isArray(row.setting_value)?row.setting_value:[];
     if(workshopEditor)renderWorkshopAdminList();
     if(technicianEditor)renderTechnicianAdminList();
+    if(productEditor)renderProductAdminList();
   }
   function renderWorkshopAdminList(){
     workshopItems.replaceChildren();
@@ -814,7 +838,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
       try{
         const form=new FormData(workshopEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"workshops");
         const {data:userData}=await supabase.auth.getUser();
-        const item={title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim()||null,workshop_date:String(form.get("date")||"")||null,workshop_time:String(form.get("time")||"")||null,location:String(form.get("location")||"").trim()||null,trainer:String(form.get("trainer")||"").trim()||null,phone:String(form.get("phone")||"").trim()||null,whatsapp:String(form.get("whatsapp")||"").trim()||null,photo_url:photo||(form.get("remove_photo")==="on"?"":workshopPhotoUrl)||null,country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",status:form.get("is_published")==="on"?"published":"draft,updated_by:userData.user?.id||null,updated_at:new Date().toISOString()};
+        const item={title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim()||null,workshop_date:String(form.get("date")||"")||null,workshop_time:String(form.get("time")||"")||null,location:String(form.get("location")||"").trim()||null,trainer:String(form.get("trainer")||"").trim()||null,phone:String(form.get("phone")||"").trim()||null,whatsapp:String(form.get("whatsapp")||"").trim()||null,photo_url:photo||(form.get("remove_photo")==="on"?"":workshopPhotoUrl)||null,country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",status:form.get("is_published")==="on"?"published":"draft",updated_by:userData.user?.id||null,updated_at:new Date().toISOString()};
         const query=id?supabase.from("workshops").update(item).eq("id",id):supabase.from("workshops").insert({...item,created_by:userData.user?.id||null});
         const {error}=await query;
         if(error)throw error;
@@ -825,6 +849,9 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
     document.querySelector("#workshop-cancel").addEventListener("click",resetWorkshopForm);
     workshopEditor.elements.photo.addEventListener("change",()=>{const file=workshopEditor.elements.photo.files[0];if(file)previewImage(workshopPhotoPreview,URL.createObjectURL(file));});
   }
+  function renderProductAdminList(){productItems.replaceChildren();if(!productData.length){addTextElement(productItems,"p","muted","No products added yet.");return;}productData.forEach(item=>{const row=document.createElement("article");row.className="technician-admin-row";productItems.append(row);addTextElement(row,"strong","",item.name);addTextElement(row,"span","",[item.category,item.country==="bd"?"Bangladesh":item.country==="saudi"?"Saudi Arabia":"Global",item.status].filter(Boolean).join(" · "));const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";edit.addEventListener("click",()=>{productEditor.elements.id.value=item.id;productEditor.elements.name.value=item.name||"";productEditor.elements.category.value=item.category||"";productEditor.elements.description.value=item.description||"";productEditor.elements.country.value=item.country||"global";productEditor.elements.phone.value=item.phone||"";productEditor.elements.whatsapp.value=item.whatsapp||"";productEditor.elements.is_published.checked=item.status==="active";productPhotoUrl=item.photo_url||"";productEditor.elements.remove_photo.checked=false;document.querySelector("#product-remove-photo-wrap").hidden=!productPhotoUrl;previewImage(productPhotoPreview,productPhotoUrl);document.querySelector("#product-form-title").textContent="Edit Product";document.querySelector("#product-cancel").hidden=false;});actions.append(edit);const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";del.addEventListener("click",async()=>{if(!confirm("Delete this product?"))return;const {error}=await supabase.from("products").delete().eq("id",item.id);if(error){editorMessage(productMessage,error.message,true);return;}productData=productData.filter(x=>x.id!==item.id);renderProductAdminList();});actions.append(del);});}
+  function resetProductForm(){productEditor.reset();productPhotoUrl="";document.querySelector("#product-remove-photo-wrap").hidden=true;previewImage(productPhotoPreview,"");document.querySelector("#product-form-title").textContent="Add Product";document.querySelector("#product-cancel").hidden=true;}
+  if(productEditor){productEditor.addEventListener("submit",async event=>{event.preventDefault();const button=document.querySelector("#product-save");button.disabled=true;editorMessage(productMessage,"Saving…");try{const form=new FormData(productEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"products");const name=String(form.get("name")||"").trim();const slug=id?(productData.find(x=>x.id===id)?.slug||""):(name.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"product")+"-"+crypto.randomUUID().slice(0,8);const item={slug,name,category:String(form.get("category")||"").trim()||null,description:String(form.get("description")||"").trim(),country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",phone:String(form.get("phone")||"").trim()||null,whatsapp:String(form.get("whatsapp")||"").trim()||null,photo_url:photo||(form.get("remove_photo")==="on"?"":productPhotoUrl)||null,status:form.get("is_published")==="on"?"active":"draft"};const query=id?supabase.from("products").update(item).eq("id",id):supabase.from("products").insert(item);const {error}=await query;if(error)throw error;resetProductForm();await loadIdentityEditors();editorMessage(productMessage,"Product saved.");}catch(error){editorMessage(productMessage,error.message||"Could not save product.",true);}finally{button.disabled=false;}});document.querySelector("#product-cancel").addEventListener("click",resetProductForm);productEditor.elements.photo.addEventListener("change",()=>{const file=productEditor.elements.photo.files[0];if(file)previewImage(productPhotoPreview,URL.createObjectURL(file));});}
   function renderTechnicianAdminList(){
     technicianItems.replaceChildren();
     if(!technicianData.length){addTextElement(technicianItems,"p","muted","No technicians added yet.");return;}
