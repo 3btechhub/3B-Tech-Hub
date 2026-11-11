@@ -460,3 +460,14 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 .home-products-section{margin:54px 0 0;padding-top:30px;border-top:1px solid var(--line)}
 .product-detail-description{margin:0;color:var(--muted);font-size:14px;line-height:1.7;white-space:pre-line}
 @media(max-width:600px){.home-products-section{margin-top:38px;padding-top:24px}}
+
+
+/* Product catalogue: display only product groups and types, never individual SKUs. */
+.product-type-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.product-type-card{display:flex;align-items:center;gap:12px;min-height:76px;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}
+.product-type-icon{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:9px;background:var(--hover);font-size:25px}
+.product-type-name{margin:0;font-size:14px;line-height:1.4}
+.product-type-group{margin:0 0 24px}
+.product-taxonomy-group{padding:14px 0;border-top:1px solid var(--line)}
+.product-taxonomy-group h3{margin:0 0 8px}
+.product-taxonomy-group ul{margin:0;padding-left:22px;display:grid;gap:6px}
