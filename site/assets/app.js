@@ -530,3 +530,138 @@ dashboardTabs.forEach((tab, index) => {
     activateDashboardModule(dashboardTabs[nextIndex].dataset.dashboardTab, true);
   });
 });
+
+
+// Homepage company profile and technician directory, managed from the owner dashboard.
+const homepageCompany = document.querySelector("#company-profile-section");
+const homepageTechnicians = document.querySelector("#technicians-section");
+function safeExternalLink(value) {
+  try { const url = new URL(value); return ["http:", "https:"].includes(url.protocol) ? url.href : ""; }
+  catch { return ""; }
+}
+function addTextElement(parent, tag, className, value) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  node.textContent = value || "";
+  parent.append(node);
+  return node;
+}
+function renderCompanyProfile(data) {
+  const target = document.querySelector("#company-profile-content");
+  if (!target || !data || !data.name) return;
+  target.replaceChildren();
+  if (data.photo_url) {
+    const image = document.createElement("img"); image.src = data.photo_url; image.alt = data.name; image.loading = "lazy"; target.append(image);
+  }
+  const details = document.createElement("div"); details.className = "company-profile-details"; target.append(details);
+  addTextElement(details, "h3", "", data.name);
+  if (data.description) addTextElement(details, "p", "", data.description);
+  if (data.address) addTextElement(details, "p", "company-address", data.address);
+  const contacts = document.createElement("div"); contacts.className = "company-contact-links"; details.append(contacts);
+  if (data.phone) { const a=document.createElement("a"); a.href="tel:"+data.phone.replace(/[^+\d]/g,""); a.textContent="Call"; contacts.append(a); }
+  if (data.whatsapp) { const a=document.createElement("a"); a.href="https://wa.me/"+data.whatsapp.replace(/\D/g,""); a.target="_blank"; a.rel="noopener noreferrer"; a.textContent="WhatsApp"; contacts.append(a); }
+  const map=safeExternalLink(data.maps_url); if(map){const a=document.createElement("a");a.href=map;a.target="_blank";a.rel="noopener noreferrer";a.textContent="View on Google Maps";contacts.append(a);}
+  homepageCompany.hidden = false;
+}
+function renderTechnicians(items) {
+  const target = document.querySelector("#technicians-list");
+  if (!target || !Array.isArray(items) || !items.length) return;
+  target.replaceChildren();
+  items.filter(item=>item && item.name && item.is_published !== false).forEach(item=>{
+    const card=document.createElement("article");card.className="technician-card";target.append(card);
+    if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt=item.name;img.loading="lazy";card.append(img);}
+    addTextElement(card,"h3","",item.name);
+    if(item.specialty)addTextElement(card,"p","technician-specialty",item.specialty);
+    const links=document.createElement("div");links.className="company-contact-links";card.append(links);
+    if(item.phone){const a=document.createElement("a");a.href="tel:"+item.phone.replace(/[^+\d]/g,"");a.textContent="Call";links.append(a);}
+    if(item.whatsapp){const a=document.createElement("a");a.href="https://wa.me/"+item.whatsapp.replace(/\D/g,"");a.target="_blank";a.rel="noopener noreferrer";a.textContent="WhatsApp";links.append(a);}
+  });
+  if(target.children.length) homepageTechnicians.hidden=false;
+}
+async function loadHomepageIdentity() {
+  if (!homepageCompany && !homepageTechnicians) return;
+  const {data,error}=await supabase.from("site_settings").select("setting_key,setting_value").eq("is_public",true).in("setting_key",["company_profile","technicians"]);
+  if(error){console.warn("Homepage identity content unavailable:",error.message);return;}
+  for(const row of data||[]){
+    if(row.setting_key==="company_profile")renderCompanyProfile(row.setting_value||{});
+    if(row.setting_key==="technicians")renderTechnicians(row.setting_value||[]);
+  }
+}
+loadHomepageIdentity();
+
+// Owner-only editors for the two homepage identity sections.
+const companyEditor=document.querySelector("#company-profile-form");
+const technicianEditor=document.querySelector("#technician-form");
+if(companyEditor && technicianEditor && ownerDashboard) {
+  const companyMessage=document.querySelector("#company-profile-message");
+  const technicianMessage=document.querySelector("#technician-message");
+  const technicianItems=document.querySelector("#technician-admin-items");
+  const companyPhotoPreview=document.querySelector("#company-photo-preview");
+  const technicianPhotoPreview=document.querySelector("#technician-photo-preview");
+  let companyData={};
+  let technicianData=[];
+  let technicianPhotoUrl="";
+  const editorMessage=(node,message,isError=false)=>{node.textContent=message;node.dataset.kind=isError?"error":"success";};
+  async function saveSetting(key,value){
+    const {data:userData}=await supabase.auth.getUser();
+    const {error}=await supabase.from("site_settings").upsert({setting_key:key,setting_value:value,is_public:true,updated_by:userData.user?.id||null,updated_at:new Date().toISOString()},{onConflict:"setting_key"});
+    if(error)throw error;
+  }
+  async function uploadIdentityPhoto(file,folder){
+    if(!file)return "";
+    if(!file.type.startsWith("image/"))throw new Error("Please select an image file.");
+    if(file.size>5*1024*1024)throw new Error("Image size must be 5 MB or less.");
+    const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
+    const path=folder+"/"+crypto.randomUUID()+"."+ext;
+    const {error}=await supabase.storage.from("site-media").upload(path,file,{contentType:file.type,upsert:false});
+    if(error)throw error;
+    return supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;
+  }
+  function previewImage(container,url){
+    container.replaceChildren();
+    if(url){const img=document.createElement("img");img.src=url;img.alt="Selected image preview";container.append(img);}
+  }
+  async function loadIdentityEditors(){
+    const {data,error}=await supabase.from("site_settings").select("setting_key,setting_value").in("setting_key",["company_profile","technicians"]);
+    if(error){editorMessage(companyMessage,error.message,true);return;}
+    for(const row of data||[]){
+      if(row.setting_key==="company_profile")companyData=row.setting_value||{};
+      if(row.setting_key==="technicians")technicianData=Array.isArray(row.setting_value)?row.setting_value:[];
+    }
+    for(const [key,value] of Object.entries(companyData))if(companyEditor.elements[key])companyEditor.elements[key].value=value||"";
+    previewImage(companyPhotoPreview,companyData.photo_url||"");
+    renderTechnicianAdminList();
+  }
+  companyEditor.addEventListener("submit",async event=>{
+    event.preventDefault();const button=companyEditor.querySelector('button[type="submit"]');button.disabled=true;editorMessage(companyMessage,"Saving…");
+    try{
+      const form=new FormData(companyEditor);const photo=await uploadIdentityPhoto(form.get("photo"),"company");
+      companyData={name:String(form.get("name")||"").trim(),description:String(form.get("description")||"").trim(),address:String(form.get("address")||"").trim(),phone:String(form.get("phone")||"").trim(),whatsapp:String(form.get("whatsapp")||"").trim(),maps_url:safeExternalLink(String(form.get("maps_url")||"").trim()),photo_url:photo||companyData.photo_url||""};
+      await saveSetting("company_profile",companyData);previewImage(companyPhotoPreview,companyData.photo_url);editorMessage(companyMessage,"Company profile saved.");
+    }catch(error){editorMessage(companyMessage,error.message||"Could not save company profile.",true);}finally{button.disabled=false;}
+  });
+  function renderTechnicianAdminList(){
+    technicianItems.replaceChildren();
+    if(!technicianData.length){addTextElement(technicianItems,"p","muted","No technicians added yet.");return;}
+    technicianData.forEach(item=>{
+      const row=document.createElement("article");row.className="technician-admin-row";technicianItems.append(row);
+      addTextElement(row,"strong","",item.name);addTextElement(row,"span","",item.specialty||"");
+      const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
+      const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";edit.addEventListener("click",()=>{technicianEditor.elements.id.value=item.id;technicianEditor.elements.name.value=item.name||"";technicianEditor.elements.specialty.value=item.specialty||"";technicianEditor.elements.phone.value=item.phone||"";technicianEditor.elements.whatsapp.value=item.whatsapp||"";technicianPhotoUrl=item.photo_url||"";previewImage(technicianPhotoPreview,technicianPhotoUrl);document.querySelector("#technician-form-title").textContent="Edit Technician";document.querySelector("#technician-cancel").hidden=false;});actions.append(edit);
+      const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";del.addEventListener("click",async()=>{if(!confirm("Delete this technician?"))return;technicianData=technicianData.filter(x=>x.id!==item.id);try{await saveSetting("technicians",technicianData);renderTechnicianAdminList();}catch(error){editorMessage(technicianMessage,error.message,true);}});actions.append(del);
+    });
+  }
+  technicianEditor.addEventListener("submit",async event=>{
+    event.preventDefault();const button=document.querySelector("#technician-save");button.disabled=true;editorMessage(technicianMessage,"Saving…");
+    try{
+      const form=new FormData(technicianEditor);const id=String(form.get("id")||"");const photo=await uploadIdentityPhoto(form.get("photo"),"technicians");
+      const item={id:id||crypto.randomUUID(),name:String(form.get("name")||"").trim(),specialty:String(form.get("specialty")||"").trim(),phone:String(form.get("phone")||"").trim(),whatsapp:String(form.get("whatsapp")||"").trim(),photo_url:photo||technicianPhotoUrl||"",is_published:true};
+      technicianData=id?technicianData.map(x=>x.id===id?item:x):[...technicianData,item];
+      await saveSetting("technicians",technicianData);technicianEditor.reset();technicianPhotoUrl="";previewImage(technicianPhotoPreview,"");document.querySelector("#technician-form-title").textContent="Add Technician";document.querySelector("#technician-cancel").hidden=true;renderTechnicianAdminList();editorMessage(technicianMessage,"Technician saved.");
+    }catch(error){editorMessage(technicianMessage,error.message||"Could not save technician.",true);}finally{button.disabled=false;}
+  });
+  document.querySelector("#technician-cancel").addEventListener("click",()=>{technicianEditor.reset();technicianPhotoUrl="";previewImage(technicianPhotoPreview,"");document.querySelector("#technician-form-title").textContent="Add Technician";document.querySelector("#technician-cancel").hidden=true;});
+  companyEditor.elements.photo.addEventListener("change",()=>{const file=companyEditor.elements.photo.files[0];if(file)previewImage(companyPhotoPreview,URL.createObjectURL(file));});
+  technicianEditor.elements.photo.addEventListener("change",()=>{const file=technicianEditor.elements.photo.files[0];if(file)previewImage(technicianPhotoPreview,URL.createObjectURL(file));});
+  loadIdentityEditors();
+}
