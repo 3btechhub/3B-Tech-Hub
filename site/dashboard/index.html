@@ -156,14 +156,17 @@
       <div class="technician-admin-list"><h2>Product List</h2><div id="product-admin-items"></div></div>
     </section>
     <section class="dashboard-module-panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-dashboard-panel="settings" hidden>
-      <div class="dashboard-function-grid" aria-label="Dashboard Settings functions">
-        <article class="dashboard-function-card"><h2>Website Name & Logo</h2></article>
-        <article class="dashboard-function-card"><h2>Contact Information & Email</h2></article>
-        <article class="dashboard-function-card"><h2>Notification Settings</h2></article>
-        <article class="dashboard-function-card"><h2>Dashboard Preferences</h2></article>
-        <article class="dashboard-function-card"><h2>Security Settings</h2></article>
-        <article class="dashboard-function-card"><h2>Backup & Restore</h2></article>
-      </div>
+      <form id="site-settings-form" class="content-editor-form">
+        <h2>Website Settings</h2>
+        <p class="muted">Manage the public homepage tagline and business contact details. The 3B TECH HUB brand name remains fixed.</p>
+        <label>Homepage Tagline<input name="tagline" maxlength="120" required></label>
+        <label>Site Description<textarea name="description" rows="3" maxlength="300"></textarea></label>
+        <label>Public Contact Email<input name="contact_email" type="email" maxlength="254"></label>
+        <label>Public Phone Number<input name="contact_phone" type="tel" maxlength="40"></label>
+        <label>WhatsApp URL<input name="whatsapp_url" type="url" maxlength="500" placeholder="https://wa.me/…"></label>
+        <div class="editor-actions"><button type="submit" id="site-settings-save">Save Website Settings</button></div>
+        <p class="editor-message" id="site-settings-message" role="status"></p>
+      </form>
     </section>
   </main>
   <footer class="site-footer"><span>© 2026 3B TECH HUB. All rights reserved.</span></footer>
