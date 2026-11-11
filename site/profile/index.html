@@ -57,7 +57,7 @@
           <input name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="New Password" aria-label="New Password">
           <input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="Confirm New Password" aria-label="Confirm New Password">
         </fieldset>
-        <div class="profile-form-actions"><button id="profile-save" type="submit" hidden>Update / Save</button></div>
+        <button id="profile-save" type="submit" hidden aria-hidden="true" tabindex="-1"></button>
       </form>
       <p id="profile-message" class="auth-message" role="status" aria-live="polite"></p>
     </section>
