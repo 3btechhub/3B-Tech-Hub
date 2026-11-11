@@ -28,7 +28,19 @@
     </nav>
   </header>
   <main class="dashboard-main" id="owner-dashboard">
-    <div class="dashboard-grid" aria-label="Website overview">
+    <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
+      <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" data-dashboard-tab="overview">Overview</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-order" aria-controls="panel-order" aria-selected="false" data-dashboard-tab="order" tabindex="-1">Order</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-complaint" aria-controls="panel-complaint" aria-selected="false" data-dashboard-tab="complaint" tabindex="-1">Complaint</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-request" aria-controls="panel-request" aria-selected="false" data-dashboard-tab="request" tabindex="-1">Request</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-media" aria-controls="panel-media" aria-selected="false" data-dashboard-tab="media" tabindex="-1">Media</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" aria-controls="panel-user" aria-selected="false" data-dashboard-tab="user" tabindex="-1">User</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" aria-controls="panel-role" aria-selected="false" data-dashboard-tab="role" tabindex="-1">Role</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" aria-controls="panel-permission" aria-selected="false" data-dashboard-tab="permission" tabindex="-1">Permission</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-dashboard-tab="settings" tabindex="-1">Settings</button>
+    </nav>
+    <section class="dashboard-module-panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-dashboard-panel="overview">
+      <div class="dashboard-grid" aria-label="Website overview">
       <section class="dashboard-card"><h2>Website Content</h2><div class="dashboard-count" id="dashboard-content-count">…</div><p>Content records</p></section>
       <section class="dashboard-card"><h2>Services</h2><div class="dashboard-count" id="dashboard-services-count">…</div><p>Service records</p></section>
       <section class="dashboard-card"><h2>Products</h2><div class="dashboard-count" id="dashboard-products-count">…</div><p>Product records</p></section>
@@ -37,7 +49,32 @@
       <section class="dashboard-card"><h2>Media Library</h2><div class="dashboard-count" id="dashboard-media-count">…</div><p>Media assets</p></section>
       <section class="dashboard-card"><h2>Site Settings</h2><div class="dashboard-count" id="dashboard-settings-count">…</div><p>Configuration entries</p></section>
       <section class="dashboard-card"><h2>Audit Log</h2><div class="dashboard-count" id="dashboard-audit-count">…</div><p>Recorded admin actions</p></section>
-    </div>
+      </div>
+    </section>
+    <section class="dashboard-module-panel" id="panel-order" role="tabpanel" aria-labelledby="tab-order" data-dashboard-panel="order" hidden>
+      <h1>Order</h1><p>Order management tools and CRUD controls will be configured here.</p>
+    </section>
+    <section class="dashboard-module-panel" id="panel-complaint" role="tabpanel" aria-labelledby="tab-complaint" data-dashboard-panel="complaint" hidden>
+      <h1>Complaint</h1><p>Complaint review, status updates and resolution tools will be configured here.</p>
+    </section>
+    <section class="dashboard-module-panel" id="panel-request" role="tabpanel" aria-labelledby="tab-request" data-dashboard-panel="request" hidden>
+      <h1>Request</h1><p>Request review and management tools will be configured here.</p>
+    </section>
+    <section class="dashboard-module-panel" id="panel-media" role="tabpanel" aria-labelledby="tab-media" data-dashboard-panel="media" hidden>
+      <h1>Media</h1><p>Media upload, browsing, editing and deletion controls will be configured here.</p>
+    </section>
+    <section class="dashboard-module-panel" id="panel-user" role="tabpanel" aria-labelledby="tab-user" data-dashboard-panel="user" hidden>
+      <h1>User</h1><p>User account management and user-level CRUD controls will be configured here.</p>
+    </section>
+    <section class="dashboard-module-panel" id="panel-role" role="tabpanel" aria-labelledby="tab-role" data-dashboard-panel="role" hidden>
+      <h1>Role</h1><p>Role creation, editing, assignment and deletion controls will be configured here.</p>
+    </section>
+    <section class="dashboard-module-panel" id="panel-permission" role="tabpanel" aria-labelledby="tab-permission" data-dashboard-panel="permission" hidden>
+      <h1>Permission</h1><p>Module-level Create, Read, Update and Delete permissions will be configured here.</p>
+    </section>
+    <section class="dashboard-module-panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-dashboard-panel="settings" hidden>
+      <h1>Settings</h1><p>Dashboard and module-specific settings will be configured here.</p>
+    </section>
     <p class="dashboard-message" id="dashboard-message" role="status" aria-live="polite">Checking Owner access…</p>
   </main>
   <footer class="site-footer"><span>© 2026 3B TECH HUB. All rights reserved.</span></footer>
