@@ -1,30 +1,36 @@
-# 3B TECH HUB — GitHub + Supabase release checklist
+# 3B TECH HUB — GitHub + Supabase Release Checklist
 
-## Target platform
-- GitHub repository: `3btechhub/3B-Tech-Hub`
+## Production platform
+- Repository: `3btechhub/3btechhub`
 - GitHub Pages: static frontend from `site/`
 - Supabase project: `sburxeuxkrilbfppxylm` (`ap-northeast-1`)
-- Supabase provides email/password Auth, PostgreSQL, RLS and Storage.
-- Vercel, Appwrite and Cloudflare are not part of the target stack.
+- Supabase: Auth, PostgreSQL, RLS and Storage.
+- Vercel, Appwrite and Cloudflare are excluded.
 
-## Implemented foundation
-- Supabase schema exists for profiles, roles, CMS content, products, services, bookings, media metadata, settings and audit logs.
-- RLS is enabled on the application tables.
-- GitHub Pages static homepage preserves the requested brand title and header/footer.
-- Login uses Supabase email/password Auth; Google OAuth is not used.
-- Static assets are published by GitHub Actions.
+## Verified foundation
+- GitHub Pages CI and deployment workflow have completed successfully in the latest observed run.
+- Supabase project is active and healthy.
+- RLS is enabled on all 10 public application tables.
+- `3btechhub@gmail.com` has the Owner role.
+- Six active services exist:
+  - Bangladesh: TV Repair, Mobile Repair, Mobile Parts Sell.
+  - Saudi Arabia: Satellite Dish Installation, Satellite Dish Servicing, Satellite Dish Parts Sell.
+- Product catalogue currently has 9 active records across two product groups.
 
-## Still required before full feature launch
-1. In repository Settings → Pages, set Build and deployment source to GitHub Actions.
-2. Confirm Supabase email/password provider, confirmation emails and password recovery URLs for the final Pages domain.
-3. Create the actual owner account in Supabase Auth. Current project inspection found zero Auth users and zero owner/admin role rows.
-4. Assign the owner role only using the verified Auth user UUID.
-5. Migrate the remaining CMS, profile, bookings, media and settings workflows to static client components and/or Supabase Edge Functions with RLS enforcement.
-6. Add browser tests for login, password recovery, signup and all admin workflows.
-7. Verify GitHub Pages deployment and the Supabase Auth redirect URLs.
+## Before production release
+1. Confirm GitHub Pages is configured to deploy through GitHub Actions.
+2. Verify Supabase Auth redirect URLs match the GitHub Pages project-site URL.
+3. Run anonymous and authenticated RLS tests for every exposed table.
+4. Confirm the Owner can manage catalogue records and non-owners cannot.
+5. Verify profile update, password change, login and logout in a real browser.
+6. Verify image upload and public image delivery through the `site-media` bucket.
+7. Verify audit event creation and Owner-only audit reads.
+8. Run unit and browser regression tests.
+9. Confirm backup/export and restore procedure before any destructive database operation.
 
 ## Security
-- Do not put a service-role/secret key in GitHub, browser code or Pages artifacts.
-- The publishable key in the static app is intended for public clients; RLS is the security boundary.
-- Never grant an owner role without verifying the actual Auth user UUID.
-- Do not claim the full CMS/admin feature set is production-ready until the remaining migration and tests pass.
+- Never put a Supabase secret/service-role key in GitHub, browser code or Pages artifacts.
+- The publishable key is public by design; RLS is mandatory.
+- Do not allow anonymous INSERT, UPDATE or DELETE privileges.
+- Only the Owner may grant or change privileged roles.
+- Do not claim a backup or restore workflow is complete until a real export and restore test succeeds.
