@@ -2,8 +2,10 @@
 
 import { FormEvent,useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage(){
+ const router = useRouter();
  const [email,setEmail]=useState(""); const [password,setPassword]=useState(""); const [name,setName]=useState("");
  const [userId,setUserId]=useState(""); const [code,setCode]=useState(""); const [error,setError]=useState(""); const [busy,setBusy]=useState(false); const [sent,setSent]=useState(false);
  async function submit(event:FormEvent<HTMLFormElement>){
@@ -11,7 +13,7 @@ export default function RegisterPage(){
   try{
    const response=await fetch(sent?"/api/auth/register/verify":"/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(sent?{userId,secret:code}:{email:email.trim(),password,name:name.trim()})});
    const data=await response.json();if(!response.ok)throw new Error(data.error??"Unable to continue.");
-   if(sent){window.location.assign("/profile");return;}
+   if(sent){router.push("/profile");return;}
    setUserId(data.userId);setSent(true);
   }catch(e){setError(e instanceof Error?e.message:"Unable to continue.");}finally{setBusy(false);}
  }
