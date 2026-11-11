@@ -722,9 +722,7 @@ function renderProducts(products) {
   })).filter(group => group.products.length);
 
   const otherProducts = visibleProducts.filter(product => !groupOrder.includes(product.category_group));
-  if (otherProducts.length) {
-    groups.push({ key: "other", title: "Other Products", products: otherProducts });
-  }
+  if (otherProducts.length) groups.push({ key: "other", title: "Other Products", products: otherProducts });
 
   let dialog = document.querySelector("#product-group-detail-dialog");
   if (!dialog) {
@@ -739,15 +737,27 @@ function renderProducts(products) {
 
   const detailBody = dialog.querySelector(".technician-detail-body");
   const catalogue = document.createElement("div");
-  catalogue.className = "product-catalogue product-card-grid";
+  catalogue.className = "product-card-grid";
 
   groups.forEach(group => {
+    const representative = group.products.find(product => product.photo_url);
     const card = document.createElement("button");
     card.type = "button";
     card.className = "product-group-card";
     card.setAttribute("aria-label", "View " + group.title + " product types");
-    const icon = addTextElement(card, "span", "product-group-card-icon", groupIcons[group.key] || "📦");
-    icon.setAttribute("aria-hidden", "true");
+
+    if (representative) {
+      const image = document.createElement("img");
+      image.className = "product-group-card-image";
+      image.src = representative.photo_url;
+      image.alt = "";
+      image.loading = "lazy";
+      card.append(image);
+    } else {
+      const icon = addTextElement(card, "span", "product-group-card-icon", groupIcons[group.key] || "📦");
+      icon.setAttribute("aria-hidden", "true");
+    }
+
     const info = document.createElement("span");
     info.className = "technician-card-info";
     addTextElement(info, "strong", "", group.title);
@@ -756,8 +766,16 @@ function renderProducts(products) {
     card.append(info);
     card.addEventListener("click", () => {
       detailBody.replaceChildren();
-      const detailIcon = addTextElement(detailBody, "span", "product-group-detail-icon", groupIcons[group.key] || "📦");
-      detailIcon.setAttribute("aria-hidden", "true");
+      if (representative) {
+        const image = document.createElement("img");
+        image.className = "technician-detail-photo";
+        image.src = representative.photo_url;
+        image.alt = group.title;
+        detailBody.append(image);
+      } else {
+        const detailIcon = addTextElement(detailBody, "span", "product-group-detail-icon", groupIcons[group.key] || "📦");
+        detailIcon.setAttribute("aria-hidden", "true");
+      }
       addTextElement(detailBody, "h2", "", group.title);
       addTextElement(detailBody, "p", "product-detail-description", "Product types");
       const list = document.createElement("ul");
