@@ -477,3 +477,33 @@ if (ownerDashboard) {
     if (!session) location.replace(new URL("login/", ROOT_URL).href);
   });
 }
+
+
+// Dashboard module tabs: all modules stay on one horizontal row.
+const dashboardTabs = document.querySelectorAll("[data-dashboard-tab]");
+const dashboardPanels = document.querySelectorAll("[data-dashboard-panel]");
+function activateDashboardModule(moduleName, focusTab = false) {
+  dashboardTabs.forEach((tab) => {
+    const active = tab.dataset.dashboardTab === moduleName;
+    tab.classList.toggle("is-active", active);
+    tab.setAttribute("aria-selected", String(active));
+    tab.tabIndex = active ? 0 : -1;
+    if (active && focusTab) tab.focus();
+  });
+  dashboardPanels.forEach((panel) => {
+    const active = panel.dataset.dashboardPanel === moduleName;
+    panel.hidden = !active;
+    panel.classList.toggle("is-active", active);
+  });
+}
+dashboardTabs.forEach((tab, index) => {
+  tab.addEventListener("click", () => activateDashboardModule(tab.dataset.dashboardTab));
+  tab.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft" && event.key !== "Home" && event.key !== "End") return;
+    event.preventDefault();
+    const nextIndex = event.key === "Home" ? 0
+      : event.key === "End" ? dashboardTabs.length - 1
+        : (index + (event.key === "ArrowRight" ? 1 : -1) + dashboardTabs.length) % dashboardTabs.length;
+    activateDashboardModule(dashboardTabs[nextIndex].dataset.dashboardTab, true);
+  });
+});
