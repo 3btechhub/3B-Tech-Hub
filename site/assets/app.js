@@ -11,9 +11,12 @@ const serviceCountryRules = {
   "satellite-dish-servicing": "ksa",
   "satellite-dish-parts-sell": "ksa"
 };
-const serviceMatch = currentPath.match(/\\/services\\/([^/]+)\\/?$/);
-if (serviceMatch && serviceCountryRules[serviceMatch[1]] && serviceCountryRules[serviceMatch[1]] !== activeCountry.region) {
-  window.location.replace("/3btechhub/" + activeCountry.region + "/");
+const servicePrefix = "/3btechhub/services/";
+if (currentPath.startsWith(servicePrefix)) {
+  const serviceSlug = currentPath.slice(servicePrefix.length).split("/")[0];
+  if (serviceCountryRules[serviceSlug] && serviceCountryRules[serviceSlug] !== activeCountry.region) {
+    window.location.replace("/3btechhub/" + activeCountry.region + "/");
+  }
 }
 document.querySelectorAll("[data-country-region]").forEach((section) => {
   section.hidden = section.dataset.countryRegion !== activeCountry.region;
