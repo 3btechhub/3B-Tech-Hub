@@ -21,7 +21,7 @@ test("public search trigger changes into a close control", async ({ page }) => {
 
 test("owner login provides email and password fields", async ({ page }) => {
   await page.goto("/login");
-  await expect(page.getByRole("heading", { name: "Sign in" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Continue with Google" })).toBeVisible();
   await expect(page.getByLabel("Email")).toHaveAttribute("type", "email");
   await expect(page.getByLabel("Password")).toHaveAttribute("type", "password");
   await expect(page.getByRole("link", { name: "Forgot password?" })).toHaveAttribute("href", "/login/recovery");
