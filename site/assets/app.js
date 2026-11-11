@@ -1,3 +1,5 @@
+import { filterProductsForRegion, getNextVisibleCount } from "./product-catalog.js";
+
 await window.countryContextReady;
 
 // Make country context available before the rest of the application runs.
@@ -744,12 +746,13 @@ function renderProducts(items) {
     dialog.showModal();
   };
 
-  const visibleItems = items.filter(item => item && item.name && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region)));
+  const visibleItems = filterProductsForRegion(items, activeCountry.region);
   let visibleCount = 4;
   visibleItems.forEach((item, index) => {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "technician-card";
+    card.hidden = index >= visibleCount;
     card.setAttribute("aria-label", "View " + item.name + " product details");
     if (item.photo_url) {
       const image = document.createElement("img");
@@ -780,7 +783,7 @@ function renderProducts(items) {
     moreButton.className = "product-more-button";
     moreButton.textContent = "More";
     moreButton.addEventListener("click", () => {
-      visibleCount = Math.min(visibleCount + 4, visibleItems.length);
+      visibleCount = getNextVisibleCount(visibleCount, visibleItems.length, 4);
       target.querySelectorAll(".technician-card").forEach((card, index) => { card.hidden = index >= visibleCount; });
       if (visibleCount >= visibleItems.length) moreButton.remove();
     });
