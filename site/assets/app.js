@@ -111,6 +111,7 @@ if (form) {
     submit.textContent = signup ? "Create account" : "Login";
     toggle.textContent = signup ? "Login Account" : "Create account";
     forgot.hidden = signup;
+    toggle.parentElement.classList.toggle("is-signup", signup);
     showMessage("");
   }
   toggle.addEventListener("click", () => {
