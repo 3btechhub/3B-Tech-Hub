@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
 type Role = "visitor" | "member" | "admin";
 type Props = { siteName: string; navigationItems: { label: string; href: string }[]; contactEmail?: string; contactPhone?: string; whatsappUrl?: string };
+type SearchItem = { label: string; href: string };
 
 function ThemeIcon({ dark }: { dark: boolean }) {
   return dark ? (
@@ -18,11 +19,19 @@ function LanguageIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18" /></svg>;
 }
 
+function SearchIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8" /><path d="m16 16 5 5" /></svg>;
+}
+
 export default function SiteHeader({ siteName }: Props) {
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState("");
   const [role, setRole] = useState<Role>("visitor");
   const [theme, setTheme] = useState<"light" | "dark">(() => typeof window === "undefined" ? "light" : window.localStorage.getItem("3b-theme") === "dark" ? "dark" : "light");
   const [language, setLanguage] = useState<"en" | "bn">(() => typeof window === "undefined" ? "en" : window.localStorage.getItem("3b-language") === "bn" ? "bn" : "en");
+  const headerRef = useRef<HTMLElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -44,28 +53,82 @@ export default function SiteHeader({ siteName }: Props) {
   }, []);
 
   useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    if (!open && !searchOpen) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && !headerRef.current?.contains(event.target)) {
+        setOpen(false);
+        setSearchOpen(false);
+      }
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setOpen(false);
+        setSearchOpen(false);
+      }
+    };
+    document.addEventListener("pointerdown", onPointerDown);
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [open]);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open, searchOpen]);
+
+  useEffect(() => {
+    if (searchOpen) searchInputRef.current?.focus();
+  }, [searchOpen]);
 
   const closeMenu = () => setOpen(false);
+  const closeSearch = () => { setSearchOpen(false); setSearch(""); };
   const loggedIn = role === "member" || role === "admin";
+  const searchItems: SearchItem[] = useMemo(() => [
+    { label: "Home", href: "/" },
+    ...(loggedIn ? [{ label: "Profile", href: "/profile" }] : []),
+    { label: "Services", href: "/#services" },
+    { label: "Gallery", href: "/gallery" },
+    ...(loggedIn ? [{ label: "Log Out", href: "/api/admin/logout" }] : [{ label: "Log In", href: "/login?next=%2Fprofile" }]),
+    ...(role === "admin" ? [{ label: "Dashboard", href: "/admin" }] : []),
+  ], [loggedIn, role]);
+  const suggestions = search.trim()
+    ? searchItems.filter((item) => item.label.toLocaleLowerCase().includes(search.trim().toLocaleLowerCase())).slice(0, 6)
+    : searchItems.slice(0, 5);
 
   return (
-    <header className="site-header">
+    <header className="site-header" ref={headerRef}>
       <nav className="container header-inner" aria-label="Main navigation">
-        <Link className="brand" href="/" aria-label={siteName + " home"} onClick={closeMenu}>
-          <span className="brand-mark">3B</span><span>{siteName}</span>
-        </Link>
-        <button type="button" className="menu-trigger" aria-expanded={open} aria-controls="site-floating-menu" onClick={() => setOpen((value) => !value)}>
-          <span className={"menu-trigger-icon " + (open ? "is-open" : "")} aria-hidden="true"><span /><span /><span /></span>
-          <span>{open ? "Close" : "Menu"}</span>
-        </button>
+        <div className="header-brand-group">
+          <Link className="brand-logo" href="/" aria-label={siteName + " home"} onClick={() => { closeMenu(); closeSearch(); }}>
+            <span className="brand-mark">3B</span>
+          </Link>
+          {!searchOpen && <span className="brand-title">{siteName}</span>}
+        </div>
+
+        <div className="header-actions">
+          <div className={"header-search " + (searchOpen ? "is-open" : "")}>
+            <button type="button" className="header-search-trigger" aria-label={searchOpen ? "Close search" : "Search"} aria-expanded={searchOpen} onClick={() => { setOpen(false); setSearchOpen((value) => !value); setSearch(""); }}>
+              {searchOpen ? <span className="search-close-mark" aria-hidden="true">×</span> : <SearchIcon />}
+            </button>
+            {searchOpen && (
+              <>
+                <span className="header-search-divider" aria-hidden="true" />
+                <input ref={searchInputRef} className="header-search-input" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search..." aria-label="Search the website" aria-controls="site-search-suggestions" aria-autocomplete="list" />
+                <div className="search-suggestions floating-menu" id="site-search-suggestions" role="listbox" aria-label="Search suggestions">
+                  {suggestions.length > 0 ? suggestions.map((item) => (
+                    <Link key={item.href} className="search-suggestion" href={item.href} role="option" onClick={() => { closeSearch(); closeMenu(); }}>{item.label}</Link>
+                  )) : <p className="search-empty">No suggestions found</p>}
+                </div>
+              </>
+            )}
+          </div>
+
+          <button type="button" className="menu-trigger" aria-expanded={open} aria-controls="site-floating-menu" onClick={() => { setSearchOpen(false); setSearch(""); setOpen((value) => !value); }}>
+            <span className={"menu-trigger-icon " + (open ? "is-open" : "")} aria-hidden="true"><span /><span /><span /></span>
+            <span>{open ? "Close" : "Menu"}</span>
+          </button>
+        </div>
       </nav>
-      {open && <>
-        <div className="floating-menu simple-menu container" id="site-floating-menu" role="group" aria-label="Website menu">
+      {open && (
+        <div className="floating-menu simple-menu" id="site-floating-menu" role="group" aria-label="Website menu">
           <div className="simple-menu-links">
             <Link className="simple-menu-link" href="/" onClick={closeMenu}>Home</Link>
             {loggedIn && <Link className="simple-menu-link" href="/profile" onClick={closeMenu}>Profile</Link>}
@@ -89,7 +152,7 @@ export default function SiteHeader({ siteName }: Props) {
             <Link className="simple-menu-link simple-menu-dashboard" href="/admin" onClick={closeMenu}>Dashboard</Link>
           </>}
         </div>
-      </>}
+      )}
     </header>
   );
 }
