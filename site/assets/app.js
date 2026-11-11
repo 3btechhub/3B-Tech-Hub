@@ -549,16 +549,82 @@ function renderTechnicians(items) {
   const target = document.querySelector("#technicians-list");
   if (!target || !Array.isArray(items) || !items.length) return;
   target.replaceChildren();
-  items.filter(item=>item && item.name && item.is_published !== false).forEach(item=>{
-    const card=document.createElement("article");card.className="technician-card";target.append(card);
-    if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt=item.name;img.loading="lazy";card.append(img);}
-    addTextElement(card,"h3","",item.name);
-    if(item.specialty)addTextElement(card,"p","technician-specialty",item.specialty);
-    const links=document.createElement("div");links.className="company-contact-links";card.append(links);
-    if(item.phone){const a=document.createElement("a");a.href="tel:"+item.phone.replace(/[^+\d]/g,"");a.textContent="Call";links.append(a);}
-    if(item.whatsapp){const a=document.createElement("a");a.href="https://wa.me/"+item.whatsapp.replace(/\D/g,"");a.target="_blank";a.rel="noopener noreferrer";a.textContent="WhatsApp";links.append(a);}
+
+  let dialog = document.querySelector("#technician-detail-dialog");
+  if (!dialog) {
+    dialog = document.createElement("dialog");
+    dialog.id = "technician-detail-dialog";
+    dialog.className = "technician-detail-dialog";
+    dialog.setAttribute("aria-labelledby", "technician-detail-name");
+    dialog.innerHTML = '<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';
+    document.body.append(dialog);
+    dialog.querySelector(".technician-detail-close").addEventListener("click", () => dialog.close());
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+  }
+
+  const detailBody = dialog.querySelector(".technician-detail-body");
+  const openDetails = (item) => {
+    detailBody.replaceChildren();
+    if (item.photo_url) {
+      const image = document.createElement("img");
+      image.src = item.photo_url;
+      image.alt = item.name;
+      image.className = "technician-detail-photo";
+      detailBody.append(image);
+    }
+    const name = addTextElement(detailBody, "h2", "", item.name);
+    name.id = "technician-detail-name";
+    if (item.specialty) addTextElement(detailBody, "p", "technician-detail-specialty", item.specialty);
+    const contacts = document.createElement("div");
+    contacts.className = "technician-detail-contacts";
+    if (item.phone) {
+      const call = document.createElement("a");
+      call.href = "tel:" + item.phone.replace(/[^+\\d]/g, "");
+      call.textContent = "Call";
+      contacts.append(call);
+    }
+    if (item.whatsapp) {
+      const whatsapp = document.createElement("a");
+      whatsapp.href = "https://wa.me/" + item.whatsapp.replace(/\\D/g, "");
+      whatsapp.target = "_blank";
+      whatsapp.rel = "noopener noreferrer";
+      whatsapp.textContent = "WhatsApp";
+      contacts.append(whatsapp);
+    }
+    if (contacts.children.length) detailBody.append(contacts);
+    dialog.showModal();
+  };
+
+  items.filter(item => item && item.name && item.is_published !== false).forEach(item => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "technician-card";
+    card.setAttribute("aria-label", "View " + item.name + " profile");
+    if (item.photo_url) {
+      const image = document.createElement("img");
+      image.src = item.photo_url;
+      image.alt = "";
+      image.loading = "lazy";
+      card.append(image);
+    } else {
+      const placeholder = document.createElement("span");
+      placeholder.className = "technician-card-placeholder";
+      placeholder.setAttribute("aria-hidden", "true");
+      placeholder.textContent = "👤";
+      card.append(placeholder);
+    }
+    const info = document.createElement("span");
+    info.className = "technician-card-info";
+    addTextElement(info, "strong", "", item.name);
+    if (item.specialty) addTextElement(info, "small", "technician-specialty", item.specialty);
+    addTextElement(info, "small", "technician-card-hint", "View details");
+    card.append(info);
+    card.addEventListener("click", () => openDetails(item));
+    target.append(card);
   });
-  if(target.children.length) homepageTechnicians.hidden=false;
+  if (target.children.length) homepageTechnicians.hidden = false;
 }
 function renderWorkshops(items) {
   const target = document.querySelector("#workshops-list");
