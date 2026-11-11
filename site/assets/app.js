@@ -46,6 +46,17 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szac"
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const loginMenuLink = document.querySelector("#login-menu-link");
 const logoutMenuLink = document.querySelector("#logout-menu-link");
+
+// Hide the menu link for the page currently being viewed.
+function hideCurrentPageMenuLink() {
+  if (!siteMenu) return;
+  const currentPath = location.pathname.replace(/\\/+$/, "") || "/";
+  siteMenu.querySelectorAll('a.menu-link[href]').forEach((link) => {
+    const targetPath = new URL(link.getAttribute("href"), location.href).pathname.replace(/\\/+$/, "") || "/";
+    if (targetPath === currentPath) link.hidden = true;
+  });
+}
+hideCurrentPageMenuLink();
 function closeSiteMenu() {
   if (!siteMenu || !menuButton) return;
   siteMenu.hidden = true;
