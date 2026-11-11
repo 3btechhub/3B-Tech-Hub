@@ -83,7 +83,7 @@
     else render();
   };
   // For ordinary internal pages, reuse the last resolved context; the entry route always performs a fresh lookup.
-  if (path !== BASE + "global/") {
+  if (!isEntryPath && path !== BASE + "global/") {
     try {
       const cached = JSON.parse(localStorage.getItem(CONTEXT_KEY) || "null");
       if (cached && ["bd", "saudi", "global"].includes(cached.region)) {
