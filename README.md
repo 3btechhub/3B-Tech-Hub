@@ -25,14 +25,15 @@ Vercel is not part of the deployment architecture. Production hosting and server
 - Production branch: `main`
 - Appwrite Site: `3B TECH HUB` (`3b-tech-hub`)
 - Production URL: https://3btechhub.appwrite.network
-- Appwrite project: `6af3bd9b003db0b9afb5`
+- Appwrite project: `6af42ac200285a12f46f`
 - Appwrite database: `3btechhub-prod`
 - Storage bucket: `media`
 - Deployment is connected to GitHub VCS and is built with `npm install` and `npm run build`.
 - The Appwrite Site uses the Next.js SSR adapter and Node.js 22.
 - Keep `APPWRITE_API_KEY` in Appwrite Site Variables as a secret, never in Global Variables or Git. The Appwrite Sites scoped `x-appwrite-key` header is preferred at runtime; the secret variable is a fallback.
-- The exact Owner Auth user ID is configured in the secret `ADMIN_OWNER_USER_ID` Site variable. `ADMIN_OWNER_USER_IDS` remains supported for multiple owners.
+- The exact Owner Auth user ID is configured in the `ADMIN_OWNER_USER_ID` Site variable; it is an identifier, not a credential. Keep passwords, API keys and session secrets private. `ADMIN_OWNER_USER_IDS` remains supported for multiple owners.
 - A successful build does not by itself prove that every authenticated workflow or integration is operational; use the health endpoint and release checklist below.
+- Current Appwrite Free plan reports a Site quota of zero. Confirm an eligible Sites entitlement before treating production hosting as durable; the current site may remain disabled despite a successful build.
 
 ## Local development
 1. Install Node.js 22.
