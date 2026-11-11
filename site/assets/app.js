@@ -597,7 +597,7 @@ function renderTechnicians(items) {
     dialog.showModal();
   };
 
-  items.filter(item => item && item.name && item.is_published !== false).forEach(item => {
+  items.filter(item => item && item.name && item.is_published !== false && (activeCountry.region === "global" || (item.country || "global") === activeCountry.region)).forEach(item => {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "technician-card";
@@ -829,10 +829,10 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
     if(!technicianData.length){addTextElement(technicianItems,"p","muted","No technicians added yet.");return;}
     technicianData.forEach(item=>{
       const row=document.createElement("article");row.className="technician-admin-row";technicianItems.append(row);
-      addTextElement(row,"strong","",item.name);addTextElement(row,"span","",item.specialty||"");
+      addTextElement(row,"strong","",item.name);addTextElement(row,"span","",[item.specialty, item.country === "bd" ? "Bangladesh" : item.country === "saudi" ? "Saudi Arabia" : "Global"].filter(Boolean).join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
-      edit.addEventListener("click",()=>{technicianEditor.elements.id.value=item.id;technicianEditor.elements.name.value=item.name||"";technicianEditor.elements.specialty.value=item.specialty||"";technicianEditor.elements.phone.value=item.phone||"";technicianEditor.elements.whatsapp.value=item.whatsapp||"";technicianPhotoUrl=item.photo_url||"";previewImage(technicianPhotoPreview,technicianPhotoUrl);document.querySelector("#technician-form-title").textContent="Edit Technician";document.querySelector("#technician-cancel").hidden=false;});actions.append(edit);
+      edit.addEventListener("click",()=>{technicianEditor.elements.id.value=item.id;technicianEditor.elements.name.value=item.name||"";technicianEditor.elements.specialty.value=item.specialty||"";technicianEditor.elements.country.value=item.country||"global";technicianEditor.elements.phone.value=item.phone||"";technicianEditor.elements.whatsapp.value=item.whatsapp||"";technicianPhotoUrl=item.photo_url||"";previewImage(technicianPhotoPreview,technicianPhotoUrl);document.querySelector("#technician-form-title").textContent="Edit Technician";document.querySelector("#technician-cancel").hidden=false;});actions.append(edit);
       const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";
       del.addEventListener("click",async()=>{if(!confirm("Delete this technician?"))return;const previous=technicianData;technicianData=technicianData.filter(x=>x.id!==item.id);try{await saveSetting("technicians",technicianData);renderTechnicianAdminList();}catch(error){technicianData=previous;editorMessage(technicianMessage,error.message,true);}});actions.append(del);
     });
@@ -842,7 +842,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
       event.preventDefault();const button=document.querySelector("#technician-save");button.disabled=true;editorMessage(technicianMessage,"Saving…");
       try{
         const form=new FormData(technicianEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"technicians");
-        const item={id:id||crypto.randomUUID(),name:String(form.get("name")||"").trim(),specialty:String(form.get("specialty")||"").trim(),phone:String(form.get("phone")||"").trim(),whatsapp:String(form.get("whatsapp")||"").trim(),photo_url:photo||technicianPhotoUrl||"",is_published:true};
+        const item={id:id||crypto.randomUUID(),name:String(form.get("name")||"").trim(),specialty:String(form.get("specialty")||"").trim(),country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",phone:String(form.get("phone")||"").trim(),whatsapp:String(form.get("whatsapp")||"").trim(),photo_url:photo||technicianPhotoUrl||"",is_published:true};
         const previous=technicianData;technicianData=id?technicianData.map(x=>x.id===id?item:x):[...technicianData,item];
         await saveSetting("technicians",technicianData);
         technicianEditor.reset();technicianPhotoUrl="";previewImage(technicianPhotoPreview,"");document.querySelector("#technician-form-title").textContent="Add Technician";document.querySelector("#technician-cancel").hidden=true;renderTechnicianAdminList();editorMessage(technicianMessage,"Technician saved.");
