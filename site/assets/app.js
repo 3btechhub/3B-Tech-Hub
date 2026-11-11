@@ -74,3 +74,31 @@ if (form) {
     showMessage("Use the password reset link sent to your email to continue.", "success");
   }
 }
+
+const profile = document.querySelector("#profile-card");
+if (profile) {
+  const email = document.querySelector("#profile-email");
+  const status = document.querySelector("#profile-message");
+  const logout = document.querySelector("#sign-out");
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    if (!session) location.replace(new URL("login/", ROOT_URL).href);
+  });
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) {
+    location.replace(new URL("login/", ROOT_URL).href);
+  } else {
+    email.textContent = data.user.email ?? "Signed-in account";
+  }
+  logout.addEventListener("click", async () => {
+    logout.disabled = true;
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) {
+      status.textContent = signOutError.message;
+      status.dataset.kind = "error";
+      logout.disabled = false;
+      return;
+    }
+    subscription.unsubscribe();
+    location.replace(new URL("login/", ROOT_URL).href);
+  });
+}
