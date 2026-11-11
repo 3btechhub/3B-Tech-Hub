@@ -647,7 +647,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
         workshopEditor.elements.id.value=item.id;
         for(const key of ["title","description","date","time","location","trainer","phone","whatsapp"])workshopEditor.elements[key].value=item[key]||"";
         workshopEditor.elements.is_published.checked=item.is_published!==false;
-        workshopPhotoUrl=item.photo_url||"";previewImage(workshopPhotoPreview,workshopPhotoUrl);
+        workshopPhotoUrl=item.photo_url||"";workshopEditor.elements.remove_photo.checked=false;document.querySelector("#workshop-remove-photo-wrap").hidden=!workshopPhotoUrl;previewImage(workshopPhotoPreview,workshopPhotoUrl);
         document.querySelector("#workshop-form-title").textContent="Edit Workshop";
         document.querySelector("#workshop-cancel").hidden=false;
       });actions.append(edit);
@@ -661,7 +661,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
     });
   }
   function resetWorkshopForm(){
-    workshopEditor.reset();workshopPhotoUrl="";previewImage(workshopPhotoPreview,"");
+    workshopEditor.reset();workshopPhotoUrl="";document.querySelector("#workshop-remove-photo-wrap").hidden=true;previewImage(workshopPhotoPreview,"");
     document.querySelector("#workshop-form-title").textContent="Add Workshop";
     document.querySelector("#workshop-cancel").hidden=true;
   }
@@ -670,7 +670,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor)) {
       event.preventDefault();const button=document.querySelector("#workshop-save");button.disabled=true;editorMessage(workshopMessage,"Saving…");
       try{
         const form=new FormData(workshopEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"workshops");
-        const item={id:id||crypto.randomUUID(),title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim(),date:String(form.get("date")||""),time:String(form.get("time")||""),location:String(form.get("location")||"").trim(),trainer:String(form.get("trainer")||"").trim(),phone:String(form.get("phone")||"").trim(),whatsapp:String(form.get("whatsapp")||"").trim(),photo_url:photo||workshopPhotoUrl||"",is_published:form.get("is_published")==="on"};
+        const item={id:id||crypto.randomUUID(),title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim(),date:String(form.get("date")||""),time:String(form.get("time")||""),location:String(form.get("location")||"").trim(),trainer:String(form.get("trainer")||"").trim(),phone:String(form.get("phone")||"").trim(),whatsapp:String(form.get("whatsapp")||"").trim(),photo_url:photo||(form.get("remove_photo")==="on"?"":workshopPhotoUrl)||"",is_published:form.get("is_published")==="on"};
         const previous=workshopData;
         workshopData=id?workshopData.map(x=>x.id===id?item:x):[...workshopData,item];
         await saveSetting("workshops",workshopData);
