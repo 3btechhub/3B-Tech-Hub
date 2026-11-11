@@ -121,3 +121,8 @@ body{background:var(--page-bg);color:var(--page-text)}
 .profile-form-actions button{width:100%;min-height:44px;border:1px solid var(--page-text);border-radius:7px;background:var(--page-text);color:var(--page-bg);font-weight:600;cursor:pointer}
 .profile-form-actions button[hidden]{display:none}
 @media(max-width:390px){.profile-row{grid-template-columns:minmax(82px,auto) minmax(0,1fr) auto;gap:7px}.profile-row strong,.profile-row .profile-value{font-size:13px}.profile-inline-edit{min-width:42px;padding-inline:7px}}
+
+
+/* Edit text directly in its displayed position; do not create replacement input boxes */
+.profile-row .profile-value[contenteditable="true"]{outline:none;border:0;background:transparent;box-shadow:none;border-radius:0;text-align:right;min-width:0;cursor:text;caret-color:var(--page-text)}
+.profile-row .profile-value.is-editing{border-bottom:1px dashed var(--page-text);padding-bottom:2px}
