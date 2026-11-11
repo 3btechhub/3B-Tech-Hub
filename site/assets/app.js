@@ -735,13 +735,13 @@ function renderProducts(products) {
 
 async function loadHomepageIdentity() {
   if (!homepageTechnicians && !homepageWorkshops && !homepageProducts) return;
-  const [{ data: settings, error: settingsError }, { data: workshops, error: workshopsError }, { data: products, error: productsError }] = await Promise.all([
-    supabase.from("site_settings").select("setting_key,setting_value").eq("is_public", true).eq("setting_key", "technicians"),
+  const [{ data: technicians, error: techniciansError }, { data: workshops, error: workshopsError }, { data: products, error: productsError }] = await Promise.all([
+    supabase.from("technicians").select("*").eq("is_published", true).order("created_at", { ascending: false }),
     supabase.from("workshops").select("*").eq("status", "published").order("created_at", { ascending: false }),
     supabase.from("products").select("*").eq("status", "active").order("updated_at", { ascending: false })
   ]);
-  if (settingsError) console.warn("Homepage technician content unavailable:", settingsError.message);
-  else for (const row of settings || []) if (row.setting_key === "technicians") renderTechnicians(row.setting_value || []);
+  if (techniciansError) console.warn("Homepage technician content unavailable:", techniciansError.message);
+  else renderTechnicians(technicians || []);
   if (workshopsError) console.warn("Homepage workshop content unavailable:", workshopsError.message);
   else renderWorkshops(workshops || []);
   if (productsError) console.warn("Homepage product content unavailable:", productsError.message);
@@ -799,20 +799,20 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
     if(url){const img=document.createElement("img");img.src=url;img.alt="Selected image preview";container.append(img);}
   }
   async function loadIdentityEditors(){
-    const [{data:workshops,error:workshopError},{data:settings,error:settingsError},{data:products,error:productError},{data:services,error:serviceError}] = await Promise.all([
+    const [{data:workshops,error:workshopError},{data:technicians,error:technicianError},{data:products,error:productError},{data:services,error:serviceError}] = await Promise.all([
       supabase.from("workshops").select("*").order("created_at",{ascending:false}),
-      supabase.from("site_settings").select("setting_key,setting_value").eq("setting_key","technicians"),
+      supabase.from("technicians").select("*").order("created_at",{ascending:false}),
       supabase.from("products").select("*").order("updated_at",{ascending:false}),
       supabase.from("services").select("*").order("created_at",{ascending:false})
     ]);
     if(workshopError){editorMessage(workshopMessage,workshopError.message,true);return;}
-    if(settingsError){editorMessage(technicianMessage,settingsError.message,true);return;}
+    if(technicianError){editorMessage(technicianMessage,technicianError.message,true);return;}
     if(productError){editorMessage(productMessage,productError.message,true);return;}
     if(serviceError){editorMessage(serviceMessage,serviceError.message,true);return;}
     workshopData=workshops||[];
     productData=products||[];
     serviceData=services||[];
-    for(const row of settings||[])if(row.setting_key==="technicians")technicianData=Array.isArray(row.setting_value)?row.setting_value.map(item=>({...item,category:item.category||item.specialty||"",description:item.description||""})):[];
+    technicianData=technicians||[];
     if(workshopEditor)renderWorkshopAdminList();
     if(technicianEditor)renderTechnicianAdminList();
     if(productEditor)renderProductAdminList();
@@ -967,7 +967,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
       edit.addEventListener("click",()=>{technicianEditor.elements.id.value=item.id;technicianEditor.elements.name.value=item.name||"";technicianEditor.elements.description.value=item.description||"";technicianEditor.elements.category.value=item.category||"";technicianEditor.elements.country.value=item.country||"";technicianEditor.elements.phone.value=item.phone||"";technicianEditor.elements.whatsapp.value=item.whatsapp||"";technicianPhotoUrl=item.photo_url||"";previewImage(technicianPhotoPreview,technicianPhotoUrl);document.querySelector("#technician-form-title").textContent="Edit Technician";document.querySelector("#technician-cancel").hidden=false;});actions.append(edit);
       const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";
-      del.addEventListener("click",async()=>{if(!confirm("Delete this technician?"))return;const previous=technicianData;technicianData=technicianData.filter(x=>x.id!==item.id);try{await saveSetting("technicians",technicianData);renderTechnicianAdminList();}catch(error){technicianData=previous;editorMessage(technicianMessage,error.message,true);}});actions.append(del);
+      del.addEventListener("click",async()=>{if(!confirm("Delete this technician?"))return;const {error}=await supabase.from("technicians").delete().eq("id",item.id);if(error){editorMessage(technicianMessage,error.message,true);return;}technicianData=technicianData.filter(x=>x.id!==item.id);renderTechnicianAdminList();});actions.append(del);
     });
   }
   if(technicianEditor){
@@ -975,9 +975,10 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
       event.preventDefault();const button=document.querySelector("#technician-save");button.disabled=true;editorMessage(technicianMessage,"Saving…");
       try{
         const form=new FormData(technicianEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"technicians");
-        const item={id:id||crypto.randomUUID(),name:String(form.get("name")||"").trim(),description:String(form.get("description")||"").trim(),category:String(form.get("category")||"").trim(),country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,phone:String(form.get("phone")||"").trim(),whatsapp:String(form.get("whatsapp")||"").trim(),photo_url:photo||technicianPhotoUrl||"",is_published:true};
-        const previous=technicianData;technicianData=id?technicianData.map(x=>x.id===id?item:x):[...technicianData,item];
-        await saveSetting("technicians",technicianData);
+        const item={id:id||crypto.randomUUID(),name:String(form.get("name")||"").trim(),description:String(form.get("description")||"").trim()||null,category:String(form.get("category")||"").trim()||null,country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,phone:String(form.get("phone")||"").trim()||null,whatsapp:String(form.get("whatsapp")||"").trim()||null,photo_url:photo||technicianPhotoUrl||null,is_published:true,updated_at:new Date().toISOString()};
+        const {error}=await supabase.from("technicians").upsert(item,{onConflict:"id"});
+        if(error)throw error;
+        technicianData=id?technicianData.map(x=>x.id===id?item:x):[...technicianData,item];
         technicianEditor.reset();technicianPhotoUrl="";previewImage(technicianPhotoPreview,"");document.querySelector("#technician-form-title").textContent="Add Technician";document.querySelector("#technician-cancel").hidden=true;renderTechnicianAdminList();editorMessage(technicianMessage,"Technician saved.");
       }catch(error){editorMessage(technicianMessage,error.message||"Could not save technician.",true);}
       finally{button.disabled=false;}
