@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     const response = await fetch(`${endpoint}/account/tokens/email`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Appwrite-Project": projectId },
-      body: JSON.stringify({ userId: ownerId, email: ownerEmail, phrase: true }),
+      body: JSON.stringify({ userId: ownerId, email: ownerEmail, phrase: false }),
       cache: "no-store",
       signal: AbortSignal.timeout(15000),
     });
