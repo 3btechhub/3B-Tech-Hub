@@ -26,8 +26,7 @@ const siteMenu = document.querySelector("#site-menu");
 const profileMenuLink = document.querySelector("#profile-menu-link");
 const dashboardMenuLink = document.querySelector("#dashboard-menu-link");
 const themeToggle = document.querySelector("#theme-toggle");
-const languageToggle = document.querySelector("#language-toggle");
-const languageCode = document.querySelector("#language-code");
+const languageSelect = document.querySelector("#language-select");
 const savedTheme = localStorage.getItem("3b-theme");
 const routeDefaultLanguage = activeCountry.region === "bd" ? "bn" : activeCountry.region === "saudi" ? "ar" : "en";
 const languageStorageKey = "3b-language-" + activeCountry.region;
@@ -46,7 +45,7 @@ function applyLanguage(language) {
     const key = element.dataset.label;
     if (translations[lang][key]) element.textContent = translations[lang][key];
   });
-  if (languageCode) languageCode.textContent = lang.toUpperCase();
+  if (languageSelect) languageSelect.value = lang;
   localStorage.setItem(languageStorageKey, lang);
 }
 function applyTheme(theme) {
@@ -61,11 +60,8 @@ function applyTheme(theme) {
 applyLanguage(savedLanguage);
 applyTheme(savedTheme === "dark" ? "dark" : "light");
 if (themeToggle) themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
-if (languageToggle) languageToggle.addEventListener("click", () => {
-  const order = activeCountry.region === "bd" ? ["bn", "en", "ar"] : activeCountry.region === "saudi" ? ["ar", "en", "bn"] : ["en", "bn", "ar"];
-  const current = document.documentElement.lang;
-  const next = order[(order.indexOf(current) + 1) % order.length];
-  applyLanguage(next);
+if (languageSelect) languageSelect.addEventListener("change", () => {
+  applyLanguage(languageSelect.value);
   applyTheme(document.documentElement.dataset.theme);
 });
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
