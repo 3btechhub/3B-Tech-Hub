@@ -27,7 +27,12 @@
 - Never store passwords, tokens, API keys, complete profile rows or other unnecessary personal data.
 - Audit records are append-only for application roles and readable only by authorized admins.
 
-## Remaining
-- Owner-only user invitation and status management require a reviewed Supabase Edge Function using the platform service role in server runtime only.
-- Role and permission UI must call a server-verified Owner workflow.
-- Add tests for both allowed and denied requests, including attempts by an Admin to promote itself or another account to Owner.
+## Owner administration endpoint
+The `owner-users` Supabase Edge Function is deployed with JWT verification enabled. It checks the caller's verified Auth session and the `owner` role before allowing user listing, invitations, role changes, block/unblock and password-reset email requests. It uses the service-role key only inside the Edge Function runtime and writes an actor-attributed audit event for each operation.
+
+The primary Owner account cannot be blocked or demoted. The Owner role cannot be assigned through the user-management endpoint. Admins cannot invoke the endpoint.
+
+## Remaining verification
+- Run browser-level tests for Owner, Admin and Customer access paths.
+- Verify invite and password-reset emails against the configured Supabase Auth redirect URL and SMTP settings.
+- Verify blocked users cannot continue an existing session after token/session refresh.
