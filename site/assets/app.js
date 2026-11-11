@@ -598,7 +598,7 @@ function renderTechnicians(items) {
     dialog.showModal();
   };
 
-  items.filter(item => item && item.name && item.is_published !== false && (activeCountry.region === "global" || (item.country || "global") === activeCountry.region)).forEach(item => {
+  items.filter(item => item && item.name && item.is_published !== false && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region))).forEach(item => {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "technician-card";
@@ -667,7 +667,7 @@ function renderWorkshops(items) {
     dialog.showModal();
   };
 
-  items.filter(item => item && item.title && (activeCountry.region === "global" || (item.country || "global") === activeCountry.region)).forEach(item => {
+  items.filter(item => item && item.title && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region))).forEach(item => {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "workshop-card";
@@ -701,7 +701,7 @@ function renderProducts(products) {
   if (!target) return;
   target.replaceChildren();
   const region = activeCountry.region;
-  const visibleProducts = (products || []).filter(item => region === "global" || item.country === "global" || item.country === region);
+  const visibleProducts = (products || []).filter(item => region === "global" || !item.country || item.country === "global" || item.country === region);
   if (!visibleProducts.length) {
     if (homepageProducts) homepageProducts.hidden = true;
     return;
@@ -832,7 +832,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
         workshopEditor.elements.title.value=item.title||"";
         workshopEditor.elements.description.value=item.description||"";
         workshopEditor.elements.category.value=item.category||"";
-        workshopEditor.elements.country.value=item.country||"global";
+        workshopEditor.elements.country.value=item.country||"";
         workshopEditor.elements.location.value=item.location||"";
         workshopEditor.elements.is_published.checked=item.status==="published";
         workshopPhotoUrl=item.photo_url||"";workshopEditor.elements.remove_photo.checked=false;document.querySelector("#workshop-remove-photo-wrap").hidden=!workshopPhotoUrl;previewImage(workshopPhotoPreview,workshopPhotoUrl);
@@ -859,7 +859,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
       try{
         const form=new FormData(workshopEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"workshops");
         const {data:userData}=await supabase.auth.getUser();
-        const item={title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim()||null,category:String(form.get("category")||"").trim()||null,location:String(form.get("location")||"").trim()||null,photo_url:photo||(form.get("remove_photo")==="on"?"":workshopPhotoUrl)||null,country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",status:form.get("is_published")==="on"?"published":"draft",updated_by:userData.user?.id||null,updated_at:new Date().toISOString()};
+        const item={title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim()||null,category:String(form.get("category")||"").trim()||null,location:String(form.get("location")||"").trim()||null,photo_url:photo||(form.get("remove_photo")==="on"?"":workshopPhotoUrl)||null,country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,status:form.get("is_published")==="on"?"published":"draft",updated_by:userData.user?.id||null,updated_at:new Date().toISOString()};
         const query=id?supabase.from("workshops").update(item).eq("id",id):supabase.from("workshops").insert({...item,created_by:userData.user?.id||null});
         const {error}=await query;
         if(error)throw error;
@@ -884,7 +884,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
         productEditor.elements.name.value=item.name||"";
         productEditor.elements.category.value=item.category||"";
         productEditor.elements.description.value=item.description||"";
-        productEditor.elements.country.value=item.country||"global";
+        productEditor.elements.country.value=item.country||"";
         productPhotoUrl=item.photo_url||"";previewImage(productPhotoPreview,productPhotoUrl);
         productEditor.elements.is_published.checked=item.status==="active";
         document.querySelector("#product-form-title").textContent="Edit Product";
@@ -901,7 +901,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
   }
   function resetProductForm(){
     productEditor.reset();productPhotoUrl="";previewImage(productPhotoPreview,"");
-    productEditor.elements.country.value="global";
+    productEditor.elements.country.value="";
     document.querySelector("#product-form-title").textContent="Add Product";
     document.querySelector("#product-cancel").hidden=true;
   }
@@ -917,7 +917,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
         const photo=await uploadContentPhoto(form.get("photo"),"products");
         if(!name)throw new Error("Name is required.");
         const slug=id?(productData.find(x=>x.id===id)?.slug||""):(name.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"product")+"-"+crypto.randomUUID().slice(0,8);
-        const item={slug,name,category:category||null,description,photo_url:photo||(id?(productData.find(x=>x.id===id)?.photo_url||null):null),country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",status:form.get("is_published")==="on"?"active":"draft"};
+        const item={slug,name,category:category||null,description,photo_url:photo||(id?(productData.find(x=>x.id===id)?.photo_url||null):null),country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,status:form.get("is_published")==="on"?"active":"draft"};
         const query=id?supabase.from("products").update(item).eq("id",id):supabase.from("products").insert(item);
         const {error}=await query;if(error)throw error;
         resetProductForm();await loadIdentityEditors();editorMessage(productMessage,"Product saved.");
@@ -936,12 +936,12 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
       addTextElement(row,"span","",[item.category,item.country==="bd"?"Bangladesh (BD)":item.country==="saudi"?"Saudi Arabia (Saudi)":"Global",item.status].filter(Boolean).join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
-      edit.addEventListener("click",()=>{serviceEditor.elements.id.value=item.id;serviceEditor.elements.name.value=item.name||"";serviceEditor.elements.description.value=item.description||"";serviceEditor.elements.category.value=item.category||"";serviceEditor.elements.country.value=item.country||"global";serviceEditor.elements.is_published.checked=item.status==="active";servicePhotoUrl=item.photo_url||"";previewImage(servicePhotoPreview,servicePhotoUrl);document.querySelector("#service-form-title").textContent="Edit Service";document.querySelector("#service-cancel").hidden=false;});actions.append(edit);
+      edit.addEventListener("click",()=>{serviceEditor.elements.id.value=item.id;serviceEditor.elements.name.value=item.name||"";serviceEditor.elements.description.value=item.description||"";serviceEditor.elements.category.value=item.category||"";serviceEditor.elements.country.value=item.country||"";serviceEditor.elements.is_published.checked=item.status==="active";servicePhotoUrl=item.photo_url||"";previewImage(servicePhotoPreview,servicePhotoUrl);document.querySelector("#service-form-title").textContent="Edit Service";document.querySelector("#service-cancel").hidden=false;});actions.append(edit);
       const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";
       del.addEventListener("click",async()=>{if(!confirm("Delete this service?"))return;const {error}=await supabase.from("services").delete().eq("id",item.id);if(error){editorMessage(serviceMessage,error.message,true);return;}serviceData=serviceData.filter(x=>x.id!==item.id);renderServiceAdminList();});actions.append(del);
     });
   }
-  function resetServiceForm(){serviceEditor.reset();servicePhotoUrl="";previewImage(servicePhotoPreview,"");serviceEditor.elements.country.value="global";document.querySelector("#service-form-title").textContent="Add Service";document.querySelector("#service-cancel").hidden=true;}
+  function resetServiceForm(){serviceEditor.reset();servicePhotoUrl="";previewImage(servicePhotoPreview,"");serviceEditor.elements.country.value="";document.querySelector("#service-form-title").textContent="Add Service";document.querySelector("#service-cancel").hidden=true;}
   if(serviceEditor){
     serviceEditor.addEventListener("submit",async event=>{
       event.preventDefault();const button=document.querySelector("#service-save");button.disabled=true;editorMessage(serviceMessage,"Saving…");
@@ -949,7 +949,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
         const form=new FormData(serviceEditor);const id=String(form.get("id")||"");const name=String(form.get("name")||"").trim();if(!name)throw new Error("Name is required.");
         const photo=await uploadContentPhoto(form.get("photo"),"services");
         const slug=id?(serviceData.find(x=>x.id===id)?.slug||""):(name.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"service")+"-"+crypto.randomUUID().slice(0,8);
-        const item={slug,name,description:String(form.get("description")||"").trim(),category:String(form.get("category")||"").trim()||null,country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",photo_url:photo||(id?(serviceData.find(x=>x.id===id)?.photo_url||null):null),status:form.get("is_published")==="on"?"active":"draft"};
+        const item={slug,name,description:String(form.get("description")||"").trim(),category:String(form.get("category")||"").trim()||null,country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,photo_url:photo||(id?(serviceData.find(x=>x.id===id)?.photo_url||null):null),status:form.get("is_published")==="on"?"active":"draft"};
         const query=id?supabase.from("services").update(item).eq("id",id):supabase.from("services").insert(item);const {error}=await query;if(error)throw error;
         resetServiceForm();await loadIdentityEditors();editorMessage(serviceMessage,"Service saved.");
       }catch(error){editorMessage(serviceMessage,error.message||"Could not save service.",true);}finally{button.disabled=false;}
@@ -965,7 +965,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
       addTextElement(row,"strong","",item.name);addTextElement(row,"span","",[item.description,item.category, item.country === "bd" ? "Bangladesh (BD)" : item.country === "saudi" ? "Saudi Arabia (Saudi)" : "Global"].filter(Boolean).join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
-      edit.addEventListener("click",()=>{technicianEditor.elements.id.value=item.id;technicianEditor.elements.name.value=item.name||"";technicianEditor.elements.description.value=item.description||"";technicianEditor.elements.category.value=item.category||"";technicianEditor.elements.country.value=item.country||"global";technicianEditor.elements.phone.value=item.phone||"";technicianEditor.elements.whatsapp.value=item.whatsapp||"";technicianPhotoUrl=item.photo_url||"";previewImage(technicianPhotoPreview,technicianPhotoUrl);document.querySelector("#technician-form-title").textContent="Edit Technician";document.querySelector("#technician-cancel").hidden=false;});actions.append(edit);
+      edit.addEventListener("click",()=>{technicianEditor.elements.id.value=item.id;technicianEditor.elements.name.value=item.name||"";technicianEditor.elements.description.value=item.description||"";technicianEditor.elements.category.value=item.category||"";technicianEditor.elements.country.value=item.country||"";technicianEditor.elements.phone.value=item.phone||"";technicianEditor.elements.whatsapp.value=item.whatsapp||"";technicianPhotoUrl=item.photo_url||"";previewImage(technicianPhotoPreview,technicianPhotoUrl);document.querySelector("#technician-form-title").textContent="Edit Technician";document.querySelector("#technician-cancel").hidden=false;});actions.append(edit);
       const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";
       del.addEventListener("click",async()=>{if(!confirm("Delete this technician?"))return;const previous=technicianData;technicianData=technicianData.filter(x=>x.id!==item.id);try{await saveSetting("technicians",technicianData);renderTechnicianAdminList();}catch(error){technicianData=previous;editorMessage(technicianMessage,error.message,true);}});actions.append(del);
     });
@@ -975,7 +975,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
       event.preventDefault();const button=document.querySelector("#technician-save");button.disabled=true;editorMessage(technicianMessage,"Saving…");
       try{
         const form=new FormData(technicianEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"technicians");
-        const item={id:id||crypto.randomUUID(),name:String(form.get("name")||"").trim(),description:String(form.get("description")||"").trim(),category:String(form.get("category")||"").trim(),country:["bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):"global",phone:String(form.get("phone")||"").trim(),whatsapp:String(form.get("whatsapp")||"").trim(),photo_url:photo||technicianPhotoUrl||"",is_published:true};
+        const item={id:id||crypto.randomUUID(),name:String(form.get("name")||"").trim(),description:String(form.get("description")||"").trim(),category:String(form.get("category")||"").trim(),country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,phone:String(form.get("phone")||"").trim(),whatsapp:String(form.get("whatsapp")||"").trim(),photo_url:photo||technicianPhotoUrl||"",is_published:true};
         const previous=technicianData;technicianData=id?technicianData.map(x=>x.id===id?item:x):[...technicianData,item];
         await saveSetting("technicians",technicianData);
         technicianEditor.reset();technicianPhotoUrl="";previewImage(technicianPhotoPreview,"");document.querySelector("#technician-form-title").textContent="Add Technician";document.querySelector("#technician-cancel").hidden=true;renderTechnicianAdminList();editorMessage(technicianMessage,"Technician saved.");
