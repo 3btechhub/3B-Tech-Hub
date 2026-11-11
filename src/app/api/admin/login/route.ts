@@ -13,12 +13,18 @@ function cookieName() {
   return projectId ? `a_session_${projectId}` : "";
 }
 
+function configuredOwnerIds() {
+  return [
+    ...(process.env.ADMIN_OWNER_USER_IDS ?? "").split(","),
+    process.env.ADMIN_OWNER_USER_ID ?? "",
+  ].map((id) => id.trim()).filter(Boolean);
+}
+
 export async function POST(request: NextRequest) {
   if (!endpoint || !projectId) {
     return NextResponse.json({ error: "Authentication is not configured." }, { status: 503 });
   }
 
-  // Reject missing and cross-origin Origin headers to mitigate login CSRF.
   const origin = request.headers.get("origin");
   if (!origin || origin !== request.nextUrl.origin) {
     return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
@@ -46,10 +52,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid authentication response." }, { status: 502 });
     }
 
-    const allowedIds = (process.env.ADMIN_OWNER_USER_IDS ?? "")
-      .split(",").map((id) => id.trim()).filter(Boolean);
-
-    if (!allowedIds.includes(session.userId)) {
+    if (!configuredOwnerIds().includes(session.userId)) {
       await fetch(`${endpoint}/account/sessions/current`, {
         method: "DELETE",
         headers: {
