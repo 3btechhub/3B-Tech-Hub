@@ -60,3 +60,5 @@ body{background:var(--page-bg);color:var(--page-text)}
 .profile-form-actions button:disabled { opacity:.55; cursor:wait; }
 .profile-password-row { border-bottom:0; }
 .profile-form .auth-message { margin-top:10px; }
+
+.profile-row .is-placeholder { color:#888; }
