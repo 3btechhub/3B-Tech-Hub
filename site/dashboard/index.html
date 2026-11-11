@@ -20,17 +20,14 @@
   <main class="dashboard-main" id="owner-dashboard">
     <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
       <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" data-dashboard-tab="overview">Overview</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-order" aria-controls="panel-order" aria-selected="false" data-dashboard-tab="order" tabindex="-1">Order</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-complaint" aria-controls="panel-complaint" aria-selected="false" data-dashboard-tab="complaint" tabindex="-1">Complaint</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-request" aria-controls="panel-request" aria-selected="false" data-dashboard-tab="request" tabindex="-1">Request</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-services" aria-controls="panel-services" aria-selected="false" data-dashboard-tab="services" tabindex="-1">Services</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-services" aria-controls="panel-services" aria-selected="false" data-dashboard-tab="services" tabindex="-1">Service</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" aria-controls="panel-products" aria-selected="false" data-dashboard-tab="products" tabindex="-1">Product</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshop" aria-controls="panel-workshop" aria-selected="false" data-dashboard-tab="workshop" tabindex="-1">Workshop</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-technician" aria-controls="panel-technician" aria-selected="false" data-dashboard-tab="technician" tabindex="-1">Technician</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-media" aria-controls="panel-media" aria-selected="false" data-dashboard-tab="media" tabindex="-1">Media</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" aria-controls="panel-user" aria-selected="false" data-dashboard-tab="user" tabindex="-1">User</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" aria-controls="panel-role" aria-selected="false" data-dashboard-tab="role" tabindex="-1">Role</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" aria-controls="panel-permission" aria-selected="false" data-dashboard-tab="permission" tabindex="-1">Permission</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshop" aria-controls="panel-workshop" aria-selected="false" data-dashboard-tab="workshop" tabindex="-1">Workshop</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-technician" aria-controls="panel-technician" aria-selected="false" data-dashboard-tab="technician" tabindex="-1">Technician</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" aria-controls="panel-products" aria-selected="false" data-dashboard-tab="products" tabindex="-1">Products</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-dashboard-tab="settings" tabindex="-1">Settings</button>
     </nav>
     <section class="dashboard-module-panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-dashboard-panel="overview">
@@ -45,33 +42,9 @@
       <section class="dashboard-card"><h2>Audit Log</h2><div class="dashboard-count" id="dashboard-audit-count">…</div><p>Recorded admin actions</p></section>
       </div>
     </section>
-    <section class="dashboard-module-panel" id="panel-order" role="tabpanel" aria-labelledby="tab-order" data-dashboard-panel="order" hidden>
-      <div class="dashboard-function-grid" aria-label="Order Management functions">
-        <article class="dashboard-function-card"><h2>Add Order</h2></article>
-        <article class="dashboard-function-card"><h2>Order List & Details</h2></article>
-        <article class="dashboard-function-card"><h2>Edit / Cancel Order</h2></article>
-        <article class="dashboard-function-card"><h2>Update Order Status</h2></article>
-        <article class="dashboard-function-card"><h2>Search by Date, Status & Customer</h2></article>
-      </div>
-    </section>
-    <section class="dashboard-module-panel" id="panel-complaint" role="tabpanel" aria-labelledby="tab-complaint" data-dashboard-panel="complaint" hidden>
-      <div class="dashboard-function-grid" aria-label="Complaint Management functions">
-        <article class="dashboard-function-card"><h2>Complaint List & Details</h2></article>
-        <article class="dashboard-function-card"><h2>Reply to Complaint</h2></article>
-        <article class="dashboard-function-card"><h2>Pending / Processing / Resolved / Rejected Status</h2></article>
-        <article class="dashboard-function-card"><h2>Edit / Delete Complaint</h2></article>
-        <article class="dashboard-function-card"><h2>Filter by Date & Status</h2></article>
-      </div>
-    </section>
-    <section class="dashboard-module-panel" id="panel-request" role="tabpanel" aria-labelledby="tab-request" data-dashboard-panel="request" hidden>
-      <div class="dashboard-function-grid" aria-label="Request Management functions">
-        <article class="dashboard-function-card"><h2>Request List & Details</h2></article>
-        <article class="dashboard-function-card"><h2>Create Request</h2></article>
-        <article class="dashboard-function-card"><h2>Approve / Reject Request</h2></article>
-        <article class="dashboard-function-card"><h2>Edit / Delete Request</h2></article>
-        <article class="dashboard-function-card"><h2>Search by Status & Date</h2></article>
-      </div>
-    </section>
+
+
+
     <section class="dashboard-module-panel" id="panel-services" role="tabpanel" aria-labelledby="tab-services" data-dashboard-panel="services" hidden>
       <div class="dashboard-function-grid" aria-label="Service Pages Management functions">
         <article class="dashboard-function-card"><h2>Service Page List & Preview</h2></article>
