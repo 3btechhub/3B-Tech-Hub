@@ -15,3 +15,15 @@ body{background:var(--page-bg);color:var(--page-text)}
 .auth-form input{background:var(--surface);color:var(--page-text);border-color:var(--line)}
 .auth-form>button[type=submit]{background:var(--page-text);color:var(--page-bg);border-color:var(--page-text)}
 .text-button{color:var(--page-text)}
+
+/* Menu interaction and two-section layout */
+.menu-trigger{position:relative;z-index:12}
+.menu-trigger span{transition:transform .18s ease,opacity .18s ease}
+.menu-trigger.is-open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.menu-trigger.is-open span:nth-child(2){opacity:0}
+.menu-trigger.is-open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.site-menu{min-width:220px;gap:2px}
+.site-menu .menu-link{display:block;width:100%;padding:11px 12px;border:0;border-radius:6px;background:transparent;color:var(--page-text);font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.site-menu .menu-link:hover{background:var(--hover)}
+.site-menu .menu-link[hidden]{display:none}
+.menu-tools{border-top:1px solid var(--line);margin-top:7px;padding-top:9px}
