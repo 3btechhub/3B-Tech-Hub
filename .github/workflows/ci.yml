@@ -27,7 +27,7 @@ jobs:
           test -s site/assets/app.js
           test -s site/404.html
       - name: Validate JavaScript syntax
-        run: node --check site/assets/app.js
+        run: node --input-type=module --check < site/assets/app.js
       - name: Validate static routes and required branding
         run: |
           grep -q "3B TECH HUB" site/index.html
