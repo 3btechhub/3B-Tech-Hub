@@ -6,6 +6,13 @@ const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
 
 export type SessionIdentity = { id: string; email: string };
 
+function configuredOwnerIds() {
+  return [
+    ...(process.env.ADMIN_OWNER_USER_IDS ?? "").split(","),
+    process.env.ADMIN_OWNER_USER_ID ?? "",
+  ].map((id) => id.trim()).filter(Boolean);
+}
+
 export function sessionCookieName() {
   if (!projectId) throw new Error("Appwrite project is not configured");
   return `a_session_${projectId}`;
@@ -32,9 +39,7 @@ export async function getCurrentIdentity(): Promise<SessionIdentity | null> {
 
 export async function isOwnerIdentity(identity: SessionIdentity | null) {
   if (!identity) return false;
-  const allowedIds = (process.env.ADMIN_OWNER_USER_IDS ?? "")
-    .split(",").map((id) => id.trim()).filter(Boolean);
-  return allowedIds.includes(identity.id);
+  return configuredOwnerIds().includes(identity.id);
 }
 
 export async function getAdminIdentity(): Promise<SessionIdentity | null> {
