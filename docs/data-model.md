@@ -48,7 +48,7 @@ The production database ID is `3btechhub-prod`. All four tables are enabled with
 - Service job: received → diagnosing → awaiting_approval → repairing → quality_check → ready → delivered.
 
 ## Access-control intent
-- Public visitors: read only published public pages, active services and active products; create rate-limited public enquiries/bookings through validated server endpoints.
+- Public visitors: read only published public pages, active services and active products.
 - Customer: read/update permitted own profile; read own bookings/orders/jobs only.
 - Staff: access assigned operational records only; no publishing or role administration by default.
 - Manager: manage approved operational areas; no owner-only publishing/security settings unless explicitly delegated.
@@ -67,7 +67,7 @@ Create indexes only after query patterns are finalized. Likely candidates includ
 
 ## Before expanding the schema
 1. Confirm initial language(s) and currency/currencies.
-2. Confirm customer account requirement (guest booking vs mandatory sign-in).
+2. Confirm customer account requirements for profile features.
 3. Confirm whether product checkout/payment is in launch scope.
 4. Review data retention, privacy and consent requirements.
 5. Convert approved future modules into Appwrite columns, indexes and permissions.
