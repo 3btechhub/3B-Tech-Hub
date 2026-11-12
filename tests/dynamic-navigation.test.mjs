@@ -30,3 +30,16 @@ test("navigation groups Sub Pages under the correct Main Page and sorts them", (
   assert.equal(tree[0].children[0].href.endsWith("/about/story/"), true);
   assert.equal(tree[1].children.length, 0);
 });
+
+
+test("country-specific Main Pages override Global and country Sub Pages stay scoped", () => {
+  const tree = buildNavigationTree([
+    { id: "global", parent_id: null, page_type: "main", slug: "about", title: "Global About", country: "global", sort_order: 1 },
+    { id: "bd", parent_id: null, page_type: "main", slug: "about", title: "Bangladesh About", country: "bd", sort_order: 1 },
+    { id: "global-child", parent_id: "global", page_type: "sub", slug: "contact", title: "Global Contact", country: "global" },
+    { id: "bd-child", parent_id: "bd", page_type: "sub", slug: "contact", title: "BD Contact", country: "bd" }
+  ], "bd");
+  assert.equal(tree.length, 1);
+  assert.equal(tree[0].title, "Bangladesh About");
+  assert.equal(tree[0].children[0].title, "BD Contact");
+});
