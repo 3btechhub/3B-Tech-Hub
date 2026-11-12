@@ -47,10 +47,10 @@
 
     <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
       <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" data-label="overview" aria-controls="panel-overview" aria-selected="true" data-dashboard-tab="overview">Overview</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-services" aria-controls="panel-services" aria-selected="false" data-dashboard-tab="services" tabindex="-1">Services</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" aria-controls="panel-products" aria-selected="false" data-dashboard-tab="products" tabindex="-1">Products</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshops" aria-controls="panel-workshops" aria-selected="false" data-dashboard-tab="workshops" tabindex="-1">Workshops</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-technicians" aria-controls="panel-technicians" aria-selected="false" data-dashboard-tab="technicians" tabindex="-1">Technicians</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-services" data-label="services" aria-controls="panel-services" aria-selected="false" data-dashboard-tab="services" tabindex="-1">Services</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" data-label="products" aria-controls="panel-products" aria-selected="false" data-dashboard-tab="products" tabindex="-1">Products</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshops" data-label="workshops" aria-controls="panel-workshops" aria-selected="false" data-dashboard-tab="workshops" tabindex="-1">Workshops</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-technicians" data-label="technicians" aria-controls="panel-technicians" aria-selected="false" data-dashboard-tab="technicians" tabindex="-1">Technicians</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-audit" data-label="audit" aria-controls="panel-audit" aria-selected="false" data-dashboard-tab="audit" tabindex="-1">Audit</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" data-label="user" aria-controls="panel-user" aria-selected="false" data-dashboard-tab="user" tabindex="-1">User</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" data-label="role" aria-controls="panel-role" aria-selected="false" data-dashboard-tab="role" tabindex="-1">Role</button>
@@ -68,7 +68,7 @@
 
     <section class="dashboard-module-panel" id="panel-services" role="tabpanel" aria-labelledby="tab-services" data-dashboard-panel="services" hidden>
       <div class="admin-list">
-        <div class="dashboard-heading"><div><h2>Services Management</h2><p class="muted">Create, edit, publish and remove services.</p></div><button class="secondary-button" type="button" data-module-refresh="services">Refresh</button></div>
+        <div class="dashboard-heading"><div><h2 data-label="services">Services Management</h2><p class="muted">Create, edit, publish and remove services.</p></div><button class="secondary-button" type="button" data-module-refresh="services">Refresh</button></div>
         <form class="content-editor-form" data-module-form="services">
           <h3 data-module-form-title="services">Add service</h3>
           <div class="module-form-grid" data-module-fields="services"></div>
@@ -81,7 +81,7 @@
 
     <section class="dashboard-module-panel" id="panel-products" role="tabpanel" aria-labelledby="tab-products" data-dashboard-panel="products" hidden>
       <div class="admin-list">
-        <div class="dashboard-heading"><div><h2>Products Management</h2><p class="muted">Create, edit, publish and remove products.</p></div><button class="secondary-button" type="button" data-module-refresh="products">Refresh</button></div>
+        <div class="dashboard-heading"><div><h2 data-label="products">Products Management</h2><p class="muted">Create, edit, publish and remove products.</p></div><button class="secondary-button" type="button" data-module-refresh="products">Refresh</button></div>
         <form class="content-editor-form" data-module-form="products">
           <h3 data-module-form-title="products">Add product</h3>
           <div class="module-form-grid" data-module-fields="products"></div>
@@ -94,7 +94,7 @@
 
     <section class="dashboard-module-panel" id="panel-workshops" role="tabpanel" aria-labelledby="tab-workshops" data-dashboard-panel="workshops" hidden>
       <div class="admin-list">
-        <div class="dashboard-heading"><div><h2>Workshops Management</h2><p class="muted">Create, edit, publish and remove workshops.</p></div><button class="secondary-button" type="button" data-module-refresh="workshops">Refresh</button></div>
+        <div class="dashboard-heading"><div><h2 data-label="workshops">Workshops Management</h2><p class="muted">Create, edit, publish and remove workshops.</p></div><button class="secondary-button" type="button" data-module-refresh="workshops">Refresh</button></div>
         <form class="content-editor-form" data-module-form="workshops">
           <h3 data-module-form-title="workshops">Add workshop</h3>
           <div class="module-form-grid" data-module-fields="workshops"></div>
@@ -107,7 +107,7 @@
 
     <section class="dashboard-module-panel" id="panel-technicians" role="tabpanel" aria-labelledby="tab-technicians" data-dashboard-panel="technicians" hidden>
       <div class="admin-list">
-        <div class="dashboard-heading"><div><h2>Technicians Management</h2><p class="muted">Create, edit, publish and remove technicians.</p></div><button class="secondary-button" type="button" data-module-refresh="technicians">Refresh</button></div>
+        <div class="dashboard-heading"><div><h2 data-label="technicians">Technicians Management</h2><p class="muted">Create, edit, publish and remove technicians.</p></div><button class="secondary-button" type="button" data-module-refresh="technicians">Refresh</button></div>
         <form class="content-editor-form" data-module-form="technicians">
           <h3 data-module-form-title="technicians">Add technician</h3>
           <div class="module-form-grid" data-module-fields="technicians"></div>
