@@ -11,6 +11,7 @@
 - A database trigger prevents Sub Pages from nesting below another Sub Page and prevents publishing a child beneath an unpublished Main Page.
 - Main Page and component updates maintain `updated_at` using the existing shared trigger function.
 - Table grants are least-privilege: public SELECT only; authenticated writes are limited to page/component CRUD and revision insert. TRUNCATE, REFERENCES and TRIGGER privileges are revoked.
+- Foreign-key indexes cover creator/updater references used for attribution and cleanup.
 - Migration filenames match the versions recorded in Supabase migration history.
 
 ## Trust boundary
