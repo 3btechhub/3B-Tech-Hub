@@ -918,6 +918,9 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         else if (input.type==="number") payload[key]=input.value===""?null:Number(input.value);
         else payload[key]=input.value.trim()===""?null:input.value.trim();
       }
+      if (moduleName==="services" || moduleName==="products") {
+        if (payload.description == null) payload.description = "";
+      }
       if (moduleName==="products") {
         if (!payload.currency) payload.currency="SAR";
         if (payload.stock_qty==null) payload.stock_qty=0;
