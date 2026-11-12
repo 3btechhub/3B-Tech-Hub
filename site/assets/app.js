@@ -1103,248 +1103,125 @@ function addTextElement(parent, tag, className, value) {
   parent.append(node);
   return node;
 }
+function detailLayout(target, item, title, fields) {
+  target.replaceChildren();
+  const wrap = document.createElement("article");
+  wrap.className = "catalogue-detail";
+  if (item.photo_url) {
+    const image = document.createElement("img");
+    image.src = item.photo_url;
+    image.alt = title;
+    image.className = "catalogue-detail-image";
+    wrap.append(image);
+  }
+  addTextElement(wrap, "h1", "", title);
+  for (const [label, value] of fields) {
+    if (!value) continue;
+    const row = document.createElement("p");
+    row.className = "catalogue-detail-field";
+    const strong = document.createElement("strong");
+    strong.textContent = label + ": ";
+    row.append(strong, document.createTextNode(String(value)));
+    wrap.append(row);
+  }
+  const back = document.createElement("a");
+  back.className = "service-back-link";
+  back.href = location.pathname.replace(/\/+$/, "") + "/";
+  back.textContent = "Explore all";
+  wrap.append(back);
+  target.append(wrap);
+}
+function itemLink(section, id) {
+  return ROOT_URL.href + section + "/?id=" + encodeURIComponent(id);
+}
+function makeIdentityCard({section, title, subtitle, photo, placeholder, className}) {
+  const link = document.createElement("a");
+  link.className = className;
+  link.href = itemLink(section, arguments[0].id);
+  if (photo) {
+    const image = document.createElement("img");
+    image.src = photo;
+    image.alt = "";
+    image.loading = "lazy";
+    link.append(image);
+  } else {
+    const icon = document.createElement("span");
+    icon.className = placeholder;
+    icon.setAttribute("aria-hidden", "true");
+    icon.textContent = arguments[0].icon || "👤";
+    link.append(icon);
+  }
+  const info = document.createElement("span");
+  info.className = "technician-card-info";
+  addTextElement(info, "strong", "", title);
+  if (subtitle) addTextElement(info, "small", "technician-specialty", subtitle);
+  addTextElement(info, "small", "technician-card-hint", "View details");
+  link.append(info);
+  return link;
+}
 function renderTechnicians(items) {
   const target = document.querySelector("#technicians-list");
-  if (!target || !Array.isArray(items) || !items.length) return;
-  target.replaceChildren();
-
-  let dialog = document.querySelector("#technician-detail-dialog");
-  if (!dialog) {
-    dialog = document.createElement("dialog");
-    dialog.id = "technician-detail-dialog";
-    dialog.className = "technician-detail-dialog";
-    dialog.setAttribute("aria-labelledby", "technician-detail-name");
-    dialog.innerHTML = '<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';
-    document.body.append(dialog);
-    dialog.querySelector(".technician-detail-close").addEventListener("click", () => dialog.close());
-    dialog.addEventListener("click", (event) => {
-      if (event.target === dialog) dialog.close();
-    });
+  if (!target || !Array.isArray(items)) return;
+  const visible = items.filter(item => item && item.name && item.is_published !== false && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region)));
+  const selectedId = new URLSearchParams(location.search).get("id");
+  if (selectedId) {
+    const item = visible.find(entry => String(entry.id) === selectedId);
+    if (item) detailLayout(target, item, item.name, [["Specialty", item.category], ["About", item.description], ["Country", item.country === "bd" ? "Bangladesh" : item.country === "saudi" ? "Saudi Arabia" : item.country === "global" ? "Global" : ""], ["Phone", item.phone], ["WhatsApp", item.whatsapp]]);
+    else addTextElement(target, "p", "muted", "This technician is unavailable.");
+    return;
   }
-
-  const detailBody = dialog.querySelector(".technician-detail-body");
-  const openDetails = (item) => {
-    detailBody.replaceChildren();
-    if (item.photo_url) {
-      const image = document.createElement("img");
-      image.src = item.photo_url;
-      image.alt = item.name;
-      image.className = "technician-detail-photo";
-      detailBody.append(image);
-    }
-    const name = addTextElement(detailBody, "h2", "", item.name);
-    name.id = "technician-detail-name";
-    if (item.description) addTextElement(detailBody, "p", "technician-detail-specialty", item.description);
-    if (item.category) addTextElement(detailBody, "p", "technician-detail-specialty", item.category);
-    const contacts = document.createElement("div");
-    contacts.className = "technician-detail-contacts";
-    if (item.phone) {
-      const call = document.createElement("a");
-      call.href = "tel:" + item.phone.replace(/[^+\d]/g, "");
-      call.textContent = "Call";
-      contacts.append(call);
-    }
-    if (item.whatsapp) {
-      const whatsapp = document.createElement("a");
-      whatsapp.href = "https://wa.me/" + item.whatsapp.replace(/\D/g, "");
-      whatsapp.target = "_blank";
-      whatsapp.rel = "noopener noreferrer";
-      whatsapp.textContent = "WhatsApp";
-      contacts.append(whatsapp);
-    }
-    if (contacts.children.length) detailBody.append(contacts);
-    dialog.showModal();
-  };
-
-  items.filter(item => item && item.name && item.is_published !== false && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region))).forEach(item => {
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "technician-card";
-    card.setAttribute("aria-label", "View " + item.name + " profile");
-    if (item.photo_url) {
-      const image = document.createElement("img");
-      image.src = item.photo_url;
-      image.alt = "";
-      image.loading = "lazy";
-      card.append(image);
-    } else {
-      const placeholder = document.createElement("span");
-      placeholder.className = "technician-card-placeholder";
-      placeholder.setAttribute("aria-hidden", "true");
-      placeholder.textContent = "👤";
-      card.append(placeholder);
-    }
-    const info = document.createElement("span");
-    info.className = "technician-card-info";
-    addTextElement(info, "strong", "", item.name);
-    if (item.category) addTextElement(info, "small", "technician-specialty", item.category);
-    addTextElement(info, "small", "technician-card-hint", "View details");
-    card.append(info);
-    card.addEventListener("click", () => openDetails(item));
-    target.append(card);
-  });
-  if (target.children.length) homepageTechnicians.hidden = false;
+  target.replaceChildren();
+  visible.forEach(item => target.append(makeIdentityCard({section:"technicians",id:item.id,title:item.name,subtitle:item.category,photo:item.photo_url,placeholder:"technician-card-placeholder",icon:"👤",className:"technician-card"})));
+  if (target.children.length && homepageTechnicians) homepageTechnicians.hidden = false;
 }
 function renderWorkshops(items) {
   const target = document.querySelector("#workshops-list");
   if (!target || !Array.isArray(items)) return;
-  target.replaceChildren();
-
-  let dialog = document.querySelector("#workshop-detail-dialog");
-  if (!dialog) {
-    dialog = document.createElement("dialog");
-    dialog.id = "workshop-detail-dialog";
-    dialog.className = "technician-detail-dialog workshop-detail-dialog";
-    dialog.innerHTML = '<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';
-    document.body.append(dialog);
-    dialog.querySelector(".technician-detail-close").addEventListener("click", () => dialog.close());
-    dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+  const visible = items.filter(item => item && item.title && item.status === "published" && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region)));
+  const selectedId = new URLSearchParams(location.search).get("id");
+  if (selectedId) {
+    const item = visible.find(entry => String(entry.id) === selectedId);
+    if (item) detailLayout(target, item, item.title, [["Category", item.category], ["Description", item.description], ["Location", item.location], ["Country", item.country === "bd" ? "Bangladesh" : item.country === "saudi" ? "Saudi Arabia" : item.country === "global" ? "Global" : ""]]);
+    else addTextElement(target, "p", "muted", "This workshop is unavailable.");
+    return;
   }
-
-  const detailBody = dialog.querySelector(".technician-detail-body");
-  const openDetails = item => {
-    detailBody.replaceChildren();
-    if (item.photo_url) {
-      const image = document.createElement("img");
-      image.src = item.photo_url;
-      image.alt = item.title;
-      image.className = "technician-detail-photo";
-      detailBody.append(image);
-    } else {
-      const icon = document.createElement("span");
-      icon.className = "workshop-detail-fallback";
-      icon.setAttribute("aria-hidden", "true");
-      icon.textContent = "🛠️";
-      detailBody.append(icon);
-    }
-    addTextElement(detailBody, "h2", "", item.title);
-    if (item.description) addTextElement(detailBody, "p", "technician-detail-specialty", item.description);
-    if (item.category) addTextElement(detailBody, "p", "workshop-date", item.category);
-    if (item.location) addTextElement(detailBody, "p", "workshop-location", item.location);
-    if (item.country) addTextElement(detailBody, "p", "workshop-location", item.country === "bd" ? "Bangladesh (BD)" : item.country === "saudi" ? "Saudi Arabia (Saudi)" : "Global");
-    dialog.showModal();
-  };
-
-  items.filter(item => item && item.title && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region))).forEach(item => {
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "workshop-card";
-    card.setAttribute("aria-label", "View " + item.title + " workshop details");
-    if (item.photo_url) {
-      const image = document.createElement("img");
-      image.src = item.photo_url;
-      image.alt = "";
-      image.loading = "lazy";
-      card.append(image);
-    } else {
-      const icon = document.createElement("span");
-      icon.className = "workshop-card-placeholder";
-      icon.setAttribute("aria-hidden", "true");
-      icon.textContent = "🛠️";
-      card.append(icon);
-    }
-    const info = document.createElement("span");
-    info.className = "technician-card-info";
-    addTextElement(info, "strong", "", item.title);
-    if (item.category) addTextElement(info, "small", "", item.category);
-    addTextElement(info, "small", "technician-card-hint", "View details");
-    card.append(info);
-    card.addEventListener("click", () => openDetails(item));
-    target.append(card);
-  });
+  target.replaceChildren();
+  visible.forEach(item => target.append(makeIdentityCard({section:"workshop",id:item.id,title:item.title,subtitle:item.category || item.location,photo:item.photo_url,placeholder:"workshop-card-placeholder",icon:"🛠️",className:"workshop-card"})));
   if (target.children.length && homepageWorkshops) homepageWorkshops.hidden = false;
 }
 function renderProducts(items) {
   const target = document.querySelector("#products-list");
   if (!target || !Array.isArray(items)) return;
-  target.replaceChildren();
-
-  const groupTitles = {
-    mobile: "Mobile & Accessories",
-    satellite: "Satellite & TV Equipment"
-  };
-  const getProductGroup = item => groupTitles[item.category_group] || item.category || "Other Products";
-
-  let dialog = document.querySelector("#product-detail-dialog");
-  if (!dialog) {
-    dialog = document.createElement("dialog");
-    dialog.id = "product-detail-dialog";
-    dialog.className = "technician-detail-dialog product-detail-dialog";
-    dialog.innerHTML = '<div class="technician-detail-content"><button class="technician-detail-close" type="button" aria-label="Close details">×</button><div class="technician-detail-body"></div></div>';
-    document.body.append(dialog);
-    dialog.querySelector(".technician-detail-close").addEventListener("click", () => dialog.close());
-    dialog.addEventListener("click", event => {
-      if (event.target === dialog) dialog.close();
-    });
+  const groupTitles = {mobile:"Mobile & Accessories",satellite:"Satellite & TV Equipment"};
+  const visible = filterProductsForRegion(items.filter(item => item && item.status === "active"), activeCountry.region);
+  const selectedId = new URLSearchParams(location.search).get("id");
+  if (selectedId) {
+    const item = visible.find(entry => String(entry.id) === selectedId);
+    if (item) detailLayout(target, item, item.name, [["Group", groupTitles[item.category_group] || item.category || "Other Products"], ["Description", item.description], ["Country", item.country === "bd" ? "Bangladesh" : item.country === "saudi" ? "Saudi Arabia" : item.country === "global" ? "Global" : ""]]);
+    else addTextElement(target, "p", "muted", "This product type is unavailable.");
+    return;
   }
-
-  const detailBody = dialog.querySelector(".technician-detail-body");
-  const openDetails = item => {
-    detailBody.replaceChildren();
-    if (item.photo_url) {
-      const image = document.createElement("img");
-      image.src = item.photo_url;
-      image.alt = item.name;
-      image.className = "technician-detail-photo";
-      detailBody.append(image);
-    } else {
-      const icon = document.createElement("span");
-      icon.className = "technician-card-placeholder";
-      icon.setAttribute("aria-hidden", "true");
-      icon.textContent = item.category_group === "satellite" ? "📡" : "📱";
-      detailBody.append(icon);
-    }
-    addTextElement(detailBody, "h2", "", item.name);
-    addTextElement(detailBody, "p", "technician-detail-specialty", getProductGroup(item));
-    if (item.description) addTextElement(detailBody, "p", "technician-detail-specialty", item.description);
-    if (item.country) addTextElement(detailBody, "p", "workshop-location", item.country === "bd" ? "Bangladesh (BD)" : item.country === "saudi" ? "Saudi Arabia (Saudi)" : "Global");
-    dialog.showModal();
-  };
-
-  const visibleItems = filterProductsForRegion(items, activeCountry.region);
-  let visibleCount = 4;
-  visibleItems.forEach((item, index) => {
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "technician-card";
-    card.hidden = index >= visibleCount;
-    card.setAttribute("aria-label", "View " + item.name + " product details");
-    if (item.photo_url) {
-      const image = document.createElement("img");
-      image.src = item.photo_url;
-      image.alt = "";
-      image.loading = "lazy";
-      card.append(image);
-    } else {
-      const placeholder = document.createElement("span");
-      placeholder.className = "technician-card-placeholder";
-      placeholder.setAttribute("aria-hidden", "true");
-      placeholder.textContent = item.category_group === "satellite" ? "📡" : "📱";
-      card.append(placeholder);
-    }
-    const info = document.createElement("span");
-    info.className = "technician-card-info";
-    addTextElement(info, "strong", "", item.name);
-    addTextElement(info, "small", "technician-specialty", getProductGroup(item));
-    addTextElement(info, "small", "technician-card-hint", "View details");
-    card.append(info);
-    card.addEventListener("click", () => openDetails(item));
+  target.replaceChildren();
+  const isHome = Boolean(homepageProducts && !document.querySelector("[data-section-page='products']"));
+  let visibleCount = isHome ? 4 : visible.length;
+  visible.forEach((item,index) => {
+    const group = groupTitles[item.category_group] || item.category || "Other Products";
+    const card = makeIdentityCard({section:"products",id:item.id,title:item.name,subtitle:group,photo:item.photo_url,placeholder:"technician-card-placeholder",icon:item.category_group === "satellite" ? "📡" : "📱",className:"technician-card"});
+    if (isHome) card.hidden = index >= visibleCount;
     target.append(card);
   });
-
-  if (visibleItems.length > 4) {
+  if (isHome && visible.length > 4) {
     const moreButton = document.createElement("button");
     moreButton.type = "button";
     moreButton.className = "product-more-button";
     moreButton.textContent = "More";
     moreButton.addEventListener("click", () => {
-      visibleCount = getNextVisibleCount(visibleCount, visibleItems.length, 4);
-      target.querySelectorAll(".technician-card").forEach((card, index) => { card.hidden = index >= visibleCount; });
-      if (visibleCount >= visibleItems.length) moreButton.remove();
+      visibleCount = getNextVisibleCount(visibleCount, visible.length, 4);
+      target.querySelectorAll(".technician-card").forEach((card,index) => { card.hidden = index >= visibleCount; });
+      if (visibleCount >= visible.length) moreButton.remove();
     });
     target.append(moreButton);
   }
-
   if (target.querySelector(".technician-card") && homepageProducts) homepageProducts.hidden = false;
   else if (homepageProducts) homepageProducts.hidden = true;
 }
@@ -1362,7 +1239,7 @@ async function loadPublicServices() {
       if (!grid) return;
       grid.replaceChildren();
       services.filter(item => !item.country || item.country === "global" || item.country === region).forEach(item => {
-        const link = document.createElement("a"); link.className = "service-card"; link.href = "./" + item.slug + "/";
+        const link = document.createElement("a"); link.className = "service-card"; link.href = ROOT_URL.href + "services/" + item.slug + "/";
         if (item.photo_url) { const img=document.createElement("img"); img.src=item.photo_url; img.alt=""; img.loading="lazy"; img.className="service-card-image"; link.append(img); }
         else { const icon=document.createElement("span"); icon.className="service-icon"; icon.setAttribute("aria-hidden","true"); icon.textContent="🛠️"; link.append(icon); }
         const info=document.createElement("span"); const title=document.createElement("strong"); title.textContent=item.name; info.append(title);
@@ -1384,13 +1261,13 @@ async function loadPublicServices() {
     if(item.description)addTextElement(detail,"p","",item.description);
     if(item.category)addTextElement(detail,"p","service-detail-category",item.category);
     if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt=item.name;img.className="service-detail-image";detail.append(img);}
-    const back=document.createElement("a");back.className="service-back-link";back.href="../../services/";back.textContent="Explore all services";detail.append(back);
+    const back=document.createElement("a");back.className="service-back-link";back.href=ROOT_URL.href + "services/";back.textContent="Explore all services";detail.append(back);
   }
 }
 loadPublicServices();
 
 async function loadHomepageIdentity() {
-  if (!homepageTechnicians && !homepageWorkshops && !homepageProducts) return;
+  if (!homepageTechnicians && !homepageWorkshops && !homepageProducts && !document.querySelector("[data-section-page]")) return;
   const [{ data: technicians, error: techniciansError }, { data: workshops, error: workshopsError }, { data: products, error: productsError }] = await Promise.all([
     supabase.from("technicians").select("*").eq("is_published", true).order("created_at", { ascending: false }),
     supabase.from("workshops").select("*").eq("status", "published").order("created_at", { ascending: false }),

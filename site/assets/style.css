@@ -682,3 +682,18 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
   .product-showcase-arrow{right:9px;bottom:9px;width:24px;height:24px}
 }
 \n\n/* Products: progressively reveal additional product cards */\n.product-more-button{grid-column:1/-1;justify-self:center;min-width:110px;min-height:40px;padding:8px 22px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--page-text);font:inherit;font-weight:600;cursor:pointer}\n.product-more-button:hover,.product-more-button:focus-visible{background:var(--hover);border-color:var(--page-text)}\n
+
+/* Dedicated section listings and full-page item details */
+.home-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.section-view-all{flex:0 0 auto;color:var(--muted);font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.section-list-page{width:min(1120px,100%);margin:0 auto;padding:28px 20px 48px;flex:1}
+.section-list-page .home-hero{padding:22px 0 28px;text-align:left}
+.section-list-page .catalogue-section{padding:12px 0}
+.catalogue-detail{width:min(760px,100%);margin:0 auto;padding:24px;border:1px solid var(--line);border-radius:16px;background:var(--surface);display:grid;gap:12px}
+.catalogue-detail h1{margin:0;font-size:clamp(24px,4vw,34px);line-height:1.2}
+.catalogue-detail-image{width:100%;max-height:360px;object-fit:cover;border-radius:12px}
+.catalogue-detail-field{margin:0;color:var(--muted);font-size:14px;line-height:1.7;white-space:pre-line}
+.catalogue-detail-field strong{color:var(--page-text)}
+.catalogue-detail .service-back-link{margin-top:8px;display:inline-flex;width:max-content;padding:10px 14px;border:1px solid var(--line);border-radius:8px}
+.catalogue-detail .service-back-link:hover{background:var(--hover)}
+@media(max-width:520px){.section-list-page{padding:20px 14px 36px}.catalogue-detail{padding:16px;border-radius:12px}}
