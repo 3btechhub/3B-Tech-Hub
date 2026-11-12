@@ -3,7 +3,7 @@
 ## Data model
 - `pages`: Main Pages (`parent_id = null`) and Sub Pages (`parent_id` points directly to a Main Page).
 - `page_components`: ordered, allowlisted component instances and JSON configuration.
-- `page_revisions`: JSON snapshots for future rollback support.
+- `page_revisions`: versioned JSON snapshots used for revision history and rollback.
 
 ## Live database
 - The initial schema and hardening migrations are applied to the production Supabase project.
@@ -29,6 +29,10 @@ The database stores content and validated configuration only. It never stores ex
 
 ## Owner/Admin Page Builder
 - Owner/Admin dashboard includes Main/Sub Page CRUD, Draft/Publish/Archive, structured component editing, ordering, preview, SEO fields and revision restore.
+- Revision snapshots are captured from the saved database state under a page-row lock, with revision numbering serialized per page.
+- Revision restore runs in one database transaction: it captures the current state, restores page metadata and the full component list, and rolls back everything if any constraint fails.
+- Component reordering is a single authorized database operation that validates the submitted list contains every component exactly once and records a revision before changing order.
+- These operations use SECURITY DEFINER RPCs with explicit site-admin checks; execution is granted only to authenticated users. The migration is applied only after an authorized merge/deploy workflow.
 - Published pages automatically appear in the matching-language navigation; drafts and archived pages stay hidden.
 - Sub Pages are grouped under their Main Page in navigation and use nested URLs.
 - The navigation uses the existing page schema; no arbitrary HTML, script or SQL is evaluated.
@@ -39,4 +43,6 @@ The database stores content and validated configuration only. It never stores ex
 - GitHub Actions runs the syntax, regression and browser checks before allowing Pages deployment.
 
 ## Remaining work
-1. Verify the live Supabase-backed navigation and dynamic deep links in the production browser after an authorized merge and deployment.
+1. Apply and verify the atomic Page Builder revision migration in Supabase after the PR is reviewed and authorized for merge/deployment.
+2. Test revision capture, restore rollback, component reorder and permission denial against a staging/test page before using the features in production.
+3. Verify the live Supabase-backed navigation and dynamic deep links in the production browser after authorized deployment.
