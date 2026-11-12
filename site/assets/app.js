@@ -56,7 +56,11 @@ function applyTheme(theme) {
   localStorage.setItem("3b-theme", dark ? "dark" : "light");
 }
 applyLanguage(savedLanguage);
-if (regionSelect) regionSelect.value = activeCountry.region;
+if (languageSelect) languageSelect.dispatchEvent(new Event("dropdownrefresh"));
+if (regionSelect) {
+  regionSelect.value = activeCountry.region;
+  regionSelect.dispatchEvent(new Event("dropdownrefresh"));
+}
 applyTheme(savedTheme === "dark" ? "dark" : "light");
 if (themeToggle) themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
 if (languageSelect) {
