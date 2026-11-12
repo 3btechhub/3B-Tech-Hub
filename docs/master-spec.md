@@ -426,7 +426,7 @@ Expected public website:
 `https://3btechhub.github.io/3btechhub/`
 
 Deployment rules:
-- Only approved code merged to `main) is eligible for Production deployment.
+- Only approved code merged to `main` is eligible for Production deployment.
 - Pull request checks must pass before merge.
 - Deployment must publish the `site/` directory.
 - Do not claim a Production release from a feature/refactor branch.
