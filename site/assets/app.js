@@ -1126,7 +1126,7 @@ function detailLayout(target, item, title, fields) {
   }
   const back = document.createElement("a");
   back.className = "service-back-link";
-  back.href = location.pathname.replace(/\\/+$/, "") + "/";
+  back.href = location.pathname.replace(/\/+$/, "") + "/";
   back.textContent = "Explore all";
   wrap.append(back);
   target.append(wrap);
