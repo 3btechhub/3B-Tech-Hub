@@ -10,7 +10,7 @@
   const pathParts = window.location.pathname.split("/").filter(Boolean);
   const routeIndex = pathParts.indexOf("3btechhub");
   const pathRegion = routeIndex >= 0 ? normalizeRegion(pathParts[routeIndex + 1]) : null;
-  const activeRegion = normalizeRegion(window.siteCountry?.region || pathRegion || "global");
+  let activeRegion = normalizeRegion(window.siteCountry?.region || pathRegion || "global");
 
   const makeDropdown = (select, title) => {
     if (!select || select.dataset.customDropdown === "true") return;
@@ -65,6 +65,7 @@
     wrapper.append(trigger, panel);
     select.hidden = true;
     select.addEventListener("change", update);
+    select.addEventListener("dropdownrefresh", update);
     update();
   };
 
@@ -92,6 +93,22 @@
   }
   makeDropdown(languageSelect, "Language");
   makeDropdown(regionSelect, "Country");
+
+  window.addEventListener("countrycontextready", (event) => {
+    const region = normalizeRegion(event.detail?.region);
+    if (!["bd", "ksa", "global"].includes(region)) return;
+    activeRegion = region;
+    if (regionSelect) {
+      regionSelect.value = region;
+      regionSelect.dispatchEvent(new Event("dropdownrefresh"));
+    }
+    if (languageSelect) {
+      const defaultLanguage = region === "bd" ? "bn" : region === "ksa" ? "ar" : "en";
+      try { languageSelect.value = localStorage.getItem("3b-language-" + region) || defaultLanguage; }
+      catch (_) { languageSelect.value = defaultLanguage; }
+      languageSelect.dispatchEvent(new Event("dropdownrefresh"));
+    }
+  });
 
   if (!button || !menu) return;
   const closeMenu = () => {
