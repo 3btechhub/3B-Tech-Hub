@@ -9,6 +9,15 @@ Read [master-spec.md](master-spec.md) first. It defines the complete allowed pro
 - Supabase publishable key may be used in browser code. Secret/service-role keys must never be shipped to GitHub Pages.
 - No Vercel, Appwrite, Cloudflare, Next.js server hosting or additional platform is allowed.
 
+## Shared page renderer
+
+- One persistent document shell owns the Header, Main Area and Footer.
+- A single route resolver maps `/global/`, `/bd/`, `/ksa/`, `/account/`, `/profile/` and `/dashboard/` to modular Main Area views.
+- Country routes reuse one Home view and vary only country context, language defaults and country-scoped data.
+- Internal navigation and browser Back/Forward replace only the Main Area; Header and Footer remain mounted.
+- The root entry defaults to Home after country detection; direct canonical route visits are preserved.
+- Static-host route entry files bootstrap the root shell, while page view markup is maintained once under `site/views/`.
+
 ## Runtime
 
 ```text
