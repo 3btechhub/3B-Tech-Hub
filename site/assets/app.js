@@ -560,7 +560,10 @@ function renderRoleSummary(users) {
   for (const role of roles) {
     const row = document.createElement("article");
     row.className = "admin-list-row";
-    const count = users.filter((user) => user.role === role).length;
+    const count = users.filter((user) => {
+      const normalized = user.role === "owner" ? "owner" : user.role === "admin" ? "admin" : "member";
+      return normalized === role;
+    }).length;
     addTextElement(row, "strong", "", role.charAt(0).toUpperCase() + role.slice(1));
     addTextElement(row, "span", "", String(count) + (count === 1 ? " account" : " accounts"));
     roleSummaryList.append(row);
@@ -584,7 +587,7 @@ function renderUserList(users) {
     const blocked = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
     const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Never signed in";
     addTextElement(primary, "span", "muted", [
-      user.role === "owner" ? "Owner" : (user.role || "Member"),
+      user.role === "owner" ? "Owner" : user.role === "admin" ? "Admin" : "Member",
       blocked ? "Blocked" : "Active",
       "Last sign-in: " + lastSignIn,
     ].join(" · "));
@@ -605,7 +608,7 @@ function renderUserList(users) {
       option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
       roleSelect.append(option);
     }
-    roleSelect.value = user.role || "member";
+    roleSelect.value = ["admin", "member"].includes(user.role) ? user.role : "member";
     roleSelect.disabled = user.role === "owner";
     actions.append(roleSelect);
 
