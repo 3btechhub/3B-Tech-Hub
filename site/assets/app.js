@@ -1160,7 +1160,6 @@ function renderTechnicians(items) {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "technician-card";
-    card.hidden = index >= visibleCount;
     card.setAttribute("aria-label", "View " + item.name + " profile");
     if (item.photo_url) {
       const image = document.createElement("img");
