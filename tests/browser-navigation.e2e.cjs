@@ -5,7 +5,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { chromium } = require("playwright");
 
-const siteRoot = path.resolve(__dirname, "../site");
+const repoRoot = path.resolve(__dirname, "..");
+const siteRoot = path.join(repoRoot, "site");
 let server;
 let browser;
 let origin;
@@ -14,8 +15,9 @@ test("published Main/Sub Pages render as grouped navigation links in a real brow
   server = http.createServer((req, res) => {
     const pathname = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
     const relative = pathname.replace(/^\/3btechhub\/?/, "");
-    const file = path.resolve(siteRoot, relative || "index.html");
-    if (!file.startsWith(siteRoot + path.sep) && file !== path.join(siteRoot, "index.html")) {
+    const base = relative.startsWith("tests/fixtures/") ? repoRoot : siteRoot;
+    const file = path.resolve(base, relative || "index.html");
+    if (!file.startsWith(base + path.sep) && file !== path.join(base, "index.html")) {
       res.writeHead(403).end("Forbidden");
       return;
     }
