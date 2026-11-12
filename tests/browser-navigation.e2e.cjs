@@ -43,6 +43,14 @@ test("published Main/Sub Pages render as grouped navigation links in a real brow
   assert.equal(links[0].href, "/3btechhub/about-us/");
   assert.equal(links[1].href, "/3btechhub/about-us/our-team/");
   assert.deepEqual(errors, []);
+
+  await page.goto(origin + "/3btechhub/tests/fixtures/dynamic-page.html");
+  await page.waitForFunction(() => document.documentElement.dataset.testReady === "true");
+  assert.equal(await page.locator("#preview h1").textContent(), "Safe Dynamic Page");
+  assert.equal(await page.locator("#preview h2").textContent(), "<img src=x onerror=alert(1)>");
+  assert.equal(await page.locator("#preview img").count(), 0);
+  assert.deepEqual(errors, []);
+
   await browser.close();
   await new Promise(resolve => server.close(resolve));
 });
