@@ -7,7 +7,7 @@ await window.countryContextReady;
 const activeCountry = window.siteCountry;
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
-const profileMenuLink = document.querySelector("#profile-menu-link");
+const accountMenuLink = document.querySelector("#login-menu-link");
 const dashboardMenuLink = document.querySelector("#dashboard-menu-link");
 const themeToggle = document.querySelector("#theme-toggle");
 const languageSelect = document.querySelector("#language-select");
@@ -85,19 +85,9 @@ if (languageSelect) {
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szacT";
 let supabase;
-const loginMenuLink = document.querySelector("#login-menu-link");
+
 const logoutMenuLink = document.querySelector("#logout-menu-link");
 
-// Hide the menu link for the page currently being viewed.
-function hideCurrentPageMenuLink() {
-  if (!siteMenu) return;
-  const currentPath = location.pathname.replace(/\/+$/, "") || "/";
-  siteMenu.querySelectorAll('a.menu-link[href]').forEach((link) => {
-    const targetPath = new URL(link.getAttribute("href"), location.href).pathname.replace(/\/+$/, "") || "/";
-    if (targetPath === currentPath) link.hidden = true;
-  });
-}
-hideCurrentPageMenuLink();
 function closeSiteMenu() {
   if (!siteMenu || !menuButton) return;
   siteMenu.hidden = true;
@@ -106,8 +96,12 @@ function closeSiteMenu() {
   menuButton.setAttribute("aria-label", "Open menu");
 }
 async function setMenuSession(session) {
-  if (profileMenuLink) profileMenuLink.hidden = !session;
-  if (loginMenuLink) loginMenuLink.hidden = !!session;
+  if (accountMenuLink) {
+    const destination = new URL(session ? "profile/" : "account/", ROOT_URL);
+    accountMenuLink.href = destination.href;
+    const currentPath = location.pathname.replace(/\/+$/, "") || "/";
+    accountMenuLink.hidden = destination.pathname.replace(/\/+$/, "") === currentPath;
+  }
   if (logoutMenuLink) logoutMenuLink.hidden = !session;
   if (dashboardMenuLink) {
     dashboardMenuLink.hidden = true;
@@ -158,15 +152,15 @@ if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   if (!error) {
     setMenuSession(null);
     closeSiteMenu();
-    location.assign(new URL("account/", ROOT_URL).href);
+    location.assign(ROOT_URL.href);
   }
 });
-async function syncProfileMenu() {
-  if (!profileMenuLink) return;
+async function syncAccountMenu() {
+  if (!accountMenuLink) return;
   const { data } = await supabase.auth.getSession();
   setMenuSession(data.session);
 }
-syncProfileMenu();
+syncAccountMenu();
 supabase.auth.onAuthStateChange((_event, session) => {
   setMenuSession(session);
 });
