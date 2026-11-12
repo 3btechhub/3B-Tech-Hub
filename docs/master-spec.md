@@ -14,6 +14,7 @@ This document is the sole product-scope authority for the website. Production UI
 - Header
 - Main Area
 - Footer
+- Header and Footer must remain visible on every page and route; neither may be hidden.
 
 ## 3. Features
 - Logo
@@ -41,7 +42,15 @@ Only these modules may exist:
 
 No separate Services, Products, Workshop, Technician, Media, Booking, or other dashboard module is permitted.
 
-## 5. User types
+## 5. Page and Sub Page rules
+- Main Area displays the website structure pages; shared Header and Footer remain visible.
+- A page may appear as a Home Page section only when its visibility setting is enabled and it is published.
+- A Sub Page must always reference an existing Main Page; orphan Sub Pages are not allowed.
+- Page CRUD fields: Title (required), Description, Type (Main Page/Sub Page, required), Country (required; defaults to `global`), Location, Phone Number, WhatsApp Number, Email, Image, and Visibility.
+- Optional contact and media fields remain optional. Create/Edit forms are shown only when requested, not permanently displayed above the page database/list.
+- Page, User, Role and Permission use consistent database-list + on-demand Create/Edit + Delete CRUD patterns. Other modules follow the same interaction and visual conventions where applicable.
+
+## 6. User types
 - Owner — fixed primary account: 3btechhub@gmail.com
 - Admin
 - Member
@@ -49,7 +58,7 @@ No separate Services, Products, Workshop, Technician, Media, Booking, or other d
 
 Visitor is the anonymous/public access level and does not need a Supabase Auth role assignment. Owner must never be demoted, deleted, blocked, or replaced. Admin permissions are explicitly delegated; Member is a normal authenticated account.
 
-## 6. Country routes
+## 7. Country routes
 Canonical route identifiers and paths:
 - `global` — default route; content available to everyone
 - `bd` — Bangladesh-only content
@@ -59,21 +68,21 @@ Global content is visible on every route. Bangladesh-only content is visible onl
 
 On the first visit to the site entry point, attempt IP/country detection. Map Bangladesh to `bd`, Saudi Arabia to `ksa`, and every other country or detection failure to `global`. A visitor may manually change the route from the menu at any time. Persist an intentional manual selection for later visits. Direct visits to a canonical route must stay on that route.
 
-## 7. Route language defaults
+## 8. Route language defaults
 - `global` — English (`en`)
 - `bd` — Bengali (`bn`)
 - `ksa` — Arabic (`ar`)
 
 Language can be changed independently on every route using the menu. Changing language must not change country route. Arabic must set RTL; English and Bengali must set LTR.
 
-## 8. Design system
+## 9. Design system
 - Monochrome black and white, with neutral gray only for hierarchy and states.
 - Two icon appearances: light-theme and dark-theme variants.
 - Text, buttons, and input/output controls have only three semantic sizes: Small, Medium, Large.
 - Reuse centralized design tokens and shared components; do not duplicate page-level styles.
 - Simple, clean, responsive, accessible and consistent.
 
-## 9. Engineering conditions
+## 10. Engineering conditions
 Fast, clean, reliable, usable, easy to maintain, secure, safe, consistent, centralized, globalized, minimal required configuration, maximum optional fields, minimal hard-coded values, and simple design.
 - Keep authorization in Supabase RLS and trusted server-side functions, never in UI visibility alone.
 - Never expose service-role or secret keys to the browser.
@@ -82,10 +91,10 @@ Fast, clean, reliable, usable, easy to maintain, secure, safe, consistent, centr
 - Every route has a safe fallback. Failed IP detection falls back to `global`.
 - Do not add product or service functionality outside the approved module list.
 
-## 10. Platform constraints
+## 11. Platform constraints
 - GitHub Pages: static frontend, source and CI/CD.
 - Supabase: Auth, PostgreSQL, RLS, Storage and Edge Functions.
 - Do not add Vercel, Appwrite, Cloudflare, Next.js server hosting, or any other platform.
 
-## 11. Scope acceptance
+## 12. Scope acceptance
 A production page, menu item, dashboard tab, route, database feature or workflow is allowed only when it directly implements an item in sections 1–5 or a required shared behavior in sections 6–10. Otherwise remove it from the active product.
