@@ -104,7 +104,7 @@ Deno.serve(async (request: Request) => {
 
     if (body.action === "invite") {
       const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-      const role = typeof body.role === "string" ? body.role : "customer";
+      const role = typeof body.role === "string" ? body.role : "member";
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return response({ error: "Enter a valid email address." }, 400, origin);
       if (email === primaryOwnerEmail || !allowedRoles.has(role)) return response({ error: "This role or account cannot be invited." }, 400, origin);
       const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo });
