@@ -175,7 +175,7 @@ if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   if (!error) {
     setMenuSession(null);
     closeSiteMenu();
-    window.navigateSiteRoute(ROOT_URL.pathname);
+    window.navigateSiteRoute(new URL("home/", ROOT_URL).pathname);
   }
 });
 async function syncAccountMenu() {
