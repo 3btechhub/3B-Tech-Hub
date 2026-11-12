@@ -68,7 +68,6 @@ Visitor is the anonymous/public access level and does not need a Supabase Auth r
 - Profile: `/profile/`
 - Dashboard: `/dashboard/`
 - `/` redirects to `/home/`.
-- `/` redirects to `/home/`.
 - `/login/` remains a compatibility alias for Account.
 
 These are normal page routes within one website, not country-specific website versions. The Header and Footer remain mounted while the Main Area changes.
