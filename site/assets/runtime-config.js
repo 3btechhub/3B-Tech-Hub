@@ -23,15 +23,15 @@ function isPlainObject(value) {
 
 export function isSafeRuntimeValue(key, value) {
   if (typeof value !== "string" || value.length > 160) return false;
-  if (/[;{}<>\\]|url\\s*\\(|expression\\s*\\(|javascript:/i.test(value)) return false;
+  if (/[;{}<>\\]|url\s*\(|expression\s*\(|javascript:/i.test(value)) return false;
 
   if (COLOR_KEYS.has(key)) {
     return /^#[0-9a-f]{3,8}$/i.test(value)
-      || /^(?:rgb|rgba|hsl|hsla)\\([0-9\\s.,%/]+\\)$/i.test(value);
+      || /^(?:rgb|rgba|hsl|hsla)\([0-9\s.,%/]+\)$/i.test(value);
   }
 
   if (LENGTH_KEYS.has(key)) {
-    return /^(?:0|[0-9]+(?:\\.[0-9]+)?(?:px|rem|em|vw|vh|%))$/i.test(value);
+    return /^(?:0|[0-9]+(?:\.[0-9]+)?(?:px|rem|em|vw|vh|%))$/i.test(value);
   }
 
   if (key === "font_family") {
