@@ -1,25 +1,32 @@
-# Dynamic Page Engine — Phase 1
+# Dynamic Page Engine
 
 ## Data model
-- `pages`: Main pages (`parent_id = null`) and Sub pages (`parent_id` points to a Main page).
-- `page_components`: ordered component instances and JSON configuration.
+- `pages`: Main Pages (`parent_id = null`) and Sub Pages (`parent_id` points directly to a Main Page).
+- `page_components`: ordered, allowlisted component instances and JSON configuration.
 - `page_revisions`: JSON snapshots for future rollback support.
+
+## Live database
+- The initial schema and hardening migrations are applied to the production Supabase project.
+- RLS is enabled on all three tables. Public reads are limited to published pages/components; writes require the existing site-admin authorization helper.
+- A database trigger prevents Sub Pages from nesting below another Sub Page and prevents publishing a child beneath an unpublished Main Page.
+- Main Page and component updates maintain `updated_at` using the existing shared trigger function.
+- Migration filenames match the versions recorded in Supabase migration history.
 
 ## Trust boundary
 The database stores content and validated configuration only. It never stores executable JavaScript, SQL, HTML templates, or arbitrary function bodies. The frontend renderer has a fixed allowlist of component handlers. Unknown component types are ignored.
 
-## Access model
-- Public visitors can read published pages and their components only.
-- Site admins can read drafts and manage pages/components/revisions through existing `private.is_site_admin()`.
-- Revision writes are admin-only.
-- RLS is enabled for every new public table.
+## Routing
+- GitHub Pages `404.html` acts as a safe fallback for non-static paths.
+- Dynamic routes use `/<main-slug>` and `/<main-slug>/<sub-slug>` below the GitHub Pages project base path.
+- Existing static routes are reserved and never intercepted by the dynamic resolver.
+- Only published pages are fetched; component data is fetched in one batched query.
+- Unknown, unpublished, malformed, and failed lookups retain the not-found experience.
 
 ## Initial registered components
 `hero`, `rich_text`, `image`, `card_grid`, `button_group`, `faq`, `spacer`.
 
-## Next phases
-1. Route resolver and public page data loader.
-2. Owner/admin page editor (create, edit, reorder, draft, publish, archive).
-3. Revision snapshot and restore workflow.
-4. Navigation and SEO integration.
-5. Preview and browser end-to-end tests.
+## Remaining work
+1. Owner/Admin page editor (create, edit, reorder, draft, publish, archive).
+2. Revision snapshot creation and restore workflow.
+3. Navigation and SEO integration.
+4. Browser end-to-end tests and visual verification.
