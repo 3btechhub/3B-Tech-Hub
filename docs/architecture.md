@@ -15,7 +15,7 @@ Read [master-spec.md](master-spec.md) first. It defines the complete allowed pro
 Browser
   |-- GitHub Pages: HTML, CSS and JavaScript
   |-- Supabase Auth: account sessions
-  |-- Supabase Data API: public pages and authorized dashboard operations
+  |-- Supabase Data API: authorized account and dashboard operations
   v
 PostgreSQL + RLS + trusted Edge Functions
 ```
@@ -26,7 +26,6 @@ PostgreSQL + RLS + trusted Edge Functions
 - Account: `/account/`
 - Profile: `/profile/`
 - Dashboard: `/dashboard/`
-- Dynamic Main Pages and Sub Pages: stored in `pages` and rendered through the allowlisted page engine.
 
 Only `global`, `bd` and `ksa` are canonical country identifiers. Global content is visible on every route; country-specific content is restricted to its matching route.
 
@@ -35,9 +34,9 @@ Only `global`, `bd` and `ksa` are canonical country identifiers. Global content 
 - `3btechhub@gmail.com` is the fixed primary Owner.
 - Allowed account roles: Owner, Admin and Member. Visitor is anonymous public access.
 - Owner has full access to approved modules.
-- Admin has Overview, Audit and Page access; user/role/permission/settings administration remains Owner-only.
-- Member can access only their own account/profile and public pages.
-- Visitor can access public pages only.
+- Admin has Overview and Audit access; user/role/permission/settings administration remains Owner-only.
+- Member can access only their own account/profile.
+- Visitor can access the public website only.
 - All authorization is enforced in RLS and trusted Edge Functions.
 
 ## Release process
