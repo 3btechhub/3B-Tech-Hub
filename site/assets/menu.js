@@ -6,6 +6,12 @@
   const languageSelect = document.querySelector("#language-select");
   const BASE = "/3btechhub/";
   const normalizeRegion = (value) => value === "saudi" ? "ksa" : value;
+  const menuLabels = {
+    en: { language:"Language", country:"Country", en:"English", bn:"Bengali", ar:"Arabic", global:"Global", bd:"Bangladesh", ksa:"Saudi Arabia" },
+    bn: { language:"ভাষা", country:"দেশ", en:"ইংরেজি", bn:"বাংলা", ar:"আরবি", global:"গ্লোবাল", bd:"বাংলাদেশ", ksa:"সৌদি আরব" },
+    ar: { language:"اللغة", country:"الدولة", en:"الإنجليزية", bn:"البنغالية", ar:"العربية", global:"عالمي", bd:"بنغلاديش", ksa:"السعودية" }
+  };
+  const currentLabels = () => menuLabels[document.documentElement.lang] || menuLabels.en;
 
   const pathParts = window.location.pathname.split("/").filter(Boolean);
   const routeIndex = pathParts.indexOf("3btechhub");
@@ -32,9 +38,11 @@
 
     const update = () => {
       const selected = select.options[select.selectedIndex];
-      trigger.textContent = title + ": " + (selected ? selected.textContent.replace(/^(Language|Country):\s*/, "") : "");
+      const labels = currentLabels();
+      trigger.textContent = (labels[title.toLowerCase()] || title) + ": " + (selected ? labels[selected.value] || selected.textContent : "");
       panel.querySelectorAll("button").forEach((option) => {
         const active = option.dataset.value === select.value;
+        option.textContent = labels[option.dataset.value] || option.dataset.value;
         option.setAttribute("aria-pressed", String(active));
         option.classList.toggle("is-selected", active);
       });
@@ -44,7 +52,7 @@
       const item = document.createElement("button");
       item.type = "button";
       item.className = "menu-dropdown-option";
-      item.textContent = option.textContent.replace(/^(Language|Country):\s*/, "");
+      item.textContent = currentLabels()[option.value] || option.textContent;
       item.dataset.value = option.value;
       item.addEventListener("click", () => {
         select.value = option.value;
@@ -93,6 +101,11 @@
   }
   makeDropdown(languageSelect, "Language");
   makeDropdown(regionSelect, "Country");
+
+  window.addEventListener("site-language-changed", () => {
+    languageSelect?.dispatchEvent(new Event("dropdownrefresh"));
+    regionSelect?.dispatchEvent(new Event("dropdownrefresh"));
+  });
 
   window.addEventListener("countrycontextready", (event) => {
     const region = normalizeRegion(event.detail?.region);
