@@ -35,7 +35,10 @@ const translations = {
 function applyLanguage(language) {
   const lang = ["bn", "ar"].includes(language) ? language : "en";
   document.documentElement.lang = lang;
-  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  // Text direction follows the selected language only, never the country route.
+  const isArabic = lang === "ar";
+  document.documentElement.dir = isArabic ? "rtl" : "ltr";
+  document.documentElement.dataset.languageDirection = isArabic ? "rtl" : "ltr";
   document.querySelectorAll("[data-label]").forEach((element) => {
     const key = element.dataset.label;
     if (translations[lang][key]) element.textContent = translations[lang][key];
@@ -80,8 +83,7 @@ if (languageSelect) {
     if (supabase) {
       void renderDynamicRoute(supabase);
       void renderDynamicNavigation(supabase);
-void renderHomeSections(supabase);
-void renderHomeSections(supabase);
+      void renderHomeSections(supabase);
     }
   };
   languageSelect.addEventListener("change", changeLanguage);
