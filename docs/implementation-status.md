@@ -25,16 +25,16 @@ See [master-spec.md](master-spec.md). This is the only allowed website specifica
 
 ## Still required before merge/deployment
 
-- [x] Converted pending legacy cleanup work into one hidden Global Main Page (`Legacy Data Cleanup`) with five linked Sub Pages in Supabase.
+- [x] Converted the two legacy Workshop records into a Workshops Main Page with two Sub Pages.\n- [x] Converted the three legacy Technician records into a Technicians Main Page with three Sub Pages, preserving country, phone, WhatsApp and image URLs.\n- [x] Converted all five legacy Technician Storage image objects into an Images Main Page with five Sub Pages, retaining original Storage URLs.\n- [x] Enabled Home visibility for all 13 converted Main/Sub Pages and added responsive homepage sections/cards with image, contact and location rendering.
 - [x] Added optional Page contact fields and explicit `visibility` column to the live `pages` table; Page Builder form now includes Location, Phone, WhatsApp, Email, Image URL and Home visibility.
 - [ ] Complete final migration: archive legacy rows privately, convert Customer to Member, remove Manager/Editor/Staff role values, then drop out-of-scope tables `site_content`, `products`, `services`, `workshops`, `technicians` and `media_assets`.
 - [ ] Deploy the updated `owner-users` Edge Function with the new frontend.
 - [ ] Verify Owner/Admin/Member authorization and audit behavior in a browser.
 - [ ] Verify IP routing, Global fallback, manual route selection, language defaults, language switching and Arabic RTL.
-- [ ] Verify Page Builder, country-scoped content, Page visibility/Home sections, Account, Profile and Settings in a browser.
+- [ ] Verify Page Builder, country-scoped content, converted Workshop/Technician/Image homepage sections, Account, Profile and Settings in a browser.
 - [ ] Run the final GitHub Actions checks after the remaining changes.
 - [ ] Review the final diff and merge only after all required checks pass.
 
 ## Data safety note
 
-The live database still contains legacy catalogue tables and records (9 Products, 6 Services, 2 Workshops and 3 Technicians). They have not been dropped. The source backup branch protects code only; it is not a database or Storage backup. The final migration must archive legacy rows into a private, non-API schema before dropping active legacy tables.
+The live database still contains legacy catalogue tables and their source records (9 Products, 6 Services, 2 Workshops and 3 Technicians), plus the five original Technician image objects in Storage. Workshop, Technician and Image information has been copied into the new Pages tree; original source rows and Storage objects remain intact and must not be deleted until the private archive/backup and final cleanup are separately verified. The source backup branch protects code only; it is not a database or Storage backup.
