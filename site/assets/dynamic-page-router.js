@@ -30,14 +30,16 @@ function setNotFound(main) {
 async function findPage(supabase, { slug, locale, region, pageType, parentId = null }) {
   const countries = region === "global" ? ["global"] : [region, "global"];
   for (const country of countries) {
-    let query = supabase.from("pages")
-      .select("id,parent_id,page_type,slug,title,description,locale,country,seo,status")
-      .eq("slug", slug).eq("locale", locale).eq("country", country)
+    for (const candidateLocale of (locale === "en" ? ["en"] : [locale, "en"])) {
+      let query = supabase.from("pages")
+        .select("id,parent_id,page_type,slug,title,description,locale,country,seo,status,location,phone_number,whatsapp_number,email,image_url")
+        .eq("slug", slug).eq("locale", candidateLocale).eq("country", country)
       .eq("status", "published").eq("page_type", pageType);
     query = parentId ? query.eq("parent_id", parentId) : query.is("parent_id", null);
     const { data, error } = await query.maybeSingle();
     if (error) throw error;
-    if (data) return data;
+      if (data) return data;
+    }
   }
   return null;
 }
@@ -90,6 +92,26 @@ export async function renderDynamicRoute(supabase) {
     const content = document.createElement("main");
     content.className = "dynamic-page-main";
     renderPage(page, components || [], content);
+    if (page.image_url && /^https?:\/\//i.test(page.image_url)) {
+      const image = document.createElement("img");
+      image.src = page.image_url;
+      image.alt = page.title || "Page image";
+      image.loading = "lazy";
+      image.className = "dynamic-page-image";
+      content.append(image);
+    }
+    const pageDetails = [
+      page.location,
+      page.phone_number ? "Phone: " + page.phone_number : "",
+      page.whatsapp_number ? "WhatsApp: " + page.whatsapp_number : "",
+      page.email ? "Email: " + page.email : ""
+    ].filter(Boolean);
+    if (pageDetails.length) {
+      const details = document.createElement("p");
+      details.className = "dynamic-page-details";
+      details.textContent = pageDetails.join(" · ");
+      content.append(details);
+    }
     main.replaceWith(content);
     document.title = (typeof page.seo?.title === "string" && page.seo.title.trim())
       ? page.seo.title.slice(0, 180) : page.title + " | 3B TECH HUB";
