@@ -65,7 +65,7 @@
     </section>
 
     <section class="dashboard-module-panel" id="panel-audit" role="tabpanel" aria-labelledby="tab-audit" data-dashboard-panel="audit" hidden>
-      <div class="technician-admin-list">
+      <div class="admin-list">
         <div class="dashboard-heading"><h2>Audit History</h2><button class="secondary-button" id="audit-refresh" type="button">Refresh</button></div>
         <div id="audit-log-list" aria-live="polite"><p class="muted">Select Audit to load recent activity.</p></div>
       </div>
@@ -84,20 +84,20 @@
         <div class="editor-actions"><button type="submit" id="user-invite-submit">Send Invitation</button><button type="button" id="user-refresh" class="secondary-button">Refresh Users</button></div>
         <p class="editor-message" id="user-message" role="status"></p>
       </form>
-      <div class="technician-admin-list"><h2>User List</h2><div id="user-admin-items"></div></div>
+      <div class="admin-list"><h2>User List</h2><div id="user-admin-items"></div></div>
     </section>
 
     <section class="dashboard-module-panel" id="panel-role" role="tabpanel" aria-labelledby="tab-role" data-dashboard-panel="role" hidden>
-      <div class="technician-admin-list"><h2>Role Assignments</h2><p class="muted">Only Owner can assign or change account roles. Owner is protected.</p><div id="role-summary-list"></div></div>
+      <div class="admin-list"><h2>Role Assignments</h2><p class="muted">Only Owner can assign or change account roles. Owner is protected.</p><div id="role-summary-list"></div></div>
     </section>
 
     <section class="dashboard-module-panel" id="panel-permission" role="tabpanel" aria-labelledby="tab-permission" data-dashboard-panel="permission" hidden>
-      <div class="technician-admin-list">
+      <div class="admin-list">
         <h2>Permission Matrix</h2>
-        <div class="technician-admin-row"><strong>Owner</strong><span>Full access to all approved modules and system settings.</span></div>
-        <div class="technician-admin-row"><strong>Admin</strong><span>Overview, Audit and Page management. No user, role or system settings administration.</span></div>
-        <div class="technician-admin-row"><strong>Member</strong><span>Own account and profile only.</span></div>
-        <div class="technician-admin-row"><strong>Visitor</strong><span>Public pages and public navigation only.</span></div>
+        <div class="admin-list-row"><strong>Owner</strong><span>Full access to all approved modules and system settings.</span></div>
+        <div class="admin-list-row"><strong>Admin</strong><span>Overview, Audit and Page management. No user, role or system settings administration.</span></div>
+        <div class="admin-list-row"><strong>Member</strong><span>Own account and profile only.</span></div>
+        <div class="admin-list-row"><strong>Visitor</strong><span>Public pages and public navigation only.</span></div>
       </div>
     </section>
 
