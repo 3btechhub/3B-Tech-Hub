@@ -20,7 +20,7 @@ The Header, Main Area and Footer form one persistent shared layout. The root ent
 - Menu
 - Dark / Light theme
 - English-only interface
-- Authentication
+- Owner authentication
 - CRUD
 - Icons and fallback visuals
 - Cards
@@ -36,9 +36,6 @@ Only these modules may exist:
 - Products
 - Workshops
 - Technicians
-- User
-- Role
-- Permission
 - Settings
 
 Services, Products, Workshops and Technicians are approved content-management modules. No Media Library, booking or other additional dashboard module is permitted.
@@ -54,13 +51,13 @@ Services, Products, Workshops and Technicians are approved content-management mo
 - Only Name and Slug are required; all other fields are optional.
 - Content records are shared across the one website; there is no country-based filtering.
 
-## 5. User types
-- Owner — fixed primary account: 3btechhub@gmail.com
-- Admin
-- Member
-- Visitor
-
-Visitor is the anonymous/public access level and does not need a Supabase Auth role assignment. Owner must never be demoted, deleted, blocked, or replaced. Admin permissions are explicitly delegated; Member is a normal authenticated account.
+## 5. Access model
+- Exactly one authenticated Owner account: 3btechhub@gmail.com.
+- Visitors use the public website anonymously and do not create or hold accounts.
+- No Admin, Member, Customer, Staff, Manager, Editor, invite, registration, or external user-management system.
+- Owner must never be demoted, deleted, blocked, or replaced.
+- Only the Owner may access the Dashboard and manage approved content and website settings.
+- Owner login, own profile, password change and account recovery remain available.
 
 ## 6. Website routes
 - Home: `/home/`
@@ -88,7 +85,7 @@ All four are independent page routes within one website. The Header and Footer r
 Fast, clean, reliable, usable, easy to maintain, secure, safe, consistent, centralized, minimal required configuration, maximum optional fields, minimal hard-coded values, and simple design.
 - Keep authorization in Supabase RLS and trusted server-side functions, never in UI visibility alone.
 - Never expose service-role or secret keys to the browser.
-- Owner identity and role are enforced using verified Auth identity and protected database logic.
+- Owner identity is enforced using the verified Supabase Auth identity for 3btechhub@gmail.com and protected database logic; do not depend on assignable role records.
 - Prefer shared components over duplicated page implementations.
 - Every approved page has a safe fallback.
 - Do not add product or service functionality outside the approved module list.
