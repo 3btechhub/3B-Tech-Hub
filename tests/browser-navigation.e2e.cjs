@@ -1,0 +1,48 @@
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const http = require("node:http");
+const fs = require("node:fs");
+const path = require("node:path");
+const { chromium } = require("playwright");
+
+const siteRoot = path.resolve(__dirname, "../site");
+let server;
+let browser;
+let origin;
+
+test("published Main/Sub Pages render as grouped navigation links in a real browser", async () => {
+  server = http.createServer((req, res) => {
+    const pathname = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
+    const relative = pathname.replace(/^\/3btechhub\/?/, "");
+    const file = path.resolve(siteRoot, relative || "index.html");
+    if (!file.startsWith(siteRoot + path.sep) && file !== path.join(siteRoot, "index.html")) {
+      res.writeHead(403).end("Forbidden");
+      return;
+    }
+    if (!fs.existsSync(file) || !fs.statSync(file).isFile()) {
+      res.writeHead(404).end("Not found");
+      return;
+    }
+    const ext = path.extname(file);
+    res.setHeader("content-type", ext === ".js" ? "text/javascript; charset=utf-8" : ext === ".html" ? "text/html; charset=utf-8" : "application/octet-stream");
+    res.end(fs.readFileSync(file));
+  });
+  await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+  origin = "http://127.0.0.1:" + server.address().port;
+  browser = await chromium.launch({ headless: true });
+  const page = await browser.newPage();
+  const errors = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto(origin + "/3btechhub/tests/fixtures/navigation.html");
+  await page.waitForFunction(() => document.documentElement.dataset.testReady === "true");
+  const links = await page.locator(".menu-dynamic-pages a").evaluateAll(nodes => nodes.map(node => ({
+    text: node.textContent,
+    href: new URL(node.href).pathname
+  })));
+  assert.deepEqual(links.map(link => link.text), ["About Us", "Our Team"]);
+  assert.equal(links[0].href, "/3btechhub/about-us/");
+  assert.equal(links[1].href, "/3btechhub/about-us/our-team/");
+  assert.deepEqual(errors, []);
+  await browser.close();
+  await new Promise(resolve => server.close(resolve));
+});
