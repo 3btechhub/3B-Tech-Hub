@@ -12,8 +12,8 @@ const themeToggle = document.querySelector("#theme-toggle");
 const languageSelect = document.querySelector("#language-select");
 const regionSelect = document.querySelector("#region-select");
 const savedTheme = localStorage.getItem("3b-theme");
-const routeDefaultLanguage = activeCountry.region === "bd" ? "bn" : activeCountry.region === "ksa" ? "ar" : "en";
-const languageStorageKey = "3b-language-" + activeCountry.region;
+let routeDefaultLanguage = activeCountry.region === "bd" ? "bn" : activeCountry.region === "ksa" ? "ar" : "en";
+let languageStorageKey = "3b-language-" + activeCountry.region;
 const savedLanguage = localStorage.getItem(languageStorageKey) || routeDefaultLanguage;
 document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
 function addTextElement(parent, tag, className, value) {
@@ -62,6 +62,17 @@ function applyTheme(theme) {
   }
   localStorage.setItem("3b-theme", dark ? "dark" : "light");
 }
+window.addEventListener("countrycontextready", (event) => {
+  const region = event.detail?.region;
+  if (!["global", "bd", "ksa"].includes(region)) return;
+  routeDefaultLanguage = region === "bd" ? "bn" : region === "ksa" ? "ar" : "en";
+  languageStorageKey = "3b-language-" + region;
+  applyLanguage(localStorage.getItem(languageStorageKey) || routeDefaultLanguage);
+  if (regionSelect) {
+    regionSelect.value = region;
+    regionSelect.dispatchEvent(new Event("dropdownrefresh"));
+  }
+});
 applyLanguage(savedLanguage);
 if (languageSelect) languageSelect.dispatchEvent(new Event("dropdownrefresh"));
 if (regionSelect) {
@@ -187,7 +198,7 @@ async function loadHomeCatalog() {
 }
 
 async function applyPublicSiteSettings() {
-  if (document.querySelector("#owner-dashboard")) return;
+  if (document.querySelector("#app-main[data-view=\"dashboard\"]")) return;
   const { data, error } = await supabase
     .from("site_settings")
     .select("setting_value")
@@ -218,7 +229,7 @@ if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   if (!error) {
     setMenuSession(null);
     closeSiteMenu();
-    location.assign(ROOT_URL.href);
+    window.navigateSiteRoute(new URL((activeCountry.region || "global") + "/", ROOT_URL).pathname);
   }
 });
 async function syncAccountMenu() {
@@ -231,7 +242,12 @@ supabase.auth.onAuthStateChange((_event, session) => {
   setMenuSession(session);
 });
 const ROOT_URL = new URL("https://3btechhub.github.io/3btechhub/");
-const form = document.querySelector("#auth-form");
+
+export async function initRoutePage() {
+  window.__routeAuthSubscriptions?.forEach((subscription) => subscription.unsubscribe());
+  window.__routeAuthSubscriptions = [];
+  applyLanguage(document.documentElement.lang || savedLanguage);
+  const form = document.querySelector("#auth-form");
 
 if (form) {
   const message = document.querySelector("#auth-message");
@@ -354,7 +370,7 @@ if (form) {
         if (error) throw error;
         if (data.session) {
           showMessage("Account created successfully.", "success");
-          location.assign(new URL("profile/", ROOT_URL).href);
+          window.navigateSiteRoute(new URL("profile/", ROOT_URL).pathname);
         } else {
           // With email confirmation enabled, Supabase may return no session for
           // both a new signup and an already-registered email. Try signing in
@@ -363,7 +379,7 @@ if (form) {
           const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
           if (!loginError && loginData.session) {
             showMessage("This email already has an account. You are now logged in to that account.", "success");
-            location.assign(new URL("profile/", ROOT_URL).href);
+            window.navigateSiteRoute(new URL("profile/", ROOT_URL).pathname);
           } else if (loginError && /email not confirmed/i.test(loginError.message)) {
             showMessage("Check your inbox to confirm your new account before logging in.", "success");
           } else {
@@ -374,7 +390,7 @@ if (form) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         showMessage("Signed in successfully.", "success");
-        location.assign(new URL("profile/", ROOT_URL).href);
+        window.navigateSiteRoute(new URL("profile/", ROOT_URL).pathname);
       }
     } catch (error) {
       showMessage(error instanceof Error ? error.message : "Authentication failed. Please try again.", "error");
@@ -384,7 +400,7 @@ if (form) {
   });
 
   render();
-  supabase.auth.onAuthStateChange((event, session) => {
+  const recoveryListener = supabase.auth.onAuthStateChange((event, session) => {
     if (event === "PASSWORD_RECOVERY" && session) {
       mode = "recovery-link";
       recoveryEmail = session.user.email || "";
@@ -396,6 +412,7 @@ if (form) {
       showMessage("Enter your new password to finish resetting your account.", "success");
     }
   });
+  window.__routeAuthSubscriptions.push(recoveryListener.data.subscription);
 }
 
 const profile = document.querySelector("#profile-card");
@@ -461,7 +478,7 @@ if (profile) {
   async function loadProfile() {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
-      location.replace(new URL("account/", ROOT_URL).href);
+      window.navigateSiteRoute(new URL("account/", ROOT_URL).pathname, { replace: true });
       return;
     }
     currentUser = data.user;
@@ -557,25 +574,25 @@ if (profile) {
 
   await loadProfile();
   const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) location.replace(new URL("account/", ROOT_URL).href);
+    if (!session) window.navigateSiteRoute(new URL("account/", ROOT_URL).pathname, { replace: true });
   });
-  window.addEventListener("pagehide", () => authListener.subscription.unsubscribe(), { once: true });
+  window.__routeAuthSubscriptions.push(authListener.subscription);
 }
 
 
 // Owner-only dashboard: the database role is checked again on the page itself.
 let currentDashboardRole = null;
-const ownerDashboard = document.querySelector("#owner-dashboard");
+const ownerDashboard = document.querySelector("#app-main[data-view=\"dashboard\"]");
 if (ownerDashboard) {
   const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError || !authData.user) {
-    location.replace(new URL("account/", ROOT_URL).href);
+    window.navigateSiteRoute(new URL("account/", ROOT_URL).pathname, { replace: true });
   } else {
     const { data: ownerRole, error: roleError } = await supabase
       .from("user_roles").select("role")
       .eq("user_id", authData.user.id).in("role", ["owner", "admin"]).limit(1).maybeSingle();
     if (roleError || !["owner", "admin"].includes(ownerRole?.role)) {
-      location.replace(new URL("profile/", ROOT_URL).href);
+      window.navigateSiteRoute(new URL("profile/", ROOT_URL).pathname, { replace: true });
     } else {
       currentDashboardRole = ownerRole.role;
       if (currentDashboardRole !== "owner") {
@@ -599,9 +616,10 @@ if (ownerDashboard) {
       }));
     }
   }
-  supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) location.replace(new URL("account/", ROOT_URL).href);
+  const dashboardAuthListener = supabase.auth.onAuthStateChange((_event, session) => {
+    if (!session) window.navigateSiteRoute(new URL("account/", ROOT_URL).pathname, { replace: true });
   });
+  window.__routeAuthSubscriptions.push(dashboardAuthListener.data.subscription);
 }
 
 
@@ -1192,4 +1210,6 @@ document.querySelector("#audit-refresh")?.addEventListener("click", () => void l
 
 
 // Load only published records for the four public homepage sections.
-void loadHomeCatalog();
+void applyPublicSiteSettings();
+  void loadHomeCatalog();
+}

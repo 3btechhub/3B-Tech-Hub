@@ -13,6 +13,8 @@ This document is the sole product-scope authority for the website. Production UI
 - Main Area
 - Footer
 
+The Header, Main Area and Footer form one persistent shared layout. One global renderer resolves all approved routes and swaps only the Main Area view. Country routes reuse the same Home view; route-specific page markup is stored as modular views rather than duplicated full-page documents. The root entry defaults to Home.
+
 ## 3. Features
 - Logo
 - Website Title
