@@ -83,7 +83,7 @@ if (root) {
     list.replaceChildren();
     if (!pages.length) list.append(el("p", { class: "muted" }, "No pages yet. Create your first Main Page."));
     pages.forEach(page => {
-      const row = el("article", { class: "technician-admin-row page-builder-page-row" });
+      const row = el("article", { class: "admin-list-row page-builder-page-row" });
       const info = el("div");
       info.append(el("strong", {}, page.title));
       info.append(el("span", { class: "muted" }, (page.page_type === "main" ? "Main Page" : "Sub Page") + " · /" + page.slug + " · " + page.locale + " · " + page.country + " · " + page.status));
@@ -164,7 +164,7 @@ if (root) {
     }
     if (!components.length) list.append(el("p", { class: "muted" }, "No components added yet."));
     components.forEach((item, index) => {
-      const row = el("article", { class: "technician-admin-row" });
+      const row = el("article", { class: "admin-list-row" });
       const info = el("div");
       info.append(el("strong", {}, item.component_type.replaceAll("_", " ")));
       info.append(el("span", { class: "muted" }, "Order " + (index + 1) + (item.is_visible ? "" : " · Hidden")));
@@ -342,7 +342,7 @@ if (root) {
     list.replaceChildren();
     if (!data?.length) list.append(el("p", { class: "muted" }, "No saved revisions yet."));
     data?.forEach(revision => {
-      const row = el("article", { class: "technician-admin-row" });
+      const row = el("article", { class: "admin-list-row" });
       row.append(el("span", {}, "Revision " + revision.revision_number + " · " + new Date(revision.created_at).toLocaleString()));
       row.append(button("Restore", () => restoreRevision(revision), true));
       list.append(row);
