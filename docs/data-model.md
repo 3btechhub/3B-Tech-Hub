@@ -8,13 +8,15 @@ The live Supabase project is `sburxeuxkrilbfppxylm` in `ap-northeast-1`.
 |---|---|
 | `user_profiles` | Member profile fields and preferred language |
 | `user_roles` | Protected Owner/Admin/Member assignments |
-| `pages` | Main Page and Sub Page records, including country scope |
+| `pages` | Main Page and Sub Page records, including country scope, visibility, optional contact and image fields |
 | `page_components` | Allowlisted page layout components |
 | `page_revisions` | Page revision snapshots |
 | `site_settings` | Website title, logo reference and centralized configuration |
 | `audit_logs` | Append-only administrative activity |
 
 Every exposed table must have RLS enabled and least-privilege policies. Visitor is anonymous access, not an assigned role row.
+
+Page records include required title/type/country, optional description/location/phone/WhatsApp/email/image, and a `visibility` flag for Home sections. Sub Pages require a valid Main Page parent. Draft or hidden pages are not public.
 
 ## Country identifiers
 
