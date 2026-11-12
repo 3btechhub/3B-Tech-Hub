@@ -1,34 +1,32 @@
-# Website UI and CSS Rules
+# Website Implementation Rules
 
-These rules apply to every production page in this repository. GitHub Pages publishes the `site/` directory.
+Read `docs/master-spec.md` before changing production code. It is the single source of truth for the allowed website scope.
 
-## Single source of truth
-- `site/assets/style.css` is the canonical production design system.
-- Reuse existing styles for buttons, inputs, selects, textareas, labels, cards, panels, notices, links, typography, icons, borders, radii, spacing, focus states and responsive sizing.
-- Do not duplicate common component styles in page-level or embedded styles.
-- Change shared design tokens/rules centrally and let every page inherit them.
-- Page-specific CSS is allowed only for genuinely unique layout composition and must use the existing shared tokens.
-- Do not add redundant selectors, parallel variants, unnecessary overrides or extra `!important` declarations.
-- Prefer semantic classes and existing shared component classes.
+## Scope
+- Only the structure, layout, features, dashboard modules, user types, country routes and languages in `docs/master-spec.md` may appear in production.
+- Do not reintroduce Services, Products, Workshops, Technicians, Media Library, bookings, or any other out-of-scope module.
+- Canonical country identifiers are exactly `global`, `bd`, and `ksa`; language defaults are `en`, `bn`, and `ar` respectively.
+- Global content is visible on every route; country-specific content is restricted to its matching route.
+- Owner `3btechhub@gmail.com` is fixed and protected. Allowed user types are Owner, Admin, Member and Visitor.
 
-## Required implementation approach
-1. Inspect `site/assets/style.css` before styling.
-2. Search for an existing style before adding a new rule.
-3. Fix inconsistent shared styles at their source rather than adding another override.
-4. Keep page styles focused on unique layout composition.
-5. Verify light/dark themes, narrow/wide viewports, keyboard focus and overflow when browser tooling is available.
-6. Never claim browser visual verification unless it was actually performed.
+## Centralized UI
+- `site/assets/style.css` is the canonical design system.
+- Use only monochrome black/white with neutral gray hierarchy.
+- Use shared semantic sizes Small, Medium and Large for text, buttons and input/output controls.
+- Reuse shared components and tokens. Avoid duplicate styles, overrides and hard-coded repeated page layouts.
+- Provide theme-aware light/dark icon appearances.
+- Verify responsive behavior, focus, contrast and RTL Arabic layout where tooling is available.
 
-## Design principles
-- Maintain the monochrome black, white and neutral-gray palette.
-- Keep typography, controls, cards, borders, radii, icons and spacing consistent by semantic role.
-- Keep touch targets readable and accessible.
-- Prefer content-driven sizing, flexible layouts and wrapping over fixed dimensions that cause overflow.
-- Keep the interface clean, minimal and balanced.
-- The floating menu remains right-anchored and center-aligned; do not add a backdrop.
-- Do not introduce a new hosting/backend provider. Production architecture is GitHub Pages + Supabase.
+## Security
+- GitHub Pages serves only static client code.
+- Supabase handles authentication, PostgreSQL, RLS, Storage and Edge Functions.
+- Never expose a service-role or secret key in browser code.
+- Enforce roles and data access with RLS and trusted server-side functions; hiding UI is not authorization.
+- Keep the fixed Owner protected from demotion, deletion and blocking.
+- Do not make unrelated Supabase security changes outside the requested scope.
 
-## Completion requirements
-- A shared-style change must remain consistent across all production pages.
-- Report which shared rules changed and which checks actually ran.
-- Do not describe the unshipped `src/` prototype as part of the production site.
+## Validation and reporting
+- Run `npm run validate` after code changes when possible.
+- Run the relevant GitHub Actions checks.
+- Report only checks actually performed; never claim visual/browser verification without performing it.
+- Keep changes on the active feature branch until reviewed. Do not push scope changes directly to `main`.
