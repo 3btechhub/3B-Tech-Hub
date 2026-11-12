@@ -1,48 +1,38 @@
-# 3B TECH HUB — Supabase Data Model
+# 3B TECH HUB — Approved Data Model
 
-The live database is Supabase project `sburxeuxkrilbfppxylm` in `ap-northeast-1`.
+The live Supabase project is `sburxeuxkrilbfppxylm` in `ap-northeast-1`.
 
-## Live application tables
+## Approved application tables
+
 | Table | Purpose |
 |---|---|
-| `user_profiles` | User display name, phone and profile settings |
-| `user_roles` | Server-controlled role assignments |
-| `site_content` | Structured website content |
-| `products` | Product types and group/country routing |
-| `services` | Six country-specific service categories |
-| `media_assets` | Metadata for approved media |
-| `site_settings` | Website configuration |
-| `audit_logs` | Append-only administrative event history |
-| `workshops` | Workshop listings |
-| `technicians` | Technician listings |
+| `user_profiles` | Member profile fields and preferred language |
+| `user_roles` | Protected Owner/Admin/Member assignments |
+| `pages` | Main Page and Sub Page records |
+| `page_components` | Allowlisted page layout components |
+| `page_revisions` | Page revision snapshots |
+| `site_settings` | Website title, logo reference and centralized configuration |
+| `audit_logs` | Append-only administrative activity |
 
-## Product grouping
-- `mobile` → Mobile & Accessories
-- `satellite` → Satellite & TV Equipment
+Every exposed table must have RLS enabled and least-privilege policies. Visitor is anonymous access, not an assigned role row.
 
-Product records describe a product type/category, not an individual stock item. Country values are `bd`, `saudi`, `global` or null where the schema allows it.
+## Country identifiers
 
-## Service routing
-Bangladesh:
-- TV Repair
-- Mobile Repair
-- Mobile Parts Sell
-
-Saudi Arabia:
-- Satellite Dish Installation
-- Satellite Dish Servicing
-- Satellite Dish Parts Sell
+Only `global`, `bd` and `ksa` are canonical. Global content is visible everywhere. BD and KSA content must be filtered to the matching route.
 
 ## Access-control intent
-- Public visitors: read active/published public catalogue and media only.
-- Authenticated customer: read/update own profile.
-- Admin: delegated catalogue operations only; no Owner-role assignment.
-- Owner: highest authority, role management and system configuration.
-- Audit logs: application roles cannot update or delete audit entries.
+
+- Visitor: published public pages only.
+- Member: read/update own profile and use public pages.
+- Admin: approved page operations and audit access.
+- Owner: all approved dashboard modules, user/role administration and settings.
+- Audit records are append-only for application users.
 
 ## Data safety
-- Keep migrations in version control and reconcile applied migration versions before future schema work.
-- Add indexes to foreign-key columns used in joins/deletes.
-- Store only changed column names in audit metadata; do not copy full rows.
+
+- Keep schema changes in version-controlled migrations.
+- Protect the fixed Owner account from demotion, deletion and blocking.
+- Store only changed column names in audit metadata; do not copy full rows or profile details.
 - Never expose private profile data or service credentials through the public Data API.
-- Do not claim a database backup until a full export and restore test are verified.
+- Do not claim a database backup until an export and restore test are verified.
+- Legacy tables outside the master specification must be removed only through a reviewed migration after their data dependencies and backup status are verified.
