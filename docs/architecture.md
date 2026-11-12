@@ -3,23 +3,24 @@
 Read [master-spec.md](master-spec.md) first. It defines the complete allowed product scope.
 
 ## Production platform
-
 - GitHub Pages publishes the static frontend from `site/`.
 - Supabase provides Auth, PostgreSQL, RLS and trusted Edge Functions.
 - Supabase publishable key may be used in browser code. Secret/service-role keys must never be shipped to GitHub Pages.
 - No Vercel, Appwrite, Cloudflare, Next.js server hosting or additional platform is allowed.
 
 ## Shared page renderer
-
 - One persistent document shell owns the Header, Main Area and Footer.
-- A single route resolver maps `/global/`, `/bd/`, `/ksa/`, `/account/`, `/profile/` and `/dashboard/` to modular Main Area views.
-- Country routes reuse one Home view and vary only country context, language defaults and country-scoped data.
+- One route resolver maps `/`, `/account/`, `/profile/` and `/dashboard/` to modular Main Area views.
 - Internal navigation and browser Back/Forward replace only the Main Area; Header and Footer remain mounted.
-- The root entry defaults to Home after country detection; direct canonical route visits are preserved.
+- The root URL opens Home.
 - Static-host route entry files bootstrap the root shell, while page view markup is maintained once under `site/views/`.
 
-## Runtime
+## Language
+- The interface is English-only.
+- The document uses `lang="en"` and `dir="ltr"`.
+- There is no country lookup, locale lookup, translation system, language selector, or RTL mode.
 
+## Runtime
 ```text
 Browser
   |-- GitHub Pages: HTML, CSS and JavaScript
@@ -30,16 +31,12 @@ PostgreSQL + RLS + trusted Edge Functions
 ```
 
 ## Approved routes and page model
-
-- Home: `/global/`, `/bd/`, `/ksa/`
-- Account: `/account/`
+- Home: `/`
+- Account: `/account/` (`/login/` compatibility alias)
 - Profile: `/profile/`
 - Dashboard: `/dashboard/`
 
-Only `global`, `bd` and `ksa` are canonical country identifiers. Global content is visible on every route; country-specific content is restricted to its matching route.
-
 ## Authorization
-
 - `3btechhub@gmail.com` is the fixed primary Owner.
 - Allowed account roles: Owner, Admin and Member. Visitor is anonymous public access.
 - Owner has full access to approved modules.
@@ -49,7 +46,6 @@ Only `global`, `bd` and `ksa` are canonical country identifiers. Global content 
 - All authorization is enforced in RLS and trusted Edge Functions.
 
 ## Release process
-
 1. Work on a dedicated branch.
 2. Review code, route changes and database migration.
 3. Run regression tests and GitHub Actions.

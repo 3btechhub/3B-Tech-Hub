@@ -13,21 +13,20 @@ This document is the sole product-scope authority for the website. Production UI
 - Main Area
 - Footer
 
-The Header, Main Area and Footer form one persistent shared layout. One global renderer resolves all approved routes and swaps only the Main Area view. Country routes reuse the same Home view; route-specific page markup is stored as modular views rather than duplicated full-page documents. The root entry defaults to Home.
+The Header, Main Area and Footer form one persistent shared layout. One global renderer resolves the approved pages and swaps only the Main Area view. Page markup is stored once under `site/views/`; the root URL opens Home.
 
 ## 3. Features
-- Logo
-- Website Title
+- Separate Logo and Website Title components
 - Menu
 - Dark / Light theme
-- Multi-language
-- IP / location / country detection and country-based routing
+- English-only interface
 - Authentication
 - CRUD
-- Icons
-- Fallback
+- Icons and fallback visuals
 - Cards
 - Pill buttons
+
+There is one website and one fixed interface language: English. No country detection, country-specific versions, language switching, translation catalogue, locale preference, or right-to-left layout is part of the product.
 
 ## 4. Dashboard modules
 Only these modules may exist:
@@ -45,14 +44,15 @@ Only these modules may exist:
 Services, Products, Workshops and Technicians are approved content-management modules. No Media Library, booking or other additional dashboard module is permitted.
 
 ### Content module fields
-- Services: Name (required), Slug (required), Description, Category, Country, Image, Visibility.
-- Products: Name (required), Slug (required), Description, Category, Country, Image, Visibility.
-- Workshops: Name (required), Slug (required), Description, Location, Technician, Category, Country, Image, Visibility.
-- Technicians: Name (required), Slug (required), Description, Skill, Category, Country, Image, Visibility.
+- Services: Name (required), Slug (required), Description, Category, Image, Visibility.
+- Products: Name (required), Slug (required), Description, Category, Image, Visibility.
+- Workshops: Name (required), Slug (required), Description, Location, Technician, Category, Image, Visibility.
+- Technicians: Name (required), Slug (required), Description, Skill, Category, Image, Visibility.
 - Slugs are generated from Name automatically and remain manually editable; they must be unique.
 - Image files are uploaded directly to Supabase Storage and can be removed or replaced.
 - In every content module, show the uploaded image when present; if absent or failed to load, show a module-appropriate fallback icon. Technicians alone use a human avatar fallback.
 - Only Name and Slug are required; all other fields are optional.
+- Content records are shared across the one website; there is no country-based filtering.
 
 ## 5. User types
 - Owner — fixed primary account: 3btechhub@gmail.com
@@ -62,37 +62,34 @@ Services, Products, Workshops and Technicians are approved content-management mo
 
 Visitor is the anonymous/public access level and does not need a Supabase Auth role assignment. Owner must never be demoted, deleted, blocked, or replaced. Admin permissions are explicitly delegated; Member is a normal authenticated account.
 
-## 6. Country routes
-Canonical route identifiers and paths:
-- `global` — default route; content available to everyone
-- `bd` — Bangladesh-only content
-- `ksa` — Saudi Arabia-only content
+## 6. Website routes
+- Home: `/`
+- Account: `/account/`
+- Profile: `/profile/`
+- Dashboard: `/dashboard/`
+- `/login/` remains a compatibility alias for Account.
 
-Global content is visible on every route. Bangladesh-only content is visible only on `bd`; Saudi-only content is visible only on `ksa`. Country-scoped content must never leak into another country route. Country values are exactly `global`, `bd`, and `ksa`; do not use `saudi` as a canonical value.
+These are normal page routes within one website, not country-specific website versions. The Header and Footer remain mounted while the Main Area changes.
 
-On the first visit to the site entry point, attempt IP/country detection. Map Bangladesh to `bd`, Saudi Arabia to `ksa`, and every other country or detection failure to `global`. A visitor may manually change the route from the menu at any time. Persist an intentional manual selection for later visits. Direct visits to a canonical route must stay on that route.
-
-## 7. Route language defaults
-- `global` — English (`en`)
-- `bd` — Bengali (`bn`)
-- `ksa` — Arabic (`ar`)
-
-Language can be changed independently on every route using the menu. Changing language must not change country route. Arabic must set RTL; English and Bengali must set LTR.
+## 7. Language
+- The entire website is permanently English.
+- The document language is `en` and layout direction is LTR.
+- No language selector, language switching, translation system, language-specific storage, or user locale field is permitted.
 
 ## 8. Design system
 - Monochrome black and white, with neutral gray only for hierarchy and states.
 - Two icon appearances: light-theme and dark-theme variants.
 - Text, buttons, and input/output controls have only three semantic sizes: Small, Medium, Large.
-- Reuse centralized design tokens and shared components; do not duplicate route-level styles.
+- Reuse centralized design tokens and shared components; do not duplicate page-level styles.
 - Simple, clean, responsive, accessible and consistent.
 
 ## 9. Engineering conditions
-Fast, clean, reliable, usable, easy to maintain, secure, safe, consistent, centralized, globalized, minimal required configuration, maximum optional fields, minimal hard-coded values, and simple design.
+Fast, clean, reliable, usable, easy to maintain, secure, safe, consistent, centralized, minimal required configuration, maximum optional fields, minimal hard-coded values, and simple design.
 - Keep authorization in Supabase RLS and trusted server-side functions, never in UI visibility alone.
 - Never expose service-role or secret keys to the browser.
 - Owner identity and role are enforced using verified Auth identity and protected database logic.
-- Prefer shared components over duplicated country-route implementations.
-- Every route has a safe fallback. Failed IP detection falls back to `global`.
+- Prefer shared components over duplicated page implementations.
+- Every approved page has a safe fallback.
 - Do not add product or service functionality outside the approved module list.
 
 ## 10. Platform constraints
@@ -101,4 +98,4 @@ Fast, clean, reliable, usable, easy to maintain, secure, safe, consistent, centr
 - Do not add Vercel, Appwrite, Cloudflare, Next.js server hosting, or any other platform.
 
 ## 11. Scope acceptance
-A production page, menu item, dashboard tab, route, database feature or workflow is allowed only when it directly implements an item in sections 1–5 or a required shared behavior in sections 6–10. Otherwise remove it from the active product.
+A production page, menu item, dashboard tab, database feature or workflow is allowed only when it directly implements an item in sections 1–5 or a required shared behavior in sections 6–10. Otherwise remove it from the active product.

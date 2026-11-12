@@ -15,12 +15,10 @@ function normalizedPath(value) {
 function routeDetails(path) {
   const pathname = new URL(path, window.location.origin).pathname;
   const first = pathname.slice(BASE.length).split("/").filter(Boolean)[0] || "";
-  if (!first || ["global","bd","ksa","saudi"].includes(first)) {
-    return { view:"home", region:first === "saudi" ? "ksa" : ["global","bd","ksa"].includes(first) ? first : window.siteCountry?.region || "global" };
-  }
-  if (first === "login") return { view:"account", region:window.siteCountry?.region || "global" };
-  if (["account","profile","dashboard"].includes(first)) return { view:first, region:window.siteCountry?.region || "global" };
-  return { view:"home", region:window.siteCountry?.region || "global" };
+  if (!first) return { view:"home" };
+  if (first === "login") return { view:"account" };
+  if (["account","profile","dashboard"].includes(first)) return { view:first };
+  return { view:"home" };
 }
 function resolveFragmentLinks(container, routePath) {
   for (const anchor of container.querySelectorAll("a[href]")) {
@@ -31,11 +29,8 @@ function resolveFragmentLinks(container, routePath) {
   }
 }
 async function renderRoute(requestedPath, { replace = false } = {}) {
-  let path = normalizedPath(requestedPath) || BASE + (window.siteCountry?.region || "global") + "/";
+  const path = normalizedPath(requestedPath) || BASE;
   const details = routeDetails(path);
-  if (["global","bd","ksa"].includes(details.region) && window.siteCountry?.region !== details.region) {
-    window.setSiteCountryContext(details.region, "url");
-  }
   const response = await fetch(BASE + "views/" + viewFiles[details.view], { cache:"no-store" });
   if (!response.ok) throw new Error("Could not load the requested page.");
   const parsed = new DOMParser().parseFromString(await response.text(), "text/html");
@@ -48,6 +43,8 @@ async function renderRoute(requestedPath, { replace = false } = {}) {
   main.innerHTML = source.innerHTML;
   resolveFragmentLinks(main, path);
   document.title = titles[details.view];
+  document.documentElement.lang = "en";
+  document.documentElement.dir = "ltr";
   const homeLink = document.getElementById("home-menu-link");
   if (homeLink) homeLink.hidden = details.view === "home";
   const robotsMeta = document.querySelector('meta[name="robots"]');
@@ -55,9 +52,7 @@ async function renderRoute(requestedPath, { replace = false } = {}) {
     const meta = robotsMeta || document.head.appendChild(document.createElement("meta"));
     meta.name = "robots";
     meta.content = "noindex,nofollow";
-  } else if (robotsMeta) {
-    robotsMeta.remove();
-  }
+  } else if (robotsMeta) robotsMeta.remove();
   window.siteCurrentRoute = path;
   await initRoutePage();
   window.scrollTo({ top:0, behavior:"auto" });
@@ -80,9 +75,8 @@ document.addEventListener("click", (event) => {
   window.navigateSiteRoute(url.pathname + url.search + url.hash);
 });
 window.addEventListener("popstate", () => { void renderRoute(window.location.pathname + window.location.search).catch((error) => { console.error("Website route could not be rendered.", error); main.textContent = "This page could not be loaded. Please refresh and try again."; }); });
-await window.countryContextReady;
-let initialPath = normalizedPath(window.siteInitialRoute) || BASE + (window.siteCountry?.region || "global") + "/";
-if (initialPath === BASE) initialPath = BASE + (window.siteCountry?.region || "global") + "/";
+const routeParam = new URLSearchParams(window.location.search).get("route");
+const initialPath = normalizedPath(routeParam || (window.location.pathname + window.location.search + window.location.hash)) || BASE;
 try {
   await renderRoute(initialPath, { replace:true });
 } catch (error) {
