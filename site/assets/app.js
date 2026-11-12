@@ -1,6 +1,5 @@
 import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
 import { renderDynamicRoute } from "./dynamic-page-router.js";
-import { renderDynamicNavigation } from "./dynamic-navigation.js";
 
 await window.countryContextReady;
 
@@ -78,7 +77,6 @@ if (languageSelect) {
     applyTheme(document.documentElement.dataset.theme);
     if (supabase) {
       void renderDynamicRoute(supabase);
-      void renderDynamicNavigation(supabase);
     }
   };
   languageSelect.addEventListener("change", changeLanguage);
@@ -127,7 +125,6 @@ supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 runtimeConfig = await loadRuntimeConfig(supabase);
 applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 void renderDynamicRoute(supabase);
-void renderDynamicNavigation(supabase);
 
 async function applyPublicSiteSettings() {
   if (document.querySelector("#owner-dashboard")) return;
