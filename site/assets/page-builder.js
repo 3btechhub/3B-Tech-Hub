@@ -422,6 +422,12 @@ if (root) {
   $("#page-locale").value = routeLocale;
   $("#page-type").addEventListener("change", renderParentOptions);
   $("#page-locale").addEventListener("change", renderParentOptions);
+  window.addEventListener("site-language-changed", (event) => {
+    if (!selectedPage && ["en", "bn", "ar"].includes(event.detail)) {
+      $("#page-locale").value = event.detail;
+      renderParentOptions();
+    }
+  });
   $("#page-country").addEventListener("change", renderParentOptions);
   $("#page-title").addEventListener("input", () => { if (!$("#page-id").value) $("#page-slug").value = slugify($("#page-title").value); });
   $("#page-form").addEventListener("submit", savePage);
