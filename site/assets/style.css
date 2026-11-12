@@ -697,3 +697,9 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 .catalogue-detail .service-back-link{margin-top:8px;display:inline-flex;width:max-content;padding:10px 14px;border:1px solid var(--line);border-radius:8px}
 .catalogue-detail .service-back-link:hover{background:var(--hover)}
 @media(max-width:520px){.section-list-page{padding:20px 14px 36px}.catalogue-detail{padding:16px;border-radius:12px}}
+
+
+.section-explore-nav{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 22px;padding:10px 0;border-bottom:1px solid var(--line)}
+.section-explore-nav a{display:inline-flex;align-items:center;min-height:36px;padding:7px 12px;border:1px solid var(--line);border-radius:8px;color:var(--page-text);font-size:13px;font-weight:600}
+.section-explore-nav a:hover,.section-explore-nav a:focus-visible{background:var(--hover);border-color:var(--page-text)}
+.catalogue-detail .section-explore-nav{margin-top:12px}

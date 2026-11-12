@@ -1103,6 +1103,18 @@ function addTextElement(parent, tag, className, value) {
   parent.append(node);
   return node;
 }
+function appendSectionNav(parent) {
+  const nav = document.createElement("nav");
+  nav.className = "section-explore-nav";
+  nav.setAttribute("aria-label", "Explore other sections");
+  for (const [label, path] of [["Services","services/"],["Products","products/"],["Workshop","workshop/"],["Technicians","technicians/"]]) {
+    const link = document.createElement("a");
+    link.href = ROOT_URL.href + path;
+    link.textContent = label;
+    nav.append(link);
+  }
+  parent.append(nav);
+}
 function detailLayout(target, item, title, fields) {
   target.replaceChildren();
   const wrap = document.createElement("article");
@@ -1261,7 +1273,7 @@ async function loadPublicServices() {
     if(item.description)addTextElement(detail,"p","",item.description);
     if(item.category)addTextElement(detail,"p","service-detail-category",item.category);
     if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt=item.name;img.className="service-detail-image";detail.append(img);}
-    const back=document.createElement("a");back.className="service-back-link";back.href=ROOT_URL.href + "services/";back.textContent="Explore all services";detail.append(back);
+    const back=document.createElement("a");back.className="service-back-link";back.href=ROOT_URL.href + "services/";back.textContent="Explore all services";detail.append(back);appendSectionNav(detail);
   }
 }
 loadPublicServices();
