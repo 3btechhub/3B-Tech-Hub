@@ -9,28 +9,30 @@ See [master-spec.md](master-spec.md). This is the only allowed website specifica
 ## Work completed on `refactor/master-spec-2026-11-12`
 
 - [x] Created a dedicated refactor branch from `main`.
-- [x] Preserved the existing `backup/2026-11-12-before-scope-reset` branch.
-- [x] Added the authoritative master specification.
-- [x] Aligned repository implementation rules with the master specification.
+- [x] Preserved the existing `backup/2026-11-12-before-scope-reset` source branch.
+- [x] Added the authoritative master specification and repository implementation rules.
 - [x] Simplified Global, BD and KSA home pages.
-- [x] Standardized canonical country route identifiers to `global`, `bd` and `ksa`.
+- [x] Standardized canonical country identifiers to `global`, `bd` and `ksa`.
 - [x] Added the Account route and retained `/login/` as a compatibility redirect.
 - [x] Replaced dashboard navigation with Overview, Audit, Page, User, Role, Permission and Settings.
-- [x] Removed the Services, Products, Workshops and Technicians frontend routes and their product-catalog helper.
-- [x] Removed legacy catalogue test coverage and updated CI route checks.
-- [x] Restricted the user administration Edge Function role choices to Admin and Member.
+- [x] Removed Services, Products, Workshops and Technicians frontend routes and product-catalog code.
+- [x] Added country scope to the Page Builder, dynamic navigation and dynamic page resolver.
+- [x] Restricted the user administration Edge Function source to Admin and Member.
+- [x] Updated role UI to treat legacy Customer/Staff/Editor/Manager assignments as Member during transition.
+- [x] `npm run validate` and dynamic-page browser navigation tests pass in GitHub Actions (CI run 990).
+- [x] Applied Supabase migration `20261112103919_add_runtime_configuration`.
+- [x] Applied Supabase migration `20261112103930_add_country_scope_and_member_role`; live `pages.country` is now constrained to Global/BD/KSA and the role check accepts Member.
 
-## Still required before merge
+## Still required before merge/deployment
 
-- [ ] Align the live `user_roles.role` constraint and role policies with Owner/Admin/Member.
-- [ ] Review and remove legacy database tables outside the approved scope after backup/dependency verification.
-- [ ] Verify the Owner Edge Function and dashboard flows with the new role model.
-- [ ] Verify the Page Builder and Audit module in a browser.
-- [ ] Verify IP routing, manual route selection, all three language defaults, language switching and Arabic RTL.
-- [x] `npm run validate` and the dynamic-page browser navigation test pass in GitHub Actions (CI run 990).
-- [ ] Browser verification of IP routing, language switching, Page Builder, Audit and account/profile flows remains pending.
-- [ ] Review the final diff and create a pull request; do not merge until all required checks pass.
+- [ ] Complete final migration: archive legacy rows privately, convert Customer to Member, remove Manager/Editor/Staff role values, then drop out-of-scope tables `site_content`, `products`, `services`, `workshops`, `technicians` and `media_assets`.
+- [ ] Deploy the updated `owner-users` Edge Function with the new frontend.
+- [ ] Verify Owner/Admin/Member authorization and audit behavior in a browser.
+- [ ] Verify IP routing, Global fallback, manual route selection, language defaults, language switching and Arabic RTL.
+- [ ] Verify Page Builder, country-scoped content, Account, Profile and Settings in a browser.
+- [ ] Run the final GitHub Actions checks after the remaining changes.
+- [ ] Review the final diff and merge only after all required checks pass.
 
 ## Data safety note
 
-The live database still contains legacy catalogue tables and records. They have not been deleted by this branch. The existing Git backup protects source code only; it is not a verified database or Storage backup. No claim of database backup completion is made.
+The live database still contains legacy catalogue tables and records (9 Products, 6 Services, 2 Workshops and 3 Technicians). They have not been dropped. The source backup branch protects code only; it is not a database or Storage backup. The final migration must archive legacy rows into a private, non-API schema before dropping active legacy tables.
