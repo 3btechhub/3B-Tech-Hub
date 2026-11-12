@@ -790,9 +790,9 @@ button[data-size="large"],input[data-size="large"],select[data-size="large"],tex
 .menu-dropdown-options[hidden]{display:none}
 .menu-dropdown-option{width:100%;min-height:34px;padding:7px 9px;border:0;border-radius:5px;background:transparent;color:var(--page-text);font-size:var(--text-medium);text-align:center;cursor:pointer}
 .menu-dropdown-option:hover,.menu-dropdown-option.is-selected{background:var(--hover)}
-html[dir="rtl"] .site-menu .menu-link{text-align:right}
-html[dir="rtl"] .menu-dropdown-option,html[dir="rtl"] .menu-dropdown-trigger{text-align:right}
-html[dir="rtl"] .admin-list-row{direction:rtl}
+html[data-language-direction="rtl"] .site-menu .menu-link{text-align:right}
+html[data-language-direction="rtl"] .menu-dropdown-option,html[data-language-direction="rtl"] .menu-dropdown-trigger{text-align:right}
+html[data-language-direction="rtl"] .admin-list-row{direction:rtl}
 
 
 /* Homepage sections generated from visible Main Pages and Sub Pages */
