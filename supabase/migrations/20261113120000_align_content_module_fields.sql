@@ -1,26 +1,24 @@
 -- Align the four approved content modules with the 3B TECH HUB content fields.
+-- Drop legacy country checks before converting legacy 'saudi' values to 'ksa'.
+alter table public.services drop constraint if exists services_country_check;
+alter table public.products drop constraint if exists products_country_check;
+alter table public.workshops drop constraint if exists workshops_country_check;
+alter table public.technicians drop constraint if exists technicians_country_check;
 
--- Normalize country values to the canonical route identifier.
 update public.services set country = 'ksa' where country = 'saudi';
 update public.products set country = 'ksa' where country = 'saudi';
 update public.workshops set country = 'ksa' where country = 'saudi';
 update public.technicians set country = 'ksa' where country = 'saudi';
 
-alter table public.services drop constraint if exists services_country_check;
 alter table public.services add constraint services_country_check check (country is null or country in ('global','bd','ksa'));
-alter table public.products drop constraint if exists products_country_check;
 alter table public.products add constraint products_country_check check (country is null or country in ('global','bd','ksa'));
-alter table public.workshops drop constraint if exists workshops_country_check;
 alter table public.workshops add constraint workshops_country_check check (country is null or country in ('global','bd','ksa'));
-alter table public.technicians drop constraint if exists technicians_country_check;
 alter table public.technicians add constraint technicians_country_check check (country is null or country in ('global','bd','ksa'));
 
--- Add the fields that do not exist yet. Existing workshop title remains the stored Name field.
 alter table public.workshops add column if not exists slug text;
 alter table public.technicians add column if not exists slug text;
 alter table public.technicians add column if not exists skill text;
 
--- Backfill unique URL slugs for existing records before enforcing NOT NULL and uniqueness.
 do $$
 declare r record; base_slug text; candidate text; suffix integer;
 begin
