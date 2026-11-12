@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Dynamic Renderer Test</title></head>
+<body><main id="preview"></main>
+<script type="module">
+import { renderPage } from "/3btechhub/assets/page-engine.js";
+renderPage(
+ {title:"Safe Dynamic Page"},
+ [{component_type:"rich_text",component_config:{heading:"<img src=x onerror=alert(1)>",text:"Text content only"},sort_order:1,is_visible:true}],
+ document.querySelector("#preview")
+);
+document.documentElement.dataset.testReady="true";
+</script></body></html>
