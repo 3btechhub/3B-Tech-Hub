@@ -114,6 +114,78 @@ supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 runtimeConfig = await loadRuntimeConfig(supabase);
 applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 
+const homeCatalogModules = [
+  { key:"services", table:"services", title:"Services", icon:"🔧", published:["status","active"], columns:"name,slug,description,category,country,photo_url" },
+  { key:"products", table:"products", title:"Products", icon:"📦", published:["status","active"], columns:"name,slug,description,category,country,photo_url" },
+  { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name,slug,description,location,trainer,category,country,photo_url" },
+  { key:"technicians", table:"technicians", title:"Technicians", icon:"", published:["is_published",true], columns:"name,slug,description,skill,category,country,photo_url" }
+];
+
+function renderHomeCard(module, record) {
+  const card=document.createElement("article");
+  card.className="home-content-card";
+  const visual=document.createElement("div");
+  visual.className="home-content-visual"+(module.key==="technicians"?" home-content-visual--person":"");
+  const fallback=document.createElement("span");
+  fallback.className="home-content-fallback";
+  fallback.textContent=module.key==="technicians"?"👤":module.icon;
+  visual.append(fallback);
+  if(record.photo_url) {
+    const image=document.createElement("img");
+    image.src=record.photo_url;
+    image.alt="";
+    image.loading="lazy";
+    image.addEventListener("error",()=>image.remove(),{once:true});
+    visual.append(image);
+  }
+  const body=document.createElement("div");
+  body.className="home-content-card-body";
+  const title=document.createElement("h3");
+  title.textContent=record.name||record.title||"Untitled";
+  body.append(title);
+  const detail=module.key==="technicians"?record.skill:module.key==="workshops"?(record.location||record.category):record.category;
+  if(detail) {
+    const meta=document.createElement("p");
+    meta.textContent=detail;
+    body.append(meta);
+  }
+  card.append(visual,body);
+  return card;
+}
+
+async function loadHomeCatalog() {
+  const root=document.querySelector(".home-catalog");
+  if(!root) return;
+  for(const module of homeCatalogModules) {
+    const target=document.getElementById("home-"+module.key+"-cards");
+    if(!target) continue;
+    try {
+      let query=supabase.from(module.table).select(module.columns)
+        .in("country",["global",activeCountry.region])
+        .limit(6);
+      query=query.eq(module.published[0],module.published[1]);
+      const {data,error}=await query;
+      if(error) throw error;
+      target.replaceChildren();
+      if(!data?.length) {
+        const empty=document.createElement("p");
+        empty.className="home-empty";
+        empty.textContent="No "+module.title.toLowerCase()+" available yet.";
+        target.append(empty);
+        continue;
+      }
+      data.forEach(record=>target.append(renderHomeCard(module,record)));
+    } catch(error) {
+      console.error("Could not load public "+module.title.toLowerCase()+".",error);
+      target.replaceChildren();
+      const empty=document.createElement("p");
+      empty.className="home-empty";
+      empty.textContent="Could not load "+module.title.toLowerCase()+".";
+      target.append(empty);
+    }
+  }
+}
+
 async function applyPublicSiteSettings() {
   if (document.querySelector("#owner-dashboard")) return;
   const { data, error } = await supabase
@@ -1117,3 +1189,7 @@ async function loadAuditLogs() {
 }
 document.querySelector('[data-dashboard-tab="audit"]')?.addEventListener("click", () => void loadAuditLogs());
 document.querySelector("#audit-refresh")?.addEventListener("click", () => void loadAuditLogs());
+
+
+// Load only published records for the four public homepage sections.
+void loadHomeCatalog();
