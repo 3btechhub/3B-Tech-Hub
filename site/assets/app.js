@@ -554,7 +554,7 @@ function renderRoleSummary(users) {
   const roles = ["owner", "admin", "member", "visitor"];
   for (const role of roles) {
     const row = document.createElement("article");
-    row.className = "technician-admin-row";
+    row.className = "admin-list-row";
     const count = users.filter((user) => user.role === role).length;
     addTextElement(row, "strong", "", role.charAt(0).toUpperCase() + role.slice(1));
     addTextElement(row, "span", "", String(count) + (count === 1 ? " account" : " accounts"));
@@ -573,7 +573,7 @@ function renderUserList(users) {
   const roles = ["member", "admin"];
   for (const user of users) {
     const row = document.createElement("article");
-    row.className = "technician-admin-row";
+    row.className = "admin-list-row";
     const primary = document.createElement("div");
     addTextElement(primary, "strong", "", user.email || "Unknown email");
     const blocked = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
@@ -817,7 +817,7 @@ async function loadAuditLogs() {
   }
   for (const entry of data) {
     const row = document.createElement("article");
-    row.className = "technician-admin-row";
+    row.className = "admin-list-row";
     const title = [entry.action, entry.resource_type].filter(Boolean).join(" · ");
     addTextElement(row, "strong", "", title || "Activity");
     const detail = [entry.resource_id ? "ID: " + entry.resource_id : "", entry.created_at ? new Date(entry.created_at).toLocaleString() : ""].filter(Boolean).join(" · ");
