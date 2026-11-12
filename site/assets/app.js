@@ -99,8 +99,7 @@ async function setMenuSession(session) {
   if (accountMenuLink) {
     const destination = new URL(session ? "profile/" : "account/", ROOT_URL);
     accountMenuLink.href = destination.href;
-    const currentPath = location.pathname.replace(/\/+$/, "") || "/";
-    accountMenuLink.hidden = destination.pathname.replace(/\/+$/, "") === currentPath;
+    accountMenuLink.hidden = false;
   }
   if (logoutMenuLink) logoutMenuLink.hidden = !session;
   if (dashboardMenuLink) {
