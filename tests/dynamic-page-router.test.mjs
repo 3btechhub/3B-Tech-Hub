@@ -7,7 +7,7 @@ test("parses valid Main Page and Sub Page routes", () => {
   assert.deepEqual(normalizedSegments("/3btechhub/about-us/our-team/"), ["about-us", "our-team"]);
 });
 
-test("ignores the site root, static routes, and paths outside the site base", () => {
+test("keeps reserved route segments for the router guard and rejects paths outside the site base", () => {
   assert.deepEqual(normalizedSegments("/3btechhub/"), []);
   assert.deepEqual(normalizedSegments("/3btechhub/dashboard/"), ["dashboard"]);
   assert.deepEqual(normalizedSegments("/another-site/about-us/"), []);
