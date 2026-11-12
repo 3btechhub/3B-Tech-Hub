@@ -27,8 +27,15 @@ The database stores content and validated configuration only. It never stores ex
 ## Initial registered components
 `hero`, `rich_text`, `image`, `card_grid`, `button_group`, `faq`, `spacer`.
 
+## Owner/Admin Page Builder
+- Dashboard includes an Owner/Admin-only Pages module; the customer profile dashboard remains separate.
+- Create, edit, archive, publish, and permanently delete Main/Sub Pages (parent pages cannot be deleted while children remain).
+- Add, edit, hide/show, reorder, and delete allowlisted components through structured fields; no raw HTML/JS/SQL editor is exposed.
+- Capture page/component snapshots before edits and restore prior revisions.
+- Configure page language, URL slug, sort order, description, and SEO title/description.
+- Render a local component preview using the same trusted component renderer.
+
 ## Remaining work
-1. Owner/Admin page editor (create, edit, reorder, draft, publish, archive).
-2. Revision snapshot creation and restore workflow.
-3. Navigation and SEO integration.
-4. Browser end-to-end tests and visual verification.
+1. Navigation menu integration for database-driven pages.
+2. Browser end-to-end tests and visual verification.
+3. Confirm GitHub Actions checks and review the complete PR before merge/deploy.
