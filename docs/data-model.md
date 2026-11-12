@@ -8,9 +8,6 @@ The live Supabase project is `sburxeuxkrilbfppxylm` in `ap-northeast-1`.
 |---|---|
 | `user_profiles` | Member profile fields and preferred language |
 | `user_roles` | Protected Owner/Admin/Member assignments |
-| `pages` | Main Page and Sub Page records, including country scope |
-| `page_components` | Allowlisted page layout components |
-| `page_revisions` | Page revision snapshots |
 | `site_settings` | Website title, logo reference and centralized configuration |
 | `audit_logs` | Append-only administrative activity |
 
@@ -18,19 +15,19 @@ Every exposed table must have RLS enabled and least-privilege policies. Visitor 
 
 ## Country identifiers
 
-Only `global`, `bd` and `ksa` are canonical. The live `pages.country` column enforces these values. Global content is visible everywhere; BD and KSA content are restricted to their matching route.
+Only `global`, `bd` and `ksa` are canonical route identifiers. Country routing is handled by the static frontend.
 
 ## Access-control intent
 
-- Visitor: published public pages only.
+- Visitor: public website access only.
 - Member: read/update own profile and use public pages.
-- Admin: approved page operations and audit access.
+- Admin: Overview and Audit access.
 - Owner: all approved dashboard modules, user/role administration and settings.
 - Audit records are append-only for application users.
 
 ## Pending legacy cleanup
 
-The production database still contains legacy tables and rows for Products, Services, Workshops, Technicians, old site content and media metadata. The final cleanup migration will archive these rows in a private schema, convert old role names to Member, and drop the out-of-scope public tables after the new frontend and Edge Function are deployed.
+The former page/content tables and dynamic page engine have been removed. Products, Services, Workshops, Technicians and media metadata remain separate modules and have not been removed.
 
 ## Data safety
 
