@@ -10,6 +10,7 @@
 - RLS is enabled on all three tables. Public reads are limited to published pages/components; writes require the existing site-admin authorization helper.
 - A database trigger prevents Sub Pages from nesting below another Sub Page and prevents publishing a child beneath an unpublished Main Page.
 - Main Page and component updates maintain `updated_at` using the existing shared trigger function.
+- Table grants are least-privilege: public SELECT only; authenticated writes are limited to page/component CRUD and revision insert. TRUNCATE, REFERENCES and TRIGGER privileges are revoked.
 - Migration filenames match the versions recorded in Supabase migration history.
 
 ## Trust boundary
