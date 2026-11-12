@@ -768,3 +768,12 @@ html[dir="rtl"] .admin-list-row{direction:rtl}
 @media(max-width:600px){.module-form-grid{grid-template-columns:1fr}.module-record-row{flex-direction:column}.module-record-row .editor-actions{width:100%}}
 
 .module-image-preview{display:block;max-width:180px;max-height:140px;object-fit:contain;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:4px}.module-image-preview[hidden]{display:none}.module-record-image{display:block;max-width:96px;max-height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+
+/* Content module record imagery and type-specific fallbacks */
+.module-record-primary{display:flex!important;grid-template-columns:none!important;align-items:center;gap:12px;min-width:0}
+.module-record-text{display:grid;gap:5px;min-width:0}
+.module-record-visual{position:relative;display:grid;place-items:center;flex:0 0 64px;width:64px;height:64px;overflow:hidden;border:1px solid var(--line);border-radius:10px;background:var(--hover)}
+.module-record-visual .module-record-image{display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;border:0;border-radius:0;padding:0}
+.module-record-visual .module-record-image[hidden],.module-record-fallback[hidden]{display:none}
+.module-record-fallback{display:grid;place-items:center;width:100%;height:100%;font-size:27px;line-height:1}
+.module-record-fallback--person{border-radius:50%;background:var(--surface);font-size:34px}
