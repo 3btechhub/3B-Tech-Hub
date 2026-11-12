@@ -18,18 +18,29 @@ export function dynamicPageHref(page, parent = null) {
   return null;
 }
 
-export function buildNavigationTree(rows) {
+export function buildNavigationTree(rows, region = "global") {
   const pages = Array.isArray(rows) ? rows : [];
-  const mains = pages.filter(page => page.page_type === "main" && !page.parent_id && isSafePageSlug(page.slug) && !RESERVED_ROOTS.has(page.slug.toLowerCase()));
-  const compare = (a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0) || String(a.title || "").localeCompare(String(b.title || ""));
-  return mains.sort(compare).map(main => ({
-    ...main,
-    href: dynamicPageHref(main),
-    children: pages
-      .filter(page => page.page_type === "sub" && page.parent_id === main.id && isSafePageSlug(page.slug))
-      .sort(compare)
-      .map(page => ({ ...page, href: dynamicPageHref(page, main) }))
-  }));
+  const compare = (a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0)
+    || String(a.title || "").localeCompare(String(b.title || ""));
+  const priority = (page) => page.country === region ? 0 : page.country === "global" ? 1 : 2;
+  const candidates = pages.filter(page => page.page_type === "main" && !page.parent_id
+    && isSafePageSlug(page.slug) && !RESERVED_ROOTS.has(page.slug.toLowerCase()))
+    .sort((a, b) => priority(a) - priority(b) || compare(a, b));
+  const mainBySlug = new Map();
+  for (const page of candidates) if (!mainBySlug.has(page.slug)) mainBySlug.set(page.slug, page);
+
+  return [...mainBySlug.values()].map(main => {
+    const childCandidates = pages.filter(page => page.page_type === "sub" && page.parent_id === main.id
+      && isSafePageSlug(page.slug) && (page.country === main.country || (main.country === "global" && page.country === region)))
+      .sort((a, b) => priority(a) - priority(b) || compare(a, b));
+    const childrenBySlug = new Map();
+    for (const page of childCandidates) if (!childrenBySlug.has(page.slug)) childrenBySlug.set(page.slug, page);
+    return {
+      ...main,
+      href: dynamicPageHref(main),
+      children: [...childrenBySlug.values()].map(page => ({ ...page, href: dynamicPageHref(page, main) }))
+    };
+  }).sort(compare);
 }
 
 export async function renderDynamicNavigation(supabase) {
@@ -48,9 +59,12 @@ export async function renderDynamicNavigation(supabase) {
 
   const locale = ["bn", "ar", "en"].includes(document.documentElement.lang)
     ? document.documentElement.lang : "en";
+  const region = ["global", "bd", "ksa"].includes(window.siteCountry?.region)
+    ? window.siteCountry.region : "global";
+  const countries = region === "global" ? ["global"] : ["global", region];
   const { data, error } = await supabase.from("pages")
-    .select("id,parent_id,page_type,slug,title,locale,status,sort_order")
-    .eq("locale", locale).eq("status", "published")
+    .select("id,parent_id,page_type,slug,title,locale,country,status,sort_order")
+    .eq("locale", locale).eq("status", "published").in("country", countries)
     .order("sort_order", { ascending: true }).order("title", { ascending: true });
   if (error) {
     section.hidden = true;
@@ -58,7 +72,7 @@ export async function renderDynamicNavigation(supabase) {
     return false;
   }
 
-  const tree = buildNavigationTree(data || []);
+  const tree = buildNavigationTree(data || [], region);
   for (const main of tree) {
     const group = document.createElement("div");
     group.className = "menu-dynamic-page-group";
