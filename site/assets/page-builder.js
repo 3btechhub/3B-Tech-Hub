@@ -148,7 +148,7 @@ if (root) {
   async function loadComponents(pageId) {
     const { data, error } = await supabase.from("page_components")
       .select("id,page_id,slot,component_type,component_config,sort_order,is_visible")
-      .eq("page_id", pageId).order("sort_order");
+      .eq("page_id", pageId).order("sort_order").order("created_at").order("id");
     if (error) throw error;
     components = data || [];
     renderComponents();
@@ -178,21 +178,10 @@ if (root) {
     });
   }
   async function snapshotPage(pageId) {
-    const page = pages.find(item => item.id === pageId);
-    if (!page) return;
-    const { data: rows, error } = await supabase.from("page_components")
-      .select("slot,component_type,component_config,sort_order,is_visible").eq("page_id", pageId).order("sort_order");
+    const { data, error } = await supabase.rpc("capture_page_revision", { p_page_id: pageId });
     if (error) throw error;
-    const { data: revisions, error: revisionError } = await supabase.from("page_revisions")
-      .select("revision_number").eq("page_id", pageId).order("revision_number", { ascending: false }).limit(1);
-    if (revisionError) throw revisionError;
-    const revisionNumber = (revisions?.[0]?.revision_number || 0) + 1;
-    const snapshot = { page: { page_type: page.page_type, parent_id: page.parent_id, slug: page.slug, title: page.title,
-      description: page.description, locale: page.locale, status: page.status, sort_order: page.sort_order, seo: page.seo || {} }, components: rows || [] };
-    const { error: saveError } = await supabase.from("page_revisions").insert({
-      page_id: pageId, revision_number: revisionNumber, snapshot, created_by: currentUser.id
-    });
-    if (saveError) throw saveError;
+    if (!data) throw new Error("Could not create a revision snapshot.");
+    return data;
   }
   async function savePage(event) {
     event.preventDefault();
@@ -301,15 +290,16 @@ if (root) {
     const targetIndex = itemIndex + delta;
     if (targetIndex < 0 || targetIndex >= components.length) return;
     try {
-      await snapshotPage(selectedPage.id);
       const copy = [...components];
       [copy[itemIndex], copy[targetIndex]] = [copy[targetIndex], copy[itemIndex]];
-      for (let index = 0; index < copy.length; index++) {
-        const { error } = await supabase.from("page_components").update({ sort_order: index }).eq("id", copy[index].id);
-        if (error) throw error;
-      }
+      const { error } = await supabase.rpc("reorder_page_components", {
+        p_page_id: selectedPage.id,
+        p_component_ids: copy.map(item => item.id)
+      });
+      if (error) throw error;
       await loadComponents(selectedPage.id);
       await loadRevisions(selectedPage.id);
+      message("Component order updated.");
     } catch (error) { message(error.message || "Could not reorder components.", true); }
   }
   async function toggleComponent(item) {
@@ -347,23 +337,17 @@ if (root) {
     });
   }
   async function restoreRevision(revision) {
-    if (!confirm("Restore revision " + revision.revision_number + "? A new backup revision will be created first.")) return;
+    if (!selectedPage) return message("Select a page before restoring a revision.", true);
+    if (!confirm("Restore revision " + revision.revision_number + "? The current state will be saved as a new revision first.")) return;
     try {
-      await snapshotPage(selectedPage.id);
-      const snap = revision.snapshot;
-      const pagePayload = { ...snap.page, updated_by: currentUser.id, updated_at: new Date().toISOString() };
-      const { error } = await supabase.from("pages").update(pagePayload).eq("id", selectedPage.id);
+      const pageId = selectedPage.id;
+      const { error } = await supabase.rpc("restore_page_revision", { p_revision_id: revision.id });
       if (error) throw error;
-      const { error: deleteError } = await supabase.from("page_components").delete().eq("page_id", selectedPage.id);
-      if (deleteError) throw deleteError;
-      if (snap.components?.length) {
-        const rows = snap.components.map(item => ({ ...item, page_id: selectedPage.id }));
-        const { error: insertError } = await supabase.from("page_components").insert(rows);
-        if (insertError) throw insertError;
-      }
       await loadPages();
-      selectPage(pages.find(item => item.id === selectedPage.id));
-      message("Revision restored.");
+      const restoredPage = pages.find(item => item.id === pageId);
+      if (!restoredPage) throw new Error("The restored page could not be reloaded.");
+      selectPage(restoredPage);
+      message("Revision restored successfully. The previous state was preserved as a new revision.");
     } catch (error) { message(error.message || "Could not restore revision.", true); }
   }
 
