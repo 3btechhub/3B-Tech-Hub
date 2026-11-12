@@ -5,6 +5,8 @@ const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szacT";
 const root = document.querySelector("#page-builder-root");
 if (root) {
+  await window.countryContextReady;
+  const routeLocale = window.siteCountry?.region === "bd" ? "bn" : window.siteCountry?.region === "ksa" ? "ar" : "en";
   const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
   const $ = (selector) => root.querySelector(selector);
   const componentTypes = ["hero", "rich_text", "image", "card_grid", "button_group", "faq", "spacer"];
@@ -114,7 +116,7 @@ if (root) {
     $("#page-form").reset();
     $("#page-id").value = "";
     $("#page-type").value = "main";
-    $("#page-locale").value = "en";
+    $("#page-locale").value = routeLocale;
     $("#page-country").value = "global";
     $("#page-status").value = "draft";
     $("#page-parent").disabled = true;
@@ -413,6 +415,7 @@ if (root) {
     <p id="page-builder-message" class="editor-message" role="status" aria-live="polite"></p>
   `;
 
+  $("#page-locale").value = routeLocale;
   $("#page-type").addEventListener("change", renderParentOptions);
   $("#page-locale").addEventListener("change", renderParentOptions);
   $("#page-country").addEventListener("change", renderParentOptions);
