@@ -1267,7 +1267,7 @@ async function loadPublicServices() {
 loadPublicServices();
 
 async function loadHomepageIdentity() {
-  if (!homepageTechnicians && !homepageWorkshops && !homepageProducts) return;
+  if (!homepageTechnicians && !homepageWorkshops && !homepageProducts && !document.querySelector("[data-section-page]")) return;
   const [{ data: technicians, error: techniciansError }, { data: workshops, error: workshopsError }, { data: products, error: productsError }] = await Promise.all([
     supabase.from("technicians").select("*").eq("is_published", true).order("created_at", { ascending: false }),
     supabase.from("workshops").select("*").eq("status", "published").order("created_at", { ascending: false }),
