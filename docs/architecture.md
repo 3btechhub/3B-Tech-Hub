@@ -10,10 +10,12 @@ Read [master-spec.md](master-spec.md) first. It defines the complete allowed pro
 
 ## Shared page renderer
 - One persistent document shell owns the Header, Main Area and Footer.
-- One route resolver maps `/home/`, `/account/`, `/profile/` and `/dashboard/` to modular Main Area views.
+- The root URL (`/`) opens this shell and initially resolves the independent Home page.
+- The Home page is a normal first-class route at `/home/`, with its own static route entry and view file; it is not hard-coded as the shell's permanent Main Area.
+- One route resolver maps `/home/`, `/account/`, `/profile/` and `/dashboard/` to their independent modular Main Area views.
+- The root entry is canonicalized to `/home/` after the shared shell loads, so `/` is not a separate content page.
 - Internal navigation and browser Back/Forward replace only the Main Area; Header and Footer remain mounted.
-- The root URL redirects to `/home/`.
-- Static-host route entry files bootstrap the root shell, while page view markup is maintained once under `site/views/`.
+- Page view markup is maintained once under `site/views/`; static-host route entry files bootstrap the shared shell.
 
 ## Language
 - The interface is English-only.

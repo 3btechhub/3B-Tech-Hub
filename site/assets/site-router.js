@@ -8,17 +8,15 @@ const titles = { home:"3B TECH HUB", account:"Account | 3B TECH HUB", profile:"M
 function normalizedPath(value) {
   const url = new URL(value, window.location.origin);
   let path = url.pathname;
-  if (path === BASE.slice(0, -1)) path = BASE + "home/";
-  if (path === BASE) path = BASE + "home/";
+  if (path === BASE.slice(0, -1) || path === BASE) path = BASE + "home/";
   if (!path.startsWith(BASE)) return null;
   return (path.endsWith("/") ? path : path + "/") + url.search + url.hash;
 }
 function routeDetails(path) {
   const pathname = new URL(path, window.location.origin).pathname;
   const first = pathname.slice(BASE.length).split("/").filter(Boolean)[0] || "";
-  if (!first) return { view:"home" };
   if (first === "login") return { view:"account" };
-  if (["account","profile","dashboard"].includes(first)) return { view:first };
+  if (["home","account","profile","dashboard"].includes(first)) return { view:first };
   return { view:"home" };
 }
 function resolveFragmentLinks(container, routePath) {
@@ -30,7 +28,7 @@ function resolveFragmentLinks(container, routePath) {
   }
 }
 async function renderRoute(requestedPath, { replace = false } = {}) {
-  const path = normalizedPath(requestedPath) || BASE;
+  const path = normalizedPath(requestedPath) || BASE + "home/";
   const details = routeDetails(path);
   const response = await fetch(BASE + "views/" + viewFiles[details.view], { cache:"no-store" });
   if (!response.ok) throw new Error("Could not load the requested page.");
