@@ -1178,7 +1178,7 @@ function renderTechnicians(items) {
   const selectedId = new URLSearchParams(location.search).get("id");
   if (selectedId) {
     const item = visible.find(entry => String(entry.id) === selectedId);
-    if (item) detailLayout(target, item, item.name, [["Specialty", item.category], ["About", item.description], ["Country", item.country === "bd" ? "Bangladesh" : item.country === "saudi" ? "Saudi Arabia" : item.country === "global" ? "Global" : ""], ["Phone", item.phone], ["WhatsApp", item.whatsapp]]);
+    if (item) detailLayout(target, item, item.name, [["Specialty", item.category], ["About", item.description], ["Phone", item.phone], ["WhatsApp", item.whatsapp]]);
     else addTextElement(target, "p", "muted", "This technician is unavailable.");
     return;
   }
@@ -1193,7 +1193,7 @@ function renderWorkshops(items) {
   const selectedId = new URLSearchParams(location.search).get("id");
   if (selectedId) {
     const item = visible.find(entry => String(entry.id) === selectedId);
-    if (item) detailLayout(target, item, item.title, [["Category", item.category], ["Description", item.description], ["Location", item.location], ["Country", item.country === "bd" ? "Bangladesh" : item.country === "saudi" ? "Saudi Arabia" : item.country === "global" ? "Global" : ""]]);
+    if (item) detailLayout(target, item, item.title, [["Category", item.category], ["Description", item.description], ["Location", item.location]]);
     else addTextElement(target, "p", "muted", "This workshop is unavailable.");
     return;
   }
@@ -1209,7 +1209,7 @@ function renderProducts(items) {
   const selectedId = new URLSearchParams(location.search).get("id");
   if (selectedId) {
     const item = visible.find(entry => String(entry.id) === selectedId);
-    if (item) detailLayout(target, item, item.name, [["Group", groupTitles[item.category_group] || item.category || "Other Products"], ["Description", item.description], ["Country", item.country === "bd" ? "Bangladesh" : item.country === "saudi" ? "Saudi Arabia" : item.country === "global" ? "Global" : ""]]);
+    if (item) detailLayout(target, item, item.name, [["Group", groupTitles[item.category_group] || item.category || "Other Products"], ["Description", item.description]]);
     else addTextElement(target, "p", "muted", "This product type is unavailable.");
     return;
   }
@@ -1369,7 +1369,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
     workshopData.forEach(item=>{
       const row=document.createElement("article");row.className="technician-admin-row";workshopItems.append(row);
       addTextElement(row,"strong","",item.title);
-      addTextElement(row,"span","",[item.category,item.location,item.country === "bd" ? "Bangladesh (BD)" : item.country === "saudi" ? "Saudi Arabia (Saudi)" : "Global",item.status].filter(Boolean).join(" · "));
+      addTextElement(row,"span","",[item.category,item.location,item.status].filter(Boolean).join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
       edit.addEventListener("click",()=>{
@@ -1422,7 +1422,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
       const row=document.createElement("article");row.className="technician-admin-row";productItems.append(row);
       addTextElement(row,"strong","",item.name);
       const groupLabel=item.category_group==="satellite"?"Satellite & TV Equipment":"Mobile & Accessories";
-      addTextElement(row,"span","",[groupLabel,`Type: ${item.category||"—"}`,item.country==="bd"?"Bangladesh (BD)":item.country==="saudi"?"Saudi Arabia (Saudi)":"Global",item.status==="active"?"Published":"Draft"].join(" · "));
+      addTextElement(row,"span","",[groupLabel,`Type: ${item.category||"—"}`,item.status==="active"?"Published":"Draft"].join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
       edit.addEventListener("click",()=>{
@@ -1483,7 +1483,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
     serviceData.forEach(item=>{
       const row=document.createElement("article");row.className="technician-admin-row";serviceItems.append(row);
       addTextElement(row,"strong","",item.name);
-      addTextElement(row,"span","",[item.category,item.country==="bd"?"Bangladesh (BD)":item.country==="saudi"?"Saudi Arabia (Saudi)":"Global",item.status].filter(Boolean).join(" · "));
+      addTextElement(row,"span","",[item.category,item.status].filter(Boolean).join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
       edit.addEventListener("click",()=>{serviceEditor.elements.id.value=item.id;serviceEditor.elements.name.value=item.name||"";serviceEditor.elements.description.value=item.description||"";serviceEditor.elements.category.value=item.category||"";serviceEditor.elements.country.value=item.country||"";serviceEditor.elements.is_published.checked=item.status==="active";servicePhotoUrl=item.photo_url||"";previewImage(servicePhotoPreview,servicePhotoUrl);document.querySelector("#service-form-title").textContent="Edit Service";document.querySelector("#service-cancel").hidden=false;});actions.append(edit);
@@ -1512,7 +1512,7 @@ if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || ser
     if(!technicianData.length){addTextElement(technicianItems,"p","muted","No technicians added yet.");return;}
     technicianData.forEach(item=>{
       const row=document.createElement("article");row.className="technician-admin-row";technicianItems.append(row);
-      addTextElement(row,"strong","",item.name);addTextElement(row,"span","",[item.description,item.category, item.country === "bd" ? "Bangladesh (BD)" : item.country === "saudi" ? "Saudi Arabia (Saudi)" : "Global"].filter(Boolean).join(" · "));
+      addTextElement(row,"strong","",item.name);addTextElement(row,"span","",[item.description,item.category].filter(Boolean).join(" · "));
       const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
       const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
       edit.addEventListener("click",()=>{technicianEditor.elements.id.value=item.id;technicianEditor.elements.name.value=item.name||"";technicianEditor.elements.description.value=item.description||"";technicianEditor.elements.category.value=item.category||"";technicianEditor.elements.country.value=item.country||"";technicianEditor.elements.phone.value=item.phone||"";technicianEditor.elements.whatsapp.value=item.whatsapp||"";technicianPhotoUrl=item.photo_url||"";previewImage(technicianPhotoPreview,technicianPhotoUrl);document.querySelector("#technician-form-title").textContent="Edit Technician";document.querySelector("#technician-cancel").hidden=false;});actions.append(edit);
