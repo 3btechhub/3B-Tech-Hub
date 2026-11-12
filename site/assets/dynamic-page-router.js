@@ -5,12 +5,29 @@ const RESERVED_ROOTS = new Set([
 ]);
 const ROOT_PATH = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 
-function normalizedSegments(pathname) {
-  let path = decodeURIComponent(pathname);
-  if (path === ROOT_PATH || path === ROOT_PATH + "/") return [];
-  if (path.startsWith(ROOT_PATH + "/")) path = path.slice(ROOT_PATH.length + 1);
-  else return [];
-  return path.split("/").filter(Boolean);
+export function normalizedSegments(pathname, rootPath = ROOT_PATH) {
+  if (typeof pathname !== "string" || typeof rootPath !== "string") return [];
+  const basePath = rootPath.replace(/\/+$/, "") || "/";
+  if (pathname === basePath || pathname === basePath + "/") return [];
+  if (!pathname.startsWith(basePath === "/" ? "/" : basePath + "/")) return [];
+
+  const relativePath = basePath === "/" ? pathname.slice(1) : pathname.slice(basePath.length + 1);
+  const rawSegments = relativePath.split("/").filter(Boolean);
+  if (rawSegments.length < 1 || rawSegments.length > 2) return [];
+
+  let segments;
+  try {
+    segments = rawSegments.map(segment => decodeURIComponent(segment));
+  } catch {
+    return [];
+  }
+
+  if (segments.some(segment =>
+    !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(segment) ||
+    segment.includes("/") || segment.includes("\\")
+  )) return [];
+
+  return segments;
 }
 
 function setNotFound(main) {
@@ -50,8 +67,6 @@ export async function renderDynamicRoute(supabase) {
   if (segments.length < 1 || segments.length > 2) return false;
   const [mainSlug, subSlug] = segments;
   if (RESERVED_ROOTS.has(mainSlug.toLowerCase())) return false;
-  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(mainSlug)) return false;
-  if (subSlug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(subSlug)) return false;
 
   const locale = ["bn", "ar", "en"].includes(document.documentElement.lang)
     ? document.documentElement.lang : "en";
