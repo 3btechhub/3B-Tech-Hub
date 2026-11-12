@@ -50,8 +50,8 @@ export async function renderDynamicNavigation(supabase) {
   const locale = ["bn", "ar", "en"].includes(document.documentElement.lang)
     ? document.documentElement.lang : "en";
   const { data, error } = await supabase.from("pages")
-    .select("id,parent_id,page_type,slug,title,locale,status,sort_order,show_in_navigation")
-    .eq("locale", locale).eq("status", "published").eq("show_in_navigation", true)
+    .select("id,parent_id,page_type,slug,title,locale,status,sort_order")
+    .eq("locale", locale).eq("status", "published")
     .order("sort_order", { ascending: true }).order("title", { ascending: true });
   if (error) {
     section.hidden = true;
