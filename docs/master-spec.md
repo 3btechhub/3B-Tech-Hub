@@ -7,8 +7,6 @@ This document is the sole product-scope authority for the website. Production UI
 - Account
 - Profile
 - Dashboard
-- Page
-- Sub Page
 
 ## 2. Shared layout
 - Header
@@ -33,7 +31,6 @@ This document is the sole product-scope authority for the website. Production UI
 Only these modules may exist:
 - Overview
 - Audit
-- Page
 - User
 - Role
 - Permission
@@ -70,7 +67,7 @@ Language can be changed independently on every route using the menu. Changing la
 - Monochrome black and white, with neutral gray only for hierarchy and states.
 - Two icon appearances: light-theme and dark-theme variants.
 - Text, buttons, and input/output controls have only three semantic sizes: Small, Medium, Large.
-- Reuse centralized design tokens and shared components; do not duplicate page-level styles.
+- Reuse centralized design tokens and shared components; do not duplicate route-level styles.
 - Simple, clean, responsive, accessible and consistent.
 
 ## 9. Engineering conditions
@@ -78,7 +75,7 @@ Fast, clean, reliable, usable, easy to maintain, secure, safe, consistent, centr
 - Keep authorization in Supabase RLS and trusted server-side functions, never in UI visibility alone.
 - Never expose service-role or secret keys to the browser.
 - Owner identity and role are enforced using verified Auth identity and protected database logic.
-- Prefer configuration/data-driven pages and shared components over duplicated country/page implementations.
+- Prefer shared components over duplicated country-route implementations.
 - Every route has a safe fallback. Failed IP detection falls back to `global`.
 - Do not add product or service functionality outside the approved module list.
 
