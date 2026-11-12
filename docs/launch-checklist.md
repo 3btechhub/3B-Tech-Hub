@@ -1,4 +1,4 @@
-# 3B TECH HUB — Master-Spec Release Checklist
+# 3B TECH HUB — Release Checklist
 
 ## Production platform
 - Repository: `3btechhub/3btechhub`
@@ -7,13 +7,13 @@
 - GitHub + Supabase only. Vercel, Appwrite and Cloudflare are excluded.
 
 ## Scope acceptance
-- [ ] Only Home, Account, Profile, Dashboard, Page and Sub Page are present.
-- [ ] Dashboard contains only Overview, Audit, Page, User, Role, Permission and Settings.
+- [ ] One website with English-only UI and LTR layout.
+- [ ] Only Home, Account, Profile and Dashboard pages.
+- [ ] Header, Main Area and Footer remain persistent.
+- [ ] Dashboard contains only Overview, Audit, Services, Products, Workshops, Technicians, User, Role, Permission and Settings.
 - [ ] User types are Owner, Admin, Member and Visitor.
-- [ ] Country routes are exactly Global, BD and KSA.
-- [ ] Global, BD and KSA page visibility follows the master specification.
-- [ ] Default languages are English, Bangla and Arabic for Global, BD and KSA.
-- [ ] Arabic layout is RTL; language switching does not change country route.
+- [ ] Services, Products, Workshops and Technicians are shared across the website without country metadata.
+- [ ] No country detection, country versions, language selector, translation system or RTL styles.
 - [ ] Theme is monochrome black/white with neutral gray and theme-aware icons.
 - [ ] Small, Medium and Large semantic sizes are used consistently.
 
@@ -27,13 +27,9 @@
 
 ## Validation
 - [ ] `npm run validate` passes.
-- [ ] GitHub Actions CI and browser navigation tests pass.
-- [ ] IP detection, Global fallback and manual route changes pass browser tests.
-- [ ] Language defaults, switching and Arabic RTL pass browser tests.
-- [ ] Account, Profile, Page Builder, Audit and Settings work in a real browser.
-- [x] Supabase additive country-scope and Member-role migration is applied and verified.
-- [ ] Final cleanup migration removes legacy role values and out-of-scope tables after frontend deployment.
-- [ ] Legacy tables outside the master specification are removed after private archive verification.
+- [ ] GitHub Actions CI passes.
+- [ ] Account, Profile, Dashboard, Audit and Settings work in a real browser.
+- [ ] Supabase migration removes obsolete country/locale metadata while preserving all content rows.
 - [ ] GitHub Pages deployment and production smoke tests pass.
 
 Do not claim a database backup until a full export/archive and restore test are verified.
