@@ -31,12 +31,25 @@ This document is the sole product-scope authority for the website. Production UI
 Only these modules may exist:
 - Overview
 - Audit
+- Services
+- Products
+- Workshops
+- Technicians
 - User
 - Role
 - Permission
 - Settings
 
-No separate Services, Products, Workshop, Technician, Media, Booking, or other dashboard module is permitted.
+Services, Products, Workshops and Technicians are approved content-management modules. No Media Library, booking or other additional dashboard module is permitted.
+
+### Content module fields
+- Services: Name (required), Slug (required), Description, Category, Country, Image, Visibility.
+- Products: Name (required), Slug (required), Description, Category, Country, Image, Visibility.
+- Workshops: Name (required), Slug (required), Description, Location, Technician, Category, Country, Image, Visibility.
+- Technicians: Name (required), Slug (required), Description, Skill, Category, Country, Image, Visibility.
+- Slugs are generated from Name automatically and remain manually editable; they must be unique.
+- Image files are uploaded directly to Supabase Storage and can be removed or replaced.
+- Only Name and Slug are required; all other fields are optional.
 
 ## 5. User types
 - Owner — fixed primary account: 3btechhub@gmail.com
