@@ -4,7 +4,7 @@
 - `pages`: Main Pages (`parent_id = null`) and Sub Pages (`parent_id` points directly to a Main Page).
 - `page_components`: ordered allowlisted component instances and JSON configuration.
 - `page_revisions`: JSON snapshots for rollback.
-- Each page has a country scope: `global`, `bd` or `ksa`.
+- `pages.country` is live and constrained to `global`, `bd` or `ksa`.
 
 ## Country and language behavior
 - Global pages are visible on every country route.
@@ -13,7 +13,7 @@
 - Global route uses Global pages only.
 - Country-specific pages take precedence over a Global page with the same slug.
 - Page language is independently selected from `en`, `bn` or `ar`; Arabic uses RTL.
-- The page country column and country-aware unique indexes require the pending Supabase migration described in the implementation checklist.
+- Country-aware unique indexes are applied in Supabase migration `20261112103930_add_country_scope_and_member_role`.
 
 ## Trust boundary
 The database stores content and validated configuration only. It never stores executable JavaScript, SQL, HTML templates or arbitrary function bodies. The frontend renderer has a fixed allowlist of component handlers. Unknown component types are ignored.
