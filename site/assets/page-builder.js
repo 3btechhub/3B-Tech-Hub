@@ -49,7 +49,7 @@ if (root) {
     return node;
   }
   function slugify(value) {
-    return value.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
+    return value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70);
   }
   async function authorize() {
