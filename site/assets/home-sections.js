@@ -51,7 +51,7 @@ export async function renderHomeSections(supabase) {
 
   const { data: pages, error } = await supabase.from("pages")
     .select("id,parent_id,page_type,slug,title,description,locale,country,status,sort_order,visibility,location,phone_number,whatsapp_number,email,image_url")
-    .eq("locale", locale).eq("status", "published").eq("visibility", true)
+    .in("locale", locale === "en" ? ["en"] : [locale, "en"]).eq("status", "published").eq("visibility", true)
     .in("country", countries)
     .order("sort_order", { ascending: true }).order("title", { ascending: true });
   if (error) {
