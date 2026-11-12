@@ -6,25 +6,6 @@ await window.countryContextReady;
 
 // Make country context available before the rest of the application runs.
 const activeCountry = window.siteCountry;
-const currentPath = window.location.pathname;
-const serviceCountryRules = {
-  "tv-repair": "bd",
-  "mobile-repair": "bd",
-  "mobile-parts-sell": "bd",
-  "satellite-dish-installation": "saudi",
-  "satellite-dish-servicing": "saudi",
-  "satellite-dish-parts-sell": "saudi"
-};
-const servicePrefix = "/3btechhub/services/";
-if (currentPath.startsWith(servicePrefix)) {
-  const serviceSlug = currentPath.slice(servicePrefix.length).split("/")[0];
-  if (serviceCountryRules[serviceSlug] && activeCountry.region !== "global" && serviceCountryRules[serviceSlug] !== activeCountry.region) {
-    window.location.replace("/3btechhub/" + activeCountry.region + "/");
-  }
-}
-document.querySelectorAll("[data-country-region]").forEach((section) => {
-  section.hidden = activeCountry.region !== "global" && section.dataset.countryRegion !== activeCountry.region;
-});
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const profileMenuLink = document.querySelector("#profile-menu-link");
@@ -145,12 +126,20 @@ async function applyPublicSiteSettings() {
     .maybeSingle();
   if (error || !data?.setting_value || typeof data.setting_value !== "object") return;
   const settings = data.setting_value;
-  const tagline = document.querySelector(".home-main p");
-  if (tagline && typeof settings.tagline === "string" && settings.tagline.trim()) tagline.textContent = settings.tagline;
-  const description = document.querySelector('meta[name="description"]');
-  if (description && typeof settings.description === "string" && settings.description.trim()) description.content = settings.description;
+  const websiteTitle = typeof settings.website_title === "string" && settings.website_title.trim()
+    ? settings.website_title.trim() : "3B TECH HUB";
+  document.querySelectorAll(".brand-title, .home-hero h1, .home-main h1").forEach((node) => { node.textContent = websiteTitle; });
+  document.title = websiteTitle;
+  const brand = document.querySelector(".brand");
+  if (brand && typeof settings.logo_url === "string" && /^https?:\/\//i.test(settings.logo_url)) {
+    const logo = document.createElement("img");
+    logo.src = settings.logo_url;
+    logo.alt = websiteTitle;
+    logo.className = "brand-image";
+    brand.replaceChildren(logo);
+  }
 }
-void applyPublicSiteSettings();
+
 if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   logoutMenuLink.disabled = true;
   const { error } = await supabase.auth.signOut();
