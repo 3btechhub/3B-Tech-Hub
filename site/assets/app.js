@@ -772,41 +772,69 @@ if (siteSettingsForm) void loadSiteSettingsForm();
 const dashboardContentModules = {
   services: { table:"services", title:"Service", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
-    ["category","Category","text",false],["country","Country","select",false,["global","bd","saudi"]],
-    ["photo_url","Photo URL","url",false],["is_home_service","Show as home service","checkbox",false],
-    ["status","Status","select",true,["draft","active","archived"]]
-  ], columns:["name","category","country","status"] },
+    ["category","Category","text",false],["country","Country","select",false,["global","bd","ksa"]],
+    ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["slug","category","country","visibility"] },
   products: { table:"products", title:"Product", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["sku","SKU","text",false],
-    ["description","Description","textarea",false],["category","Category","text",false],
-    ["category_group","Product group","select",true,["mobile","satellite"]],
-    ["condition","Condition","select",true,["new","used","refurbished"]],
-    ["price_minor","Price (minor currency units)","number",false],["currency","Currency","text",true],
-    ["stock_qty","Stock quantity","number",true],["country","Country","select",false,["global","bd","saudi"]],
-    ["phone","Phone","text",false],["whatsapp","WhatsApp","text",false],
-    ["photo_url","Main photo URL","url",false],["image_paths","Additional image paths (one per line)","textarea",false],
-    ["status","Status","select",true,["draft","active","archived"]]
-  ], columns:["name","sku","category_group","price_minor","stock_qty","country","status"] },
+    ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
+    ["category","Category","text",false],["country","Country","select",false,["global","bd","ksa"]],
+    ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["slug","category","country","visibility"] },
   workshops: { table:"workshops", title:"Workshop", fields:[
-    ["title","Title","text",true],["description","Description","textarea",false],
-    ["workshop_date","Date","date",false],["workshop_time","Time","time",false],
-    ["location","Location","text",false],["trainer","Trainer","text",false],
-    ["category","Category","text",false],["country","Country","select",false,["global","bd","saudi"]],
-    ["phone","Phone","text",false],["whatsapp","WhatsApp","text",false],
-    ["photo_url","Photo URL","url",false],["status","Status","select",true,["draft","published"]]
-  ], columns:["title","workshop_date","location","trainer","country","status"] },
+    ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
+    ["location","Location","text",false],["technician","Technician","text",false],
+    ["category","Category","text",false],["country","Country","select",false,["global","bd","ksa"]],
+    ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["slug","location","technician","category","country","visibility"] },
   technicians: { table:"technicians", title:"Technician", fields:[
-    ["name","Name","text",true],["description","Description","textarea",false],
-    ["category","Specialty / Category","text",false],["country","Country","select",false,["global","bd","saudi"]],
-    ["phone","Phone","text",false],["whatsapp","WhatsApp","text",false],
-    ["photo_url","Photo URL","url",false],["is_published","Published","checkbox",false]
-  ], columns:["name","category","country","phone","is_published"] }
+    ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
+    ["skill","Skill","text",false],["category","Category","text",false],["country","Country","select",false,["global","bd","ksa"]],
+    ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["slug","skill","category","country","visibility"] }
 };
 
 function moduleLabel(value) {
-  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "boolean") return value ? "Visible" : "Hidden";
   if (value == null || value === "") return "—";
   return String(value);
+}
+function slugFromName(value) {
+  return String(value || "").normalize("NFKC").trim().toLocaleLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "");
+}
+function moduleDatabaseKey(moduleName,key) {
+  if (moduleName === "workshops" && key === "name") return "title";
+  if (moduleName === "workshops" && key === "technician") return "trainer";
+  return key;
+}
+function recordVisibility(moduleName,record) {
+  if (moduleName === "technicians") return record.is_published ? "visible" : "hidden";
+  if (moduleName === "workshops") return record.status === "published" ? "visible" : "hidden";
+  return record.status === "active" ? "visible" : "hidden";
+}
+function storagePathFromUrl(url) {
+  if (!url) return "";
+  try {
+    const parsed = new URL(url);
+    const marker = "/storage/v1/object/public/site-media/";
+    const index = parsed.pathname.indexOf(marker);
+    return index < 0 ? "" : decodeURIComponent(parsed.pathname.slice(index + marker.length));
+  } catch { return ""; }
+}
+async function removeStoredImage(url) {
+  const path = storagePathFromUrl(url);
+  if (!path) return;
+  const { error } = await supabase.storage.from("site-media").remove([path]);
+  if (error) throw error;
+}
+function updateImagePreview(form,url) {
+  const preview = form.querySelector(".module-image-preview");
+  const remove = form.querySelector("[data-image-remove]");
+  if (preview) {
+    if (url) { preview.src=url; preview.hidden=false; }
+    else { preview.removeAttribute("src"); preview.hidden=true; }
+  }
+  if (remove) remove.hidden=!url;
 }
 function createModuleField(field) {
   const [name,label,type,required,options] = field;
@@ -816,21 +844,39 @@ function createModuleField(field) {
   if (type === "textarea") { control=document.createElement("textarea"); control.rows=3; }
   else if (type === "select") {
     control=document.createElement("select");
+    const blank=document.createElement("option"); blank.value=""; blank.textContent="— Select —"; control.append(blank);
     for (const value of options || []) {
-      const option=document.createElement("option"); option.value=value; option.textContent=value; control.append(option);
+      const option=document.createElement("option"); option.value=value; option.textContent=value==="visible"?"Visible":value==="hidden"?"Hidden":value; control.append(option);
     }
-    if (!required) { const blank=document.createElement("option"); blank.value=""; blank.textContent="— Select —"; control.prepend(blank); }
-  } else { control=document.createElement("input"); control.type=type; }
+  } else {
+    control=document.createElement("input"); control.type=type;
+    if (type==="file") control.accept="image/jpeg,image/png,image/webp,image/avif,image/gif";
+  }
   control.name=name; control.required=Boolean(required);
-  if (type === "checkbox") {
+  if (type === "file") {
+    wrapper.append(addTextElement(wrapper,"span","",label),control);
+    const preview=document.createElement("img"); preview.className="module-image-preview"; preview.alt=label+" preview"; preview.hidden=true;
+    const remove=document.createElement("button"); remove.type="button"; remove.className="secondary-button"; remove.textContent="Remove image"; remove.dataset.imageRemove="true"; remove.hidden=true;
+    control.addEventListener("change",()=>{
+      const form=wrapper.closest("form");
+      const file=control.files?.[0];
+      if (file) {
+        preview.src=URL.createObjectURL(file); preview.hidden=false; remove.hidden=false;
+        if (form) form.dataset.removePhoto="false";
+      }
+    });
+    remove.addEventListener("click",()=>{
+      control.value=""; const form=wrapper.closest("form");
+      if (form) form.dataset.removePhoto="true";
+      updateImagePreview(form || wrapper, "");
+    });
+    wrapper.append(preview,remove);
+  } else if (type === "checkbox") {
     wrapper.classList.add("module-checkbox-field"); control.setAttribute("aria-label",label); wrapper.append(control);
     addTextElement(wrapper,"span","",label);
   } else {
     addTextElement(wrapper,"span","",label); wrapper.append(control);
   }
-  if (name==="currency") control.value="SAR";
-  if (name==="stock_qty") { control.value="0"; control.min="0"; control.step="1"; }
-  if (name==="price_minor") { control.min="0"; control.step="1"; }
   return wrapper;
 }
 function setModuleMessage(moduleName,message,kind="") {
@@ -840,7 +886,8 @@ function setModuleMessage(moduleName,message,kind="") {
 function resetModuleForm(moduleName) {
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if (!form) return;
-  form.reset(); form.dataset.editId="";
+  form.reset(); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.removePhoto="false"; form.dataset.slugManual="false";
+  updateImagePreview(form,"");
   const config=dashboardContentModules[moduleName];
   document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Add "+config.title;
   document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Save "+config.title;
@@ -856,19 +903,30 @@ function renderModuleList(moduleName,records) {
     const row=document.createElement("article"); row.className="admin-list-row module-record-row";
     const primary=document.createElement("div");
     addTextElement(primary,"strong","",record.name||record.title||record.slug||"Untitled");
-    const details=config.columns.filter((key)=>!["name","title"].includes(key))
-      .map((key)=>key.replaceAll("_"," ")+": "+moduleLabel(record[key])).join(" · ");
-    addTextElement(primary,"span","muted",details); row.append(primary);
+    const details=config.columns.map((key)=>{
+      const value=key==="visibility"?recordVisibility(moduleName,record)
+        :key==="technician"?record.trainer:record[key];
+      return key.replaceAll("_"," ")+": "+moduleLabel(value);
+    }).join(" · ");
+    addTextElement(primary,"span","muted",details);
+    if (record.photo_url) {
+      const thumb=document.createElement("img"); thumb.className="module-record-image"; thumb.src=record.photo_url; thumb.alt=""; thumb.loading="lazy"; primary.append(thumb);
+    }
+    row.append(primary);
     const actions=document.createElement("div"); actions.className="editor-actions";
     const edit=document.createElement("button"); edit.type="button"; edit.className="secondary-button"; edit.textContent="Edit";
     edit.addEventListener("click",()=>{
       const form=document.querySelector('[data-module-form="'+moduleName+'"]'); form.dataset.editId=record.id;
+      form.dataset.currentPhotoUrl=record.photo_url||""; form.dataset.removePhoto="false"; form.dataset.slugManual="false";
       for (const [key] of config.fields) {
         const input=form.elements.namedItem(key); if (!input) continue;
-        if (input.type==="checkbox") input.checked=Boolean(record[key]);
-        else if (key==="image_paths") input.value=Array.isArray(record[key])?record[key].join("\n"):"";
-        else input.value=record[key]==null?"":String(record[key]);
+        if (key==="visibility") input.value=recordVisibility(moduleName,record);
+        else if (key==="name") input.value=record.name||record.title||"";
+        else if (key==="technician") input.value=record.trainer||"";
+        else if (key==="photo_url") input.value="";
+        else input.value=record[moduleDatabaseKey(moduleName,key)]==null?"":String(record[moduleDatabaseKey(moduleName,key)]);
       }
+      updateImagePreview(form,record.photo_url||"");
       document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Edit "+config.title;
       document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Update "+config.title;
       document.querySelector('[data-module-cancel="'+moduleName+'"]').hidden=false;
@@ -882,6 +940,7 @@ function renderModuleList(moduleName,records) {
       try {
         const {error}=await supabase.from(config.table).delete().eq("id",record.id);
         if (error) throw error;
+        await removeStoredImage(record.photo_url);
         setModuleMessage(moduleName,config.title+" deleted.","success"); await loadContentModule(moduleName);
       } catch(error) { setModuleMessage(moduleName,error.message||"Could not delete this record.","error"); remove.disabled=false; }
     });
@@ -905,56 +964,72 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if (!fieldsHost||!form) continue;
   for (const field of config.fields) fieldsHost.append(createModuleField(field));
+  const nameInput=form.elements.namedItem("name");
+  const slugInput=form.elements.namedItem("slug");
+  if (nameInput&&slugInput) {
+    nameInput.addEventListener("input",()=>{
+      if (form.dataset.slugManual!=="true") slugInput.value=slugFromName(nameInput.value);
+    });
+    slugInput.addEventListener("input",()=>{ form.dataset.slugManual="true"; });
+  }
+  form.dataset.removePhoto="false"; form.dataset.slugManual="false";
   form.addEventListener("submit",async(event)=>{
     event.preventDefault();
     if (!["owner","admin"].includes(currentDashboardRole)) { setModuleMessage(moduleName,"Admin permission required.","error"); return; }
     const submit=document.querySelector('[data-module-submit="'+moduleName+'"]'); submit.disabled=true; setModuleMessage(moduleName,"Saving…");
+    let uploadedUrl="", oldPhotoUrl=form.dataset.currentPhotoUrl||"", saved=false;
     try {
       const payload={};
       for (const [key] of config.fields) {
-        const input=form.elements.namedItem(key); if (!input) continue;
-        if (input.type==="checkbox") payload[key]=input.checked;
-        else if (key==="image_paths") payload[key]=input.value.split(/\r?\n/).map((item)=>item.trim()).filter(Boolean);
-        else if (input.type==="number") payload[key]=input.value===""?null:Number(input.value);
-        else payload[key]=input.value.trim()===""?null:input.value.trim();
+        const input=form.elements.namedItem(key); if (!input || key==="photo_url" || key==="visibility") continue;
+        const dbKey=moduleDatabaseKey(moduleName,key);
+        payload[dbKey]=input.value.trim()===""?null:input.value.trim();
       }
-      if (moduleName==="services" || moduleName==="products") {
-        if (payload.description == null) payload.description = "";
-      }
-      if (moduleName==="products") {
-        if (!payload.currency) payload.currency="SAR";
-        if (payload.stock_qty==null) payload.stock_qty=0;
-        if (!payload.category_group) payload.category_group="mobile";
-        if (!payload.condition) payload.condition="new";
-        if (!payload.status) payload.status="draft";
-        if (!payload.image_paths) payload.image_paths=[];
-      }
-      if (moduleName==="services"&&!payload.status) payload.status="draft";
-      if (moduleName==="workshops") {
-        if (!payload.status) payload.status="draft";
-        const {data:authData}=await supabase.auth.getUser();
-        if (authData?.user?.id) payload.updated_by=authData.user.id;
-      }
+      const nameValue=String(nameInput?.value||"").trim();
+      const slugValue=String(slugInput?.value||"").trim()||slugFromName(nameValue);
+      if (!nameValue || !slugValue) throw new Error("Name and Slug are required.");
+      payload[moduleDatabaseKey(moduleName,"name")]=nameValue;
+      payload.slug=slugValue;
+      if (moduleName==="services"||moduleName==="products") payload.description=payload.description||"";
+      const visibility=form.elements.namedItem("visibility")?.value||"hidden";
+      if (moduleName==="technicians") payload.is_published=visibility==="visible";
+      else payload.status=visibility==="visible"?(moduleName==="workshops"?"published":"active"):"draft";
+      const imageInput=form.elements.namedItem("photo_url");
+      if (imageInput?.files?.[0]) {
+        const file=imageInput.files[0];
+        if (!file.type.startsWith("image/")) throw new Error("Please select an image file.");
+        if (file.size>10*1024*1024) throw new Error("Image must be 10 MB or smaller.");
+        const safeName=file.name.normalize("NFKD").replace(/[^\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
+        const path="content/"+moduleName+"/"+crypto.randomUUID()+"-"+safeName;
+        const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type,upsert:false});
+        if (uploadError) throw uploadError;
+        uploadedUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;
+        payload.photo_url=uploadedUrl;
+      } else if (form.dataset.removePhoto==="true") payload.photo_url=null;
       const editId=form.dataset.editId; let result;
       if (editId) result=await supabase.from(config.table).update(payload).eq("id",editId);
       else {
-        if (moduleName==="workshops") {
-          const {data:authData}=await supabase.auth.getUser();
-          if (authData?.user?.id) payload.created_by=authData.user.id;
-        }
+        const {data:authData}=await supabase.auth.getUser();
+        if (moduleName==="workshops"&&authData?.user?.id) { payload.created_by=authData.user.id; payload.updated_by=authData.user.id; }
         result=await supabase.from(config.table).insert(payload);
       }
       if (result.error) throw result.error;
+      saved=true;
+      const nextPhotoUrl=payload.photo_url===undefined?oldPhotoUrl:payload.photo_url;
+      if (oldPhotoUrl&&oldPhotoUrl!==nextPhotoUrl) {
+        try { await removeStoredImage(oldPhotoUrl); } catch (cleanupError) { console.warn("Old image cleanup failed.",cleanupError); }
+      }
       resetModuleForm(moduleName); setModuleMessage(moduleName,config.title+(editId?" updated.":" created."),"success");
       await loadContentModule(moduleName);
-    } catch(error) { setModuleMessage(moduleName,error.message||"Could not save this record.","error"); }
-    finally { submit.disabled=false; }
+    } catch(error) {
+      if (uploadedUrl&&!saved) { try { await removeStoredImage(uploadedUrl); } catch {} }
+      setModuleMessage(moduleName,error.message||"Could not save this record.","error");
+    } finally { submit.disabled=false; }
   });
   document.querySelector('[data-module-cancel="'+moduleName+'"]')?.addEventListener("click",()=>resetModuleForm(moduleName));
   document.querySelector('[data-module-refresh="'+moduleName+'"]')?.addEventListener("click",()=>void loadContentModule(moduleName));
   document.querySelector('[data-dashboard-tab="'+moduleName+'"]')?.addEventListener("click",()=>void loadContentModule(moduleName));
 }
-
 
 // Dashboard module tabs: all modules stay on one horizontal row.
 const dashboardTabs = Array.from(document.querySelectorAll("[data-dashboard-tab]"));

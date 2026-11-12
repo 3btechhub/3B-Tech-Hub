@@ -766,3 +766,5 @@ html[dir="rtl"] .admin-list-row{direction:rtl}
 .module-record-row>div:first-child{display:grid;gap:5px;min-width:0}
 .module-record-row .muted{overflow-wrap:anywhere;line-height:1.5}
 @media(max-width:600px){.module-form-grid{grid-template-columns:1fr}.module-record-row{flex-direction:column}.module-record-row .editor-actions{width:100%}}
+
+.module-image-preview{display:block;max-width:180px;max-height:140px;object-fit:contain;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:4px}.module-image-preview[hidden]{display:none}.module-record-image{display:block;max-width:96px;max-height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}

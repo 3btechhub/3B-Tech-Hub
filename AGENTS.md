@@ -4,7 +4,7 @@ Read `docs/master-spec.md` before changing production code. It is the single sou
 
 ## Scope
 - Only the structure, layout, features, dashboard modules, user types, country routes and languages in `docs/master-spec.md` may appear in production.
-- Do not reintroduce Services, Products, Workshops, Technicians, Media Library, bookings, or any other out-of-scope module.
+- Services, Products, Workshops and Technicians are approved content modules with fields defined in docs/master-spec.md. Do not add Media Library, bookings, or other unapproved modules.
 - Canonical country identifiers are exactly `global`, `bd`, and `ksa`; language defaults are `en`, `bn`, and `ar` respectively.
 - Global content is visible on every route; country-specific content is restricted to its matching route.
 - Owner `3btechhub@gmail.com` is fixed and protected. Allowed user types are Owner, Admin, Member and Visitor.
