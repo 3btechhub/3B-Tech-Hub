@@ -136,7 +136,8 @@ async function applyPublicSiteSettings() {
     logo.src = settings.logo_url;
     logo.alt = websiteTitle;
     logo.className = "brand-image";
-    brand.replaceChildren(logo);
+    const mark = brand.querySelector(".brand-mark");
+    if (mark) mark.replaceWith(logo);
   }
 }
 
@@ -213,7 +214,7 @@ if (form) {
     showMessage("Sending verification code…");
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: new URL("login/?recovery=1", ROOT_URL).href,
+        redirectTo: new URL("account/?recovery=1", ROOT_URL).href,
       });
       if (error) throw error;
       recoveryEmail = email;
