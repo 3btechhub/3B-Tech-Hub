@@ -48,6 +48,16 @@ async function renderRoute(requestedPath, { replace = false } = {}) {
   main.innerHTML = source.innerHTML;
   resolveFragmentLinks(main, path);
   document.title = titles[details.view];
+  const homeLink = document.getElementById("home-menu-link");
+  if (homeLink) homeLink.hidden = details.view === "home";
+  const robotsMeta = document.querySelector('meta[name="robots"]');
+  if (details.view === "dashboard") {
+    const meta = robotsMeta || document.head.appendChild(document.createElement("meta"));
+    meta.name = "robots";
+    meta.content = "noindex,nofollow";
+  } else if (robotsMeta) {
+    robotsMeta.remove();
+  }
   window.siteCurrentRoute = path;
   await initRoutePage();
   window.scrollTo({ top:0, behavior:"auto" });
@@ -58,7 +68,7 @@ window.navigateSiteRoute = (target, options = {}) => {
   if (!path) return;
   if (options.replace) history.replaceState({ route:path }, "", path);
   else history.pushState({ route:path }, "", path);
-  void renderRoute(path);
+  void renderRoute(path).catch((error) => { console.error("Website route could not be rendered.", error); main.textContent = "This page could not be loaded. Please refresh and try again."; });
 };
 document.addEventListener("click", (event) => {
   const anchor = event.target.closest("a[href]");
@@ -69,7 +79,7 @@ document.addEventListener("click", (event) => {
   event.preventDefault();
   window.navigateSiteRoute(url.pathname + url.search + url.hash);
 });
-window.addEventListener("popstate", () => { void renderRoute(window.location.pathname + window.location.search); });
+window.addEventListener("popstate", () => { void renderRoute(window.location.pathname + window.location.search).catch((error) => { console.error("Website route could not be rendered.", error); main.textContent = "This page could not be loaded. Please refresh and try again."; }); });
 await window.countryContextReady;
 let initialPath = normalizedPath(window.siteInitialRoute) || BASE + (window.siteCountry?.region || "global") + "/";
 if (initialPath === BASE) initialPath = BASE + (window.siteCountry?.region || "global") + "/";
