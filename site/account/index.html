@@ -21,16 +21,16 @@
   <main class="auth-main">
     <form id="auth-form" class="auth-form">
       <label class="visually-hidden" for="email">Email address</label>
-      <input id="email" name="email" type="email" autocomplete="email" placeholder="Email" maxlength="254" required>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="Email" data-placeholder="email" maxlength="254" required>
       <label class="visually-hidden" for="otp">Verification code</label>
-      <input id="otp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Verification Code" minlength="6" maxlength="8" pattern="[0-9]{6,8}" hidden>
+      <input id="otp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Verification Code" data-placeholder="verificationCode" minlength="6" maxlength="8" pattern="[0-9]{6,8}" hidden>
       <label class="visually-hidden" for="password">Password</label>
-      <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password" minlength="8" maxlength="256" required>
+      <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password" data-placeholder="password" minlength="8" maxlength="256" required>
       <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
-      <button id="auth-submit" type="submit">Account</button>
+      <button id="auth-submit" type="submit" data-label="signIn">Sign In</button>
       <div class="auth-links">
-        <button id="forgot-password" class="text-button" type="button">Forgot password?</button>
-        <button id="toggle-signup" class="text-button" type="button">Create account</button>
+        <button id="forgot-password" class="text-button" type="button" data-label="forgotPassword">Forgot password?</button>
+        <button id="toggle-signup" class="text-button" type="button" data-label="createAccount">Create account</button>
       </div>
     </form>
   </main>
