@@ -1,17 +1,25 @@
 (() => {
+  "use strict";
   const button = document.querySelector(".menu-trigger");
   const menu = document.querySelector("#site-menu");
   const regionSelect = document.querySelector("#region-select");
   const languageSelect = document.querySelector("#language-select");
+  const BASE = "/3btechhub/";
+  const normalizeRegion = (value) => value === "saudi" ? "ksa" : value;
 
   const pathParts = window.location.pathname.split("/").filter(Boolean);
   const routeIndex = pathParts.indexOf("3btechhub");
-  const pathRegion = routeIndex >= 0 ? pathParts[routeIndex + 1] : null;
-  const activeRegion = window.siteCountry?.region || (["bd", "saudi", "global"].includes(pathRegion) ? pathRegion : "global");
+  const pathRegion = routeIndex >= 0 ? normalizeRegion(pathParts[routeIndex + 1]) : null;
+  const activeRegion = normalizeRegion(window.siteCountry?.region || pathRegion || "global");
 
   const makeDropdown = (select, title) => {
     if (!select || select.dataset.customDropdown === "true") return;
     select.dataset.customDropdown = "true";
+    Array.from(select.options).forEach((option) => {
+      option.value = normalizeRegion(option.value);
+      if (option.value === "ksa") option.textContent = "Country: Saudi Arabia";
+    });
+
     const wrapper = document.createElement("div");
     wrapper.className = "menu-dropdown";
     const trigger = document.createElement("button");
@@ -24,7 +32,7 @@
 
     const update = () => {
       const selected = select.options[select.selectedIndex];
-      trigger.textContent = title + ": " + (selected ? selected.textContent.replace(/^(Language|Country):\s*/, "") : "");
+      trigger.textContent = title + ": " + (selected ? selected.textContent.replace(/^(Language|Country):\\s*/, "") : "");
       panel.querySelectorAll("button").forEach((option) => {
         const active = option.dataset.value === select.value;
         option.setAttribute("aria-pressed", String(active));
@@ -36,7 +44,7 @@
       const item = document.createElement("button");
       item.type = "button";
       item.className = "menu-dropdown-option";
-      item.textContent = option.textContent.replace(/^(Language|Country):\s*/, "");
+      item.textContent = option.textContent.replace(/^(Language|Country):\\s*/, "");
       item.dataset.value = option.value;
       item.addEventListener("click", () => {
         select.value = option.value;
@@ -63,17 +71,19 @@
   if (regionSelect) {
     regionSelect.value = activeRegion;
     const goToRegion = () => {
-      const region = regionSelect.value;
-      if (!["bd", "saudi", "global"].includes(region) || region === activeRegion) return;
-      try { localStorage.setItem("3b-country-manual", region); } catch (_) {}
-      window.location.href = "/3btechhub/" + region + "/";
+      const region = normalizeRegion(regionSelect.value);
+      if (!["bd", "ksa", "global"].includes(region) || region === activeRegion) return;
+      try {
+        localStorage.setItem("3b-country-manual", region);
+        localStorage.setItem("3b-country-context", JSON.stringify({ region, source: "manual" }));
+      } catch (_) {}
+      window.location.href = BASE + region + "/";
     };
     regionSelect.addEventListener("change", goToRegion);
-    regionSelect.addEventListener("input", goToRegion);
   }
 
   if (languageSelect) {
-    const defaultLanguage = activeRegion === "bd" ? "bn" : activeRegion === "saudi" ? "ar" : "en";
+    const defaultLanguage = activeRegion === "bd" ? "bn" : activeRegion === "ksa" ? "ar" : "en";
     try {
       languageSelect.value = localStorage.getItem("3b-language-" + activeRegion) || defaultLanguage;
     } catch (_) {
