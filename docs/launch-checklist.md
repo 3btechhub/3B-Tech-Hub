@@ -31,7 +31,8 @@
 - [ ] IP detection, Global fallback and manual route changes pass browser tests.
 - [ ] Language defaults, switching and Arabic RTL pass browser tests.
 - [ ] Account, Profile, Page Builder, Audit and Settings work in a real browser.
-- [ ] Supabase country/role migration is applied and verified.
+- [x] Supabase additive country-scope and Member-role migration is applied and verified.
+- [ ] Final cleanup migration removes legacy role values and out-of-scope tables after frontend deployment.
 - [ ] Legacy tables outside the master specification are removed after private archive verification.
 - [ ] GitHub Pages deployment and production smoke tests pass.
 
