@@ -118,9 +118,19 @@ if (root) {
   }
   function resetPageForm() {
     $("#page-form").reset();
+    $("#page-form").hidden = true;
+    $("#page-add-button").hidden = false;
+    $("#component-form").hidden = true;
     $("#page-id").value = "";
     $("#page-type").value = "main";
-    $("#page-locale").value = routeLocale;
+    $("#page-add-button").addEventListener("click", () => {
+    resetPageForm();
+    $("#page-form").hidden = false;
+    $("#page-add-button").hidden = true;
+    $("#page-form-title").textContent = "Create Page";
+    $("#page-title").focus();
+  });
+  $("#page-locale").value = routeLocale;
     $("#page-country").value = "global";
     $("#page-status").value = "draft";
     $("#page-parent").disabled = true;
@@ -134,6 +144,9 @@ if (root) {
   }
   function selectPage(page) {
     selectedPage = page;
+    $("#page-form").hidden = false;
+    $("#page-add-button").hidden = true;
+    $("#component-form").hidden = false;
     $("#page-id").value = page.id;
     $("#page-type").value = page.page_type;
     $("#page-parent").value = page.parent_id || "";
@@ -389,13 +402,14 @@ if (root) {
       <section class="page-builder-column">
         <h2>Pages</h2>
         <p class="muted">Create and manage Main Pages and their Sub Pages. Published pages appear automatically in the matching-language site menu; Draft and Archived pages stay hidden.</p>
+        <div class="editor-actions"><button id="page-add-button" type="button">Add Page</button></div>
         <div id="page-list"></div>
       </section>
       <section class="page-builder-column">
-        <form id="page-form" class="content-editor-form">
+        <form id="page-form" class="content-editor-form" hidden>
           <h2 id="page-form-title">Create Page</h2>
           <input type="hidden" id="page-id">
-          <label class="page-builder-field"><span>Page Type</span><select id="page-type"><option value="main">Main Page</option><option value="sub">Sub Page</option></select></label>
+          <label class="page-builder-field"><span>Page Type</span><select id="page-type" required><option value="main">Main Page</option><option value="sub">Sub Page</option></select></label>
           <label class="page-builder-field"><span>Parent Main Page</span><select id="page-parent"><option value="">Select Main Page</option></select></label>
           <label class="page-builder-field"><span>Title (required)</span><input id="page-title" maxlength="180" required></label>
           <label class="page-builder-field"><span>URL Slug (English letters, numbers, hyphens)</span><input id="page-slug" maxlength="80" placeholder="about-us"></label>
@@ -418,7 +432,7 @@ if (root) {
           <div class="editor-actions"><button id="page-save" type="submit">Save Page</button><button id="page-preview-button" type="button" class="secondary-button">Preview</button><button id="page-cancel" type="button" class="secondary-button" hidden>Cancel</button></div>
         </form>
         <section class="page-builder-subsection">
-          <form id="component-form" class="content-editor-form">
+          <form id="component-form" class="content-editor-form" hidden>
             <h3 id="component-form-title">Add Component</h3>
             <label class="page-builder-field"><span>Component Type</span><select id="component-type">${componentTypes.map(type => `<option value="${type}">${type.replaceAll("_"," ")}</option>`).join("")}</select></label>
             <div id="component-config"></div>
