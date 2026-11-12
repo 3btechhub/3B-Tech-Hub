@@ -33,8 +33,11 @@ jobs:
       - name: Validate website files and regression tests
         run: |
           test -s site/index.html
-          test -s site/login/index.html
+          test -s site/account/index.html
           test -s site/profile/index.html
+          test -s site/global/index.html
+          test -s site/bd/index.html
+          test -s site/ksa/index.html
           test -s site/dashboard/index.html
           test -s site/assets/style.css
           test -s site/assets/app.js
@@ -42,6 +45,10 @@ jobs:
           test -s site/404.html
           npm run validate
           grep -q "3B TECH HUB" site/index.html
+          ! test -d site/services
+          ! test -d site/products
+          ! test -d site/workshop
+          ! test -d site/technicians
 
   deploy:
     if: github.event_name != 'pull_request'

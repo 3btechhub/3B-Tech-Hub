@@ -1,51 +1,38 @@
-# Implementation Status
+# Master-Spec Refactor Status
 
 Updated: 2026-11-12
 
-## Live platform
-- [x] GitHub Pages deploys the `site/` static frontend.
-- [x] Supabase project `sburxeuxkrilbfppxylm` is active and healthy.
-- [x] Supabase email/password authentication is used by the static frontend.
-- [x] RLS is enabled on all 10 public application tables.
-- [x] The Owner role is assigned to `3btechhub@gmail.com`.
-- [x] Six active services are present with the approved country routing.
-- [x] Products are stored in two groups: Mobile & Accessories and Satellite & TV Equipment.
-- [x] Product group selection and More pagination fixes are merged to `main`.
+## Approved scope
 
-## Implemented static-site modules
-- [x] Homepage, login and user profile.
-- [x] Service, product, workshop and technician catalogue rendering.
-- [x] Owner-only CRUD forms for services, products, workshops and technicians.
-- [x] Supabase Storage image uploads for catalogue records.
-- [x] Dedicated Media Library with Storage listing, upload, metadata CRUD, filters and reference-safe deletion (browser verification pending).
-- [x] Owner user administration (invite, list, role assignment, block/unblock and password reset) through the deployed JWT-verified Edge Function and dashboard UI.
-- [x] Role assignment and role summary; Permission Matrix is read-only (custom per-role permission editing is not implemented).
-- [x] Owner-only website profile settings connected to Supabase; public homepage tagline and meta description read the public settings record.
-- [ ] Complete Supabase database + Storage export and tested restore workflow (not available through the connected tools).
+See [master-spec.md](master-spec.md). This is the only allowed website specification.
 
-## Database review findings
-- [x] Revoke unnecessary anonymous write grants and review authenticated grants.
-- [x] Restrict user-role mutations to the Owner, not any Admin.
-- [x] Add append-only audit triggers for privileged data changes.
-- [x] Add the missing workshop foreign-key indexes.
-- [x] Add updated_at triggers for workshops and technicians.
-- [x] Reconcile migration history with version-controlled SQL files.
+## Work completed on `refactor/master-spec-2026-11-12`
 
-## CI and verification
-- [x] Static website file validation.
-- [x] JavaScript syntax validation.
-- [x] Unit/regression tests for catalogue behavior (GitHub Actions CI passed).
-- [ ] Browser end-to-end tests for authentication and owner CRUD.
-- [ ] Automated accessibility, responsive and production smoke tests.
+- [x] Created a dedicated refactor branch from `main`.
+- [x] Preserved the existing `backup/2026-11-12-before-scope-reset` source branch.
+- [x] Added the authoritative master specification and repository implementation rules.
+- [x] Simplified Global, BD and KSA home pages.
+- [x] Standardized canonical country identifiers to `global`, `bd` and `ksa`.
+- [x] Added the Account route and retained `/login/` as a compatibility redirect.
+- [x] Replaced dashboard navigation with Overview, Audit, Page, User, Role, Permission and Settings.
+- [x] Removed Services, Products, Workshops and Technicians frontend routes and product-catalog code.
+- [x] Added country scope to the Page Builder, dynamic navigation and dynamic page resolver.
+- [x] Restricted the user administration Edge Function source to Admin and Member.
+- [x] Updated role UI to treat legacy Customer/Staff/Editor/Manager assignments as Member during transition.
+- [x] `npm run validate` and dynamic-page browser navigation tests pass in GitHub Actions (CI run 990).
+- [x] Applied Supabase migration `20261112103919_add_runtime_configuration`.
+- [x] Applied Supabase migration `20261112103930_add_country_scope_and_member_role`; live `pages.country` is now constrained to Global/BD/KSA and the role check accepts Member.
 
-- [x] Reconciled all 11 version-controlled migration files to the exact versions and SQL statements recorded in Supabase migration history.
-- [x] Applied and verified least-privilege grants, Owner-only role policies, protected primary Owner, audit triggers, workshop indexes and timestamp triggers.
-- [x] Deployed JWT-verified `owner-users` Edge Function for Owner-only invitations, role changes, account blocking/unblocking and password-reset emails.
-- [x] Added User, Role Summary and Permission Matrix panels to the Owner dashboard.
+## Still required before merge/deployment
 
-- [ ] Full dynamic page/content revision editor for `site_content`.
+- [ ] Complete final migration: archive legacy rows privately, convert Customer to Member, remove Manager/Editor/Staff role values, then drop out-of-scope tables `site_content`, `products`, `services`, `workshops`, `technicians` and `media_assets`.
+- [ ] Deploy the updated `owner-users` Edge Function with the new frontend.
+- [ ] Verify Owner/Admin/Member authorization and audit behavior in a browser.
+- [ ] Verify IP routing, Global fallback, manual route selection, language defaults, language switching and Arabic RTL.
+- [ ] Verify Page Builder, country-scoped content, Account, Profile and Settings in a browser.
+- [ ] Run the final GitHub Actions checks after the remaining changes.
+- [ ] Review the final diff and merge only after all required checks pass.
 
-## Explicitly not production-ready
-The inactive Next.js/Appwrite prototype has been removed from the production branch. The audit backup branch preserves the pre-cleanup source. The live application is only the GitHub Pages frontend plus Supabase.
+## Data safety note
 
-Do not claim a backup is complete until a database export/archive exists and a restore test has passed. Do not claim a module is complete until it is connected to Supabase, protected by RLS and verified in the browser.
+The live database still contains legacy catalogue tables and records (9 Products, 6 Services, 2 Workshops and 3 Technicians). They have not been dropped. The source backup branch protects code only; it is not a database or Storage backup. The final migration must archive legacy rows into a private, non-API schema before dropping active legacy tables.

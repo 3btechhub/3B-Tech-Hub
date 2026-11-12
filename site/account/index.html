@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#ffffff">
+  <title>Account | 3B TECH HUB</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <script src="../assets/country-router.js"></script>
+  <script defer src="../assets/menu.js"></script>
+  <script type="module" src="../assets/app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="../" aria-label="3B TECH HUB home"><span class="brand-mark">3B</span><span class="brand-title">3B TECH HUB</span></a>
+    <button class="menu-trigger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="site-menu" id="site-menu" aria-label="Site menu" hidden><div class="menu-section menu-primary"><a class="menu-link" href="../" id="home-menu-link" data-label="home">Home</a><a class="menu-link" href="../profile/" id="profile-menu-link" data-label="profile" hidden>Profile</a><a class="menu-link" href="../account/" id="login-menu-link" data-label="login">Account</a><button class="menu-link" type="button" id="logout-menu-link" data-label="logout" hidden>Logout</button></div><div class="menu-divider" role="separator"></div><div class="menu-tools"><button class="menu-tool theme-tool" id="theme-toggle" type="button" aria-label="Switch theme"><span>Dark/Light:</span> <span class="theme-icon icon-for-light" aria-hidden="true">☾</span><span class="theme-icon icon-for-dark" aria-hidden="true">☀</span></button><label class="visually-hidden" for="language-select">Select language</label><select class="menu-tool" id="language-select" aria-label="Language"><option value="en">Language: English</option><option value="bn">Language: Bengali</option><option value="ar">Language: Arabic</option></select><label class="visually-hidden" for="region-select">Select country</label><select class="menu-tool" id="region-select" aria-label="Country"><option value="bd">Country: Bangladesh</option><option value="ksa">Country: Saudi Arabia</option><option value="global">Country: Global</option></select></div><div class="menu-divider" role="separator"></div><div class="menu-section menu-secondary"><a class="menu-link" href="../dashboard/" id="dashboard-menu-link" data-label="dashboard" hidden>Dashboard</a></div></nav>
+  </header>
+  <main class="auth-main">
+    <form id="auth-form" class="auth-form">
+      <label class="visually-hidden" for="email">Email address</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="Email" data-placeholder="email" maxlength="254" required>
+      <label class="visually-hidden" for="otp">Verification code</label>
+      <input id="otp" name="otp" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="Verification Code" data-placeholder="verificationCode" minlength="6" maxlength="8" pattern="[0-9]{6,8}" hidden>
+      <label class="visually-hidden" for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Password" data-placeholder="password" minlength="8" maxlength="256" required>
+      <p id="auth-message" class="auth-message" role="status" aria-live="polite"></p>
+      <button id="auth-submit" type="submit" data-label="signIn">Sign In</button>
+      <div class="auth-links">
+        <button id="forgot-password" class="text-button" type="button" data-label="forgotPassword">Forgot password?</button>
+        <button id="toggle-signup" class="text-button" type="button" data-label="createAccount">Create account</button>
+      </div>
+    </form>
+  </main>
+  <footer class="site-footer"><span>© 2026 3B TECH HUB. All rights reserved.</span></footer>
+</body>
+</html>

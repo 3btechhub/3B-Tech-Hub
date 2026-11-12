@@ -1,8 +1,7 @@
 import { renderPage } from "./page-engine.js";
 
 const RESERVED_ROOTS = new Set([
-  "login", "profile", "dashboard", "services", "products", "workshop",
-  "technicians", "bd", "saudi", "global", "assets", "auth"
+  "account", "login", "profile", "dashboard", "bd", "ksa", "global", "assets", "auth"
 ]);
 const ROOT_PATH = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 
@@ -28,6 +27,21 @@ function setNotFound(main) {
   main.append(wrap);
 }
 
+async function findPage(supabase, { slug, locale, region, pageType, parentId = null }) {
+  const countries = region === "global" ? ["global"] : [region, "global"];
+  for (const country of countries) {
+    let query = supabase.from("pages")
+      .select("id,parent_id,page_type,slug,title,description,locale,country,seo,status")
+      .eq("slug", slug).eq("locale", locale).eq("country", country)
+      .eq("status", "published").eq("page_type", pageType);
+    query = parentId ? query.eq("parent_id", parentId) : query.is("parent_id", null);
+    const { data, error } = await query.maybeSingle();
+    if (error) throw error;
+    if (data) return data;
+  }
+  return null;
+}
+
 export async function renderDynamicRoute(supabase) {
   const main = document.querySelector("main.dynamic-page-main, main.home-main");
   if (!main || !supabase) return false;
@@ -41,22 +55,28 @@ export async function renderDynamicRoute(supabase) {
 
   const locale = ["bn", "ar", "en"].includes(document.documentElement.lang)
     ? document.documentElement.lang : "en";
+  const region = ["global", "bd", "ksa"].includes(window.siteCountry?.region)
+    ? window.siteCountry.region : "global";
 
   try {
-    let pageQuery = supabase.from("pages").select("id,parent_id,page_type,slug,title,description,locale,seo,status")
-      .eq("slug", subSlug || mainSlug).eq("locale", locale).eq("status", "published").limit(1);
+    let page;
     if (subSlug) {
-      const { data: parent, error: parentError } = await supabase.from("pages")
-        .select("id").is("parent_id", null).eq("page_type", "main")
-        .eq("slug", mainSlug).eq("locale", locale).eq("status", "published").maybeSingle();
-      if (parentError || !parent) return false;
-      pageQuery = pageQuery.eq("parent_id", parent.id).eq("page_type", "sub");
+      const parent = await findPage(supabase, {
+        slug: mainSlug, locale, region, pageType: "main"
+      });
+      if (!parent) {
+        if (main.classList.contains("dynamic-page-main")) setNotFound(main);
+        return false;
+      }
+      page = await findPage(supabase, {
+        slug: subSlug, locale, region, pageType: "sub", parentId: parent.id
+      });
     } else {
-      pageQuery = pageQuery.is("parent_id", null).eq("page_type", "main");
+      page = await findPage(supabase, {
+        slug: mainSlug, locale, region, pageType: "main"
+      });
     }
 
-    const { data: page, error } = await pageQuery.maybeSingle();
-    if (error) throw error;
     if (!page) {
       if (main.classList.contains("dynamic-page-main")) setNotFound(main);
       return false;

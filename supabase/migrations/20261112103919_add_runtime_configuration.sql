@@ -1,6 +1,5 @@
--- Runtime configuration foundation for the minimal-code hybrid architecture.
--- Reuses the existing RLS-protected site_settings table; no schema or business rows are changed.
--- Existing settings are preserved on re-run.
+-- Public runtime configuration with monochrome theme and shared layout defaults.
+-- Existing site settings are preserved on re-run.
 insert into public.site_settings (setting_key, setting_value, is_public)
 values (
   'runtime_config',

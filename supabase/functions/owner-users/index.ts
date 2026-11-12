@@ -1,9 +1,9 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const allowedOrigins = new Set(["https://3btechhub.github.io"]);
-const allowedRoles = new Set(["admin", "manager", "editor", "staff", "customer"]);
+const allowedRoles = new Set(["admin", "member"]);
 const primaryOwnerEmail = "3btechhub@gmail.com";
-const redirectTo = "https://3btechhub.github.io/3btechhub/login/";
+const redirectTo = "https://3btechhub.github.io/3btechhub/account/";
 
 function response(body: unknown, status: number, origin: string | null) {
   const headers: Record<string, string> = {
@@ -94,7 +94,7 @@ Deno.serve(async (request: Request) => {
           created_at: user.created_at,
           last_sign_in_at: user.last_sign_in_at,
           banned_until: user.banned_until,
-          role: roleByUser.get(user.id) || "customer",
+          role: roleByUser.get(user.id) || "member",
         })),
         page,
         perPage,
@@ -104,7 +104,7 @@ Deno.serve(async (request: Request) => {
 
     if (body.action === "invite") {
       const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-      const role = typeof body.role === "string" ? body.role : "customer";
+      const role = typeof body.role === "string" ? body.role : "member";
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return response({ error: "Enter a valid email address." }, 400, origin);
       if (email === primaryOwnerEmail || !allowedRoles.has(role)) return response({ error: "This role or account cannot be invited." }, 400, origin);
       const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo });

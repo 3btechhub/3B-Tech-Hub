@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ffffff">
   <meta name="robots" content="noindex,nofollow">
-  <title>Owner Dashboard | 3B TECH HUB</title>
+  <title>Dashboard | 3B TECH HUB</title>
   <link rel="stylesheet" href="../assets/style.css">
   <script src="../assets/country-router.js"></script>
   <script defer src="../assets/menu.js"></script>
@@ -14,166 +14,104 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="../" aria-label="3B TECH HUB home"><span class="brand-mark">3B</span></a>
+    <a class="brand" href="../" aria-label="3B TECH HUB home"><span class="brand-mark">3B</span><span class="brand-title">3B TECH HUB</span></a>
     <button class="menu-trigger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu"><span></span><span></span><span></span></button>
-    <nav class="site-menu" id="site-menu" aria-label="Site menu" hidden><div class="menu-section menu-primary"><a class="menu-link" href="../" id="home-menu-link" data-label="home">Home</a><a class="menu-link" href="../profile/" id="profile-menu-link" data-label="profile" hidden>Profile</a><a class="menu-link" href="../login/" id="login-menu-link" data-label="login">Login</a><button class="menu-link" type="button" id="logout-menu-link" data-label="logout" hidden>Logout</button></div><div class="menu-divider" role="separator"></div><div class="menu-tools"><button class="menu-tool theme-tool" id="theme-toggle" type="button" aria-label="Switch theme"><span>Dark/Light:</span> <span class="theme-icon" aria-hidden="true">☾</span></button><label class="visually-hidden" for="language-select">Select language</label><select class="menu-tool" id="language-select" aria-label="Language"><option value="en">Language: English</option><option value="bn">Language: Bengali</option><option value="ar">Language: Arabic</option></select><label class="visually-hidden" for="region-select">Select country</label><select class="menu-tool" id="region-select" aria-label="Country"><option value="bd">Country: Bangladesh</option><option value="saudi">Country: Saudi Arabia</option><option value="global">Country: Global</option></select></div><div class="menu-divider" role="separator"></div><div class="menu-section menu-secondary"><a class="menu-link" href="./" id="dashboard-menu-link" data-label="dashboard" hidden>Dashboard</a></div></nav>
-  </header>
-  <main class="dashboard-main" id="owner-dashboard">
-    <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-pages" aria-controls="panel-pages" aria-selected="false" data-dashboard-tab="pages" tabindex="-1">Pages</button>
-      <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" data-dashboard-tab="overview">Overview</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-services" aria-controls="panel-services" aria-selected="false" data-dashboard-tab="services" tabindex="-1">Service</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" aria-controls="panel-products" aria-selected="false" data-dashboard-tab="products" tabindex="-1">Product</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshop" aria-controls="panel-workshop" aria-selected="false" data-dashboard-tab="workshop" tabindex="-1">Workshop</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-technician" aria-controls="panel-technician" aria-selected="false" data-dashboard-tab="technician" tabindex="-1">Technician</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-media" aria-controls="panel-media" aria-selected="false" data-dashboard-tab="media" tabindex="-1">Media</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" aria-controls="panel-user" aria-selected="false" data-dashboard-tab="user" tabindex="-1">User</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" aria-controls="panel-role" aria-selected="false" data-dashboard-tab="role" tabindex="-1">Role</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" aria-controls="panel-permission" aria-selected="false" data-dashboard-tab="permission" tabindex="-1">Permission</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-dashboard-tab="settings" tabindex="-1">Settings</button>
+    <nav class="site-menu" id="site-menu" aria-label="Site menu" hidden>
+      <div class="menu-section menu-primary">
+        <a class="menu-link" href="../" id="home-menu-link" data-label="home">Home</a>
+        <a class="menu-link" href="../profile/" id="profile-menu-link" data-label="profile" hidden>Profile</a>
+        <a class="menu-link" href="../account/" id="login-menu-link" data-label="login">Account</a>
+        <button class="menu-link" type="button" id="logout-menu-link" data-label="logout" hidden>Logout</button>
+      </div>
+      <div class="menu-divider" role="separator"></div>
+      <div class="menu-tools">
+        <button class="menu-tool theme-tool" id="theme-toggle" type="button" aria-label="Switch theme"><span>Dark/Light:</span> <span class="theme-icon icon-for-light" aria-hidden="true">☾</span><span class="theme-icon icon-for-dark" aria-hidden="true">☀</span></button>
+        <label class="visually-hidden" for="language-select">Select language</label>
+        <select class="menu-tool" id="language-select" aria-label="Language">
+          <option value="en">Language: English</option><option value="bn">Language: Bengali</option><option value="ar">Language: Arabic</option>
+        </select>
+        <label class="visually-hidden" for="region-select">Select country</label>
+        <select class="menu-tool" id="region-select" aria-label="Country">
+          <option value="global">Country: Global</option><option value="bd">Country: Bangladesh</option><option value="ksa">Country: Saudi Arabia</option>
+        </select>
+      </div>
+      <div class="menu-divider" role="separator"></div>
+      <div class="menu-section menu-secondary"><a class="menu-link" href="./" id="dashboard-menu-link" data-label="dashboard" hidden>Dashboard</a></div>
     </nav>
-    <section class="dashboard-module-panel" id="panel-pages" role="tabpanel" aria-labelledby="tab-pages" data-dashboard-panel="pages" hidden>
-      <div id="page-builder-root"><p class="muted">Loading Page Builder…</p></div>
-    </section>
+  </header>
+
+  <main class="dashboard-main" id="owner-dashboard">
+    <div class="dashboard-heading">
+      <div><h1 data-label="dashboard">Dashboard</h1><p id="dashboard-owner-email" class="dashboard-owner"></p></div>
+    </div>
+
+    <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
+      <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" data-label="overview" aria-controls="panel-overview" aria-selected="true" data-dashboard-tab="overview">Overview</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-audit" data-label="audit" aria-controls="panel-audit" aria-selected="false" data-dashboard-tab="audit" tabindex="-1">Audit</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-page" data-label="page" aria-controls="panel-page" aria-selected="false" data-dashboard-tab="page" tabindex="-1">Page</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" data-label="user" aria-controls="panel-user" aria-selected="false" data-dashboard-tab="user" tabindex="-1">User</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" data-label="role" aria-controls="panel-role" aria-selected="false" data-dashboard-tab="role" tabindex="-1">Role</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" data-label="permission" aria-controls="panel-permission" aria-selected="false" data-dashboard-tab="permission" tabindex="-1">Permission</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" data-label="settings" aria-controls="panel-settings" aria-selected="false" data-dashboard-tab="settings" tabindex="-1">Settings</button>
+    </nav>
+
     <section class="dashboard-module-panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-dashboard-panel="overview">
       <div class="dashboard-grid" aria-label="Website overview">
-      <section class="dashboard-card"><h2>Website Content</h2><div class="dashboard-count" id="dashboard-content-count">…</div><p>Content records</p></section>
-      <section class="dashboard-card"><h2>Services</h2><div class="dashboard-count" id="dashboard-services-count">…</div><p>Service records</p></section>
-      <section class="dashboard-card"><h2>Products</h2><div class="dashboard-count" id="dashboard-products-count">…</div><p>Product records</p></section>
-      <section class="dashboard-card"><h2>Users & Roles</h2><div class="dashboard-count" id="dashboard-users-count">…</div><p>Role assignments</p></section>
-      <section class="dashboard-card"><h2>Media Library</h2><div class="dashboard-count" id="dashboard-media-count">…</div><p>Media assets</p></section>
-      <section class="dashboard-card"><h2>Site Settings</h2><div class="dashboard-count" id="dashboard-settings-count">…</div><p>Configuration entries</p></section>
-      <section class="dashboard-card"><h2>Audit Log</h2><div class="dashboard-count" id="dashboard-audit-count">…</div><p>Recorded admin actions</p></section>
+        <section class="dashboard-card"><h2 data-label="pages">Pages</h2><div class="dashboard-count" id="dashboard-pages-count">…</div></section>
+        <section class="dashboard-card"><h2 data-label="users">Users</h2><div class="dashboard-count" id="dashboard-users-count">…</div></section>
+        <section class="dashboard-card"><h2 data-label="audit">Audit</h2><div class="dashboard-count" id="dashboard-audit-count">…</div></section>
+        <section class="dashboard-card"><h2 data-label="settings">Settings</h2><div class="dashboard-count" id="dashboard-settings-count">…</div></section>
       </div>
     </section>
 
-
-
-    <section class="dashboard-module-panel" id="panel-services" role="tabpanel" aria-labelledby="tab-services" data-dashboard-panel="services" hidden>
-      <form id="service-form" class="content-editor-form">
-        <h2 id="service-form-title">Add Service</h2>
-        <p class="muted">Name is required. All other fields are optional.</p>
-        <input type="hidden" name="id">
-        <label>Name<input name="name" maxlength="160" required></label>
-        <label>Description (optional)<textarea name="description" rows="4" maxlength="2000"></textarea></label>
-        <label>Category (optional)<input name="category" maxlength="120"></label>
-        <label>Country (optional)<select name="country"><option value="">Select Country (optional)</option><option value="global">Global</option><option value="bd">Bangladesh (BD)</option><option value="saudi">Saudi Arabia (Saudi)</option></select></label>
-        <label>Image (optional)<input name="photo" type="file" accept="image/*"></label>
-        <div class="editor-preview" id="service-photo-preview"></div>
-        <label><input name="is_published" type="checkbox" checked> Publish Service</label>
-        <div class="editor-actions"><button type="submit" id="service-save">Save Service</button><button type="button" id="service-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
-        <p class="editor-message" id="service-message" role="status"></p>
-      </form>
-      <div class="technician-admin-list"><h2>Service List</h2><div id="service-admin-items"></div></div>
-    </section>
-    <section class="dashboard-module-panel" id="panel-media" role="tabpanel" aria-labelledby="tab-media" data-dashboard-panel="media" hidden>
-      <form id="media-upload-form" class="content-editor-form">
-        <h2>Upload Media</h2>
-        <p class="muted">Public image assets only. Maximum file size: 10 MB.</p>
-        <label>Image File<input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/avif,image/gif" required></label>
-        <label>Alternative Text (optional)<input name="alt_text" maxlength="250"></label>
-        <div class="editor-actions"><button type="submit" id="media-upload-submit">Upload Image</button></div>
-        <p class="editor-message" id="media-message" role="status"></p>
-      </form>
-      <div class="technician-admin-list">
-        <h2>Media Library</h2>
-        <label>Search by file name<input id="media-search" type="search" maxlength="80" placeholder="Search images…"></label>
-        <label>Image Format<select id="media-type-filter"><option value="all">All formats</option><option value="image/jpeg">JPEG</option><option value="image/png">PNG</option><option value="image/webp">WebP</option><option value="image/avif">AVIF</option><option value="image/gif">GIF</option></select></label>
-        <label>Date Added<select id="media-date-filter"><option value="all">All time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option></select></label>
-        <div id="media-admin-items"></div>
+    <section class="dashboard-module-panel" id="panel-audit" role="tabpanel" aria-labelledby="tab-audit" data-dashboard-panel="audit" hidden>
+      <div class="admin-list">
+        <div class="dashboard-heading"><h2 data-label="auditHistory">Audit History</h2><button class="secondary-button" id="audit-refresh" type="button" data-label="refresh">Refresh</button></div>
+        <div id="audit-log-list" aria-live="polite"><p class="muted">Select Audit to load recent activity.</p></div>
       </div>
     </section>
+
+    <section class="dashboard-module-panel" id="panel-page" role="tabpanel" aria-labelledby="tab-page" data-dashboard-panel="page" hidden>
+      <div id="page-builder-root"><p class="muted">Loading Page Builder…</p></div>
+    </section>
+
     <section class="dashboard-module-panel" id="panel-user" role="tabpanel" aria-labelledby="tab-user" data-dashboard-panel="user" hidden>
       <form id="user-invite-form" class="content-editor-form">
-        <h2>Invite User</h2>
-        <p class="muted">Send an invitation and assign a role. The primary Owner account cannot be changed here.</p>
-        <label>Email Address<input name="email" type="email" maxlength="254" autocomplete="email" required></label>
-        <label>Role<select name="role" required><option value="customer">Customer</option><option value="staff">Staff</option><option value="editor">Editor</option><option value="manager">Manager</option><option value="admin">Admin</option></select></label>
-        <div class="editor-actions"><button type="submit" id="user-invite-submit">Send Invitation</button><button type="button" id="user-refresh" class="secondary-button">Refresh Users</button></div>
+        <h2 data-label="inviteUser">Invite User</h2>
+        <p class="muted">Owner is fixed and cannot be changed. Visitor access is public and does not require an account.</p>
+        <label><span data-label="emailAddress">Email Address</span><input name="email" type="email" maxlength="254" autocomplete="email" required></label>
+        <label><span data-label="userType">User Type</span><select name="role" required><option value="member">Member</option><option value="admin">Admin</option></select></label>
+        <div class="editor-actions"><button type="submit" id="user-invite-submit" data-label="sendInvitation">Send Invitation</button><button type="button" id="user-refresh" class="secondary-button" data-label="refreshUsers">Refresh Users</button></div>
         <p class="editor-message" id="user-message" role="status"></p>
       </form>
-      <div class="technician-admin-list"><h2>User List</h2><div id="user-admin-items"></div></div>
+      <div class="admin-list"><h2 data-label="userList">User List</h2><div id="user-admin-items"></div></div>
     </section>
+
     <section class="dashboard-module-panel" id="panel-role" role="tabpanel" aria-labelledby="tab-role" data-dashboard-panel="role" hidden>
-      <div class="technician-admin-list"><h2>Role Assignments</h2><p class="muted">Assign roles from User Management. Only the Owner can invite users or change roles. The Owner role is protected.</p><div id="role-summary-list"></div></div>
+      <div class="admin-list"><h2 data-label="roleAssignments">Role Assignments</h2><p class="muted">Only Owner can assign or change account roles. Owner is protected.</p><div id="role-summary-list"></div></div>
     </section>
+
     <section class="dashboard-module-panel" id="panel-permission" role="tabpanel" aria-labelledby="tab-permission" data-dashboard-panel="permission" hidden>
-      <div class="technician-admin-list"><h2>Permission Matrix</h2><p class="muted">Read-only access policy. Database RLS remains the enforcement layer.</p>
-        <div class="technician-admin-row"><strong>Owner</strong><span>All administration, user/role management, settings and audit access.</span></div>
-        <div class="technician-admin-row"><strong>Admin</strong><span>Delegated catalogue and content operations. Cannot manage users or grant Owner.</span></div>
-        <div class="technician-admin-row"><strong>Manager</strong><span>Operational catalogue access only where explicitly granted by policy.</span></div>
-        <div class="technician-admin-row"><strong>Editor</strong><span>Content editing only where explicitly granted by policy.</span></div>
-        <div class="technician-admin-row"><strong>Staff</strong><span>No administrative access unless explicitly granted by policy.</span></div>
-        <div class="technician-admin-row"><strong>Customer</strong><span>Own profile access only.</span></div>
+      <div class="admin-list">
+        <h2 data-label="permissionMatrix">Permission Matrix</h2>
+        <div class="admin-list-row"><strong>Owner</strong><span>Full access to all approved modules and system settings.</span></div>
+        <div class="admin-list-row"><strong>Admin</strong><span>Overview, Audit and Page management. No user, role or system settings administration.</span></div>
+        <div class="admin-list-row"><strong>Member</strong><span>Own account and profile only.</span></div>
+        <div class="admin-list-row"><strong>Visitor</strong><span>Public pages and public navigation only.</span></div>
       </div>
     </section>
-    <section class="dashboard-module-panel" id="panel-workshop" role="tabpanel" aria-labelledby="tab-workshop" data-dashboard-panel="workshop" hidden>
-      <form id="workshop-form" class="content-editor-form">
-        <h2 id="workshop-form-title">Add Workshop</h2><p class="muted">Name is required. All other fields are optional.</p>
-        <input type="hidden" name="id">
-        <label>Name<input name="title" maxlength="160" required></label>
-        <label>Description (optional)<textarea name="description" rows="4" maxlength="2000"></textarea></label>
-        <label>Category (optional)<input name="category" maxlength="120"></label>
-        <label>Country (optional)<select name="country"><option value="">Select Country (optional)</option><option value="global">Global</option><option value="bd">Bangladesh (BD)</option><option value="saudi">Saudi Arabia (Saudi)</option></select></label>
-        <label>Location (optional)<input name="location" maxlength="240"></label>
-        <label>Image (optional)<input name="photo" type="file" accept="image/*"></label>
-        <div class="editor-preview" id="workshop-photo-preview"></div>
-        <label id="workshop-remove-photo-wrap" hidden><input name="remove_photo" type="checkbox"> Remove current image</label>
-        <label><input name="is_published" type="checkbox" checked> Publish Workshop</label>
-        <div class="editor-actions"><button type="submit" id="workshop-save">Save Workshop</button><button type="button" id="workshop-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
-        <p class="editor-message" id="workshop-message" role="status"></p>
-      </form>
-      <div class="technician-admin-list"><h2>Workshop List</h2><div id="workshop-admin-items"></div></div>
-    </section>
-    <section class="dashboard-module-panel" id="panel-technician" role="tabpanel" aria-labelledby="tab-technician" data-dashboard-panel="technician" hidden>
-      <form id="technician-form" class="content-editor-form">
-        <h2 id="technician-form-title">Add Technician</h2><p class="muted">Name is required. All other fields are optional.</p>
-        <input type="hidden" name="id">
-        <label>Name<input name="name" maxlength="120" required></label>
-        <label>Description (optional)<textarea name="description" rows="4" maxlength="2000"></textarea></label>
-        <label>Category (optional)<input name="category" maxlength="160"></label>
-        <label>Country (optional)<select name="country"><option value="">Select Country (optional)</option><option value="global">Global</option><option value="bd">Bangladesh (BD)</option><option value="saudi">Saudi Arabia (Saudi)</option></select></label>
-        <label>Phone Number (optional)<input name="phone" type="tel" maxlength="40"></label>
-        <label>WhatsApp Number (optional)<input name="whatsapp" type="tel" maxlength="40"></label>
-        <label>Image (optional)<input name="photo" type="file" accept="image/*"></label>
-        <div class="editor-preview" id="technician-photo-preview"></div>
-        <div class="editor-actions"><button type="submit" id="technician-save">Save Technician</button><button type="button" id="technician-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
-        <p class="editor-message" id="technician-message" role="status"></p>
-      </form>
-      <div class="technician-admin-list"><h2>Technician List</h2><div id="technician-admin-items"></div></div>
-    </section>
-    <section class="dashboard-module-panel" id="panel-products" role="tabpanel" aria-labelledby="tab-products" data-dashboard-panel="products" hidden>
-      <form id="product-form" class="content-editor-form">
-        <h2 id="product-form-title">Add Product</h2>
-        <p class="muted">Name is required. All other fields are optional.</p>
-        <input type="hidden" name="id">
-        <label>Name<input name="name" maxlength="120" required></label>
-        <label>Description (optional)<textarea name="description" rows="4" maxlength="2000"></textarea></label>
-        <label>Product Group<select name="category_group" required><option value="mobile">Mobile &amp; Accessories</option><option value="satellite">Satellite &amp; TV Equipment</option></select></label>
-        <label>Product Type (optional)<input name="category" maxlength="120" placeholder="e.g. Phone Glass Protector"></label>
-        <label>Country (optional)<select name="country"><option value="">Select Country (optional)</option><option value="global">Global</option><option value="bd">Bangladesh (BD)</option><option value="saudi">Saudi Arabia (Saudi)</option></select></label>
-        <label>Image (optional)<input name="photo" type="file" accept="image/*"></label>
-        <div class="editor-preview" id="product-photo-preview"></div>
-        <label><input name="is_published" type="checkbox" checked> Publish Product</label>
-        <div class="editor-actions"><button type="submit" id="product-save">Save Product</button><button type="button" id="product-cancel" class="secondary-button" hidden>Cancel Edit</button></div>
-        <p class="editor-message" id="product-message" role="status"></p>
-      </form>
-      <div class="technician-admin-list"><h2>Product List</h2><div id="product-admin-items"></div></div>
-    </section>
+
     <section class="dashboard-module-panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-dashboard-panel="settings" hidden>
       <form id="site-settings-form" class="content-editor-form">
-        <h2>Website Settings</h2>
-        <p class="muted">Manage the public homepage tagline and business contact details. The 3B TECH HUB brand name remains fixed.</p>
-        <label>Homepage Tagline<input name="tagline" maxlength="120" required></label>
-        <label>Site Description<textarea name="description" rows="3" maxlength="300"></textarea></label>
-        <label>Public Contact Email<input name="contact_email" type="email" maxlength="254"></label>
-        <label>Public Phone Number<input name="contact_phone" type="tel" maxlength="40"></label>
-        <label>WhatsApp URL<input name="whatsapp_url" type="url" maxlength="500" placeholder="https://wa.me/…"></label>
-        <div class="editor-actions"><button type="submit" id="site-settings-save">Save Website Settings</button></div>
+        <h2 data-label="websiteSettings">Website Settings</h2>
+        <label><span data-label="websiteTitle">Website Title</span><input name="website_title" maxlength="100" placeholder="3B TECH HUB"></label>
+        <label><span data-label="logoUrl">Logo URL (optional)</span><input name="logo_url" type="url" maxlength="1000" placeholder="https://…"></label>
+        <div class="editor-actions"><button type="submit" id="site-settings-save" data-label="saveSettings">Save Settings</button></div>
         <p class="editor-message" id="site-settings-message" role="status"></p>
       </form>
     </section>
   </main>
+
   <footer class="site-footer"><span>© 2026 3B TECH HUB. All rights reserved.</span></footer>
 </body>
 </html>

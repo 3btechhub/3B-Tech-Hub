@@ -1,4 +1,3 @@
-import { filterProductsForRegion, getNextVisibleCount } from "./product-catalog.js";
 import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
 import { renderDynamicRoute } from "./dynamic-page-router.js";
 import { renderDynamicNavigation } from "./dynamic-navigation.js";
@@ -7,25 +6,6 @@ await window.countryContextReady;
 
 // Make country context available before the rest of the application runs.
 const activeCountry = window.siteCountry;
-const currentPath = window.location.pathname;
-const serviceCountryRules = {
-  "tv-repair": "bd",
-  "mobile-repair": "bd",
-  "mobile-parts-sell": "bd",
-  "satellite-dish-installation": "saudi",
-  "satellite-dish-servicing": "saudi",
-  "satellite-dish-parts-sell": "saudi"
-};
-const servicePrefix = "/3btechhub/services/";
-if (currentPath.startsWith(servicePrefix)) {
-  const serviceSlug = currentPath.slice(servicePrefix.length).split("/")[0];
-  if (serviceCountryRules[serviceSlug] && activeCountry.region !== "global" && serviceCountryRules[serviceSlug] !== activeCountry.region) {
-    window.location.replace("/3btechhub/" + activeCountry.region + "/");
-  }
-}
-document.querySelectorAll("[data-country-region]").forEach((section) => {
-  section.hidden = activeCountry.region !== "global" && section.dataset.countryRegion !== activeCountry.region;
-});
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const profileMenuLink = document.querySelector("#profile-menu-link");
@@ -34,14 +14,22 @@ const themeToggle = document.querySelector("#theme-toggle");
 const languageSelect = document.querySelector("#language-select");
 const regionSelect = document.querySelector("#region-select");
 const savedTheme = localStorage.getItem("3b-theme");
-const routeDefaultLanguage = activeCountry.region === "bd" ? "bn" : activeCountry.region === "saudi" ? "ar" : "en";
+const routeDefaultLanguage = activeCountry.region === "bd" ? "bn" : activeCountry.region === "ksa" ? "ar" : "en";
 const languageStorageKey = "3b-language-" + activeCountry.region;
 const savedLanguage = localStorage.getItem(languageStorageKey) || routeDefaultLanguage;
 document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
+function addTextElement(parent, tag, className, value) {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  node.textContent = value == null ? "" : String(value);
+  parent.append(node);
+  return node;
+}
+
 const translations = {
-  en: {home:"Home",profile:"Profile",services:"Services",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
-  bn: {home:"হোম",profile:"প্রোফাইল",services:"সার্ভিস",login:"লগইন",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"},
-  ar: {home:"الرئيسية",profile:"الملف الشخصي",services:"الخدمات",login:"تسجيل الدخول",logout:"تسجيل الخروج",dashboard:"لوحة التحكم",accountLogin:"تسجيل الدخول إلى الحساب",dark:"تفعيل الوضع الداكن",light:"تفعيل الوضع الفاتح"}
+  en: {home:"Home",profile:"Profile",login:"Account",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode",overview:"Overview",audit:"Audit",page:"Page",user:"User",role:"Role",permission:"Permission",settings:"Settings",pages:"Pages",users:"Users",refresh:"Refresh",auditHistory:"Audit History",inviteUser:"Invite User",userType:"User Type",emailAddress:"Email Address",sendInvitation:"Send Invitation",refreshUsers:"Refresh Users",userList:"User List",roleAssignments:"Role Assignments",permissionMatrix:"Permission Matrix",websiteSettings:"Website Settings",websiteTitle:"Website Title",logoUrl:"Logo URL (optional)",saveSettings:"Save Settings",signIn:"Sign In",forgotPassword:"Forgot password?",createAccount:"Create account",verificationCode:"Verification Code",name:"Name",email:"Email",phoneNumber:"Phone Number",password:"Password",changePassword:"Change Password",edit:"Edit",currentPassword:"Current Password",newPassword:"New Password",confirmPassword:"Confirm New Password",updatePassword:"Update Password",verifyCodeReset:"Verify Code & Reset Password",loginAccount:"Login Account"},
+  bn: {home:"হোম",profile:"প্রোফাইল",login:"অ্যাকাউন্ট",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন",overview:"ওভারভিউ",audit:"অডিট",page:"পেজ",user:"ব্যবহারকারী",role:"ভূমিকা",permission:"অনুমতি",settings:"সেটিংস",pages:"পেজসমূহ",users:"ব্যবহারকারী",refresh:"রিফ্রেশ",auditHistory:"অডিট ইতিহাস",inviteUser:"ব্যবহারকারী আমন্ত্রণ",userType:"ব্যবহারকারীর ধরন",emailAddress:"ইমেইল ঠিকানা",sendInvitation:"আমন্ত্রণ পাঠান",refreshUsers:"ব্যবহারকারী রিফ্রেশ",userList:"ব্যবহারকারী তালিকা",roleAssignments:"ভূমিকা বরাদ্দ",permissionMatrix:"অনুমতি তালিকা",websiteSettings:"ওয়েবসাইট সেটিংস",websiteTitle:"ওয়েবসাইটের শিরোনাম",logoUrl:"লোগোর URL (ঐচ্ছিক)",saveSettings:"সেটিংস সংরক্ষণ",signIn:"লগইন",forgotPassword:"পাসওয়ার্ড ভুলে গেছেন?",createAccount:"অ্যাকাউন্ট তৈরি করুন",verificationCode:"যাচাইকরণ কোড",name:"নাম",email:"ইমেইল",phoneNumber:"ফোন নম্বর",password:"পাসওয়ার্ড",changePassword:"পাসওয়ার্ড পরিবর্তন",edit:"সম্পাদনা",currentPassword:"বর্তমান পাসওয়ার্ড",newPassword:"নতুন পাসওয়ার্ড",confirmPassword:"নতুন পাসওয়ার্ড নিশ্চিত করুন",updatePassword:"পাসওয়ার্ড আপডেট",verifyCodeReset:"কোড যাচাই করে পাসওয়ার্ড রিসেট",loginAccount:"অ্যাকাউন্টে লগইন"},
+  ar: {home:"الرئيسية",profile:"الملف الشخصي",login:"الحساب",logout:"تسجيل الخروج",dashboard:"لوحة التحكم",accountLogin:"تسجيل الدخول إلى الحساب",dark:"تفعيل الوضع الداكن",light:"تفعيل الوضع الفاتح",overview:"نظرة عامة",audit:"التدقيق",page:"الصفحة",user:"المستخدم",role:"الدور",permission:"الصلاحيات",settings:"الإعدادات",pages:"الصفحات",users:"المستخدمون",refresh:"تحديث",auditHistory:"سجل التدقيق",inviteUser:"دعوة مستخدم",userType:"نوع المستخدم",emailAddress:"البريد الإلكتروني",sendInvitation:"إرسال الدعوة",refreshUsers:"تحديث المستخدمين",userList:"قائمة المستخدمين",roleAssignments:"تعيين الأدوار",permissionMatrix:"مصفوفة الصلاحيات",websiteSettings:"إعدادات الموقع",websiteTitle:"عنوان الموقع",logoUrl:"رابط الشعار (اختياري)",saveSettings:"حفظ الإعدادات",signIn:"تسجيل الدخول",forgotPassword:"هل نسيت كلمة المرور؟",createAccount:"إنشاء حساب",verificationCode:"رمز التحقق",name:"الاسم",email:"البريد الإلكتروني",phoneNumber:"رقم الهاتف",password:"كلمة المرور",changePassword:"تغيير كلمة المرور",edit:"تعديل",currentPassword:"كلمة المرور الحالية",newPassword:"كلمة المرور الجديدة",confirmPassword:"تأكيد كلمة المرور الجديدة",updatePassword:"تحديث كلمة المرور",verifyCodeReset:"تحقق من الرمز وأعد تعيين كلمة المرور",loginAccount:"تسجيل الدخول إلى الحساب"}
 };
 function applyLanguage(language) {
   const lang = ["bn", "ar"].includes(language) ? language : "en";
@@ -51,8 +39,17 @@ function applyLanguage(language) {
     const key = element.dataset.label;
     if (translations[lang][key]) element.textContent = translations[lang][key];
   });
+  document.querySelectorAll("[data-placeholder]").forEach((element) => {
+    const value = translations[lang][element.dataset.placeholder];
+    if (value) element.placeholder = value;
+  });
+  document.querySelectorAll("[data-aria-label]").forEach((element) => {
+    const value = translations[lang][element.dataset.ariaLabel];
+    if (value) element.setAttribute("aria-label", value);
+  });
   if (languageSelect) languageSelect.value = lang;
   localStorage.setItem(languageStorageKey, lang);
+  window.dispatchEvent(new CustomEvent("site-language-changed", { detail: lang }));
 }
 let runtimeConfig = null;
 
@@ -68,7 +65,11 @@ function applyTheme(theme) {
   localStorage.setItem("3b-theme", dark ? "dark" : "light");
 }
 applyLanguage(savedLanguage);
-if (regionSelect) regionSelect.value = activeCountry.region;
+if (languageSelect) languageSelect.dispatchEvent(new Event("dropdownrefresh"));
+if (regionSelect) {
+  regionSelect.value = activeCountry.region;
+  regionSelect.dispatchEvent(new Event("dropdownrefresh"));
+}
 applyTheme(savedTheme === "dark" ? "dark" : "light");
 if (themeToggle) themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
 if (languageSelect) {
@@ -138,12 +139,21 @@ async function applyPublicSiteSettings() {
     .maybeSingle();
   if (error || !data?.setting_value || typeof data.setting_value !== "object") return;
   const settings = data.setting_value;
-  const tagline = document.querySelector(".home-main p");
-  if (tagline && typeof settings.tagline === "string" && settings.tagline.trim()) tagline.textContent = settings.tagline;
-  const description = document.querySelector('meta[name="description"]');
-  if (description && typeof settings.description === "string" && settings.description.trim()) description.content = settings.description;
+  const websiteTitle = typeof settings.website_title === "string" && settings.website_title.trim()
+    ? settings.website_title.trim() : "3B TECH HUB";
+  document.querySelectorAll(".brand-title, .home-hero h1, .home-main h1").forEach((node) => { node.textContent = websiteTitle; });
+  document.title = websiteTitle;
+  const brand = document.querySelector(".brand");
+  if (brand && typeof settings.logo_url === "string" && /^https?:\/\//i.test(settings.logo_url)) {
+    const logo = document.createElement("img");
+    logo.src = settings.logo_url;
+    logo.alt = websiteTitle;
+    logo.className = "brand-image";
+    const mark = brand.querySelector(".brand-mark");
+    if (mark) mark.replaceWith(logo);
+  }
 }
-void applyPublicSiteSettings();
+
 if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   logoutMenuLink.disabled = true;
   const { error } = await supabase.auth.signOut();
@@ -151,7 +161,7 @@ if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   if (!error) {
     setMenuSession(null);
     closeSiteMenu();
-    location.assign(new URL("login/", ROOT_URL).href);
+    location.assign(new URL("account/", ROOT_URL).href);
   }
 });
 async function syncProfileMenu() {
@@ -186,16 +196,17 @@ if (form) {
     const signup = mode === "signup";
     const recovery = mode === "recovery" || mode === "recovery-link";
     const recoveryLink = mode === "recovery-link";
-    submit.textContent = recoveryLink ? "Update Password" : recovery ? "Verify Code & Reset Password" : signup ? "Create Account" : "Login";
-    toggle.textContent = signup ? "Login Account" : "Create Account";
+    const labels = translations[document.documentElement.lang] || translations.en;
+    submit.textContent = recoveryLink ? labels.updatePassword : recovery ? labels.verifyCodeReset : signup ? labels.createAccount : labels.signIn;
+    toggle.textContent = signup ? labels.loginAccount : labels.createAccount;
     toggle.disabled = recovery;
     forgot.disabled = recovery;
     emailInput.readOnly = mode === "recovery";
     otpInput.hidden = mode !== "recovery";
     otpInput.required = mode === "recovery";
     passwordInput.autocomplete = recovery || signup ? "new-password" : "current-password";
-    passwordInput.setAttribute("aria-label", recovery ? "New Password" : "Password");
-    passwordInput.placeholder = recovery ? "New Password" : "Password";
+    passwordInput.setAttribute("aria-label", recovery ? labels.newPassword : labels.password);
+    passwordInput.placeholder = recovery ? labels.newPassword : labels.password;
     passwordInput.required = true;
     if (recovery) otpInput.focus();
   }
@@ -217,7 +228,7 @@ if (form) {
     showMessage("Sending verification code…");
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: new URL("login/?recovery=1", ROOT_URL).href,
+        redirectTo: new URL("account/?recovery=1", ROOT_URL).href,
       });
       if (error) throw error;
       recoveryEmail = email;
@@ -281,7 +292,7 @@ if (form) {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: new URL("login/", ROOT_URL).href },
+          options: { emailRedirectTo: new URL("account/", ROOT_URL).href },
         });
         if (error) throw error;
         if (data.session) {
@@ -393,7 +404,7 @@ if (profile) {
   async function loadProfile() {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
-      location.replace(new URL("login/", ROOT_URL).href);
+      location.replace(new URL("account/", ROOT_URL).href);
       return;
     }
     currentUser = data.user;
@@ -489,7 +500,7 @@ if (profile) {
 
   await loadProfile();
   const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) location.replace(new URL("login/", ROOT_URL).href);
+    if (!session) location.replace(new URL("account/", ROOT_URL).href);
   });
   window.addEventListener("pagehide", () => authListener.subscription.unsubscribe(), { once: true });
 }
@@ -501,7 +512,7 @@ const ownerDashboard = document.querySelector("#owner-dashboard");
 if (ownerDashboard) {
   const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError || !authData.user) {
-    location.replace(new URL("login/", ROOT_URL).href);
+    location.replace(new URL("account/", ROOT_URL).href);
   } else {
     const { data: ownerRole, error: roleError } = await supabase
       .from("user_roles").select("role")
@@ -519,13 +530,10 @@ if (ownerDashboard) {
       const ownerEmail = document.querySelector("#dashboard-owner-email");
       if (ownerEmail) ownerEmail.textContent = authData.user.email || "";
       const resources = [
-        ["site_content", "dashboard-content-count"],
-        ["services", "dashboard-services-count"],
-        ["products", "dashboard-products-count"],
+        ["pages", "dashboard-pages-count"],
         ["user_roles", "dashboard-users-count"],
-        ["media_assets", "dashboard-media-count"],
-        ["site_settings", "dashboard-settings-count"],
         ["audit_logs", "dashboard-audit-count"],
+        ["site_settings", "dashboard-settings-count"],
       ];
       const results = await Promise.all(resources.map(async ([table, target]) => {
         const { count, error } = await supabase.from(table).select("*", { count: "exact", head: true });
@@ -536,7 +544,7 @@ if (ownerDashboard) {
     }
   }
   supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) location.replace(new URL("login/", ROOT_URL).href);
+    if (!session) location.replace(new URL("account/", ROOT_URL).href);
   });
 }
 
@@ -558,11 +566,14 @@ async function callOwnerUsers(payload) {
 function renderRoleSummary(users) {
   if (!roleSummaryList) return;
   roleSummaryList.replaceChildren();
-  const roles = ["owner", "admin", "manager", "editor", "staff", "customer"];
+  const roles = ["owner", "admin", "member", "visitor"];
   for (const role of roles) {
     const row = document.createElement("article");
-    row.className = "technician-admin-row";
-    const count = users.filter((user) => user.role === role).length;
+    row.className = "admin-list-row";
+    const count = users.filter((user) => {
+      const normalized = user.role === "owner" ? "owner" : user.role === "admin" ? "admin" : "member";
+      return normalized === role;
+    }).length;
     addTextElement(row, "strong", "", role.charAt(0).toUpperCase() + role.slice(1));
     addTextElement(row, "span", "", String(count) + (count === 1 ? " account" : " accounts"));
     roleSummaryList.append(row);
@@ -577,16 +588,16 @@ function renderUserList(users) {
     return;
   }
 
-  const roles = ["customer", "staff", "editor", "manager", "admin"];
+  const roles = ["member", "admin"];
   for (const user of users) {
     const row = document.createElement("article");
-    row.className = "technician-admin-row";
+    row.className = "admin-list-row";
     const primary = document.createElement("div");
     addTextElement(primary, "strong", "", user.email || "Unknown email");
     const blocked = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
     const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Never signed in";
     addTextElement(primary, "span", "muted", [
-      user.role === "owner" ? "Owner" : (user.role || "Customer"),
+      user.role === "owner" ? "Owner" : user.role === "admin" ? "Admin" : "Member",
       blocked ? "Blocked" : "Active",
       "Last sign-in: " + lastSignIn,
     ].join(" · "));
@@ -607,7 +618,7 @@ function renderUserList(users) {
       option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
       roleSelect.append(option);
     }
-    roleSelect.value = user.role || "customer";
+    roleSelect.value = ["admin", "member"].includes(user.role) ? user.role : "member";
     roleSelect.disabled = user.role === "owner";
     actions.append(roleSelect);
 
@@ -693,7 +704,7 @@ if (userInviteForm) {
     const submit = document.querySelector("#user-invite-submit");
     const form = new FormData(userInviteForm);
     const email = String(form.get("email") || "").trim();
-    const role = String(form.get("role") || "customer");
+    const role = String(form.get("role") || "member");
     if (submit) submit.disabled = true;
     if (userMessage) userMessage.textContent = "Sending invitation…";
     try {
@@ -710,287 +721,6 @@ if (userInviteForm) {
 }
 if (userRefreshButton) userRefreshButton.addEventListener("click", () => void loadOwnerUsers());
 if (ownerDashboard && userItems) void loadOwnerUsers();
-
-// Owner-only Media Library for public catalogue images in Supabase Storage.
-const mediaUploadForm = document.querySelector("#media-upload-form");
-const mediaItems = document.querySelector("#media-admin-items");
-const mediaSearch = document.querySelector("#media-search");
-const mediaTypeFilter = document.querySelector("#media-type-filter");
-const mediaDateFilter = document.querySelector("#media-date-filter");
-const mediaMessage = document.querySelector("#media-message");
-let mediaAssetData = [];
-
-function getMediaPublicUrl(item) {
-  return supabase.storage.from("site-media").getPublicUrl(item.storage_path).data.publicUrl;
-}
-
-function renderMediaAssets() {
-  if (!mediaItems) return;
-  mediaItems.replaceChildren();
-  const search = String(mediaSearch?.value || "").trim().toLowerCase();
-  const type = String(mediaTypeFilter?.value || "all");
-  const days = String(mediaDateFilter?.value || "all");
-  const cutoff = days === "all" ? 0 : Date.now() - Number(days) * 24 * 60 * 60 * 1000;
-  const visible = mediaAssetData.filter((item) => {
-    const matchesSearch = !search || String(item.file_name || "").toLowerCase().includes(search);
-    const matchesType = type === "all" || item.content_type === type;
-    const matchesDate = !cutoff || new Date(item.created_at).getTime() >= cutoff;
-    return matchesSearch && matchesType && matchesDate;
-  });
-  if (!visible.length) {
-    addTextElement(mediaItems, "p", "muted", mediaAssetData.length ? "No matching images." : "No images uploaded yet.");
-    return;
-  }
-
-  for (const item of visible) {
-    const row = document.createElement("article");
-    row.className = "technician-admin-row";
-    const image = document.createElement("img");
-    image.className = "technician-detail-photo";
-    image.src = getMediaPublicUrl(item);
-    image.alt = item.alt_text || item.file_name || "Media image";
-    image.loading = "lazy";
-    row.append(image);
-
-    const details = document.createElement("div");
-    addTextElement(details, "strong", "", item.file_name || "Untitled image");
-    addTextElement(details, "span", "muted", [
-      item.content_type || "Image",
-      (Number(item.size_bytes || 0) / 1024).toFixed(1) + " KB",
-      item.created_at ? new Date(item.created_at).toLocaleDateString() : "",
-    ].filter(Boolean).join(" · "));
-    const fileNameInput = document.createElement("input");
-    fileNameInput.type = "text";
-    fileNameInput.maxLength = 255;
-    fileNameInput.value = item.file_name || "";
-    fileNameInput.setAttribute("aria-label", "File name for " + item.file_name);
-    details.append(fileNameInput);
-    const altInput = document.createElement("input");
-    altInput.type = "text";
-    altInput.maxLength = 250;
-    altInput.value = item.alt_text || "";
-    altInput.setAttribute("aria-label", "Alternative text for " + item.file_name);
-    details.append(altInput);
-    row.append(details);
-
-    const actions = document.createElement("div");
-    actions.className = "editor-actions";
-    const save = document.createElement("button");
-    save.type = "button";
-    save.textContent = "Save Alt Text";
-    save.addEventListener("click", async () => {
-      save.disabled = true;
-      try {
-        const fileName = fileNameInput.value.trim().slice(0, 255);
-        if (!fileName) throw new Error("File name is required.");
-        const changes = { file_name: fileName, alt_text: altInput.value.trim() };
-        if (item.id) {
-          const { error } = await supabase.from("media_assets").update(changes).eq("id", item.id);
-          if (error) throw error;
-        } else {
-          const { data: authData, error: authError } = await supabase.auth.getUser();
-          if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
-          const { data, error } = await supabase.from("media_assets").insert({
-            ...changes,
-            storage_path: item.storage_path,
-            content_type: item.content_type || "application/octet-stream",
-            size_bytes: Number(item.size_bytes || 0),
-            is_public: true,
-            uploaded_by: authData.user.id,
-          }).select("id").single();
-          if (error) throw error;
-          item.id = data.id;
-        }
-        item.file_name = fileName;
-        item.alt_text = altInput.value.trim();
-        if (mediaMessage) mediaMessage.textContent = "Media details saved.";
-      } catch (error) {
-        if (mediaMessage) mediaMessage.textContent = error.message || "Could not update media details.";
-      } finally {
-        save.disabled = false;
-      }
-    });
-    actions.append(save);
-
-    const copy = document.createElement("button");
-    copy.type = "button";
-    copy.className = "secondary-button";
-    copy.textContent = "Copy URL";
-    copy.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(getMediaPublicUrl(item));
-        if (mediaMessage) mediaMessage.textContent = "Public media URL copied.";
-      } catch {
-        if (mediaMessage) mediaMessage.textContent = "Clipboard access is unavailable in this browser.";
-      }
-    });
-    actions.append(copy);
-
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.className = "secondary-button";
-    remove.textContent = "Delete";
-    remove.addEventListener("click", async () => {
-      if (!confirm("Delete this image? It will be removed only if no catalogue record uses it.")) return;
-      remove.disabled = true;
-      try {
-        const publicUrl = getMediaPublicUrl(item);
-        for (const table of ["products", "services", "workshops", "technicians"]) {
-          const { data, error } = await supabase.from(table).select("id").eq("photo_url", publicUrl).limit(1);
-          if (error) throw error;
-          if (data?.length) throw new Error("This image is still used by " + table + ". Change that record's image before deleting it.");
-        }
-        const { data: contentRows, error: contentError } = await supabase.from("site_content").select("id,body").limit(100);
-        if (contentError) throw contentError;
-        const isUsedInContent = (contentRows || []).some((entry) => {
-          const serialized = JSON.stringify(entry.body || {});
-          return serialized.includes(publicUrl) || serialized.includes(item.storage_path);
-        });
-        if (isUsedInContent) throw new Error("This image is still used by website content.");
-        const { error: storageError } = await supabase.storage.from("site-media").remove([item.storage_path]);
-        if (storageError) throw storageError;
-        if (item.id) {
-          const { error: metadataError } = await supabase.from("media_assets").delete().eq("id", item.id);
-          if (metadataError) throw metadataError;
-        }
-        mediaAssetData = mediaAssetData.filter((entry) => entry.id !== item.id);
-        renderMediaAssets();
-        if (mediaMessage) mediaMessage.textContent = "Image deleted.";
-      } catch (error) {
-        if (mediaMessage) mediaMessage.textContent = error.message || "Could not delete image.";
-      } finally {
-        remove.disabled = false;
-      }
-    });
-    actions.append(remove);
-    row.append(actions);
-    mediaItems.append(row);
-  }
-}
-
-async function listMediaStorageFiles(folder = "", depth = 0) {
-  if (depth > 5) return [];
-  const files = [];
-  for (let offset = 0; offset < 1000; offset += 100) {
-    const { data, error } = await supabase.storage.from("site-media").list(folder, {
-      limit: 100,
-      offset,
-      sortBy: { column: "name", order: "asc" },
-    });
-    if (error) throw error;
-    for (const entry of data || []) {
-      const path = folder ? folder + "/" + entry.name : entry.name;
-      if (!entry.id && !entry.metadata) {
-        files.push(...await listMediaStorageFiles(path, depth + 1));
-      } else {
-        files.push({
-          storage_path: path,
-          storage_name: entry.name,
-          storage_metadata: entry.metadata || {},
-          storage_created_at: entry.created_at || null,
-        });
-      }
-    }
-    if (!data || data.length < 100) break;
-  }
-  return files;
-}
-
-async function loadMediaAssets() {
-  if (!ownerDashboard || !mediaItems) return;
-  if (mediaMessage) mediaMessage.textContent = "Loading media…";
-  try {
-    const [{ data: metadata, error: metadataError }, storageFiles] = await Promise.all([
-      supabase.from("media_assets")
-        .select("id,storage_path,file_name,content_type,size_bytes,alt_text,is_public,uploaded_by,created_at")
-        .eq("is_public", true)
-        .order("created_at", { ascending: false })
-        .limit(1000),
-      listMediaStorageFiles(),
-    ]);
-    if (metadataError) throw metadataError;
-    const metadataByPath = new Map((metadata || []).map((item) => [item.storage_path, item]));
-    mediaAssetData = storageFiles.map((file) => {
-      const saved = metadataByPath.get(file.storage_path) || {};
-      return {
-        ...saved,
-        storage_path: file.storage_path,
-        file_name: saved.file_name || file.storage_name,
-        content_type: saved.content_type || file.storage_metadata.mimetype || "",
-        size_bytes: saved.size_bytes ?? file.storage_metadata.size ?? 0,
-        alt_text: saved.alt_text || "",
-        created_at: saved.created_at || file.storage_created_at,
-        is_public: true,
-      };
-    }).sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
-    renderMediaAssets();
-    if (mediaMessage) mediaMessage.textContent = "Showing " + mediaAssetData.length + " media assets.";
-  } catch (error) {
-    if (mediaMessage) mediaMessage.textContent = error.message || "Could not load Media Library.";
-  }
-}
-
-if (mediaUploadForm) {
-  mediaUploadForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const submit = document.querySelector("#media-upload-submit");
-    const form = new FormData(mediaUploadForm);
-    const file = form.get("file");
-    const altText = String(form.get("alt_text") || "").trim();
-    const extensions = {
-      "image/jpeg": "jpg",
-      "image/png": "png",
-      "image/webp": "webp",
-      "image/avif": "avif",
-      "image/gif": "gif",
-    };
-    if (!(file instanceof File) || !extensions[file.type]) {
-      if (mediaMessage) mediaMessage.textContent = "Choose a supported image file.";
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      if (mediaMessage) mediaMessage.textContent = "Image must be 10 MB or smaller.";
-      return;
-    }
-    if (submit) submit.disabled = true;
-    if (mediaMessage) mediaMessage.textContent = "Uploading image…";
-    const storagePath = "library/" + crypto.randomUUID() + "." + extensions[file.type];
-    try {
-      const { error: uploadError } = await supabase.storage.from("site-media").upload(storagePath, file, {
-        cacheControl: "3600",
-        contentType: file.type,
-        upsert: false,
-      });
-      if (uploadError) throw uploadError;
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
-      const { error: metadataError } = await supabase.from("media_assets").insert({
-        storage_path: storagePath,
-        file_name: file.name.slice(0, 255),
-        content_type: file.type,
-        size_bytes: file.size,
-        alt_text: altText,
-        is_public: true,
-        uploaded_by: authData.user.id,
-      });
-      if (metadataError) {
-        await supabase.storage.from("site-media").remove([storagePath]);
-        throw metadataError;
-      }
-      mediaUploadForm.reset();
-      await loadMediaAssets();
-      if (mediaMessage) mediaMessage.textContent = "Image uploaded successfully.";
-    } catch (error) {
-      if (mediaMessage) mediaMessage.textContent = error.message || "Could not upload image.";
-    } finally {
-      if (submit) submit.disabled = false;
-    }
-  });
-}
-if (mediaSearch) mediaSearch.addEventListener("input", renderMediaAssets);
-if (mediaTypeFilter) mediaTypeFilter.addEventListener("change", renderMediaAssets);
-if (mediaDateFilter) mediaDateFilter.addEventListener("change", renderMediaAssets);
-if (ownerDashboard && mediaItems) void loadMediaAssets();
 
 // Owner-only website profile settings stored as a single public configuration record.
 const siteSettingsForm = document.querySelector("#site-settings-form");
@@ -1009,11 +739,9 @@ async function loadSiteSettingsForm() {
     return;
   }
   const settings = data?.setting_value && typeof data.setting_value === "object" ? data.setting_value : {};
-  siteSettingsForm.elements.tagline.value = typeof settings.tagline === "string" ? settings.tagline : "our services and technical support";
-  siteSettingsForm.elements.description.value = typeof settings.description === "string" ? settings.description : "Three Brothers Tech Hub — technical services by region.";
-  siteSettingsForm.elements.contact_email.value = typeof settings.contact_email === "string" ? settings.contact_email : "";
-  siteSettingsForm.elements.contact_phone.value = typeof settings.contact_phone === "string" ? settings.contact_phone : "";
-  siteSettingsForm.elements.whatsapp_url.value = typeof settings.whatsapp_url === "string" ? settings.whatsapp_url : "";
+  siteSettingsForm.elements.website_title.value = typeof settings.website_title === "string" ? settings.website_title : "3B TECH HUB";
+  siteSettingsForm.elements.logo_url.value = typeof settings.logo_url === "string" ? settings.logo_url : "";
+  
   if (siteSettingsMessage) siteSettingsMessage.textContent = "Website settings loaded.";
 }
 
@@ -1026,35 +754,18 @@ if (siteSettingsForm) {
     }
     const submit = document.querySelector("#site-settings-save");
     const form = new FormData(siteSettingsForm);
-    const tagline = String(form.get("tagline") || "").trim();
-    const description = String(form.get("description") || "").trim();
-    const contactEmail = String(form.get("contact_email") || "").trim();
-    const contactPhone = String(form.get("contact_phone") || "").trim();
-    const whatsappUrl = String(form.get("whatsapp_url") || "").trim();
-    if (!tagline) {
-      if (siteSettingsMessage) siteSettingsMessage.textContent = "Homepage tagline is required.";
-      return;
-    }
-    if (whatsappUrl) {
-      try {
-        if (new URL(whatsappUrl).protocol !== "https:") throw new Error("HTTPS required");
-      } catch {
-        if (siteSettingsMessage) siteSettingsMessage.textContent = "WhatsApp URL must be a valid HTTPS address.";
-        return;
-      }
+    const websiteTitle = String(form.get("website_title") || "").trim() || "3B TECH HUB";
+    const logoUrl = String(form.get("logo_url") || "").trim();
+    if (logoUrl) {
+      try { if (!["https:", "http:"].includes(new URL(logoUrl).protocol)) throw new Error("Invalid URL"); }
+      catch { if (siteSettingsMessage) siteSettingsMessage.textContent = "Logo URL must be a valid HTTP(S) address."; return; }
     }
     if (submit) submit.disabled = true;
     if (siteSettingsMessage) siteSettingsMessage.textContent = "Saving website settings…";
     try {
       const { data: authData, error: authError } = await supabase.auth.getUser();
       if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
-      const settingValue = {
-        tagline,
-        description,
-        contact_email: contactEmail,
-        contact_phone: contactPhone,
-        whatsapp_url: whatsappUrl,
-      };
+      const settingValue = { website_title: websiteTitle, logo_url: logoUrl };
       const { error } = await supabase.from("site_settings").upsert({
         setting_key: "site_profile",
         setting_value: settingValue,
@@ -1102,453 +813,35 @@ dashboardTabs.forEach((tab, index) => {
 });
 
 
-// Homepage workshop and technician content, managed from the owner dashboard.
-const homepageTechnicians = document.querySelector("#technicians-section");
-const homepageWorkshops = document.querySelector("#workshops-section");
-const homepageProducts = document.querySelector("#products-section");
-function safeExternalLink(value) {
-  try { const url = new URL(value); return ["http:", "https:"].includes(url.protocol) ? url.href : ""; }
-  catch { return ""; }
-}
-function addTextElement(parent, tag, className, value) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  node.textContent = value || "";
-  parent.append(node);
-  return node;
-}
-function appendSectionNav(parent) {
-  const nav = document.createElement("nav");
-  nav.className = "section-explore-nav";
-  nav.setAttribute("aria-label", "Explore other sections");
-  for (const [label, path] of [["Services","services/"],["Products","products/"],["Workshop","workshop/"],["Technicians","technicians/"]]) {
-    const link = document.createElement("a");
-    link.href = ROOT_URL.href + path;
-    link.textContent = label;
-    nav.append(link);
-  }
-  parent.append(nav);
-}
-function detailLayout(target, item, title, fields) {
-  target.replaceChildren();
-  const wrap = document.createElement("article");
-  wrap.className = "catalogue-detail";
-  if (item.photo_url) {
-    const image = document.createElement("img");
-    image.src = item.photo_url;
-    image.alt = title;
-    image.className = "catalogue-detail-image";
-    wrap.append(image);
-  }
-  addTextElement(wrap, "h1", "", title);
-  for (const [label, value] of fields) {
-    if (!value) continue;
-    const row = document.createElement("p");
-    row.className = "catalogue-detail-field";
-    const strong = document.createElement("strong");
-    strong.textContent = label + ": ";
-    row.append(strong, document.createTextNode(String(value)));
-    wrap.append(row);
-  }
-  const back = document.createElement("a");
-  back.className = "service-back-link";
-  back.href = location.pathname.replace(/\/+$/, "") + "/";
-  back.textContent = "Explore all";
-  wrap.append(back);
-  target.append(wrap);
-}
-function itemLink(section, id) {
-  return ROOT_URL.href + section + "/?id=" + encodeURIComponent(id);
-}
-function makeIdentityCard({section, title, subtitle, photo, placeholder, className}) {
-  const link = document.createElement("a");
-  link.className = className;
-  link.href = itemLink(section, arguments[0].id);
-  if (photo) {
-    const image = document.createElement("img");
-    image.src = photo;
-    image.alt = "";
-    image.loading = "lazy";
-    link.append(image);
-  } else {
-    const icon = document.createElement("span");
-    icon.className = placeholder;
-    icon.setAttribute("aria-hidden", "true");
-    icon.textContent = arguments[0].icon || "👤";
-    link.append(icon);
-  }
-  const info = document.createElement("span");
-  info.className = "technician-card-info";
-  addTextElement(info, "strong", "", title);
-  if (subtitle) addTextElement(info, "small", "technician-specialty", subtitle);
-  addTextElement(info, "small", "technician-card-hint", "View details");
-  link.append(info);
-  return link;
-}
-function renderTechnicians(items) {
-  const target = document.querySelector("#technicians-list");
-  if (!target || !Array.isArray(items)) return;
-  const visible = items.filter(item => item && item.name && item.is_published !== false && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region)));
-  const selectedId = new URLSearchParams(location.search).get("id");
-  if (selectedId) {
-    const item = visible.find(entry => String(entry.id) === selectedId);
-    if (item) detailLayout(target, item, item.name, [["Specialty", item.category], ["About", item.description], ["Phone", item.phone], ["WhatsApp", item.whatsapp]]);
-    else addTextElement(target, "p", "muted", "This technician is unavailable.");
-    return;
-  }
-  target.replaceChildren();
-  visible.forEach(item => target.append(makeIdentityCard({section:"technicians",id:item.id,title:item.name,subtitle:item.category,photo:item.photo_url,placeholder:"technician-card-placeholder",icon:"👤",className:"technician-card"})));
-  if (target.children.length && homepageTechnicians) homepageTechnicians.hidden = false;
-}
-function renderWorkshops(items) {
-  const target = document.querySelector("#workshops-list");
-  if (!target || !Array.isArray(items)) return;
-  const visible = items.filter(item => item && item.title && item.status === "published" && (activeCountry.region === "global" || (!item.country || item.country === "global" || item.country === activeCountry.region)));
-  const selectedId = new URLSearchParams(location.search).get("id");
-  if (selectedId) {
-    const item = visible.find(entry => String(entry.id) === selectedId);
-    if (item) detailLayout(target, item, item.title, [["Category", item.category], ["Description", item.description], ["Location", item.location]]);
-    else addTextElement(target, "p", "muted", "This workshop is unavailable.");
-    return;
-  }
-  target.replaceChildren();
-  visible.forEach(item => target.append(makeIdentityCard({section:"workshop",id:item.id,title:item.title,subtitle:item.category || item.location,photo:item.photo_url,placeholder:"workshop-card-placeholder",icon:"🛠️",className:"workshop-card"})));
-  if (target.children.length && homepageWorkshops) homepageWorkshops.hidden = false;
-}
-function renderProducts(items) {
-  const target = document.querySelector("#products-list");
-  if (!target || !Array.isArray(items)) return;
-  const groupTitles = {mobile:"Mobile & Accessories",satellite:"Satellite & TV Equipment"};
-  const visible = filterProductsForRegion(items.filter(item => item && item.status === "active"), activeCountry.region);
-  const selectedId = new URLSearchParams(location.search).get("id");
-  if (selectedId) {
-    const item = visible.find(entry => String(entry.id) === selectedId);
-    if (item) detailLayout(target, item, item.name, [["Group", groupTitles[item.category_group] || item.category || "Other Products"], ["Description", item.description]]);
-    else addTextElement(target, "p", "muted", "This product type is unavailable.");
-    return;
-  }
-  target.replaceChildren();
-  const isHome = Boolean(homepageProducts && !document.querySelector("[data-section-page='products']"));
-  let visibleCount = isHome ? 4 : visible.length;
-  visible.forEach((item,index) => {
-    const group = groupTitles[item.category_group] || item.category || "Other Products";
-    const card = makeIdentityCard({section:"products",id:item.id,title:item.name,subtitle:group,photo:item.photo_url,placeholder:"technician-card-placeholder",icon:item.category_group === "satellite" ? "📡" : "📱",className:"technician-card"});
-    if (isHome) card.hidden = index >= visibleCount;
-    target.append(card);
-  });
-  if (isHome && visible.length > 4) {
-    const moreButton = document.createElement("button");
-    moreButton.type = "button";
-    moreButton.className = "product-more-button";
-    moreButton.textContent = "More";
-    moreButton.addEventListener("click", () => {
-      visibleCount = getNextVisibleCount(visibleCount, visible.length, 4);
-      target.querySelectorAll(".technician-card").forEach((card,index) => { card.hidden = index >= visibleCount; });
-      if (visibleCount >= visible.length) moreButton.remove();
-    });
-    target.append(moreButton);
-  }
-  if (target.querySelector(".technician-card") && homepageProducts) homepageProducts.hidden = false;
-  else if (homepageProducts) homepageProducts.hidden = true;
-}
 
-async function loadPublicServices() {
-  if (!currentPath.includes("/services/")) return;
-  const { data, error } = await supabase.from("services").select("slug,name,description,category,country,photo_url").eq("status","active").order("name");
-  if (error) { console.warn("Service content unavailable:", error.message); return; }
-  const services = data || [];
-  const listing = document.querySelector(".services-index");
-  if (listing) {
-    listing.querySelectorAll(".service-country").forEach(section => {
-      const region = section.dataset.countryRegion;
-      const grid = section.querySelector(".service-card-grid");
-      if (!grid) return;
-      grid.replaceChildren();
-      services.filter(item => !item.country || item.country === "global" || item.country === region).forEach(item => {
-        const link = document.createElement("a"); link.className = "service-card"; link.href = ROOT_URL.href + "services/" + item.slug + "/";
-        if (item.photo_url) { const img=document.createElement("img"); img.src=item.photo_url; img.alt=""; img.loading="lazy"; img.className="service-card-image"; link.append(img); }
-        else { const icon=document.createElement("span"); icon.className="service-icon"; icon.setAttribute("aria-hidden","true"); icon.textContent="🛠️"; link.append(icon); }
-        const info=document.createElement("span"); const title=document.createElement("strong"); title.textContent=item.name; info.append(title);
-        if(item.description){const desc=document.createElement("small");desc.textContent=item.description;info.append(desc);}
-        if(item.category){const cat=document.createElement("small");cat.textContent=item.category;info.append(cat);}
-        link.append(info); const arrow=document.createElement("span");arrow.className="service-arrow";arrow.setAttribute("aria-hidden","true");arrow.textContent="↗";link.append(arrow);grid.append(link);
-      });
-      section.hidden = grid.children.length === 0;
-    });
+
+// Audit module: read-only recent administrative activity.
+const auditList = document.querySelector("#audit-log-list");
+async function loadAuditLogs() {
+  if (!auditList || !["owner", "admin"].includes(currentDashboardRole)) return;
+  auditList.replaceChildren();
+  const { data, error } = await supabase
+    .from("audit_logs")
+    .select("id,action,resource_type,resource_id,metadata,created_at")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error) {
+    addTextElement(auditList, "p", "muted", "Audit history is temporarily unavailable.");
     return;
   }
-  const detail = document.querySelector(".service-detail-main");
-  if (detail) {
-    const slug = currentPath.split("/").filter(Boolean).pop();
-    const item = services.find(service => service.slug === slug);
-    if (!item) return;
-    detail.replaceChildren();
-    addTextElement(detail,"h1","",item.name);
-    if(item.description)addTextElement(detail,"p","",item.description);
-    if(item.category)addTextElement(detail,"p","service-detail-category",item.category);
-    if(item.photo_url){const img=document.createElement("img");img.src=item.photo_url;img.alt=item.name;img.className="service-detail-image";detail.append(img);}
-    const back=document.createElement("a");back.className="service-back-link";back.href=ROOT_URL.href + "services/";back.textContent="Explore all services";detail.append(back);appendSectionNav(detail);
+  if (!data?.length) {
+    addTextElement(auditList, "p", "muted", "No audit events recorded yet.");
+    return;
+  }
+  for (const entry of data) {
+    const row = document.createElement("article");
+    row.className = "admin-list-row";
+    const title = [entry.action, entry.resource_type].filter(Boolean).join(" · ");
+    addTextElement(row, "strong", "", title || "Activity");
+    const detail = [entry.resource_id ? "ID: " + entry.resource_id : "", entry.created_at ? new Date(entry.created_at).toLocaleString() : ""].filter(Boolean).join(" · ");
+    addTextElement(row, "span", "muted", detail);
+    auditList.append(row);
   }
 }
-loadPublicServices();
-
-async function loadHomepageIdentity() {
-  if (!homepageTechnicians && !homepageWorkshops && !homepageProducts && !document.querySelector("[data-section-page]")) return;
-  const [{ data: technicians, error: techniciansError }, { data: workshops, error: workshopsError }, { data: products, error: productsError }] = await Promise.all([
-    supabase.from("technicians").select("*").eq("is_published", true).order("created_at", { ascending: false }),
-    supabase.from("workshops").select("*").eq("status", "published").order("created_at", { ascending: false }),
-    supabase.from("products").select("*").eq("status", "active").order("updated_at", { ascending: false })
-  ]);
-  if (techniciansError) console.warn("Homepage technician content unavailable:", techniciansError.message);
-  else renderTechnicians(technicians || []);
-  if (workshopsError) console.warn("Homepage workshop content unavailable:", workshopsError.message);
-  else renderWorkshops(workshops || []);
-  if (productsError) console.warn("Homepage product content unavailable:", productsError.message);
-  else renderProducts(products || []);
-}
-loadHomepageIdentity();
-
-// Owner-only Workshop and Technician editors.
-const workshopEditor=document.querySelector("#workshop-form");
-const technicianEditor=document.querySelector("#technician-form");
-const productEditor=document.querySelector("#product-form");
-const serviceEditor=document.querySelector("#service-form");
-if(ownerDashboard && (workshopEditor || technicianEditor || productEditor || serviceEditor)) {
-  const technicianMessage=document.querySelector("#technician-message");
-  const technicianItems=document.querySelector("#technician-admin-items");
-  const technicianPhotoPreview=document.querySelector("#technician-photo-preview");
-  let technicianData=[];
-  let technicianPhotoUrl="";
-  let workshopData=[];
-  let workshopPhotoUrl="";
-  let productData=[];
-  let productPhotoUrl="";
-  let serviceData=[];
-  let servicePhotoUrl="";
-  const workshopMessage=document.querySelector("#workshop-message");
-  const workshopItems=document.querySelector("#workshop-admin-items");
-  const workshopPhotoPreview=document.querySelector("#workshop-photo-preview");
-  const productMessage=document.querySelector("#product-message");
-  const productItems=document.querySelector("#product-admin-items");
-  const productPhotoPreview=document.querySelector("#product-photo-preview");
-  const serviceMessage=document.querySelector("#service-message");
-  const serviceItems=document.querySelector("#service-admin-items");
-  const servicePhotoPreview=document.querySelector("#service-photo-preview");
-  const editorMessage=(node,message,isError=false)=>{if(!node)return;node.textContent=message;node.dataset.kind=isError?"error":"success";};
-  async function saveSetting(key,value){
-    const {data:userData}=await supabase.auth.getUser();
-    const {error}=await supabase.from("site_settings").upsert({setting_key:key,setting_value:value,is_public:true,updated_by:userData.user?.id||null,updated_at:new Date().toISOString()},{onConflict:"setting_key"});
-    if(error)throw error;
-  }
-  async function uploadContentPhoto(file,folder){
-    // Browsers return an empty File object when no file was selected.
-    // Treat it as no upload so image selection stays optional.
-    if(!file || !file.name || file.size===0)return "";
-    if(!file.type.startsWith("image/"))throw new Error("Please select an image file.");
-    if(file.size>5*1024*1024)throw new Error("Image size must be 5 MB or less.");
-    const ext=(file.name.split(".").pop()||"jpg").toLowerCase().replace(/[^a-z0-9]/g,"")||"jpg";
-    const path=folder+"/"+crypto.randomUUID()+"."+ext;
-    const {error}=await supabase.storage.from("site-media").upload(path,file,{contentType:file.type,upsert:false});
-    if(error)throw error;
-    return supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;
-  }
-  function previewImage(container,url){
-    if(!container)return;
-    container.replaceChildren();
-    if(url){const img=document.createElement("img");img.src=url;img.alt="Selected image preview";container.append(img);}
-  }
-  async function loadIdentityEditors(){
-    const [{data:workshops,error:workshopError},{data:technicians,error:technicianError},{data:products,error:productError},{data:services,error:serviceError}] = await Promise.all([
-      supabase.from("workshops").select("*").order("created_at",{ascending:false}),
-      supabase.from("technicians").select("*").order("created_at",{ascending:false}),
-      supabase.from("products").select("*").order("updated_at",{ascending:false}),
-      supabase.from("services").select("*").order("created_at",{ascending:false})
-    ]);
-    if(workshopError){editorMessage(workshopMessage,workshopError.message,true);return;}
-    if(technicianError){editorMessage(technicianMessage,technicianError.message,true);return;}
-    if(productError){editorMessage(productMessage,productError.message,true);return;}
-    if(serviceError){editorMessage(serviceMessage,serviceError.message,true);return;}
-    workshopData=workshops||[];
-    productData=products||[];
-    serviceData=services||[];
-    technicianData=technicians||[];
-    if(workshopEditor)renderWorkshopAdminList();
-    if(technicianEditor)renderTechnicianAdminList();
-    if(productEditor)renderProductAdminList();
-    if(serviceEditor)renderServiceAdminList();
-  }
-  function renderWorkshopAdminList(){
-    workshopItems.replaceChildren();
-    if(!workshopData.length){addTextElement(workshopItems,"p","muted","No workshops added yet.");return;}
-    workshopData.forEach(item=>{
-      const row=document.createElement("article");row.className="technician-admin-row";workshopItems.append(row);
-      addTextElement(row,"strong","",item.title);
-      addTextElement(row,"span","",[item.category,item.location,item.status].filter(Boolean).join(" · "));
-      const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
-      const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
-      edit.addEventListener("click",()=>{
-        workshopEditor.elements.id.value=item.id;
-        workshopEditor.elements.title.value=item.title||"";
-        workshopEditor.elements.description.value=item.description||"";
-        workshopEditor.elements.category.value=item.category||"";
-        workshopEditor.elements.country.value=item.country||"";
-        workshopEditor.elements.location.value=item.location||"";
-        workshopEditor.elements.is_published.checked=item.status==="published";
-        workshopPhotoUrl=item.photo_url||"";workshopEditor.elements.remove_photo.checked=false;document.querySelector("#workshop-remove-photo-wrap").hidden=!workshopPhotoUrl;previewImage(workshopPhotoPreview,workshopPhotoUrl);
-        document.querySelector("#workshop-form-title").textContent="Edit Workshop";
-        document.querySelector("#workshop-cancel").hidden=false;
-      });actions.append(edit);
-      const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";
-      del.addEventListener("click",async()=>{
-        if(!confirm("Delete this workshop?"))return;
-        const {error}=await supabase.from("workshops").delete().eq("id",item.id);
-        if(error){editorMessage(workshopMessage,error.message,true);return;}
-        workshopData=workshopData.filter(x=>x.id!==item.id);renderWorkshopAdminList();
-      });actions.append(del);
-    });
-  }
-  function resetWorkshopForm(){
-    workshopEditor.reset();workshopPhotoUrl="";document.querySelector("#workshop-remove-photo-wrap").hidden=true;previewImage(workshopPhotoPreview,"");
-    document.querySelector("#workshop-form-title").textContent="Add Workshop";
-    document.querySelector("#workshop-cancel").hidden=true;
-  }
-  if(workshopEditor){
-    workshopEditor.addEventListener("submit",async event=>{
-      event.preventDefault();const button=document.querySelector("#workshop-save");button.disabled=true;editorMessage(workshopMessage,"Saving…");
-      try{
-        const form=new FormData(workshopEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"workshops");
-        const {data:userData}=await supabase.auth.getUser();
-        const item={title:String(form.get("title")||"").trim(),description:String(form.get("description")||"").trim()||null,category:String(form.get("category")||"").trim()||null,location:String(form.get("location")||"").trim()||null,photo_url:photo||(form.get("remove_photo")==="on"?"":workshopPhotoUrl)||null,country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,status:form.get("is_published")==="on"?"published":"draft",updated_by:userData.user?.id||null,updated_at:new Date().toISOString()};
-        const query=id?supabase.from("workshops").update(item).eq("id",id):supabase.from("workshops").insert({...item,created_by:userData.user?.id||null});
-        const {error}=await query;
-        if(error)throw error;
-        resetWorkshopForm();await loadIdentityEditors();editorMessage(workshopMessage,"Workshop saved.");
-      }catch(error){editorMessage(workshopMessage,error.message||"Could not save workshop.",true);}
-      finally{button.disabled=false;}
-    });
-    document.querySelector("#workshop-cancel").addEventListener("click",resetWorkshopForm);
-    workshopEditor.elements.photo.addEventListener("change",()=>{const file=workshopEditor.elements.photo.files[0];if(file)previewImage(workshopPhotoPreview,URL.createObjectURL(file));});
-  }
-  function renderProductAdminList(){
-    productItems.replaceChildren();
-    if(!productData.length){addTextElement(productItems,"p","muted","No product types added yet.");return;}
-    productData.forEach(item=>{
-      const row=document.createElement("article");row.className="technician-admin-row";productItems.append(row);
-      addTextElement(row,"strong","",item.name);
-      const groupLabel=item.category_group==="satellite"?"Satellite & TV Equipment":"Mobile & Accessories";
-      addTextElement(row,"span","",[groupLabel,`Type: ${item.category||"—"}`,item.status==="active"?"Published":"Draft"].join(" · "));
-      const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
-      const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
-      edit.addEventListener("click",()=>{
-        productEditor.elements.id.value=item.id;
-        productEditor.elements.name.value=item.name||"";
-        productEditor.elements.category_group.value=item.category_group||"mobile";
-        productEditor.elements.category.value=item.category||"";
-        productEditor.elements.description.value=item.description||"";
-        productEditor.elements.country.value=item.country||"";
-        productPhotoUrl=item.photo_url||"";previewImage(productPhotoPreview,productPhotoUrl);
-        productEditor.elements.is_published.checked=item.status==="active";
-        document.querySelector("#product-form-title").textContent="Edit Product";
-        document.querySelector("#product-cancel").hidden=false;
-      });actions.append(edit);
-      const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";
-      del.addEventListener("click",async()=>{
-        if(!confirm("Delete this product type?"))return;
-        const {error}=await supabase.from("products").delete().eq("id",item.id);
-        if(error){editorMessage(productMessage,error.message,true);return;}
-        productData=productData.filter(x=>x.id!==item.id);renderProductAdminList();
-      });actions.append(del);
-    });
-  }
-  function resetProductForm(){
-    productEditor.reset();productPhotoUrl="";previewImage(productPhotoPreview,"");
-    productEditor.elements.country.value="";
-    productEditor.elements.category_group.value="mobile";
-    document.querySelector("#product-form-title").textContent="Add Product";
-    document.querySelector("#product-cancel").hidden=true;
-  }
-  if(productEditor){
-    productEditor.addEventListener("submit",async event=>{
-      event.preventDefault();
-      const button=document.querySelector("#product-save");button.disabled=true;editorMessage(productMessage,"Saving…");
-      try{
-        const form=new FormData(productEditor);const id=String(form.get("id")||"");
-        const name=String(form.get("name")||"").trim();
-        const description=String(form.get("description")||"").trim();
-        const category=String(form.get("category")||"").trim();
-        const categoryGroup=String(form.get("category_group")||"mobile");
-        if(!["mobile","satellite"].includes(categoryGroup))throw new Error("Select a valid product group.");
-        const photo=await uploadContentPhoto(form.get("photo"),"products");
-        if(!name)throw new Error("Name is required.");
-        const slug=id?(productData.find(x=>x.id===id)?.slug||""):(name.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"product")+"-"+crypto.randomUUID().slice(0,8);
-        const item={slug,name,category_group:categoryGroup,category:category||null,description,photo_url:photo||(id?(productData.find(x=>x.id===id)?.photo_url||null):null),country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,status:form.get("is_published")==="on"?"active":"draft"};
-        const query=id?supabase.from("products").update(item).eq("id",id):supabase.from("products").insert(item);
-        const {error}=await query;if(error)throw error;
-        resetProductForm();await loadIdentityEditors();editorMessage(productMessage,"Product saved.");
-      }catch(error){editorMessage(productMessage,error.message||"Could not save product type.",true);}
-      finally{button.disabled=false;}
-    });
-    document.querySelector("#product-cancel").addEventListener("click",resetProductForm);
-    productEditor.elements.photo.addEventListener("change",()=>{const file=productEditor.elements.photo.files[0];if(file)previewImage(productPhotoPreview,URL.createObjectURL(file));});
-  }
-  function renderServiceAdminList(){
-    serviceItems.replaceChildren();
-    if(!serviceData.length){addTextElement(serviceItems,"p","muted","No services added yet.");return;}
-    serviceData.forEach(item=>{
-      const row=document.createElement("article");row.className="technician-admin-row";serviceItems.append(row);
-      addTextElement(row,"strong","",item.name);
-      addTextElement(row,"span","",[item.category,item.status].filter(Boolean).join(" · "));
-      const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
-      const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
-      edit.addEventListener("click",()=>{serviceEditor.elements.id.value=item.id;serviceEditor.elements.name.value=item.name||"";serviceEditor.elements.description.value=item.description||"";serviceEditor.elements.category.value=item.category||"";serviceEditor.elements.country.value=item.country||"";serviceEditor.elements.is_published.checked=item.status==="active";servicePhotoUrl=item.photo_url||"";previewImage(servicePhotoPreview,servicePhotoUrl);document.querySelector("#service-form-title").textContent="Edit Service";document.querySelector("#service-cancel").hidden=false;});actions.append(edit);
-      const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";
-      del.addEventListener("click",async()=>{if(!confirm("Delete this service?"))return;const {error}=await supabase.from("services").delete().eq("id",item.id);if(error){editorMessage(serviceMessage,error.message,true);return;}serviceData=serviceData.filter(x=>x.id!==item.id);renderServiceAdminList();});actions.append(del);
-    });
-  }
-  function resetServiceForm(){serviceEditor.reset();servicePhotoUrl="";previewImage(servicePhotoPreview,"");serviceEditor.elements.country.value="";document.querySelector("#service-form-title").textContent="Add Service";document.querySelector("#service-cancel").hidden=true;}
-  if(serviceEditor){
-    serviceEditor.addEventListener("submit",async event=>{
-      event.preventDefault();const button=document.querySelector("#service-save");button.disabled=true;editorMessage(serviceMessage,"Saving…");
-      try{
-        const form=new FormData(serviceEditor);const id=String(form.get("id")||"");const name=String(form.get("name")||"").trim();if(!name)throw new Error("Name is required.");
-        const photo=await uploadContentPhoto(form.get("photo"),"services");
-        const slug=id?(serviceData.find(x=>x.id===id)?.slug||""):(name.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48)||"service")+"-"+crypto.randomUUID().slice(0,8);
-        const item={slug,name,description:String(form.get("description")||"").trim(),category:String(form.get("category")||"").trim()||null,country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,photo_url:photo||(id?(serviceData.find(x=>x.id===id)?.photo_url||null):null),status:form.get("is_published")==="on"?"active":"draft"};
-        const query=id?supabase.from("services").update(item).eq("id",id):supabase.from("services").insert(item);const {error}=await query;if(error)throw error;
-        resetServiceForm();await loadIdentityEditors();editorMessage(serviceMessage,"Service saved.");
-      }catch(error){editorMessage(serviceMessage,error.message||"Could not save service.",true);}finally{button.disabled=false;}
-    });
-    document.querySelector("#service-cancel").addEventListener("click",resetServiceForm);
-    serviceEditor.elements.photo.addEventListener("change",()=>{const file=serviceEditor.elements.photo.files[0];if(file)previewImage(servicePhotoPreview,URL.createObjectURL(file));});
-  }
-  function renderTechnicianAdminList(){
-    technicianItems.replaceChildren();
-    if(!technicianData.length){addTextElement(technicianItems,"p","muted","No technicians added yet.");return;}
-    technicianData.forEach(item=>{
-      const row=document.createElement("article");row.className="technician-admin-row";technicianItems.append(row);
-      addTextElement(row,"strong","",item.name);addTextElement(row,"span","",[item.description,item.category].filter(Boolean).join(" · "));
-      const actions=document.createElement("div");actions.className="editor-actions";row.append(actions);
-      const edit=document.createElement("button");edit.type="button";edit.textContent="Edit";
-      edit.addEventListener("click",()=>{technicianEditor.elements.id.value=item.id;technicianEditor.elements.name.value=item.name||"";technicianEditor.elements.description.value=item.description||"";technicianEditor.elements.category.value=item.category||"";technicianEditor.elements.country.value=item.country||"";technicianEditor.elements.phone.value=item.phone||"";technicianEditor.elements.whatsapp.value=item.whatsapp||"";technicianPhotoUrl=item.photo_url||"";previewImage(technicianPhotoPreview,technicianPhotoUrl);document.querySelector("#technician-form-title").textContent="Edit Technician";document.querySelector("#technician-cancel").hidden=false;});actions.append(edit);
-      const del=document.createElement("button");del.type="button";del.className="secondary-button";del.textContent="Delete";
-      del.addEventListener("click",async()=>{if(!confirm("Delete this technician?"))return;const {error}=await supabase.from("technicians").delete().eq("id",item.id);if(error){editorMessage(technicianMessage,error.message,true);return;}technicianData=technicianData.filter(x=>x.id!==item.id);renderTechnicianAdminList();});actions.append(del);
-    });
-  }
-  if(technicianEditor){
-    technicianEditor.addEventListener("submit",async event=>{
-      event.preventDefault();const button=document.querySelector("#technician-save");button.disabled=true;editorMessage(technicianMessage,"Saving…");
-      try{
-        const form=new FormData(technicianEditor);const id=String(form.get("id")||"");const photo=await uploadContentPhoto(form.get("photo"),"technicians");
-        const item={id:id||crypto.randomUUID(),name:String(form.get("name")||"").trim(),description:String(form.get("description")||"").trim()||null,category:String(form.get("category")||"").trim()||null,country:["global","bd","saudi"].includes(String(form.get("country")||""))?String(form.get("country")):null,phone:String(form.get("phone")||"").trim()||null,whatsapp:String(form.get("whatsapp")||"").trim()||null,photo_url:photo||technicianPhotoUrl||null,is_published:true,updated_at:new Date().toISOString()};
-        const {error}=await supabase.from("technicians").upsert(item,{onConflict:"id"});
-        if(error)throw error;
-        technicianData=id?technicianData.map(x=>x.id===id?item:x):[...technicianData,item];
-        technicianEditor.reset();technicianPhotoUrl="";previewImage(technicianPhotoPreview,"");document.querySelector("#technician-form-title").textContent="Add Technician";document.querySelector("#technician-cancel").hidden=true;renderTechnicianAdminList();editorMessage(technicianMessage,"Technician saved.");
-      }catch(error){editorMessage(technicianMessage,error.message||"Could not save technician.",true);}
-      finally{button.disabled=false;}
-    });
-    document.querySelector("#technician-cancel").addEventListener("click",()=>{technicianEditor.reset();technicianPhotoUrl="";previewImage(technicianPhotoPreview,"");document.querySelector("#technician-form-title").textContent="Add Technician";document.querySelector("#technician-cancel").hidden=true;});
-    technicianEditor.elements.photo.addEventListener("change",()=>{const file=technicianEditor.elements.photo.files[0];if(file)previewImage(technicianPhotoPreview,URL.createObjectURL(file));});
-  }
-  loadIdentityEditors();
-}
+document.querySelector('[data-dashboard-tab="audit"]')?.addEventListener("click", () => void loadAuditLogs());
+document.querySelector("#audit-refresh")?.addEventListener("click", () => void loadAuditLogs());

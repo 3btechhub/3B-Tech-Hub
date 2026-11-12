@@ -20,8 +20,11 @@ jobs:
       - name: Validate required website files
         run: |
           test -s site/index.html
-          test -s site/login/index.html
+          test -s site/account/index.html
           test -s site/profile/index.html
+          test -s site/global/index.html
+          test -s site/bd/index.html
+          test -s site/ksa/index.html
           test -s site/dashboard/index.html
           test -s site/assets/style.css
           test -s site/assets/app.js
@@ -38,6 +41,10 @@ jobs:
       - name: Validate static routes and required branding
         run: |
           grep -q "3B TECH HUB" site/index.html
+          ! test -d site/services
+          ! test -d site/products
+          ! test -d site/workshop
+          ! test -d site/technicians
           grep -q "signInWithPassword" site/assets/app.js
           grep -q "resetPasswordForEmail" site/assets/app.js
           ! grep -R -E "SUPABASE_SECRET_KEY|service_role" site

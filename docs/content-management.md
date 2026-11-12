@@ -1,30 +1,20 @@
-# Catalogue and Content Management
+# Page Management
 
-## Live catalogue modules
-The GitHub Pages frontend reads public active records from Supabase and the Owner dashboard manages:
-- Services
-- Products
-- Workshops
-- Technicians
+The only content management system is the Page module defined in [master-spec.md](master-spec.md).
 
-All writes must be protected by Supabase RLS. Hiding controls in the browser is not an authorization boundary.
+## Page hierarchy
 
-## Product data model
-- Group: `mobile` (Mobile & Accessories) or `satellite` (Satellite & TV Equipment).
-- Product type/name: e.g. Phone Glass Protector.
-- Country: `bd`, `saudi`, `global` or null where allowed.
-- Status: active, draft or archived according to the table schema.
-- The public catalogue initially shows four cards; the More control reveals the next four without hiding already-visible cards.
+- Main Page: a top-level dynamic page.
+- Sub Page: belongs to exactly one Main Page.
+- Sub Pages cannot be published unless their parent Main Page is published.
+- URL slugs are lowercase, URL-safe values.
+- The browser renders only registered, allowlisted component types. Stored content must never be treated as executable HTML or JavaScript.
 
-## Service country routing
-Bangladesh: TV Repair, Mobile Repair, Mobile Parts Sell.
-Saudi Arabia: Satellite Dish Installation, Satellite Dish Servicing, Satellite Dish Parts Sell.
+## Publishing and access
 
-## Publishing rules
-- Public visitors see active/published records only.
-- Owner-only CRUD is enforced by RLS.
-- Preserve the six approved service records and their country assignments.
-- Product records represent categories/types, not individual stock products.
+- Visitors and Members can read published pages.
+- Admin and Owner can manage pages according to RLS.
+- Page CRUD, publication status, hierarchy and revisions are enforced by Supabase policies and database constraints.
+- Global, BD and KSA visibility follows the country rules in the master specification.
 
-## Remaining CMS work
-A full page builder, revisions/approval workflow, website settings editor and dedicated media library are not part of the live static release. Build them only against Supabase and with tested RLS/Edge Function authorization.
+No separate Services, Products, Workshops, Technicians, Media Library, Booking or catalogue management module is permitted.
