@@ -39,5 +39,4 @@ The database stores content and validated configuration only. It never stores ex
 - GitHub Actions runs the syntax, regression and browser checks before allowing Pages deployment.
 
 ## Remaining work
-1. Run the PR checks and fix any failures.
-2. Verify live navigation and deep links in a real browser after an authorized deployment.
+1. Verify the live Supabase-backed navigation and dynamic deep links in the production browser after an authorized merge and deployment.
