@@ -8,7 +8,8 @@ const titles = { home:"3B TECH HUB", account:"Account | 3B TECH HUB", profile:"M
 function normalizedPath(value) {
   const url = new URL(value, window.location.origin);
   let path = url.pathname;
-  if (path === BASE.slice(0, -1)) path = BASE;
+  if (path === BASE.slice(0, -1)) path = BASE + "home/";
+  if (path === BASE) path = BASE + "home/";
   if (!path.startsWith(BASE)) return null;
   return (path.endsWith("/") ? path : path + "/") + url.search + url.hash;
 }
@@ -76,7 +77,7 @@ document.addEventListener("click", (event) => {
 });
 window.addEventListener("popstate", () => { void renderRoute(window.location.pathname + window.location.search).catch((error) => { console.error("Website route could not be rendered.", error); main.textContent = "This page could not be loaded. Please refresh and try again."; }); });
 const routeParam = new URLSearchParams(window.location.search).get("route");
-const initialPath = normalizedPath(routeParam || (window.location.pathname + window.location.search + window.location.hash)) || BASE;
+const initialPath = normalizedPath(routeParam || (window.location.pathname + window.location.search + window.location.hash)) || (BASE + "home/");
 try {
   await renderRoute(initialPath, { replace:true });
 } catch (error) {
