@@ -15,6 +15,14 @@ const LAYOUT_VARIABLES = Object.freeze({
 });
 
 const COLOR_KEYS = new Set(Object.keys(THEME_VARIABLES));
+
+function isMonochromeHex(value) {
+  if (typeof value !== "string" || !/^#[0-9a-f]{3,8}$/i.test(value)) return false;
+  let hex = value.slice(1);
+  if (hex.length === 3 || hex.length === 4) hex = [...hex.slice(0, 3)].map(char => char + char).join("");
+  else hex = hex.slice(0, 6);
+  return hex.slice(0, 2) === hex.slice(2, 4) && hex.slice(2, 4) === hex.slice(4, 6);
+}
 const LENGTH_KEYS = new Set(Object.keys(LAYOUT_VARIABLES));
 
 function isPlainObject(value) {
@@ -26,8 +34,7 @@ export function isSafeRuntimeValue(key, value) {
   if (/[;{}<>\\]|url\s*\(|expression\s*\(|javascript:/i.test(value)) return false;
 
   if (COLOR_KEYS.has(key)) {
-    return /^#[0-9a-f]{3,8}$/i.test(value)
-      || /^(?:rgb|rgba|hsl|hsla)\([0-9\s.,%/]+\)$/i.test(value);
+    return isMonochromeHex(value);
   }
 
   if (LENGTH_KEYS.has(key)) {
