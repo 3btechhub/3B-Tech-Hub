@@ -9,10 +9,12 @@ function normalizedPath(value) {
   const url = new URL(value, window.location.origin);
   let path = url.pathname;
   if (path === BASE.slice(0, -1)) path = BASE;
-  return path.startsWith(BASE) ? (path.endsWith("/") ? path : path + "/") : null;
+  if (!path.startsWith(BASE)) return null;
+  return (path.endsWith("/") ? path : path + "/") + url.search + url.hash;
 }
 function routeDetails(path) {
-  const first = path.slice(BASE.length).split("/").filter(Boolean)[0] || "";
+  const pathname = new URL(path, window.location.origin).pathname;
+  const first = pathname.slice(BASE.length).split("/").filter(Boolean)[0] || "";
   if (!first || ["global","bd","ksa","saudi"].includes(first)) {
     return { view:"home", region:first === "saudi" ? "ksa" : ["global","bd","ksa"].includes(first) ? first : window.siteCountry?.region || "global" };
   }
