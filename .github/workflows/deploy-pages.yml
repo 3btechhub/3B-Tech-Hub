@@ -27,7 +27,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate static website files
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate website files and regression tests
         run: |
           test -s site/index.html
           test -s site/login/index.html
@@ -35,8 +38,9 @@ jobs:
           test -s site/dashboard/index.html
           test -s site/assets/style.css
           test -s site/assets/app.js
+          test -s site/assets/dynamic-navigation.js
           test -s site/404.html
-          node --input-type=module --check < site/assets/app.js
+          npm run validate
           grep -q "3B TECH HUB" site/index.html
 
   deploy:

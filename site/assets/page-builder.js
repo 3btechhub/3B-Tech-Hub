@@ -49,7 +49,7 @@ if (root) {
     return node;
   }
   function slugify(value) {
-    return value.toLowerCase().normalize("NFKD").replace(/[\\u0300-\\u036f]/g, "")
+    return value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 70);
   }
   async function authorize() {
@@ -371,7 +371,7 @@ if (root) {
     <div class="page-builder-layout">
       <section class="page-builder-column">
         <h2>Pages</h2>
-        <p class="muted">Create and manage Main Pages and their Sub Pages.</p>
+        <p class="muted">Create and manage Main Pages and their Sub Pages. Published pages appear automatically in the matching-language site menu; Draft and Archived pages stay hidden.</p>
         <div id="page-list"></div>
       </section>
       <section class="page-builder-column">

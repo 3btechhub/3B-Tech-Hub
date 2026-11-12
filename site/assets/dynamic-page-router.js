@@ -29,7 +29,7 @@ function setNotFound(main) {
 }
 
 export async function renderDynamicRoute(supabase) {
-  const main = document.querySelector("main.home-main");
+  const main = document.querySelector("main.dynamic-page-main, main.home-main");
   if (!main || !supabase) return false;
 
   const segments = normalizedSegments(location.pathname);
@@ -56,7 +56,11 @@ export async function renderDynamicRoute(supabase) {
     }
 
     const { data: page, error } = await pageQuery.maybeSingle();
-    if (error || !page) return false;
+    if (error) throw error;
+    if (!page) {
+      if (main.classList.contains("dynamic-page-main")) setNotFound(main);
+      return false;
+    }
 
     const { data: components, error: componentError } = await supabase.from("page_components")
       .select("id,slot,component_type,component_config,sort_order,is_visible")

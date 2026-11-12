@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   validate-static-site:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,11 +25,16 @@ jobs:
           test -s site/dashboard/index.html
           test -s site/assets/style.css
           test -s site/assets/app.js
+          test -s site/assets/dynamic-navigation.js
           test -s site/404.html
-      - name: Validate JavaScript syntax
-        run: node --input-type=module --check < site/assets/app.js
-      - name: Run regression and syntax checks
+      - name: Validate JavaScript syntax and regression tests
         run: npm run validate
+      - name: Install pinned browser test runner
+        run: npm install --no-save --package-lock=false playwright@1.56.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser navigation test
+        run: node --test tests/browser-navigation.e2e.cjs
       - name: Validate static routes and required branding
         run: |
           grep -q "3B TECH HUB" site/index.html

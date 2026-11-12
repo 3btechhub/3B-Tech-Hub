@@ -743,3 +743,10 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 #page-builder-message{margin-top:18px}
 @media(max-width:850px){.page-builder-layout{grid-template-columns:1fr}}
 @media(max-width:520px){.page-builder-two{grid-template-columns:1fr}.page-builder-page-row{align-items:flex-start;flex-direction:column}}
+
+
+/* Database-driven navigation */
+.menu-dynamic-pages{display:grid;gap:4px}
+.menu-dynamic-page-group{display:grid;gap:3px}
+.menu-dynamic-pages .menu-sub-link{padding-inline-start:28px;font-size:.94em;opacity:.9}
+.menu-dynamic-pages a[aria-current="page"]{font-weight:700}
