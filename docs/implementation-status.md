@@ -27,7 +27,8 @@ See [master-spec.md](master-spec.md). This is the only allowed website specifica
 - [ ] Verify the Owner Edge Function and dashboard flows with the new role model.
 - [ ] Verify the Page Builder and Audit module in a browser.
 - [ ] Verify IP routing, manual route selection, all three language defaults, language switching and Arabic RTL.
-- [ ] Run `npm run validate`, browser tests and GitHub Actions.
+- [x] `npm run validate` and the dynamic-page browser navigation test pass in GitHub Actions (CI run 990).
+- [ ] Browser verification of IP routing, language switching, Page Builder, Audit and account/profile flows remains pending.
 - [ ] Review the final diff and create a pull request; do not merge until all required checks pass.
 
 ## Data safety note
