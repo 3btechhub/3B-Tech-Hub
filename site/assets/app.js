@@ -75,7 +75,10 @@ if (languageSelect) {
   const changeLanguage = () => {
     applyLanguage(languageSelect.value);
     applyTheme(document.documentElement.dataset.theme);
-    if (supabase) void renderDynamicNavigation(supabase);
+    if (supabase) {
+      void renderDynamicRoute(supabase);
+      void renderDynamicNavigation(supabase);
+    }
   };
   languageSelect.addEventListener("change", changeLanguage);
   languageSelect.addEventListener("input", changeLanguage);
