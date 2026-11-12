@@ -32,7 +32,7 @@
 
     const update = () => {
       const selected = select.options[select.selectedIndex];
-      trigger.textContent = title + ": " + (selected ? selected.textContent.replace(/^(Language|Country):\\s*/, "") : "");
+      trigger.textContent = title + ": " + (selected ? selected.textContent.replace(/^(Language|Country):\s*/, "") : "");
       panel.querySelectorAll("button").forEach((option) => {
         const active = option.dataset.value === select.value;
         option.setAttribute("aria-pressed", String(active));
@@ -44,7 +44,7 @@
       const item = document.createElement("button");
       item.type = "button";
       item.className = "menu-dropdown-option";
-      item.textContent = option.textContent.replace(/^(Language|Country):\\s*/, "");
+      item.textContent = option.textContent.replace(/^(Language|Country):\s*/, "");
       item.dataset.value = option.value;
       item.addEventListener("click", () => {
         select.value = option.value;
