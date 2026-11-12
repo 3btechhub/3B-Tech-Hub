@@ -71,7 +71,7 @@ if (root) {
   function renderParentOptions() {
     const select = $("#page-parent");
     select.replaceChildren(el("option", { value: "" }, "Select Main Page"));
-    pages.filter(page => page.page_type === "main").forEach(page => {
+    pages.filter(page => page.page_type === "main" && page.locale === $("#page-locale").value).forEach(page => {
       const option = el("option", { value: page.id }, page.title + " · " + page.locale);
       select.append(option);
     });
@@ -92,9 +92,22 @@ if (root) {
       if (page.status === "published") actions.append(button("Unpublish", () => changeStatus(page, "draft"), true));
       else actions.append(button("Publish", () => changeStatus(page, "published")));
       actions.append(button("Archive", () => changeStatus(page, "archived"), true));
+      actions.append(button("Delete", () => deletePage(page), true));
       row.append(actions);
       list.append(row);
     });
+  }
+  async function deletePage(page) {
+    const childCount = pages.filter(item => item.parent_id === page.id).length;
+    if (childCount) return message("Delete or move this page’s Sub Pages first.", true);
+    if (!confirm("Permanently delete “" + page.title + "” and its components and revision history?")) return;
+    try {
+      const { error } = await supabase.from("pages").delete().eq("id", page.id);
+      if (error) throw error;
+      if (selectedPage?.id === page.id) resetPageForm();
+      await loadPages();
+      message("Page deleted.");
+    } catch (error) { message(error.message || "Could not delete page.", true); }
   }
   function resetPageForm() {
     $("#page-form").reset();
@@ -396,6 +409,7 @@ if (root) {
   `;
 
   $("#page-type").addEventListener("change", renderParentOptions);
+  $("#page-locale").addEventListener("change", renderParentOptions);
   $("#page-title").addEventListener("input", () => { if (!$("#page-id").value) $("#page-slug").value = slugify($("#page-title").value); });
   $("#page-form").addEventListener("submit", savePage);
   $("#page-cancel").addEventListener("click", resetPageForm);
