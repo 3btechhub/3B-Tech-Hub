@@ -724,3 +724,22 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 .dynamic-faq p{margin:10px 0 0;color:var(--muted);line-height:1.65;white-space:pre-line}
 .dynamic-spacer{width:100%;pointer-events:none}
 @media(max-width:520px){.dynamic-page-main{padding:20px 14px 36px;gap:16px}.dynamic-hero,.dynamic-rich-text,.dynamic-card,.dynamic-faq{padding:15px;border-radius:12px}}
+
+
+/* Owner/Admin Page Builder */
+.page-builder-layout{display:grid;grid-template-columns:minmax(260px,.8fr) minmax(0,1.4fr);gap:22px;align-items:start}
+.page-builder-column,.page-builder-subsection{min-width:0}
+.page-builder-column>h2,.page-builder-subsection h3{margin-top:0}
+.page-builder-page-row{align-items:center;gap:12px}
+.page-builder-page-row>div:first-child{display:grid;gap:5px;min-width:0}
+.page-builder-page-row .muted{overflow-wrap:anywhere}
+.page-builder-field{display:grid;gap:7px;min-width:0;margin:12px 0;font-weight:600}
+.page-builder-field>span{font-size:14px}
+.page-builder-field input,.page-builder-field select,.page-builder-field textarea{width:100%;min-width:0;box-sizing:border-box}
+.page-builder-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.page-builder-subsection{margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
+#page-builder-root details{margin:14px 0}
+#page-builder-root summary{cursor:pointer;font-weight:650}
+#page-builder-message{margin-top:18px}
+@media(max-width:850px){.page-builder-layout{grid-template-columns:1fr}}
+@media(max-width:520px){.page-builder-two{grid-template-columns:1fr}.page-builder-page-row{align-items:flex-start;flex-direction:column}}
