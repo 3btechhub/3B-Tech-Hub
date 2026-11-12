@@ -1,4 +1,5 @@
 import { filterProductsForRegion, getNextVisibleCount } from "./product-catalog.js";
+import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
 
 await window.countryContextReady;
 
@@ -51,9 +52,12 @@ function applyLanguage(language) {
   if (languageSelect) languageSelect.value = lang;
   localStorage.setItem(languageStorageKey, lang);
 }
+let runtimeConfig = null;
+
 function applyTheme(theme) {
   const dark = theme === "dark";
   document.documentElement.dataset.theme = dark ? "dark" : "light";
+  applyRuntimeConfig(runtimeConfig, dark ? "dark" : "light");
   if (themeToggle) {
     const themeIcon = themeToggle.querySelector(".theme-icon");
     if (themeIcon) themeIcon.textContent = dark ? "☀" : "☾";
@@ -113,6 +117,8 @@ async function setMenuSession(session) {
 // Load authentication separately so a Supabase CDN issue cannot disable the menu.
 const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
 supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+runtimeConfig = await loadRuntimeConfig(supabase);
+applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 
 async function applyPublicSiteSettings() {
   if (document.querySelector("#owner-dashboard")) return;
