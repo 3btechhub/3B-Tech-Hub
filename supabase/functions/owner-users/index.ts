@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const allowedOrigins = new Set(["https://3btechhub.github.io"]);
 const allowedRoles = new Set(["admin", "member"]);
 const primaryOwnerEmail = "3btechhub@gmail.com";
-const redirectTo = "https://3btechhub.github.io/3btechhub/login/";
+const redirectTo = "https://3btechhub.github.io/3btechhub/account/";
 
 function response(body: unknown, status: number, origin: string | null) {
   const headers: Record<string, string> = {
