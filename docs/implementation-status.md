@@ -7,7 +7,7 @@ See [master-spec.md](master-spec.md). The website is one English-only site with 
 
 ## Completed
 - [x] Removed IP/country detection and country context bootstrap from the frontend.
-- [x] Replaced country-aware routing with one `/home/` Home route and the approved Account, Profile and Dashboard routes. Root `/` redirects to `/home/`. Root `/` redirects to `/home/`.
+- [x] Replaced country-aware routing with one `/home/` Home route and the approved Account, Profile and Dashboard routes. Root `/` redirects to `/home/`.
 - [x] Removed language and country selectors from the shared menu and 404 page.
 - [x] Fixed the document language to English and direction to LTR.
 - [x] Removed country filters and country fields from frontend content-module forms and catalogue queries.
