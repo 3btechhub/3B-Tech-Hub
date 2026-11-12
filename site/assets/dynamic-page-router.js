@@ -6,12 +6,14 @@ const RESERVED_ROOTS = new Set([
 ]);
 const ROOT_PATH = new URL("../", import.meta.url).pathname.replace(/\/$/, "");
 
-export function normalizedSegments(pathname) {
-  if (typeof pathname !== "string") return [];
-  if (pathname === ROOT_PATH || pathname === ROOT_PATH + "/") return [];
-  if (!pathname.startsWith(ROOT_PATH + "/")) return [];
+export function normalizedSegments(pathname, rootPath = ROOT_PATH) {
+  if (typeof pathname !== "string" || typeof rootPath !== "string") return [];
+  const basePath = rootPath.replace(/\/+$/, "") || "/";
+  if (pathname === basePath || pathname === basePath + "/") return [];
+  if (!pathname.startsWith(basePath === "/" ? "/" : basePath + "/")) return [];
 
-  const rawSegments = pathname.slice(ROOT_PATH.length + 1).split("/").filter(Boolean);
+  const relativePath = basePath === "/" ? pathname.slice(1) : pathname.slice(basePath.length + 1);
+  const rawSegments = relativePath.split("/").filter(Boolean);
   if (rawSegments.length < 1 || rawSegments.length > 2) return [];
 
   let segments;
