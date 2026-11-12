@@ -29,6 +29,7 @@ test("published Main/Sub Pages render as grouped navigation links in a real brow
   });
   await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
   origin = "http://127.0.0.1:" + server.address().port;
+  try {
   browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
   const errors = [];
@@ -51,6 +52,8 @@ test("published Main/Sub Pages render as grouped navigation links in a real brow
   assert.equal(await page.locator("#preview img").count(), 0);
   assert.deepEqual(errors, []);
 
-  await browser.close();
-  await new Promise(resolve => server.close(resolve));
+  } finally {
+    if (browser) await browser.close();
+    if (server) await new Promise(resolve => server.close(resolve));
+  }
 });
