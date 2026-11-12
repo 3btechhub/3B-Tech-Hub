@@ -68,7 +68,7 @@ if (root) {
   }
   async function loadPages() {
     const { data, error } = await supabase.from("pages")
-      .select("id,parent_id,page_type,slug,title,description,locale,country,status,sort_order,seo,created_at,updated_at")
+      .select("id,parent_id,page_type,slug,title,description,locale,country,status,visibility,location,phone_number,whatsapp_number,email,image_url,sort_order,seo,created_at,updated_at")
       .order("page_type").order("sort_order").order("title");
     if (error) throw error;
     pages = data || [];
@@ -141,6 +141,12 @@ if (root) {
     $("#page-title").value = page.title;
     $("#page-slug").value = page.slug;
     $("#page-description").value = page.description || "";
+    $("#page-location").value = page.location || "";
+    $("#page-phone").value = page.phone_number || "";
+    $("#page-whatsapp").value = page.whatsapp_number || "";
+    $("#page-email").value = page.email || "";
+    $("#page-image").value = page.image_url || "";
+    $("#page-visibility").checked = Boolean(page.visibility);
     $("#page-locale").value = page.locale;
     $("#page-country").value = page.country || "global";
     $("#page-status").value = page.status;
@@ -217,6 +223,9 @@ if (root) {
       if (type === "main" && reserved.has(slug)) throw new Error("This URL is reserved for an existing website route.");
       const existing = pages.find(item => item.id === id);
       const payload = { page_type: type, parent_id: parentId, title, slug, description: $("#page-description").value.trim(),
+        location: $("#page-location").value.trim() || null, phone_number: $("#page-phone").value.trim() || null,
+        whatsapp_number: $("#page-whatsapp").value.trim() || null, email: $("#page-email").value.trim() || null,
+        image_url: $("#page-image").value.trim() || null, visibility: $("#page-visibility").checked,
         locale: $("#page-locale").value, country: $("#page-country").value, status: $("#page-status").value, sort_order: Number($("#page-order").value || 0),
         seo: { title: $("#page-seo-title").value.trim(), description: $("#page-seo-description").value.trim() },
         updated_by: currentUser.id, updated_at: new Date().toISOString() };
@@ -388,10 +397,15 @@ if (root) {
           <input type="hidden" id="page-id">
           <label class="page-builder-field"><span>Page Type</span><select id="page-type"><option value="main">Main Page</option><option value="sub">Sub Page</option></select></label>
           <label class="page-builder-field"><span>Parent Main Page</span><select id="page-parent"><option value="">Select Main Page</option></select></label>
-          <label class="page-builder-field"><span>Page Title</span><input id="page-title" maxlength="180" required></label>
+          <label class="page-builder-field"><span>Title (required)</span><input id="page-title" maxlength="180" required></label>
           <label class="page-builder-field"><span>URL Slug (English letters, numbers, hyphens)</span><input id="page-slug" maxlength="80" placeholder="about-us"></label>
           <label class="page-builder-field"><span>Description</span><textarea id="page-description" rows="3" maxlength="2000"></textarea></label>
-          <label class="page-builder-field"><span>Country Route</span><select id="page-country"><option value="global">Global</option><option value="bd">Bangladesh</option><option value="ksa">Saudi Arabia</option></select></label>
+          <label class="page-builder-field"><span>Country (required)</span><select id="page-country" required><option value="global" selected>Global</option><option value="bd">Bangladesh</option><option value="ksa">Saudi Arabia</option></select></label>
+          <label class="page-builder-field"><span>Location</span><input id="page-location" maxlength="180"></label>
+          <div class="page-builder-two"><label class="page-builder-field"><span>Phone Number</span><input id="page-phone" type="tel" maxlength="40"></label><label class="page-builder-field"><span>WhatsApp Number</span><input id="page-whatsapp" type="tel" maxlength="40"></label></div>
+          <label class="page-builder-field"><span>Email</span><input id="page-email" type="email" maxlength="180"></label>
+          <label class="page-builder-field"><span>Image URL</span><input id="page-image" type="url" maxlength="1000" placeholder="https://"></label>
+          <label class="page-builder-field page-visibility-field"><input id="page-visibility" type="checkbox"><span>Visible on Home Page</span></label>
           <div class="page-builder-two">
             <label class="page-builder-field"><span>Language</span><select id="page-locale"><option value="en">English</option><option value="bn">বাংলা</option><option value="ar">العربية</option></select></label>
             <label class="page-builder-field"><span>Status</span><select id="page-status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
