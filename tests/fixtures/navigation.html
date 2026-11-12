@@ -5,12 +5,12 @@
 <script type="module">
 import { renderDynamicNavigation } from "/3btechhub/assets/dynamic-navigation.js";
 const rows = [
- {id:"m1",parent_id:null,page_type:"main",slug:"about-us",title:"About Us",locale:"en",status:"published",sort_order:2,show_in_navigation:true},
- {id:"s1",parent_id:"m1",page_type:"sub",slug:"our-team",title:"Our Team",locale:"en",status:"published",sort_order:1,show_in_navigation:true},
- {id:"m2",parent_id:null,page_type:"main",slug:"services",title:"Reserved Collision",locale:"en",status:"published",sort_order:1,show_in_navigation:true},
- {id:"m3",parent_id:null,page_type:"main",slug:"contact",title:"Contact",locale:"en",status:"draft",sort_order:3,show_in_navigation:true}
+ {id:"m1",parent_id:null,page_type:"main",slug:"about-us",title:"About Us",locale:"en",status:"published",sort_order:2},
+ {id:"s1",parent_id:"m1",page_type:"sub",slug:"our-team",title:"Our Team",locale:"en",status:"published",sort_order:1},
+ {id:"m2",parent_id:null,page_type:"main",slug:"services",title:"Reserved Collision",locale:"en",status:"published",sort_order:1},
+ {id:"m3",parent_id:null,page_type:"main",slug:"contact",title:"Contact",locale:"en",status:"draft",sort_order:3}
 ];
-const supabase = { from(){ return { select(){return this;}, eq(){return this;}, order(){return this;}, then(resolve){resolve({data:rows.filter(x=>x.status==="published"&&x.show_in_navigation),error:null});} }; } };
+const supabase = { from(){ return { select(){return this;}, eq(){return this;}, order(){return this;}, then(resolve){resolve({data:rows.filter(x=>x.status==="published"),error:null});} }; } };
 await renderDynamicNavigation(supabase);
 document.documentElement.dataset.testReady = "true";
 </script></body></html>
