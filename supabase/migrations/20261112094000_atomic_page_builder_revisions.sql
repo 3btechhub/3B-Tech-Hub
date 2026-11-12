@@ -5,7 +5,7 @@ create or replace function public.capture_page_revision(p_page_id uuid)
 returns uuid
 language plpgsql
 security definer
-set search_path = public, private, auth, pg_temp
+set search_path = ''
 as $$
 declare
   v_page public.pages%rowtype;
@@ -78,7 +78,7 @@ create or replace function public.restore_page_revision(p_revision_id uuid)
 returns void
 language plpgsql
 security definer
-set search_path = public, private, auth, pg_temp
+set search_path = ''
 as $$
 declare
   v_revision public.page_revisions%rowtype;
@@ -153,7 +153,7 @@ create or replace function public.reorder_page_components(
 returns void
 language plpgsql
 security definer
-set search_path = public, private, auth, pg_temp
+set search_path = ''
 as $$
 declare
   v_expected_count integer;
