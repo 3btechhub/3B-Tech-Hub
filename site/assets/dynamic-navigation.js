@@ -64,7 +64,7 @@ export async function renderDynamicNavigation(supabase) {
   const countries = region === "global" ? ["global"] : ["global", region];
   const { data, error } = await supabase.from("pages")
     .select("id,parent_id,page_type,slug,title,locale,country,status,sort_order")
-    .eq("locale", locale).eq("status", "published").in("country", countries)
+    .in("locale", locale === "en" ? ["en"] : [locale, "en"]).eq("status", "published").in("country", countries)
     .order("sort_order", { ascending: true }).order("title", { ascending: true });
   if (error) {
     section.hidden = true;
