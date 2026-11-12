@@ -1,6 +1,7 @@
 import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
 import { renderDynamicRoute } from "./dynamic-page-router.js";
 import { renderDynamicNavigation } from "./dynamic-navigation.js";
+import { renderHomeSections } from "./home-sections.js";
 
 await window.countryContextReady;
 
@@ -79,6 +80,7 @@ if (languageSelect) {
     if (supabase) {
       void renderDynamicRoute(supabase);
       void renderDynamicNavigation(supabase);
+void renderHomeSections(supabase);
     }
   };
   languageSelect.addEventListener("change", changeLanguage);
