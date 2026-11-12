@@ -13,7 +13,7 @@ This document is the sole product-scope authority for the website. Production UI
 - Main Area
 - Footer
 
-The Header, Main Area and Footer form one persistent shared layout. One global renderer resolves the approved pages and swaps only the Main Area view. Page markup is stored once under `site/views/`; the Home page is served at `/home/`.
+The Header, Main Area and Footer form one persistent shared layout. The root entry (`/`) loads this shared layout; its Main Area initially displays the independent Home page. The Home page has its own canonical route (`/home/`), view file and static route entry, just like Account, Profile and Dashboard. Navigation swaps only the Main Area while Header and Footer remain mounted. Each page view is maintained once under `site/views/`.
 
 ## 3. Features
 - Separate Logo and Website Title components
@@ -67,10 +67,10 @@ Visitor is the anonymous/public access level and does not need a Supabase Auth r
 - Account: `/account/`
 - Profile: `/profile/`
 - Dashboard: `/dashboard/`
-- `/` redirects to `/home/`.
+- `/` is the shared-layout entry point and resolves to the independent Home page at `/home/`; it is not a separate content page.
 - `/login/` remains a compatibility alias for Account.
 
-These are normal page routes within one website, not country-specific website versions. The Header and Footer remain mounted while the Main Area changes.
+All four are independent page routes within one website. The Header and Footer remain mounted while the Main Area changes.
 
 ## 7. Language
 - The entire website is permanently English.
