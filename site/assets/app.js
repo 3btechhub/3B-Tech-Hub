@@ -1,20 +1,10 @@
 import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
-
-await window.countryContextReady;
-
-// Make country context available before the rest of the application runs.
-const activeCountry = window.siteCountry;
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const accountMenuLink = document.querySelector("#login-menu-link");
 const dashboardMenuLink = document.querySelector("#dashboard-menu-link");
 const themeToggle = document.querySelector("#theme-toggle");
-const languageSelect = document.querySelector("#language-select");
-const regionSelect = document.querySelector("#region-select");
 const savedTheme = localStorage.getItem("3b-theme");
-let routeDefaultLanguage = activeCountry.region === "bd" ? "bn" : activeCountry.region === "ksa" ? "ar" : "en";
-let languageStorageKey = "3b-language-" + activeCountry.region;
-const savedLanguage = localStorage.getItem(languageStorageKey) || routeDefaultLanguage;
 document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
 function addTextElement(parent, tag, className, value) {
   const node = document.createElement(tag);
@@ -24,33 +14,15 @@ function addTextElement(parent, tag, className, value) {
   return node;
 }
 
-const translations = {
-  en: {home:"Home",profile:"Profile",login:"Account",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode",overview:"Overview",services:"Services",products:"Products",workshops:"Workshops",technicians:"Technicians",audit:"Audit",user:"User",role:"Role",permission:"Permission",settings:"Settings",users:"Users",refresh:"Refresh",auditHistory:"Audit History",inviteUser:"Invite User",userType:"User Type",emailAddress:"Email Address",sendInvitation:"Send Invitation",refreshUsers:"Refresh Users",userList:"User List",roleAssignments:"Role Assignments",permissionMatrix:"Permission Matrix",websiteSettings:"Website Settings",websiteTitle:"Website Title",logoUrl:"Logo URL (optional)",saveSettings:"Save Settings",signIn:"Sign In",forgotPassword:"Forgot password?",createAccount:"Create account",verificationCode:"Verification Code",name:"Name",email:"Email",phoneNumber:"Phone Number",password:"Password",changePassword:"Change Password",edit:"Edit",currentPassword:"Current Password",newPassword:"New Password",confirmPassword:"Confirm New Password",updatePassword:"Update Password",verifyCodeReset:"Verify Code & Reset Password",loginAccount:"Login Account"},
-  bn: {home:"হোম",profile:"প্রোফাইল",login:"অ্যাকাউন্ট",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন",overview:"ওভারভিউ",services:"সার্ভিস",products:"প্রোডাক্ট",workshops:"ওয়ার্কশপ",technicians:"টেকনিশিয়ান",audit:"অডিট",user:"ব্যবহারকারী",role:"ভূমিকা",permission:"অনুমতি",settings:"সেটিংস",users:"ব্যবহারকারী",refresh:"রিফ্রেশ",auditHistory:"অডিট ইতিহাস",inviteUser:"ব্যবহারকারী আমন্ত্রণ",userType:"ব্যবহারকারীর ধরন",emailAddress:"ইমেইল ঠিকানা",sendInvitation:"আমন্ত্রণ পাঠান",refreshUsers:"ব্যবহারকারী রিফ্রেশ",userList:"ব্যবহারকারী তালিকা",roleAssignments:"ভূমিকা বরাদ্দ",permissionMatrix:"অনুমতি তালিকা",websiteSettings:"ওয়েবসাইট সেটিংস",websiteTitle:"ওয়েবসাইটের শিরোনাম",logoUrl:"লোগোর URL (ঐচ্ছিক)",saveSettings:"সেটিংস সংরক্ষণ",signIn:"লগইন",forgotPassword:"পাসওয়ার্ড ভুলে গেছেন?",createAccount:"অ্যাকাউন্ট তৈরি করুন",verificationCode:"যাচাইকরণ কোড",name:"নাম",email:"ইমেইল",phoneNumber:"ফোন নম্বর",password:"পাসওয়ার্ড",changePassword:"পাসওয়ার্ড পরিবর্তন",edit:"সম্পাদনা",currentPassword:"বর্তমান পাসওয়ার্ড",newPassword:"নতুন পাসওয়ার্ড",confirmPassword:"নতুন পাসওয়ার্ড নিশ্চিত করুন",updatePassword:"পাসওয়ার্ড আপডেট",verifyCodeReset:"কোড যাচাই করে পাসওয়ার্ড রিসেট",loginAccount:"অ্যাকাউন্টে লগইন"},
-  ar: {home:"الرئيسية",profile:"الملف الشخصي",login:"الحساب",logout:"تسجيل الخروج",dashboard:"لوحة التحكم",accountLogin:"تسجيل الدخول إلى الحساب",dark:"تفعيل الوضع الداكن",light:"تفعيل الوضع الفاتح",overview:"نظرة عامة",services:"الخدمات",products:"المنتجات",workshops:"ورش العمل",technicians:"الفنيون",audit:"التدقيق",user:"المستخدم",role:"الدور",permission:"الصلاحيات",settings:"الإعدادات",users:"المستخدمون",refresh:"تحديث",auditHistory:"سجل التدقيق",inviteUser:"دعوة مستخدم",userType:"نوع المستخدم",emailAddress:"البريد الإلكتروني",sendInvitation:"إرسال الدعوة",refreshUsers:"تحديث المستخدمين",userList:"قائمة المستخدمين",roleAssignments:"تعيين الأدوار",permissionMatrix:"مصفوفة الصلاحيات",websiteSettings:"إعدادات الموقع",websiteTitle:"عنوان الموقع",logoUrl:"رابط الشعار (اختياري)",saveSettings:"حفظ الإعدادات",signIn:"تسجيل الدخول",forgotPassword:"هل نسيت كلمة المرور؟",createAccount:"إنشاء حساب",verificationCode:"رمز التحقق",name:"الاسم",email:"البريد الإلكتروني",phoneNumber:"رقم الهاتف",password:"كلمة المرور",changePassword:"تغيير كلمة المرور",edit:"تعديل",currentPassword:"كلمة المرور الحالية",newPassword:"كلمة المرور الجديدة",confirmPassword:"تأكيد كلمة المرور الجديدة",updatePassword:"تحديث كلمة المرور",verifyCodeReset:"تحقق من الرمز وأعد تعيين كلمة المرور",loginAccount:"تسجيل الدخول إلى الحساب"}
-};
-function applyLanguage(language) {
-  const lang = ["bn", "ar"].includes(language) ? language : "en";
-  document.documentElement.lang = lang;
-  document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-  document.querySelectorAll("[data-label]").forEach((element) => {
-    const key = element.dataset.label;
-    if (translations[lang][key]) element.textContent = translations[lang][key];
-  });
-  document.querySelectorAll("[data-placeholder]").forEach((element) => {
-    const value = translations[lang][element.dataset.placeholder];
-    if (value) element.placeholder = value;
-  });
-  document.querySelectorAll("[data-aria-label]").forEach((element) => {
-    const value = translations[lang][element.dataset.ariaLabel];
-    if (value) element.setAttribute("aria-label", value);
-  });
-  if (languageSelect) languageSelect.value = lang;
-  localStorage.setItem(languageStorageKey, lang);
-  window.dispatchEvent(new CustomEvent("site-language-changed", { detail: lang }));
+const translations = { en: {home:"Home",profile:"Profile",login:"Account",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode",overview:"Overview",services:"Services",products:"Products",workshops:"Workshops",technicians:"Technicians",audit:"Audit",user:"User",role:"Role",permission:"Permission",settings:"Settings",users:"Users",refresh:"Refresh",auditHistory:"Audit History",inviteUser:"Invite User",userType:"User Type",emailAddress:"Email Address",sendInvitation:"Send Invitation",refreshUsers:"Refresh Users",userList:"User List",roleAssignments:"Role Assignments",permissionMatrix:"Permission Matrix",websiteSettings:"Website Settings",websiteTitle:"Website Title",logoUrl:"Logo URL (optional)",saveSettings:"Save Settings",signIn:"Sign In",forgotPassword:"Forgot password?",createAccount:"Create account",verificationCode:"Verification Code",name:"Name",email:"Email",phoneNumber:"Phone Number",password:"Password",changePassword:"Change Password",edit:"Edit",currentPassword:"Current Password",newPassword:"New Password",confirmPassword:"Confirm New Password",updatePassword:"Update Password",verifyCodeReset:"Verify Code & Reset Password",loginAccount:"Login Account"} };
+function applyEnglishText() {
+  document.documentElement.lang = "en";
+  document.documentElement.dir = "ltr";
+  document.querySelectorAll("[data-label]").forEach((element) => { const value=translations.en[element.dataset.label]; if(value) element.textContent=value; });
+  document.querySelectorAll("[data-placeholder]").forEach((element) => { const value=translations.en[element.dataset.placeholder]; if(value) element.placeholder=value; });
+  document.querySelectorAll("[data-aria-label]").forEach((element) => { const value=translations.en[element.dataset.ariaLabel]; if(value) element.setAttribute("aria-label",value); });
 }
 let runtimeConfig = null;
-
 function applyTheme(theme) {
   const dark = theme === "dark";
   document.documentElement.dataset.theme = dark ? "dark" : "light";
@@ -58,37 +30,13 @@ function applyTheme(theme) {
   if (themeToggle) {
     const themeIcon = themeToggle.querySelector(".theme-icon");
     if (themeIcon) themeIcon.textContent = dark ? "☀" : "☾";
-    themeToggle.setAttribute("aria-label", dark ? translations[document.documentElement.lang].light : translations[document.documentElement.lang].dark);
+    themeToggle.setAttribute("aria-label", dark ? translations.en.light : translations.en.dark);
   }
   localStorage.setItem("3b-theme", dark ? "dark" : "light");
 }
-window.addEventListener("countrycontextready", (event) => {
-  const region = event.detail?.region;
-  if (!["global", "bd", "ksa"].includes(region)) return;
-  routeDefaultLanguage = region === "bd" ? "bn" : region === "ksa" ? "ar" : "en";
-  languageStorageKey = "3b-language-" + region;
-  applyLanguage(localStorage.getItem(languageStorageKey) || routeDefaultLanguage);
-  if (regionSelect) {
-    regionSelect.value = region;
-    regionSelect.dispatchEvent(new Event("dropdownrefresh"));
-  }
-});
-applyLanguage(savedLanguage);
-if (languageSelect) languageSelect.dispatchEvent(new Event("dropdownrefresh"));
-if (regionSelect) {
-  regionSelect.value = activeCountry.region;
-  regionSelect.dispatchEvent(new Event("dropdownrefresh"));
-}
+applyEnglishText();
 applyTheme(savedTheme === "dark" ? "dark" : "light");
 if (themeToggle) themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
-if (languageSelect) {
-  const changeLanguage = () => {
-    applyLanguage(languageSelect.value);
-    applyTheme(document.documentElement.dataset.theme);
-  };
-  languageSelect.addEventListener("change", changeLanguage);
-  languageSelect.addEventListener("input", changeLanguage);
-}
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szacT";
 let supabase;
@@ -126,10 +74,10 @@ runtimeConfig = await loadRuntimeConfig(supabase);
 applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 
 const homeCatalogModules = [
-  { key:"services", table:"services", title:"Services", icon:"🔧", published:["status","active"], columns:"name,slug,description,category,country,photo_url" },
-  { key:"products", table:"products", title:"Products", icon:"📦", published:["status","active"], columns:"name,slug,description,category,country,photo_url" },
-  { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name,slug,description,location,trainer,category,country,photo_url" },
-  { key:"technicians", table:"technicians", title:"Technicians", icon:"", published:["is_published",true], columns:"name,slug,description,skill,category,country,photo_url" }
+  { key:"services", table:"services", title:"Services", icon:"🔧", published:["status","active"], columns:"name,slug,description,category,photo_url" },
+  { key:"products", table:"products", title:"Products", icon:"📦", published:["status","active"], columns:"name,slug,description,category,photo_url" },
+  { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name,slug,description,location,trainer,category,photo_url" },
+  { key:"technicians", table:"technicians", title:"Technicians", icon:"", published:["is_published",true], columns:"name,slug,description,skill,category,photo_url" }
 ];
 
 function renderHomeCard(module, record) {
@@ -171,9 +119,7 @@ async function loadHomeCatalog() {
     const target=document.getElementById("home-"+module.key+"-cards");
     if(!target) continue;
     try {
-      let query=supabase.from(module.table).select(module.columns)
-        .in("country",["global",activeCountry.region])
-        .limit(6);
+      let query=supabase.from(module.table).select(module.columns).limit(6);
       query=query.eq(module.published[0],module.published[1]);
       const {data,error}=await query;
       if(error) throw error;
@@ -229,7 +175,7 @@ if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   if (!error) {
     setMenuSession(null);
     closeSiteMenu();
-    window.navigateSiteRoute(new URL((activeCountry.region || "global") + "/", ROOT_URL).pathname);
+    window.navigateSiteRoute(ROOT_URL.pathname);
   }
 });
 async function syncAccountMenu() {
@@ -246,7 +192,7 @@ const ROOT_URL = new URL("https://3btechhub.github.io/3btechhub/");
 export async function initRoutePage() {
   window.__routeAuthSubscriptions?.forEach((subscription) => subscription.unsubscribe());
   window.__routeAuthSubscriptions = [];
-  applyLanguage(document.documentElement.lang || savedLanguage);
+  applyEnglishText();
   const form = document.querySelector("#auth-form");
 
 if (form) {
@@ -269,7 +215,7 @@ if (form) {
     const signup = mode === "signup";
     const recovery = mode === "recovery" || mode === "recovery-link";
     const recoveryLink = mode === "recovery-link";
-    const labels = translations[document.documentElement.lang] || translations.en;
+    const labels = translations.en
     submit.textContent = recoveryLink ? labels.updatePassword : recovery ? labels.verifyCodeReset : signup ? labels.createAccount : labels.signIn;
     toggle.textContent = signup ? labels.loginAccount : labels.createAccount;
     toggle.disabled = recovery;
@@ -862,25 +808,25 @@ if (siteSettingsForm) void loadSiteSettingsForm();
 const dashboardContentModules = {
   services: { table:"services", title:"Service", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
-    ["category","Category","text",false],["country","Country","select",false,["global","bd","ksa"]],
+    ["category","Category","text",false],
     ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["slug","category","country","visibility"] },
+  ], columns:["slug","category","visibility"] },
   products: { table:"products", title:"Product", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
-    ["category","Category","text",false],["country","Country","select",false,["global","bd","ksa"]],
+    ["category","Category","text",false],
     ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["slug","category","country","visibility"] },
+  ], columns:["slug","category","visibility"] },
   workshops: { table:"workshops", title:"Workshop", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
     ["location","Location","text",false],["technician","Technician","text",false],
-    ["category","Category","text",false],["country","Country","select",false,["global","bd","ksa"]],
+    ["category","Category","text",false],
     ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["slug","location","technician","category","country","visibility"] },
+  ], columns:["slug","location","technician","category","visibility"] },
   technicians: { table:"technicians", title:"Technician", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
-    ["skill","Skill","text",false],["category","Category","text",false],["country","Country","select",false,["global","bd","ksa"]],
+    ["skill","Skill","text",false],["category","Category","text",false],
     ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["slug","skill","category","country","visibility"] }
+  ], columns:["slug","skill","category","visibility"] }
 };
 
 function moduleLabel(value) {
