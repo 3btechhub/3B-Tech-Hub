@@ -778,6 +778,10 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 .icon-for-dark{display:none}
 :root[data-theme="dark"] .icon-for-light{display:none}
 :root[data-theme="dark"] .icon-for-dark{display:inline}
+.site-menu .theme-tool > .icon-for-light{display:inline-flex}
+.site-menu .theme-tool > .icon-for-dark{display:none}
+:root[data-theme="dark"] .site-menu .theme-tool > .icon-for-light{display:none}
+:root[data-theme="dark"] .site-menu .theme-tool > .icon-for-dark{display:inline-flex}
 button[data-size="small"],input[data-size="small"],select[data-size="small"],textarea[data-size="small"]{min-height:32px;font-size:var(--text-small)}
 button[data-size="medium"],input[data-size="medium"],select[data-size="medium"],textarea[data-size="medium"]{font-size:var(--text-medium)}
 button[data-size="large"],input[data-size="large"],select[data-size="large"],textarea[data-size="large"]{min-height:48px;font-size:var(--text-large)}
