@@ -22,9 +22,6 @@ jobs:
           test -s site/index.html
           test -s site/account/index.html
           test -s site/profile/index.html
-          test -s site/global/index.html
-          test -s site/bd/index.html
-          test -s site/ksa/index.html
           test -s site/dashboard/index.html
           test -s site/assets/style.css
           test -s site/assets/app.js
@@ -41,3 +38,4 @@ jobs:
           grep -q "signInWithPassword" site/assets/app.js
           grep -q "resetPasswordForEmail" site/assets/app.js
           ! grep -R -E "SUPABASE_SECRET_KEY|service_role" site
+          ! grep -R -E "country-router|language-select|region-select|ipwho\\.is|preferred_locale|countryContextReady" site
