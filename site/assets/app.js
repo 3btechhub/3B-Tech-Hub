@@ -147,7 +147,7 @@ if (logoutMenuLink) logoutMenuLink.addEventListener("click", async () => {
   if (!error) {
     setMenuSession(null);
     closeSiteMenu();
-    location.assign(new URL("login/", ROOT_URL).href);
+    location.assign(new URL("account/", ROOT_URL).href);
   }
 });
 async function syncProfileMenu() {
@@ -277,7 +277,7 @@ if (form) {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: new URL("login/", ROOT_URL).href },
+          options: { emailRedirectTo: new URL("account/", ROOT_URL).href },
         });
         if (error) throw error;
         if (data.session) {
@@ -389,7 +389,7 @@ if (profile) {
   async function loadProfile() {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
-      location.replace(new URL("login/", ROOT_URL).href);
+      location.replace(new URL("account/", ROOT_URL).href);
       return;
     }
     currentUser = data.user;
@@ -485,7 +485,7 @@ if (profile) {
 
   await loadProfile();
   const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) location.replace(new URL("login/", ROOT_URL).href);
+    if (!session) location.replace(new URL("account/", ROOT_URL).href);
   });
   window.addEventListener("pagehide", () => authListener.subscription.unsubscribe(), { once: true });
 }
@@ -497,7 +497,7 @@ const ownerDashboard = document.querySelector("#owner-dashboard");
 if (ownerDashboard) {
   const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError || !authData.user) {
-    location.replace(new URL("login/", ROOT_URL).href);
+    location.replace(new URL("account/", ROOT_URL).href);
   } else {
     const { data: ownerRole, error: roleError } = await supabase
       .from("user_roles").select("role")
@@ -529,7 +529,7 @@ if (ownerDashboard) {
     }
   }
   supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) location.replace(new URL("login/", ROOT_URL).href);
+    if (!session) location.replace(new URL("account/", ROOT_URL).href);
   });
 }
 
