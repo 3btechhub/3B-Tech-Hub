@@ -826,3 +826,4 @@ async function loadAuditLogs() {
   }
 }
 document.querySelector('[data-dashboard-tab="audit"]')?.addEventListener("click", () => void loadAuditLogs());
+document.querySelector("#audit-refresh")?.addEventListener("click", () => void loadAuditLogs());
