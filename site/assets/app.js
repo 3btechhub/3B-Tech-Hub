@@ -27,9 +27,9 @@ function addTextElement(parent, tag, className, value) {
 }
 
 const translations = {
-  en: {home:"Home",profile:"Profile",login:"Account",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
-  bn: {home:"হোম",profile:"প্রোফাইল",login:"অ্যাকাউন্ট",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"},
-  ar: {home:"الرئيسية",profile:"الملف الشخصي",login:"الحساب",logout:"تسجيل الخروج",dashboard:"لوحة التحكم",accountLogin:"تسجيل الدخول إلى الحساب",dark:"تفعيل الوضع الداكن",light:"تفعيل الوضع الفاتح"}
+  en: {home:"Home",profile:"Profile",login:"Account",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode",overview:"Overview",audit:"Audit",page:"Page",user:"User",role:"Role",permission:"Permission",settings:"Settings",pages:"Pages",users:"Users",refresh:"Refresh",auditHistory:"Audit History",inviteUser:"Invite User",userType:"User Type",emailAddress:"Email Address",sendInvitation:"Send Invitation",refreshUsers:"Refresh Users",userList:"User List",roleAssignments:"Role Assignments",permissionMatrix:"Permission Matrix",websiteSettings:"Website Settings",websiteTitle:"Website Title",logoUrl:"Logo URL (optional)",saveSettings:"Save Settings"},
+  bn: {home:"হোম",profile:"প্রোফাইল",login:"অ্যাকাউন্ট",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন",overview:"ওভারভিউ",audit:"অডিট",page:"পেজ",user:"ব্যবহারকারী",role:"ভূমিকা",permission:"অনুমতি",settings:"সেটিংস",pages:"পেজসমূহ",users:"ব্যবহারকারী",refresh:"রিফ্রেশ",auditHistory:"অডিট ইতিহাস",inviteUser:"ব্যবহারকারী আমন্ত্রণ",userType:"ব্যবহারকারীর ধরন",emailAddress:"ইমেইল ঠিকানা",sendInvitation:"আমন্ত্রণ পাঠান",refreshUsers:"ব্যবহারকারী রিফ্রেশ",userList:"ব্যবহারকারী তালিকা",roleAssignments:"ভূমিকা বরাদ্দ",permissionMatrix:"অনুমতি তালিকা",websiteSettings:"ওয়েবসাইট সেটিংস",websiteTitle:"ওয়েবসাইটের শিরোনাম",logoUrl:"লোগোর URL (ঐচ্ছিক)",saveSettings:"সেটিংস সংরক্ষণ"},
+  ar: {home:"الرئيسية",profile:"الملف الشخصي",login:"الحساب",logout:"تسجيل الخروج",dashboard:"لوحة التحكم",accountLogin:"تسجيل الدخول إلى الحساب",dark:"تفعيل الوضع الداكن",light:"تفعيل الوضع الفاتح",overview:"نظرة عامة",audit:"التدقيق",page:"الصفحة",user:"المستخدم",role:"الدور",permission:"الصلاحيات",settings:"الإعدادات",pages:"الصفحات",users:"المستخدمون",refresh:"تحديث",auditHistory:"سجل التدقيق",inviteUser:"دعوة مستخدم",userType:"نوع المستخدم",emailAddress:"البريد الإلكتروني",sendInvitation:"إرسال الدعوة",refreshUsers:"تحديث المستخدمين",userList:"قائمة المستخدمين",roleAssignments:"تعيين الأدوار",permissionMatrix:"مصفوفة الصلاحيات",websiteSettings:"إعدادات الموقع",websiteTitle:"عنوان الموقع",logoUrl:"رابط الشعار (اختياري)",saveSettings:"حفظ الإعدادات"}
 };
 function applyLanguage(language) {
   const lang = ["bn", "ar"].includes(language) ? language : "en";
@@ -41,6 +41,7 @@ function applyLanguage(language) {
   });
   if (languageSelect) languageSelect.value = lang;
   localStorage.setItem(languageStorageKey, lang);
+  window.dispatchEvent(new CustomEvent("site-language-changed", { detail: lang }));
 }
 let runtimeConfig = null;
 
