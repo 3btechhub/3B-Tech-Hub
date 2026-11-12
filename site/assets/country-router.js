@@ -53,34 +53,9 @@
     if (isEntryPath) routeHome(region);
   };
   const showPrompt = () => {
-    if (settled) return;
-    let manual = null;
-    try { manual = localStorage.getItem(MANUAL_KEY); } catch (_) {}
-    if (["bd", "saudi", "global"].includes(manual)) { finish(manual, "manual"); return; }
-    const render = () => {
-      if (settled) return;
-      document.documentElement.dataset.countryReady = "true";
-      if (document.getElementById("country-detection-prompt")) return;
-      const overlay = document.createElement("div");
-      overlay.id = "country-detection-prompt";
-      overlay.className = "country-prompt-overlay";
-      overlay.setAttribute("role", "dialog");
-      overlay.setAttribute("aria-modal", "true");
-      overlay.setAttribute("aria-labelledby", "country-prompt-title");
-      overlay.innerHTML = '<div class="country-prompt"><h2 id="country-prompt-title">Select Your Country</h2><p>We could not detect your location. Please choose an option to continue.</p><div class="country-choice-list"><button type="button" data-region="bd">Bangladesh</button><button type="button" data-region="saudi">Saudi Arabia</button><button type="button" data-region="global">Other Countries</button></div></div>';
-      overlay.addEventListener("click", (event) => {
-        const button = event.target.closest("button[data-region]");
-        if (!button) return;
-        const region = button.dataset.region;
-        try { localStorage.setItem(MANUAL_KEY, region); } catch (_) {}
-        overlay.remove();
-        finish(region, "manual");
-        if (isEntryPath) routeHome(region);
-      });
-      document.body.appendChild(overlay);
-    };
-    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", render, { once: true });
-    else render();
+    // If automatic route detection is unavailable, use the neutral route.
+    // Visitors can change the active route only from the site menu.
+    finish("global", "default");
   };
   // For ordinary internal pages, reuse the last resolved context; the entry route always performs a fresh lookup.
   if (!isEntryPath && path !== BASE + "global/") {
