@@ -12,9 +12,9 @@ The approved product scope is defined in [docs/master-spec.md](docs/master-spec.
 
 ## Approved website
 
-- Structure: Home, Account, Profile, Dashboard, Page and Sub Page.
+- Structure: Home, Account, Profile and Dashboard.
 - Shared layout: Header, Main Area and Footer.
-- Dashboard modules: Overview, Audit, Page, User, Role, Permission and Settings.
+- Dashboard modules: Overview, Audit, User, Role, Permission and Settings.
 - User types: Owner, Admin, Member and Visitor.
 - Country routes: `global`, `bd`, `ksa`.
 - Default languages: English for Global, Bangla for Bangladesh and Arabic for Saudi Arabia.
