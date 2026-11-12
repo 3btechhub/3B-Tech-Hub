@@ -857,10 +857,18 @@ function createModuleField(field) {
     wrapper.append(addTextElement(wrapper,"span","",label),control);
     const preview=document.createElement("img"); preview.className="module-image-preview"; preview.alt=label+" preview"; preview.hidden=true;
     const remove=document.createElement("button"); remove.type="button"; remove.className="secondary-button"; remove.textContent="Remove image"; remove.dataset.imageRemove="true"; remove.hidden=true;
+    control.addEventListener("change",()=>{
+      const form=wrapper.closest("form");
+      const file=control.files?.[0];
+      if (file) {
+        preview.src=URL.createObjectURL(file); preview.hidden=false; remove.hidden=false;
+        if (form) form.dataset.removePhoto="false";
+      }
+    });
     remove.addEventListener("click",()=>{
       control.value=""; const form=wrapper.closest("form");
       if (form) form.dataset.removePhoto="true";
-      updateImagePreview(wrapper.closest("form") || wrapper, "");
+      updateImagePreview(form || wrapper, "");
     });
     wrapper.append(preview,remove);
   } else if (type === "checkbox") {
@@ -969,7 +977,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     event.preventDefault();
     if (!["owner","admin"].includes(currentDashboardRole)) { setModuleMessage(moduleName,"Admin permission required.","error"); return; }
     const submit=document.querySelector('[data-module-submit="'+moduleName+'"]'); submit.disabled=true; setModuleMessage(moduleName,"Saving…");
-    let uploadedUrl="", oldPhotoUrl=form.dataset.currentPhotoUrl||"";
+    let uploadedUrl="", oldPhotoUrl=form.dataset.currentPhotoUrl||"", saved=false;
     try {
       const payload={};
       for (const [key] of config.fields) {
@@ -1006,12 +1014,15 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         result=await supabase.from(config.table).insert(payload);
       }
       if (result.error) throw result.error;
+      saved=true;
       const nextPhotoUrl=payload.photo_url===undefined?oldPhotoUrl:payload.photo_url;
-      if (oldPhotoUrl&&oldPhotoUrl!==nextPhotoUrl) await removeStoredImage(oldPhotoUrl);
+      if (oldPhotoUrl&&oldPhotoUrl!==nextPhotoUrl) {
+        try { await removeStoredImage(oldPhotoUrl); } catch (cleanupError) { console.warn("Old image cleanup failed.",cleanupError); }
+      }
       resetModuleForm(moduleName); setModuleMessage(moduleName,config.title+(editId?" updated.":" created."),"success");
       await loadContentModule(moduleName);
     } catch(error) {
-      if (uploadedUrl) { try { await removeStoredImage(uploadedUrl); } catch {} }
+      if (uploadedUrl&&!saved) { try { await removeStoredImage(uploadedUrl); } catch {} }
       setModuleMessage(moduleName,error.message||"Could not save this record.","error");
     } finally { submit.disabled=false; }
   });
