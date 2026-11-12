@@ -33,6 +33,7 @@ jobs:
       - name: Validate website files and regression tests
         run: |
           test -s site/index.html
+          test -s site/home/index.html
           test -s site/account/index.html
           test -s site/profile/index.html
           test -s site/dashboard/index.html
