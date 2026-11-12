@@ -10,9 +10,9 @@ Read [master-spec.md](master-spec.md) first. It defines the complete allowed pro
 
 ## Shared page renderer
 - One persistent document shell owns the Header, Main Area and Footer.
-- One route resolver maps `/`, `/account/`, `/profile/` and `/dashboard/` to modular Main Area views.
+- One route resolver maps `/home/`, `/account/`, `/profile/` and `/dashboard/` to modular Main Area views.
 - Internal navigation and browser Back/Forward replace only the Main Area; Header and Footer remain mounted.
-- The root URL opens Home.
+- The root URL redirects to `/home/`.
 - Static-host route entry files bootstrap the root shell, while page view markup is maintained once under `site/views/`.
 
 ## Language
@@ -31,7 +31,7 @@ PostgreSQL + RLS + trusted Edge Functions
 ```
 
 ## Approved routes and page model
-- Home: `/`
+- Home: `/home/`
 - Account: `/account/` (`/login/` compatibility alias)
 - Profile: `/profile/`
 - Dashboard: `/dashboard/`
