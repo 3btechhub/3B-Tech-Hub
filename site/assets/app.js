@@ -1,5 +1,6 @@
 import { filterProductsForRegion, getNextVisibleCount } from "./product-catalog.js";
 import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
+import { renderDynamicRoute } from "./dynamic-page-router.js";
 
 await window.countryContextReady;
 
@@ -119,6 +120,7 @@ const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
 supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 runtimeConfig = await loadRuntimeConfig(supabase);
 applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
+void renderDynamicRoute(supabase);
 
 async function applyPublicSiteSettings() {
   if (document.querySelector("#owner-dashboard")) return;

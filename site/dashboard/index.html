@@ -10,6 +10,7 @@
   <script src="../assets/country-router.js"></script>
   <script defer src="../assets/menu.js"></script>
   <script type="module" src="../assets/app.js"></script>
+  <script type="module" src="../assets/page-builder.js"></script>
 </head>
 <body>
   <header class="site-header">
@@ -19,6 +20,7 @@
   </header>
   <main class="dashboard-main" id="owner-dashboard">
     <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-pages" aria-controls="panel-pages" aria-selected="false" data-dashboard-tab="pages" tabindex="-1">Pages</button>
       <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" data-dashboard-tab="overview">Overview</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-services" aria-controls="panel-services" aria-selected="false" data-dashboard-tab="services" tabindex="-1">Service</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" aria-controls="panel-products" aria-selected="false" data-dashboard-tab="products" tabindex="-1">Product</button>
@@ -30,6 +32,9 @@
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" aria-controls="panel-permission" aria-selected="false" data-dashboard-tab="permission" tabindex="-1">Permission</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-dashboard-tab="settings" tabindex="-1">Settings</button>
     </nav>
+    <section class="dashboard-module-panel" id="panel-pages" role="tabpanel" aria-labelledby="tab-pages" data-dashboard-panel="pages" hidden>
+      <div id="page-builder-root"><p class="muted">Loading Page Builder…</p></div>
+    </section>
     <section class="dashboard-module-panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-dashboard-panel="overview">
       <div class="dashboard-grid" aria-label="Website overview">
       <section class="dashboard-card"><h2>Website Content</h2><div class="dashboard-count" id="dashboard-content-count">…</div><p>Content records</p></section>
