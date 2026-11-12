@@ -8,7 +8,7 @@ if (root) {
   const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
   const $ = (selector) => root.querySelector(selector);
   const componentTypes = ["hero", "rich_text", "image", "card_grid", "button_group", "faq", "spacer"];
-  const reserved = new Set(["login","profile","dashboard","services","products","workshop","technicians","bd","saudi","global","assets","auth"]);
+  const reserved = new Set(["account","login","profile","dashboard","bd","ksa","global","assets","auth"]);
   let pages = [], selectedPage = null, components = [], editingComponent = null, currentUser = null;
 
   const el = (tag, attrs = {}, value = "") => {
@@ -62,7 +62,7 @@ if (root) {
   }
   async function loadPages() {
     const { data, error } = await supabase.from("pages")
-      .select("id,parent_id,page_type,slug,title,description,locale,status,sort_order,seo,created_at,updated_at")
+      .select("id,parent_id,page_type,slug,title,description,locale,country,status,sort_order,seo,created_at,updated_at")
       .order("page_type").order("sort_order").order("title");
     if (error) throw error;
     pages = data || [];
@@ -72,8 +72,8 @@ if (root) {
   function renderParentOptions() {
     const select = $("#page-parent");
     select.replaceChildren(el("option", { value: "" }, "Select Main Page"));
-    pages.filter(page => page.page_type === "main" && page.locale === $("#page-locale").value).forEach(page => {
-      const option = el("option", { value: page.id }, page.title + " · " + page.locale);
+    pages.filter(page => page.page_type === "main" && page.locale === $("#page-locale").value && page.country === $("#page-country").value).forEach(page => {
+      const option = el("option", { value: page.id }, page.title + " · " + page.locale + " · " + page.country);
       select.append(option);
     });
     select.disabled = $("#page-type").value !== "sub";
@@ -86,7 +86,7 @@ if (root) {
       const row = el("article", { class: "technician-admin-row page-builder-page-row" });
       const info = el("div");
       info.append(el("strong", {}, page.title));
-      info.append(el("span", { class: "muted" }, (page.page_type === "main" ? "Main Page" : "Sub Page") + " · /" + page.slug + " · " + page.locale + " · " + page.status));
+      info.append(el("span", { class: "muted" }, (page.page_type === "main" ? "Main Page" : "Sub Page") + " · /" + page.slug + " · " + page.locale + " · " + page.country + " · " + page.status));
       row.append(info);
       const actions = el("div", { class: "editor-actions" });
       actions.append(button("Edit", () => selectPage(page)));
@@ -115,6 +115,7 @@ if (root) {
     $("#page-id").value = "";
     $("#page-type").value = "main";
     $("#page-locale").value = "en";
+    $("#page-country").value = "global";
     $("#page-status").value = "draft";
     $("#page-parent").disabled = true;
     $("#page-form-title").textContent = "Create Page";
@@ -135,6 +136,7 @@ if (root) {
     $("#page-slug").value = page.slug;
     $("#page-description").value = page.description || "";
     $("#page-locale").value = page.locale;
+    $("#page-country").value = page.country || "global";
     $("#page-status").value = page.status;
     $("#page-order").value = page.sort_order || 0;
     $("#page-seo-title").value = page.seo?.title || "";
@@ -188,7 +190,7 @@ if (root) {
     if (revisionError) throw revisionError;
     const revisionNumber = (revisions?.[0]?.revision_number || 0) + 1;
     const snapshot = { page: { page_type: page.page_type, parent_id: page.parent_id, slug: page.slug, title: page.title,
-      description: page.description, locale: page.locale, status: page.status, sort_order: page.sort_order, seo: page.seo || {} }, components: rows || [] };
+      description: page.description, locale: page.locale, country: page.country || "global", status: page.status, sort_order: page.sort_order, seo: page.seo || {} }, components: rows || [] };
     const { error: saveError } = await supabase.from("page_revisions").insert({
       page_id: pageId, revision_number: revisionNumber, snapshot, created_by: currentUser.id
     });
@@ -209,7 +211,7 @@ if (root) {
       if (type === "main" && reserved.has(slug)) throw new Error("This URL is reserved for an existing website route.");
       const existing = pages.find(item => item.id === id);
       const payload = { page_type: type, parent_id: parentId, title, slug, description: $("#page-description").value.trim(),
-        locale: $("#page-locale").value, status: $("#page-status").value, sort_order: Number($("#page-order").value || 0),
+        locale: $("#page-locale").value, country: $("#page-country").value, status: $("#page-status").value, sort_order: Number($("#page-order").value || 0),
         seo: { title: $("#page-seo-title").value.trim(), description: $("#page-seo-description").value.trim() },
         updated_by: currentUser.id, updated_at: new Date().toISOString() };
       if (existing) await snapshotPage(id);
@@ -383,6 +385,7 @@ if (root) {
           <label class="page-builder-field"><span>Page Title</span><input id="page-title" maxlength="180" required></label>
           <label class="page-builder-field"><span>URL Slug (English letters, numbers, hyphens)</span><input id="page-slug" maxlength="80" placeholder="about-us"></label>
           <label class="page-builder-field"><span>Description</span><textarea id="page-description" rows="3" maxlength="2000"></textarea></label>
+          <label class="page-builder-field"><span>Country Route</span><select id="page-country"><option value="global">Global</option><option value="bd">Bangladesh</option><option value="ksa">Saudi Arabia</option></select></label>
           <div class="page-builder-two">
             <label class="page-builder-field"><span>Language</span><select id="page-locale"><option value="en">English</option><option value="bn">বাংলা</option><option value="ar">العربية</option></select></label>
             <label class="page-builder-field"><span>Status</span><select id="page-status"><option value="draft">Draft</option><option value="published">Published</option><option value="archived">Archived</option></select></label>
@@ -412,6 +415,7 @@ if (root) {
 
   $("#page-type").addEventListener("change", renderParentOptions);
   $("#page-locale").addEventListener("change", renderParentOptions);
+  $("#page-country").addEventListener("change", renderParentOptions);
   $("#page-title").addEventListener("input", () => { if (!$("#page-id").value) $("#page-slug").value = slugify($("#page-title").value); });
   $("#page-form").addEventListener("submit", savePage);
   $("#page-cancel").addEventListener("click", resetPageForm);
