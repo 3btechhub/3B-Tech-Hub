@@ -1,15 +1,13 @@
 (() => {
   "use strict";
-
-  const BASE = "/3btechhub/";
   const MANUAL_KEY = "3b-country-manual";
   const CONTEXT_KEY = "3b-country-context";
   const REGIONS = ["global", "bd", "ksa"];
-  const path = window.location.pathname;
-
+  const params = new URLSearchParams(window.location.search);
+  window.siteInitialRoute = params.get("route") || window.location.pathname;
   const normalizeRegion = (value) => value === "saudi" ? "ksa" : value;
-  const regionFromPath = () => {
-    const match = path.match(/^\/3btechhub\/(global|bd|ksa|saudi)(?:\/|$)/);
+  const regionFromPath = (value) => {
+    const match = String(value || "").match(/^\/3btechhub\/(global|bd|ksa|saudi)(?:\/|$)/);
     return match ? normalizeRegion(match[1]) : null;
   };
   const countryData = (region, source) => {
@@ -23,58 +21,37 @@
   };
   const applyContext = (region, source) => {
     const context = countryData(region, source);
-    window.siteCountry = context;
-    try { localStorage.setItem(CONTEXT_KEY, JSON.stringify(context)); } catch (_) {}
-    document.documentElement.dataset.country = context.region;
-    document.documentElement.dataset.countryCode = context.code;
+    if (window.siteCountry && typeof window.siteCountry === "object") Object.assign(window.siteCountry, context);
+    else window.siteCountry = context;
+    const active = window.siteCountry;
+    try { localStorage.setItem(CONTEXT_KEY, JSON.stringify(active)); } catch (_) {}
+    document.documentElement.dataset.country = active.region;
+    document.documentElement.dataset.countryCode = active.code;
     document.documentElement.dataset.countryReady = "true";
-    window.dispatchEvent(new CustomEvent("countrycontextready", { detail: context }));
-    return context;
+    window.dispatchEvent(new CustomEvent("countrycontextready", { detail: active }));
+    return active;
   };
-  const routeHome = (region) => window.location.replace(BASE + region + "/");
-  const isEntryPath = path === BASE || path === BASE.slice(0, -1);
-
-  const pathRegion = regionFromPath();
-  if (pathRegion) {
-    if (path.startsWith(BASE + "saudi/")) {
-      routeHome("ksa");
-      return;
-    }
-    applyContext(pathRegion, "url");
-    window.countryContextReady = Promise.resolve(window.siteCountry);
-    return;
-  }
-
+  window.setSiteCountryContext = applyContext;
   let resolveContext;
   window.countryContextReady = new Promise((resolve) => { resolveContext = resolve; });
   let settled = false;
   const finish = (region, source) => {
     if (settled) return;
     settled = true;
-    const context = applyContext(region, source);
-    resolveContext(context);
-    if (isEntryPath) routeHome(context.region);
+    resolveContext(applyContext(region, source));
   };
-
-  if (isEntryPath) {
-    try {
-      const manual = normalizeRegion(localStorage.getItem(MANUAL_KEY));
-      if (REGIONS.includes(manual)) {
-        finish(manual, "manual");
-        return;
-      }
-    } catch (_) {}
-  } else {
-    try {
-      const cached = JSON.parse(localStorage.getItem(CONTEXT_KEY) || "null");
-      const cachedRegion = normalizeRegion(cached?.region);
-      if (REGIONS.includes(cachedRegion)) {
-        finish(cachedRegion, "session");
-        return;
-      }
-    } catch (_) {}
+  const routeRegion = regionFromPath(window.siteInitialRoute);
+  if (routeRegion) {
+    finish(routeRegion, "url");
+    return;
   }
-
+  try {
+    const manual = normalizeRegion(localStorage.getItem(MANUAL_KEY));
+    if (REGIONS.includes(manual)) { finish(manual, "manual"); return; }
+    const cached = JSON.parse(localStorage.getItem(CONTEXT_KEY) || "null");
+    const cachedRegion = normalizeRegion(cached?.region);
+    if (REGIONS.includes(cachedRegion)) { finish(cachedRegion, "session"); return; }
+  } catch (_) {}
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 5000);
   fetch("https://ipwho.is/", { signal: controller.signal, cache: "no-store" })

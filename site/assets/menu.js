@@ -86,7 +86,8 @@
         localStorage.setItem("3b-country-manual", region);
         localStorage.setItem("3b-country-context", JSON.stringify({ region, source: "manual" }));
       } catch (_) {}
-      window.location.href = BASE + region + "/";
+      if (typeof window.navigateSiteRoute === "function") window.navigateSiteRoute(BASE + region + "/");
+      else window.location.href = BASE + region + "/";
     };
     regionSelect.addEventListener("change", goToRegion);
   }
