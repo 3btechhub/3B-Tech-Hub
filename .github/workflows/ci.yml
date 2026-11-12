@@ -32,6 +32,9 @@ jobs:
       - name: Validate static routes and required branding
         run: |
           grep -q "3B TECH HUB" site/index.html
+          grep -q '["home","account","profile","dashboard"].includes(first)' site/assets/site-router.js
+          grep -q 'if (path === BASE.slice(0, -1) || path === BASE)' site/assets/site-router.js
+          ! grep -q 'class="home-main' site/index.html
           ! test -d site/services
           ! test -d site/products
           ! test -d site/workshop
