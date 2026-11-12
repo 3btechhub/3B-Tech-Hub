@@ -25,11 +25,13 @@ See [master-spec.md](master-spec.md). This is the only allowed website specifica
 
 ## Still required before merge/deployment
 
+- [x] Converted pending legacy cleanup work into one hidden Global Main Page (`Legacy Data Cleanup`) with five linked Sub Pages in Supabase.
+- [x] Added optional Page contact fields and explicit `visibility` column to the live `pages` table; Page Builder form now includes Location, Phone, WhatsApp, Email, Image URL and Home visibility.
 - [ ] Complete final migration: archive legacy rows privately, convert Customer to Member, remove Manager/Editor/Staff role values, then drop out-of-scope tables `site_content`, `products`, `services`, `workshops`, `technicians` and `media_assets`.
 - [ ] Deploy the updated `owner-users` Edge Function with the new frontend.
 - [ ] Verify Owner/Admin/Member authorization and audit behavior in a browser.
 - [ ] Verify IP routing, Global fallback, manual route selection, language defaults, language switching and Arabic RTL.
-- [ ] Verify Page Builder, country-scoped content, Account, Profile and Settings in a browser.
+- [ ] Verify Page Builder, country-scoped content, Page visibility/Home sections, Account, Profile and Settings in a browser.
 - [ ] Run the final GitHub Actions checks after the remaining changes.
 - [ ] Review the final diff and merge only after all required checks pass.
 
