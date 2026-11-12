@@ -10,7 +10,6 @@
   <script src="../assets/country-router.js"></script>
   <script defer src="../assets/menu.js"></script>
   <script type="module" src="../assets/app.js"></script>
-  <script type="module" src="../assets/page-builder.js"></script>
 </head>
 <body>
   <header class="site-header">
@@ -48,7 +47,6 @@
     <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
       <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" data-label="overview" aria-controls="panel-overview" aria-selected="true" data-dashboard-tab="overview">Overview</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-audit" data-label="audit" aria-controls="panel-audit" aria-selected="false" data-dashboard-tab="audit" tabindex="-1">Audit</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-page" data-label="page" aria-controls="panel-page" aria-selected="false" data-dashboard-tab="page" tabindex="-1">Page</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" data-label="user" aria-controls="panel-user" aria-selected="false" data-dashboard-tab="user" tabindex="-1">User</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" data-label="role" aria-controls="panel-role" aria-selected="false" data-dashboard-tab="role" tabindex="-1">Role</button>
       <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" data-label="permission" aria-controls="panel-permission" aria-selected="false" data-dashboard-tab="permission" tabindex="-1">Permission</button>
@@ -57,7 +55,6 @@
 
     <section class="dashboard-module-panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-dashboard-panel="overview">
       <div class="dashboard-grid" aria-label="Website overview">
-        <section class="dashboard-card"><h2 data-label="pages">Pages</h2><div class="dashboard-count" id="dashboard-pages-count">…</div></section>
         <section class="dashboard-card"><h2 data-label="users">Users</h2><div class="dashboard-count" id="dashboard-users-count">…</div></section>
         <section class="dashboard-card"><h2 data-label="audit">Audit</h2><div class="dashboard-count" id="dashboard-audit-count">…</div></section>
         <section class="dashboard-card"><h2 data-label="settings">Settings</h2><div class="dashboard-count" id="dashboard-settings-count">…</div></section>
@@ -69,10 +66,6 @@
         <div class="dashboard-heading"><h2 data-label="auditHistory">Audit History</h2><button class="secondary-button" id="audit-refresh" type="button" data-label="refresh">Refresh</button></div>
         <div id="audit-log-list" aria-live="polite"><p class="muted">Select Audit to load recent activity.</p></div>
       </div>
-    </section>
-
-    <section class="dashboard-module-panel" id="panel-page" role="tabpanel" aria-labelledby="tab-page" data-dashboard-panel="page" hidden>
-      <div id="page-builder-root"><p class="muted">Loading Page Builder…</p></div>
     </section>
 
     <section class="dashboard-module-panel" id="panel-user" role="tabpanel" aria-labelledby="tab-user" data-dashboard-panel="user" hidden>
@@ -95,9 +88,9 @@
       <div class="admin-list">
         <h2 data-label="permissionMatrix">Permission Matrix</h2>
         <div class="admin-list-row"><strong>Owner</strong><span>Full access to all approved modules and system settings.</span></div>
-        <div class="admin-list-row"><strong>Admin</strong><span>Overview, Audit and Page management. No user, role or system settings administration.</span></div>
+        <div class="admin-list-row"><strong>Admin</strong><span>Overview and Audit. No user, role or system settings administration.</span></div>
         <div class="admin-list-row"><strong>Member</strong><span>Own account and profile only.</span></div>
-        <div class="admin-list-row"><strong>Visitor</strong><span>Public pages and public navigation only.</span></div>
+        <div class="admin-list-row"><strong>Visitor</strong><span>Public website access only.</span></div>
       </div>
     </section>
 
