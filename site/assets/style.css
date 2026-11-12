@@ -9,7 +9,6 @@ body{background:var(--page-bg);color:var(--page-text)}
 .site-menu a{color:var(--page-text)}
 .menu-tools{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line);margin-top:5px;padding:8px 4px 2px}
 .menu-tool{min-height:38px;flex:1;border:0;border-radius:7px;background:transparent;color:var(--page-text);cursor:pointer;font-size:17px}
-#language-select,#region-select{min-width:112px;max-width:150px;padding:0 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--page-text);font:inherit;font-size:14px;cursor:pointer}
 .site-footer{border-color:var(--line);color:var(--muted)}
 .muted{color:var(--muted)}
 .auth-form input{background:var(--surface);color:var(--page-text);border-color:var(--line)}
@@ -216,34 +215,6 @@ body{background:var(--page-bg);color:var(--page-text)}
 @media(max-width:520px){.services-home{padding:38px 16px 44px}.home-hero{margin-bottom:36px}.service-card-grid{grid-template-columns:1fr;gap:9px}.service-card{min-height:82px;padding:13px}.service-country{margin-bottom:34px}.service-detail-main{padding:54px 18px}}
 
 
-/* Country entry and automatic IP routing */
-.country-entry-main{flex:1;width:min(720px,100%);margin:0 auto;padding:72px 22px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
-.country-entry-main h1{margin:8px 0 12px;font-size:clamp(28px,5vw,42px)}
-.country-entry-main>p:not(.eyebrow){color:var(--muted);line-height:1.6}
-.country-entry-main .eyebrow{color:var(--muted);font-size:11px;font-weight:700;letter-spacing:.13em}
-.country-fallback{width:min(440px,100%);margin-top:24px;padding:22px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-align:left}
-.country-fallback h2{margin:0 0 8px;font-size:20px}
-.country-fallback p{color:var(--muted);font-size:14px;line-height:1.55}
-.country-choice-list{display:grid;gap:9px;margin-top:16px}
-.country-choice-list a{display:flex;align-items:center;justify-content:center;min-height:44px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;font-size:14px;font-weight:600}
-.country-choice-list a:hover{background:var(--hover)}
-.region-switcher{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-top:30px}
-.region-switcher a{padding:9px 13px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-weight:600}
-.region-switcher a[aria-current=page]{background:var(--page-text);color:var(--page-bg);border-color:var(--page-text)}
-
-
-/* Site-wide country selection prompt */
-.country-prompt-overlay{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:20px;background:#0009}
-.country-prompt{width:min(430px,100%);padding:24px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--page-text);box-shadow:0 18px 60px #0004}
-.country-prompt h2{margin:0 0 9px;font-size:21px}
-.country-prompt p{margin:0;color:var(--muted);font-size:14px;line-height:1.55}
-.country-prompt .country-choice-list{display:grid;gap:9px;margin-top:18px}
-.country-prompt .country-choice-list button{min-height:45px;padding:10px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--page-text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
-.country-prompt .country-choice-list button:hover{background:var(--hover)}
-
-html:not([data-country-ready="true"]) body{visibility:hidden}
-
-
 /* Menu layout: primary links, preferences, and dashboard separated clearly */
 .site-menu{min-width:260px;padding:10px;gap:0}
 .menu-section{display:grid;gap:2px}
@@ -255,45 +226,6 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 .site-menu .theme-tool span{font-size:14px}
 @media(max-width:480px){.site-menu{min-width:250px;max-width:calc(100vw - 28px)}}
 
-
-/* Keep language and country choices inline inside the menu on mobile */
-#language-select,#region-select{
-  display:block;
-  width:100%;
-  max-width:none;
-  min-width:0;
-  height:auto;
-  min-height:0;
-  padding:5px 8px;
-  overflow-y:auto;
-  appearance:auto;
-  -webkit-appearance:listbox;
-  font-size:13px;
-  line-height:1.35;
-  background:var(--surface);
-  color:var(--page-text);
-  border:1px solid var(--line);
-  border-radius:7px;
-}
-#language-select option,#region-select option{
-  min-height:25px;
-  padding:5px 7px;
-  background:var(--surface);
-  color:var(--page-text);
-}
-.menu-tools{display:grid;grid-template-columns:1fr;align-items:stretch;gap:8px}
-
-
-/* Collapsible in-menu language and country dropdowns */
-#language-select,#region-select{display:none!important}
-.menu-dropdown{position:relative;width:100%;min-width:0}
-.menu-dropdown-trigger{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;text-align:left;cursor:pointer}
-.menu-dropdown-trigger::after{content:"▾";font-size:13px;color:var(--muted)}
-.menu-dropdown-trigger[aria-expanded="true"]::after{content:"▴"}
-.menu-dropdown-options{display:grid;gap:3px;margin-top:5px;padding:5px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
-.menu-dropdown-options[hidden]{display:none}
-.menu-dropdown-option{width:100%;min-height:36px;padding:8px 10px;border:0;border-radius:6px;background:transparent;color:var(--page-text);font:inherit;font-size:13px;text-align:left;cursor:pointer}
-.menu-dropdown-option:hover,.menu-dropdown-option.is-selected{background:var(--hover)}
 
 /* Align the Dark/Light label and theme icon consistently */
 .site-menu .theme-tool{
@@ -740,18 +672,6 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 button[data-size="small"],input[data-size="small"],select[data-size="small"],textarea[data-size="small"]{min-height:32px;font-size:var(--text-small)}
 button[data-size="medium"],input[data-size="medium"],select[data-size="medium"],textarea[data-size="medium"]{font-size:var(--text-medium)}
 button[data-size="large"],input[data-size="large"],select[data-size="large"],textarea[data-size="large"]{min-height:48px;font-size:var(--text-large)}
-
-
-/* Country and language dropdowns, including RTL presentation */
-.menu-dropdown{position:relative;flex:1;min-width:0}
-.menu-dropdown-trigger{width:100%;min-height:38px;padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--page-text);font-size:var(--text-medium);text-align:center;cursor:pointer}
-.menu-dropdown-options{position:absolute;top:calc(100% + 5px);left:0;right:0;z-index:30;display:grid;gap:2px;max-height:240px;overflow:auto;padding:5px;border:1px solid var(--line);border-radius:8px;background:var(--surface);box-shadow:0 8px 24px #00000020}
-.menu-dropdown-options[hidden]{display:none}
-.menu-dropdown-option{width:100%;min-height:34px;padding:7px 9px;border:0;border-radius:5px;background:transparent;color:var(--page-text);font-size:var(--text-medium);text-align:center;cursor:pointer}
-.menu-dropdown-option:hover,.menu-dropdown-option.is-selected{background:var(--hover)}
-html[dir="rtl"] .site-menu .menu-link{text-align:right}
-html[dir="rtl"] .menu-dropdown-option,html[dir="rtl"] .menu-dropdown-trigger{text-align:right}
-html[dir="rtl"] .admin-list-row{direction:rtl}
 
 
 /* Dashboard content module forms and record lists */
