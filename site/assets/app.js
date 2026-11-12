@@ -767,6 +767,192 @@ if (siteSettingsForm) {
 }
 if (siteSettingsForm) void loadSiteSettingsForm();
 
+
+// Core content modules: each module uses its existing Supabase table and RLS policies.
+const dashboardContentModules = {
+  services: { table:"services", title:"Service", fields:[
+    ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
+    ["category","Category","text",false],["country","Country","select",false,["global","bd","saudi"]],
+    ["photo_url","Photo URL","url",false],["is_home_service","Show as home service","checkbox",false],
+    ["status","Status","select",true,["draft","active","archived"]]
+  ], columns:["name","category","country","status"] },
+  products: { table:"products", title:"Product", fields:[
+    ["name","Name","text",true],["slug","Slug","text",true],["sku","SKU","text",false],
+    ["description","Description","textarea",false],["category","Category","text",false],
+    ["category_group","Product group","select",true,["mobile","satellite"]],
+    ["condition","Condition","select",true,["new","used","refurbished"]],
+    ["price_minor","Price (minor currency units)","number",false],["currency","Currency","text",true],
+    ["stock_qty","Stock quantity","number",true],["country","Country","select",false,["global","bd","saudi"]],
+    ["phone","Phone","text",false],["whatsapp","WhatsApp","text",false],
+    ["photo_url","Main photo URL","url",false],["image_paths","Additional image paths (one per line)","textarea",false],
+    ["status","Status","select",true,["draft","active","archived"]]
+  ], columns:["name","sku","category_group","price_minor","stock_qty","country","status"] },
+  workshops: { table:"workshops", title:"Workshop", fields:[
+    ["title","Title","text",true],["description","Description","textarea",false],
+    ["workshop_date","Date","date",false],["workshop_time","Time","time",false],
+    ["location","Location","text",false],["trainer","Trainer","text",false],
+    ["category","Category","text",false],["country","Country","select",false,["global","bd","saudi"]],
+    ["phone","Phone","text",false],["whatsapp","WhatsApp","text",false],
+    ["photo_url","Photo URL","url",false],["status","Status","select",true,["draft","published"]]
+  ], columns:["title","workshop_date","location","trainer","country","status"] },
+  technicians: { table:"technicians", title:"Technician", fields:[
+    ["name","Name","text",true],["description","Description","textarea",false],
+    ["category","Specialty / Category","text",false],["country","Country","select",false,["global","bd","saudi"]],
+    ["phone","Phone","text",false],["whatsapp","WhatsApp","text",false],
+    ["photo_url","Photo URL","url",false],["is_published","Published","checkbox",false]
+  ], columns:["name","category","country","phone","is_published"] }
+};
+
+function moduleLabel(value) {
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (value == null || value === "") return "—";
+  return String(value);
+}
+function createModuleField(field) {
+  const [name,label,type,required,options] = field;
+  const wrapper = document.createElement("label");
+  wrapper.className = "module-form-field";
+  let control;
+  if (type === "textarea") { control=document.createElement("textarea"); control.rows=3; }
+  else if (type === "select") {
+    control=document.createElement("select");
+    for (const value of options || []) {
+      const option=document.createElement("option"); option.value=value; option.textContent=value; control.append(option);
+    }
+    if (!required) { const blank=document.createElement("option"); blank.value=""; blank.textContent="— Select —"; control.prepend(blank); }
+  } else { control=document.createElement("input"); control.type=type; }
+  control.name=name; control.required=Boolean(required);
+  if (type === "checkbox") {
+    wrapper.classList.add("module-checkbox-field"); control.setAttribute("aria-label",label); wrapper.append(control);
+    addTextElement(wrapper,"span","",label);
+  } else {
+    addTextElement(wrapper,"span","",label); wrapper.append(control);
+  }
+  if (name==="currency") control.value="SAR";
+  if (name==="stock_qty") { control.value="0"; control.min="0"; control.step="1"; }
+  if (name==="price_minor") { control.min="0"; control.step="1"; }
+  return wrapper;
+}
+function setModuleMessage(moduleName,message,kind="") {
+  const node=document.querySelector('[data-module-message="'+moduleName+'"]');
+  if (node) { node.textContent=message; node.dataset.kind=kind; }
+}
+function resetModuleForm(moduleName) {
+  const form=document.querySelector('[data-module-form="'+moduleName+'"]');
+  if (!form) return;
+  form.reset(); form.dataset.editId="";
+  const config=dashboardContentModules[moduleName];
+  document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Add "+config.title;
+  document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Save "+config.title;
+  document.querySelector('[data-module-cancel="'+moduleName+'"]').hidden=true;
+}
+function renderModuleList(moduleName,records) {
+  const config=dashboardContentModules[moduleName];
+  const container=document.querySelector('[data-module-list="'+moduleName+'"]');
+  if (!container) return;
+  container.replaceChildren();
+  if (!records.length) { addTextElement(container,"p","muted","No records found. Use the form above to add one."); return; }
+  for (const record of records) {
+    const row=document.createElement("article"); row.className="admin-list-row module-record-row";
+    const primary=document.createElement("div");
+    addTextElement(primary,"strong","",record.name||record.title||record.slug||"Untitled");
+    const details=config.columns.filter((key)=>!["name","title"].includes(key))
+      .map((key)=>key.replaceAll("_"," ")+": "+moduleLabel(record[key])).join(" · ");
+    addTextElement(primary,"span","muted",details); row.append(primary);
+    const actions=document.createElement("div"); actions.className="editor-actions";
+    const edit=document.createElement("button"); edit.type="button"; edit.className="secondary-button"; edit.textContent="Edit";
+    edit.addEventListener("click",()=>{
+      const form=document.querySelector('[data-module-form="'+moduleName+'"]'); form.dataset.editId=record.id;
+      for (const [key] of config.fields) {
+        const input=form.elements.namedItem(key); if (!input) continue;
+        if (input.type==="checkbox") input.checked=Boolean(record[key]);
+        else if (key==="image_paths") input.value=Array.isArray(record[key])?record[key].join("\n"):"";
+        else input.value=record[key]==null?"":String(record[key]);
+      }
+      document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Edit "+config.title;
+      document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Update "+config.title;
+      document.querySelector('[data-module-cancel="'+moduleName+'"]').hidden=false;
+      setModuleMessage(moduleName,""); form.scrollIntoView({behavior:"smooth",block:"start"});
+    });
+    const remove=document.createElement("button"); remove.type="button"; remove.className="secondary-button"; remove.textContent="Delete";
+    remove.addEventListener("click",async()=>{
+      const displayName=record.name||record.title||record.slug||"this record";
+      if (!window.confirm('Delete "'+displayName+'"? This cannot be undone.')) return;
+      remove.disabled=true;
+      try {
+        const {error}=await supabase.from(config.table).delete().eq("id",record.id);
+        if (error) throw error;
+        setModuleMessage(moduleName,config.title+" deleted.","success"); await loadContentModule(moduleName);
+      } catch(error) { setModuleMessage(moduleName,error.message||"Could not delete this record.","error"); remove.disabled=false; }
+    });
+    actions.append(edit,remove); row.append(actions); container.append(row);
+  }
+}
+async function loadContentModule(moduleName) {
+  if (!ownerDashboard || !["owner","admin"].includes(currentDashboardRole)) return;
+  const config=dashboardContentModules[moduleName];
+  const container=document.querySelector('[data-module-list="'+moduleName+'"]');
+  if (container) { container.replaceChildren(); addTextElement(container,"p","muted","Loading records…"); }
+  const {data,error}=await supabase.from(config.table).select("*").order("created_at",{ascending:false});
+  if (error) {
+    if (container) { container.replaceChildren(); addTextElement(container,"p","muted",error.message||"Could not load records."); }
+    return;
+  }
+  renderModuleList(moduleName,data||[]);
+}
+for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
+  const fieldsHost=document.querySelector('[data-module-fields="'+moduleName+'"]');
+  const form=document.querySelector('[data-module-form="'+moduleName+'"]');
+  if (!fieldsHost||!form) continue;
+  for (const field of config.fields) fieldsHost.append(createModuleField(field));
+  form.addEventListener("submit",async(event)=>{
+    event.preventDefault();
+    if (!["owner","admin"].includes(currentDashboardRole)) { setModuleMessage(moduleName,"Admin permission required.","error"); return; }
+    const submit=document.querySelector('[data-module-submit="'+moduleName+'"]'); submit.disabled=true; setModuleMessage(moduleName,"Saving…");
+    try {
+      const payload={};
+      for (const [key] of config.fields) {
+        const input=form.elements.namedItem(key); if (!input) continue;
+        if (input.type==="checkbox") payload[key]=input.checked;
+        else if (key==="image_paths") payload[key]=input.value.split(/\r?\n/).map((item)=>item.trim()).filter(Boolean);
+        else if (input.type==="number") payload[key]=input.value===""?null:Number(input.value);
+        else payload[key]=input.value.trim()===""?null:input.value.trim();
+      }
+      if (moduleName==="products") {
+        if (!payload.currency) payload.currency="SAR";
+        if (payload.stock_qty==null) payload.stock_qty=0;
+        if (!payload.category_group) payload.category_group="mobile";
+        if (!payload.condition) payload.condition="new";
+        if (!payload.status) payload.status="draft";
+        if (!payload.image_paths) payload.image_paths=[];
+      }
+      if (moduleName==="services"&&!payload.status) payload.status="draft";
+      if (moduleName==="workshops") {
+        if (!payload.status) payload.status="draft";
+        const {data:authData}=await supabase.auth.getUser();
+        if (authData?.user?.id) payload.updated_by=authData.user.id;
+      }
+      const editId=form.dataset.editId; let result;
+      if (editId) result=await supabase.from(config.table).update(payload).eq("id",editId);
+      else {
+        if (moduleName==="workshops") {
+          const {data:authData}=await supabase.auth.getUser();
+          if (authData?.user?.id) payload.created_by=authData.user.id;
+        }
+        result=await supabase.from(config.table).insert(payload);
+      }
+      if (result.error) throw result.error;
+      resetModuleForm(moduleName); setModuleMessage(moduleName,config.title+(editId?" updated.":" created."),"success");
+      await loadContentModule(moduleName);
+    } catch(error) { setModuleMessage(moduleName,error.message||"Could not save this record.","error"); }
+    finally { submit.disabled=false; }
+  });
+  document.querySelector('[data-module-cancel="'+moduleName+'"]')?.addEventListener("click",()=>resetModuleForm(moduleName));
+  document.querySelector('[data-module-refresh="'+moduleName+'"]')?.addEventListener("click",()=>void loadContentModule(moduleName));
+  document.querySelector('[data-dashboard-tab="'+moduleName+'"]')?.addEventListener("click",()=>void loadContentModule(moduleName));
+}
+
+
 // Dashboard module tabs: all modules stay on one horizontal row.
 const dashboardTabs = Array.from(document.querySelectorAll("[data-dashboard-tab]"));
 const dashboardPanels = Array.from(document.querySelectorAll("[data-dashboard-panel]"));
