@@ -1,38 +1,32 @@
-# Admin Authentication and Authorization
+# Account Authentication and Authorization
 
-## Production identity
+## Identity
 - Supabase Auth email/password is the identity provider.
-- The static site uses the public publishable key only.
+- The static frontend uses only the Supabase publishable key.
 - The authenticated user's UUID comes from the verified Supabase session.
-- `3btechhub@gmail.com` is the highest-authority Owner; its Owner role is stored in `public.user_roles`.
-- No browser-supplied email, role or user UUID is sufficient authorization by itself.
+- `3btechhub@gmail.com` is the fixed primary Owner in `public.user_roles`.
+- Browser-supplied email, role or user UUID is never sufficient authorization.
 
-## Access rules
-- Owner: full authority, including role assignment and system-level actions.
-- Admin: only explicitly delegated catalogue/content operations; cannot grant or modify Owner roles.
-- Manager/Editor/Staff: no authority unless a matching RLS policy and tested workflow explicitly grants it.
-- Customer: own profile only.
-- Anonymous visitor: public active/published content only.
+## User types
+- Owner: full access to all approved modules; fixed and protected.
+- Admin: Overview, Audit and Page management; cannot manage users, roles, permissions or system settings.
+- Member: own Account and Profile only, plus public pages.
+- Visitor: anonymous public access only; no Auth role row.
 
 ## Enforcement
-- Every exposed table has RLS enabled.
-- UPDATE policies must include both `USING` and `WITH CHECK`.
-- Role-management writes must be Owner-only.
-- Public visitors must not have INSERT, UPDATE or DELETE table privileges.
+- RLS is enabled on every exposed application table.
+- UPDATE policies include both `USING` and `WITH CHECK`.
+- User-role changes are Owner-only.
+- Anonymous visitors receive no application-table write privileges.
 - Never authorize from user-editable metadata or hidden UI controls.
 - Never expose Supabase secret/service-role keys in client code.
 
-## Audit events
+## Audit
 - Record actor UUID, action, resource type, resource ID and changed column names.
-- Never store passwords, tokens, API keys, complete profile rows or other unnecessary personal data.
-- Audit records are append-only for application roles and readable only by authorized admins.
+- Never store passwords, tokens, API keys, complete profile rows or unnecessary personal data.
+- Audit records are append-only for application roles and readable by Admin/Owner.
 
 ## Owner administration endpoint
-The `owner-users` Supabase Edge Function is deployed with JWT verification enabled. It checks the caller's verified Auth session and the `owner` role before allowing user listing, invitations, role changes, block/unblock and password-reset email requests. It uses the service-role key only inside the Edge Function runtime and writes an actor-attributed audit event for each operation.
+The `owner-users` Edge Function checks the caller's verified Auth session and the Owner role before listing users, inviting Members/Admins, changing roles, blocking/unblocking accounts or sending password-reset emails. The service-role key remains inside the Edge Function runtime only.
 
-The primary Owner account cannot be blocked or demoted. The Owner role cannot be assigned through the user-management endpoint. Admins cannot invoke the endpoint.
-
-## Remaining verification
-- Run browser-level tests for Owner, Admin and Customer access paths.
-- Verify invite and password-reset emails against the configured Supabase Auth redirect URL and SMTP settings.
-- Verify blocked users cannot continue an existing session after token/session refresh.
+The primary Owner cannot be blocked, demoted, deleted or replaced. The Owner role cannot be granted through the user-management endpoint. Admins cannot invoke this endpoint.
