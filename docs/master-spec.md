@@ -49,6 +49,7 @@ Services, Products, Workshops and Technicians are approved content-management mo
 - Technicians: Name (required), Slug (required), Description, Skill, Category, Country, Image, Visibility.
 - Slugs are generated from Name automatically and remain manually editable; they must be unique.
 - Image files are uploaded directly to Supabase Storage and can be removed or replaced.
+- In every content module, show the uploaded image when present; if absent or failed to load, show a module-appropriate fallback icon. Technicians alone use a human avatar fallback.
 - Only Name and Slug are required; all other fields are optional.
 
 ## 5. User types
