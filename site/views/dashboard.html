@@ -1,0 +1,121 @@
+<main class="dashboard-main" id="owner-dashboard">
+    <div class="dashboard-heading">
+      <div><h1 data-label="dashboard">Dashboard</h1><p id="dashboard-owner-email" class="dashboard-owner"></p></div>
+    </div>
+
+    <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
+      <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" data-label="overview" aria-controls="panel-overview" aria-selected="true" data-dashboard-tab="overview">Overview</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-services" data-label="services" aria-controls="panel-services" aria-selected="false" data-dashboard-tab="services" tabindex="-1">Services</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" data-label="products" aria-controls="panel-products" aria-selected="false" data-dashboard-tab="products" tabindex="-1">Products</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshops" data-label="workshops" aria-controls="panel-workshops" aria-selected="false" data-dashboard-tab="workshops" tabindex="-1">Workshops</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-technicians" data-label="technicians" aria-controls="panel-technicians" aria-selected="false" data-dashboard-tab="technicians" tabindex="-1">Technicians</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-audit" data-label="audit" aria-controls="panel-audit" aria-selected="false" data-dashboard-tab="audit" tabindex="-1">Audit</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" data-label="user" aria-controls="panel-user" aria-selected="false" data-dashboard-tab="user" tabindex="-1">User</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" data-label="role" aria-controls="panel-role" aria-selected="false" data-dashboard-tab="role" tabindex="-1">Role</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" data-label="permission" aria-controls="panel-permission" aria-selected="false" data-dashboard-tab="permission" tabindex="-1">Permission</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" data-label="settings" aria-controls="panel-settings" aria-selected="false" data-dashboard-tab="settings" tabindex="-1">Settings</button>
+    </nav>
+
+    <section class="dashboard-module-panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-dashboard-panel="overview">
+      <div class="dashboard-grid" aria-label="Website overview">
+        <section class="dashboard-card"><h2 data-label="users">Users</h2><div class="dashboard-count" id="dashboard-users-count">…</div></section>
+        <section class="dashboard-card"><h2 data-label="audit">Audit</h2><div class="dashboard-count" id="dashboard-audit-count">…</div></section>
+        <section class="dashboard-card"><h2 data-label="settings">Settings</h2><div class="dashboard-count" id="dashboard-settings-count">…</div></section>
+      </div>
+    </section>
+
+    <section class="dashboard-module-panel" id="panel-services" role="tabpanel" aria-labelledby="tab-services" data-dashboard-panel="services" hidden>
+      <div class="admin-list">
+        <div class="dashboard-heading"><div><h2 data-label="services">Services Management</h2><p class="muted">Create, edit, publish and remove services.</p></div><button class="secondary-button" type="button" data-module-refresh="services">Refresh</button></div>
+        <form class="content-editor-form" data-module-form="services">
+          <h3 data-module-form-title="services">Add service</h3>
+          <div class="module-form-grid" data-module-fields="services"></div>
+          <div class="editor-actions"><button type="submit" data-module-submit="services">Save service</button><button class="secondary-button" type="button" data-module-cancel="services" hidden>Cancel Edit</button></div>
+          <p class="editor-message" role="status" data-module-message="services"></p>
+        </form>
+        <div class="admin-list" data-module-list="services" aria-live="polite"><p class="muted">Open this module to load records.</p></div>
+      </div>
+    </section>
+
+    <section class="dashboard-module-panel" id="panel-products" role="tabpanel" aria-labelledby="tab-products" data-dashboard-panel="products" hidden>
+      <div class="admin-list">
+        <div class="dashboard-heading"><div><h2 data-label="products">Products Management</h2><p class="muted">Create, edit, publish and remove products.</p></div><button class="secondary-button" type="button" data-module-refresh="products">Refresh</button></div>
+        <form class="content-editor-form" data-module-form="products">
+          <h3 data-module-form-title="products">Add product</h3>
+          <div class="module-form-grid" data-module-fields="products"></div>
+          <div class="editor-actions"><button type="submit" data-module-submit="products">Save product</button><button class="secondary-button" type="button" data-module-cancel="products" hidden>Cancel Edit</button></div>
+          <p class="editor-message" role="status" data-module-message="products"></p>
+        </form>
+        <div class="admin-list" data-module-list="products" aria-live="polite"><p class="muted">Open this module to load records.</p></div>
+      </div>
+    </section>
+
+    <section class="dashboard-module-panel" id="panel-workshops" role="tabpanel" aria-labelledby="tab-workshops" data-dashboard-panel="workshops" hidden>
+      <div class="admin-list">
+        <div class="dashboard-heading"><div><h2 data-label="workshops">Workshops Management</h2><p class="muted">Create, edit, publish and remove workshops.</p></div><button class="secondary-button" type="button" data-module-refresh="workshops">Refresh</button></div>
+        <form class="content-editor-form" data-module-form="workshops">
+          <h3 data-module-form-title="workshops">Add workshop</h3>
+          <div class="module-form-grid" data-module-fields="workshops"></div>
+          <div class="editor-actions"><button type="submit" data-module-submit="workshops">Save workshop</button><button class="secondary-button" type="button" data-module-cancel="workshops" hidden>Cancel Edit</button></div>
+          <p class="editor-message" role="status" data-module-message="workshops"></p>
+        </form>
+        <div class="admin-list" data-module-list="workshops" aria-live="polite"><p class="muted">Open this module to load records.</p></div>
+      </div>
+    </section>
+
+    <section class="dashboard-module-panel" id="panel-technicians" role="tabpanel" aria-labelledby="tab-technicians" data-dashboard-panel="technicians" hidden>
+      <div class="admin-list">
+        <div class="dashboard-heading"><div><h2 data-label="technicians">Technicians Management</h2><p class="muted">Create, edit, publish and remove technicians.</p></div><button class="secondary-button" type="button" data-module-refresh="technicians">Refresh</button></div>
+        <form class="content-editor-form" data-module-form="technicians">
+          <h3 data-module-form-title="technicians">Add technician</h3>
+          <div class="module-form-grid" data-module-fields="technicians"></div>
+          <div class="editor-actions"><button type="submit" data-module-submit="technicians">Save technician</button><button class="secondary-button" type="button" data-module-cancel="technicians" hidden>Cancel Edit</button></div>
+          <p class="editor-message" role="status" data-module-message="technicians"></p>
+        </form>
+        <div class="admin-list" data-module-list="technicians" aria-live="polite"><p class="muted">Open this module to load records.</p></div>
+      </div>
+    </section>
+
+    <section class="dashboard-module-panel" id="panel-audit" role="tabpanel" aria-labelledby="tab-audit" data-dashboard-panel="audit" hidden>
+      <div class="admin-list">
+        <div class="dashboard-heading"><h2 data-label="auditHistory">Audit History</h2><button class="secondary-button" id="audit-refresh" type="button" data-label="refresh">Refresh</button></div>
+        <div id="audit-log-list" aria-live="polite"><p class="muted">Select Audit to load recent activity.</p></div>
+      </div>
+    </section>
+
+    <section class="dashboard-module-panel" id="panel-user" role="tabpanel" aria-labelledby="tab-user" data-dashboard-panel="user" hidden>
+      <form id="user-invite-form" class="content-editor-form">
+        <h2 data-label="inviteUser">Invite User</h2>
+        <p class="muted">Owner is fixed and cannot be changed. Visitor access is public and does not require an account.</p>
+        <label><span data-label="emailAddress">Email Address</span><input name="email" type="email" maxlength="254" autocomplete="email" required></label>
+        <label><span data-label="userType">User Type</span><select name="role" required><option value="member">Member</option><option value="admin">Admin</option></select></label>
+        <div class="editor-actions"><button type="submit" id="user-invite-submit" data-label="sendInvitation">Send Invitation</button><button type="button" id="user-refresh" class="secondary-button" data-label="refreshUsers">Refresh Users</button></div>
+        <p class="editor-message" id="user-message" role="status"></p>
+      </form>
+      <div class="admin-list"><h2 data-label="userList">User List</h2><div id="user-admin-items"></div></div>
+    </section>
+
+    <section class="dashboard-module-panel" id="panel-role" role="tabpanel" aria-labelledby="tab-role" data-dashboard-panel="role" hidden>
+      <div class="admin-list"><h2 data-label="roleAssignments">Role Assignments</h2><p class="muted">Only Owner can assign or change account roles. Owner is protected.</p><div id="role-summary-list"></div></div>
+    </section>
+
+    <section class="dashboard-module-panel" id="panel-permission" role="tabpanel" aria-labelledby="tab-permission" data-dashboard-panel="permission" hidden>
+      <div class="admin-list">
+        <h2 data-label="permissionMatrix">Permission Matrix</h2>
+        <div class="admin-list-row"><strong>Owner</strong><span>Full access to all approved modules and system settings.</span></div>
+        <div class="admin-list-row"><strong>Admin</strong><span>Overview and Audit. No user, role or system settings administration.</span></div>
+        <div class="admin-list-row"><strong>Member</strong><span>Own account and profile only.</span></div>
+        <div class="admin-list-row"><strong>Visitor</strong><span>Public website access only.</span></div>
+      </div>
+    </section>
+
+    <section class="dashboard-module-panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-dashboard-panel="settings" hidden>
+      <form id="site-settings-form" class="content-editor-form">
+        <h2 data-label="websiteSettings">Website Settings</h2>
+        <label><span data-label="websiteTitle">Website Title</span><input name="website_title" maxlength="100" placeholder="3B TECH HUB"></label>
+        <label><span data-label="logoUrl">Logo URL (optional)</span><input name="logo_url" type="url" maxlength="1000" placeholder="https://…"></label>
+        <div class="editor-actions"><button type="submit" id="site-settings-save" data-label="saveSettings">Save Settings</button></div>
+        <p class="editor-message" id="site-settings-message" role="status"></p>
+      </form>
+    </section>
+  </main>
