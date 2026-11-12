@@ -893,6 +893,29 @@ function resetModuleForm(moduleName) {
   document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Save "+config.title;
   document.querySelector('[data-module-cancel="'+moduleName+'"]').hidden=true;
 }
+function createModuleRecordVisual(moduleName,photoUrl) {
+  const visual=document.createElement("span");
+  visual.className="module-record-visual";
+  const fallback=document.createElement("span");
+  fallback.className="module-record-fallback";
+  fallback.setAttribute("aria-hidden","true");
+  const fallbacks={services:"🔧",products:"📦",workshops:"🎓",technicians:"👤"};
+  fallback.textContent=fallbacks[moduleName]||"◆";
+  if (moduleName==="technicians") fallback.classList.add("module-record-fallback--person");
+  const image=document.createElement("img");
+  image.className="module-record-image";
+  image.alt="";
+  image.loading="lazy";
+  image.hidden=!photoUrl;
+  fallback.hidden=Boolean(photoUrl);
+  image.addEventListener("error",()=>{
+    image.hidden=true;
+    fallback.hidden=false;
+  });
+  if (photoUrl) image.src=photoUrl;
+  visual.append(image,fallback);
+  return visual;
+}
 function renderModuleList(moduleName,records) {
   const config=dashboardContentModules[moduleName];
   const container=document.querySelector('[data-module-list="'+moduleName+'"]');
@@ -902,16 +925,17 @@ function renderModuleList(moduleName,records) {
   for (const record of records) {
     const row=document.createElement("article"); row.className="admin-list-row module-record-row";
     const primary=document.createElement("div");
-    addTextElement(primary,"strong","",record.name||record.title||record.slug||"Untitled");
+    primary.className="module-record-primary";
+    primary.append(createModuleRecordVisual(moduleName,record.photo_url));
+    const textContent=document.createElement("div"); textContent.className="module-record-text";
+    addTextElement(textContent,"strong","",record.name||record.title||record.slug||"Untitled");
     const details=config.columns.map((key)=>{
       const value=key==="visibility"?recordVisibility(moduleName,record)
         :key==="technician"?record.trainer:record[key];
       return key.replaceAll("_"," ")+": "+moduleLabel(value);
     }).join(" · ");
-    addTextElement(primary,"span","muted",details);
-    if (record.photo_url) {
-      const thumb=document.createElement("img"); thumb.className="module-record-image"; thumb.src=record.photo_url; thumb.alt=""; thumb.loading="lazy"; primary.append(thumb);
-    }
+    addTextElement(textContent,"span","muted",details);
+    primary.append(textContent);
     row.append(primary);
     const actions=document.createElement("div"); actions.className="editor-actions";
     const edit=document.createElement("button"); edit.type="button"; edit.className="secondary-button"; edit.textContent="Edit";
