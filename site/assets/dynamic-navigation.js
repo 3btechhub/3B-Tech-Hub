@@ -1,6 +1,5 @@
 const RESERVED_ROOTS = new Set([
-  "login", "profile", "dashboard", "services", "products", "workshop",
-  "technicians", "bd", "saudi", "global", "assets", "auth"
+  "account", "login", "profile", "dashboard", "bd", "ksa", "global", "assets", "auth"
 ]);
 const ROOT_PATH = new URL("../", import.meta.url).pathname;
 
