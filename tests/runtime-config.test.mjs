@@ -72,3 +72,9 @@ test("runtime config loader fails closed when setting is unavailable", async () 
   const client = { from: () => ({ select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: new Error("offline") }) }) }) }) }) };
   assert.equal(await loadRuntimeConfig(client), null);
 });
+
+
+test("runtime theme colors reject non-monochrome values", () => {
+  assert.equal(isSafeRuntimeValue("page_bg", "#ff0000"), false);
+  assert.equal(isSafeRuntimeValue("page_bg", "#111111"), true);
+});
