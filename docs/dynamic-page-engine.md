@@ -27,8 +27,17 @@ The database stores content and validated configuration only. It never stores ex
 ## Initial registered components
 `hero`, `rich_text`, `image`, `card_grid`, `button_group`, `faq`, `spacer`.
 
+## Owner/Admin Page Builder
+- Owner/Admin dashboard includes Main/Sub Page CRUD, Draft/Publish/Archive, structured component editing, ordering, preview, SEO fields and revision restore.
+- Published pages automatically appear in the matching-language navigation; drafts and archived pages stay hidden.
+- Sub Pages are grouped under their Main Page in navigation and use nested URLs.
+- The navigation uses the existing page schema; no arbitrary HTML, script or SQL is evaluated.
+
+## Automated verification
+- Node tests validate safe slugs, reserved static route protection, Main/Sub grouping and sort order.
+- A Chromium browser test checks rendered navigation links and verifies dynamic page content is inserted as text rather than executable markup.
+- GitHub Actions runs the syntax, regression and browser checks before allowing Pages deployment.
+
 ## Remaining work
-1. Owner/Admin page editor (create, edit, reorder, draft, publish, archive).
-2. Revision snapshot creation and restore workflow.
-3. Navigation and SEO integration.
-4. Browser end-to-end tests and visual verification.
+1. Run the PR checks and fix any failures.
+2. Verify live navigation and deep links in a real browser after an authorized deployment.
