@@ -781,3 +781,15 @@ html:not([data-country-ready="true"]) body{visibility:hidden}
 button[data-size="small"],input[data-size="small"],select[data-size="small"],textarea[data-size="small"]{min-height:32px;font-size:var(--text-small)}
 button[data-size="medium"],input[data-size="medium"],select[data-size="medium"],textarea[data-size="medium"]{font-size:var(--text-medium)}
 button[data-size="large"],input[data-size="large"],select[data-size="large"],textarea[data-size="large"]{min-height:48px;font-size:var(--text-large)}
+
+
+/* Country and language dropdowns, including RTL presentation */
+.menu-dropdown{position:relative;flex:1;min-width:0}
+.menu-dropdown-trigger{width:100%;min-height:38px;padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--page-text);font-size:var(--text-medium);text-align:center;cursor:pointer}
+.menu-dropdown-options{position:absolute;top:calc(100% + 5px);left:0;right:0;z-index:30;display:grid;gap:2px;max-height:240px;overflow:auto;padding:5px;border:1px solid var(--line);border-radius:8px;background:var(--surface);box-shadow:0 8px 24px #00000020}
+.menu-dropdown-options[hidden]{display:none}
+.menu-dropdown-option{width:100%;min-height:34px;padding:7px 9px;border:0;border-radius:5px;background:transparent;color:var(--page-text);font-size:var(--text-medium);text-align:center;cursor:pointer}
+.menu-dropdown-option:hover,.menu-dropdown-option.is-selected{background:var(--hover)}
+html[dir="rtl"] .site-menu .menu-link{text-align:right}
+html[dir="rtl"] .menu-dropdown-option,html[dir="rtl"] .menu-dropdown-trigger{text-align:right}
+html[dir="rtl"] .admin-list-row{direction:rtl}
