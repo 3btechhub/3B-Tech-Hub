@@ -371,7 +371,7 @@ if (root) {
     <div class="page-builder-layout">
       <section class="page-builder-column">
         <h2>Pages</h2>
-        <p class="muted">Create and manage Main Pages and their Sub Pages.</p>
+        <p class="muted">Create and manage Main Pages and their Sub Pages. Published pages appear automatically in the matching-language site menu; Draft and Archived pages stay hidden.</p>
         <div id="page-list"></div>
       </section>
       <section class="page-builder-column">
