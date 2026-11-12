@@ -6,8 +6,11 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szacT
 const root = document.querySelector("#page-builder-root");
 if (root) {
   await window.countryContextReady;
-  const routeDefault = window.siteCountry?.region === "bd" ? "bn" : window.siteCountry?.region === "ksa" ? "ar" : "en";
-  const routeLocale = ["en", "bn", "ar"].includes(document.documentElement.lang) ? document.documentElement.lang : routeDefault;
+  const activeRegion = window.siteCountry?.region || "global";
+  const routeDefault = activeRegion === "bd" ? "bn" : activeRegion === "ksa" ? "ar" : "en";
+  let savedLocale = null;
+  try { savedLocale = localStorage.getItem("3b-language-" + activeRegion); } catch (_) {}
+  const routeLocale = ["en", "bn", "ar"].includes(savedLocale) ? savedLocale : routeDefault;
   const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
   const $ = (selector) => root.querySelector(selector);
   const componentTypes = ["hero", "rich_text", "image", "card_grid", "button_group", "faq", "spacer"];
