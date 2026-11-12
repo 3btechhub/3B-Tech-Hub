@@ -27,9 +27,9 @@ function addTextElement(parent, tag, className, value) {
 }
 
 const translations = {
-  en: {home:"Home",profile:"Profile",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
-  bn: {home:"হোম",profile:"প্রোফাইল",login:"লগইন",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"},
-  ar: {home:"الرئيسية",profile:"الملف الشخصي",login:"تسجيل الدخول",logout:"تسجيل الخروج",dashboard:"لوحة التحكم",accountLogin:"تسجيل الدخول إلى الحساب",dark:"تفعيل الوضع الداكن",light:"تفعيل الوضع الفاتح"}
+  en: {home:"Home",profile:"Profile",login:"Account",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode"},
+  bn: {home:"হোম",profile:"প্রোফাইল",login:"অ্যাকাউন্ট",logout:"লগআউট",dashboard:"ড্যাশবোর্ড",accountLogin:"অ্যাকাউন্টে লগইন",dark:"ডার্ক মোড চালু করুন",light:"লাইট মোড চালু করুন"},
+  ar: {home:"الرئيسية",profile:"الملف الشخصي",login:"الحساب",logout:"تسجيل الخروج",dashboard:"لوحة التحكم",accountLogin:"تسجيل الدخول إلى الحساب",dark:"تفعيل الوضع الداكن",light:"تفعيل الوضع الفاتح"}
 };
 function applyLanguage(language) {
   const lang = ["bn", "ar"].includes(language) ? language : "en";
