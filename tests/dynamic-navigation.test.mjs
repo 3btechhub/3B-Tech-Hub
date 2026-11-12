@@ -11,7 +11,8 @@ test("only safe URL slugs are accepted", () => {
 
 test("reserved static routes cannot be replaced by dynamic pages", () => {
   assert.equal(dynamicPageHref({ page_type: "main", slug: "login" }), null);
-  assert.equal(dynamicPageHref({ page_type: "main", slug: "services" }), null);
+  assert.equal(dynamicPageHref({ page_type: "main", slug: "services" }).endsWith("/services/"), true);
+  assert.equal(dynamicPageHref({ page_type: "main", slug: "ksa" }), null);
   assert.ok(dynamicPageHref({ page_type: "main", slug: "about-us" }).endsWith("/about-us/"));
 });
 
