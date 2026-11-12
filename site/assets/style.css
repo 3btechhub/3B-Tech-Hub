@@ -816,3 +816,7 @@ html[dir="rtl"] .admin-list-row{direction:rtl}
 .home-page-card h3{margin:15px 15px 8px;font-size:17px}
 .home-page-description,.home-page-meta{margin:0 15px 12px}
 @media(max-width:480px){.home-main.has-home-content{padding:24px 16px 36px}.home-page-card img{height:160px}}
+
+.dynamic-page-main{flex:1;width:min(900px,100%);margin:0 auto;padding:34px 22px 48px}
+.dynamic-page-image{display:block;width:min(100%,760px);max-height:520px;object-fit:contain;margin:22px auto;border-radius:10px}
+.dynamic-page-details{color:var(--muted);font-size:14px;line-height:1.6;overflow-wrap:anywhere}
