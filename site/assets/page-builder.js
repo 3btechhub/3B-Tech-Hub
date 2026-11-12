@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { renderPage } from "./page-engine.js";
 
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szacT";
@@ -391,7 +392,7 @@ if (root) {
             <label class="page-builder-field"><span>SEO Title</span><input id="page-seo-title" maxlength="180"></label>
             <label class="page-builder-field"><span>SEO Description</span><textarea id="page-seo-description" rows="2" maxlength="300"></textarea></label>
           </details>
-          <div class="editor-actions"><button id="page-save" type="submit">Save Page</button><button id="page-cancel" type="button" class="secondary-button" hidden>Cancel</button></div>
+          <div class="editor-actions"><button id="page-save" type="submit">Save Page</button><button id="page-preview-button" type="button" class="secondary-button">Preview</button><button id="page-cancel" type="button" class="secondary-button" hidden>Cancel</button></div>
         </form>
         <section class="page-builder-subsection">
           <form id="component-form" class="content-editor-form">
@@ -402,6 +403,7 @@ if (root) {
           </form>
           <h3>Page Components</h3><div id="component-list"></div>
         </section>
+        <section class="page-builder-subsection"><h3>Preview</h3><div id="page-preview" class="dynamic-page-main" hidden></div></section>
         <section class="page-builder-subsection"><h3>Revision History</h3><div id="revision-list"></div></section>
       </section>
     </div>
@@ -413,6 +415,15 @@ if (root) {
   $("#page-title").addEventListener("input", () => { if (!$("#page-id").value) $("#page-slug").value = slugify($("#page-title").value); });
   $("#page-form").addEventListener("submit", savePage);
   $("#page-cancel").addEventListener("click", resetPageForm);
+  $("#page-preview-button").addEventListener("click", () => {
+    if (!selectedPage) return message("Save the page before previewing its components.", true);
+    const preview = $("#page-preview");
+    const page = { ...selectedPage, title: $("#page-title").value.trim() || selectedPage.title };
+    renderPage(page, components, preview);
+    preview.hidden = false;
+    preview.scrollIntoView({ behavior: "smooth", block: "start" });
+    message("Preview generated from the current saved components.");
+  });
   $("#component-type").addEventListener("change", () => configFields($("#component-type").value));
   $("#component-form").addEventListener("submit", saveComponent);
   $("#component-cancel").addEventListener("click", () => editComponent());
