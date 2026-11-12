@@ -1,43 +1,43 @@
 # 3B TECH HUB
 
-**3B TECH HUB** is the only official brand name. No expanded or alternate brand name is used.
+**3B TECH HUB** is the only official brand name.
 
-The production website is a static, mobile-first frontend published by **GitHub Pages**. Supabase provides email/password authentication, PostgreSQL, Row Level Security and Storage.
+The approved product scope is defined in [docs/master-spec.md](docs/master-spec.md). All production code, routes, database features and UI must follow that specification exactly.
 
-## Platform policy
+## Platform
 
 - GitHub: source repository, CI/CD and static website hosting through GitHub Pages.
-- Supabase: Auth, PostgreSQL, RLS, Storage and Edge Functions.
+- Supabase: email/password Auth, PostgreSQL, Row Level Security, Storage only where required, and Edge Functions.
 - No Vercel, Appwrite, Cloudflare, or other hosting provider is used.
 
-## Website requirements
+## Approved website
 
-- Use only **3B TECH HUB** as the brand name everywhere.
-- Homepage main content: “3B TECH HUB”; keep the custom header and footer.
-- Login uses email and password only. Google OAuth is not included.
-- The login UI remains minimal: placeholder inputs and a simple submit button.
-- Supabase publishable key is public by design; all data access must be protected by RLS.
-- Never expose a Supabase secret/service-role key in the browser.
+- Structure: Home, Account, Profile, Dashboard, Page and Sub Page.
+- Shared layout: Header, Main Area and Footer.
+- Dashboard modules: Overview, Audit, Page, User, Role, Permission and Settings.
+- User types: Owner, Admin, Member and Visitor.
+- Country routes: `global`, `bd`, `ksa`.
+- Default languages: English for Global, Bangla for Bangladesh and Arabic for Saudi Arabia.
+- Theme: monochrome black and white with neutral gray hierarchy.
 
-## Deploy
+## Country and language behavior
 
-The `.github/workflows/deploy-pages.yml` workflow validates and publishes the `site/` directory. GitHub Pages must be configured to use GitHub Actions in repository Settings → Pages. The expected project-site URL is:
+The first entry attempts IP country detection. Bangladesh routes to `/bd/`, Saudi Arabia to `/ksa/`, and all other countries or detection failures to `/global/`. A visitor can change the route from the menu. Language can be changed independently without changing the route.
+
+## Fixed Owner
+
+The primary Owner is `3btechhub@gmail.com`. The Owner role must never be demoted, deleted, blocked or replaced. Authorization is enforced by Supabase RLS and trusted Edge Functions, not by UI visibility.
+
+## Deployment
+
+GitHub Pages publishes the `site/` directory. Expected project URL:
 
 `https://3btechhub.github.io/3btechhub/`
 
-The static release includes the public catalogue, profile/authentication flows, Owner/Admin catalogue CRUD, a searchable Supabase Media Library, Owner-only user administration and website profile settings. A complete content revision/page-builder workflow and a full database-plus-Storage backup/restore process remain pending.
-
-## Supabase
-
-- Project: `sburxeuxkrilbfppxylm`
-- Region: `ap-northeast-1`
-- Auth provider: email/password only.
-- RLS is enabled on all 10 public application tables. Anonymous write grants have been revoked, role changes are Owner-only, and audit triggers are active.
-- The verified Owner account `3btechhub@gmail.com` already has the `owner` role. Never change or remove this primary Owner assignment.
-
 ## Validation
 
-- `npm test` — built-in Node.js regression tests.
-- `npm run validate` — browser-module syntax checks plus regression tests.
-- GitHub Actions validates required static routes and deployment artifacts.
-- GitHub Pages workflow validates the deployed static assets.
+- `npm test` — Node.js regression tests.
+- `npm run validate` — JavaScript syntax checks and regression tests.
+- GitHub Actions validates the required route files and deployable static assets.
+
+The master-spec refactor is being prepared on `refactor/master-spec-2026-11-12`. It must pass CI and receive a database migration review before merging to `main`.
