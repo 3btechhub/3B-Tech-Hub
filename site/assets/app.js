@@ -81,6 +81,7 @@ if (languageSelect) {
       void renderDynamicRoute(supabase);
       void renderDynamicNavigation(supabase);
 void renderHomeSections(supabase);
+void renderHomeSections(supabase);
     }
   };
   languageSelect.addEventListener("change", changeLanguage);
