@@ -31,7 +31,7 @@ function addTextElement(parent, tag, className, value) {
   return node;
 }
 
-const translations = { en: {home:"Home",profile:"Profile",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode",overview:"Overview",services:"Services",products:"Products",workshops:"Workshops",technicians:"Technicians",contacts:"Contacts",audit:"Audits & Logs",user:"User",role:"Role",permission:"Permission",settings:"Settings",users:"Users",refresh:"Refresh",auditHistory:"Audit History",inviteUser:"Invite User",userType:"User Type",emailAddress:"Email Address",sendInvitation:"Send Invitation",refreshUsers:"Refresh Users",userList:"User List",roleAssignments:"Role Assignments",permissionMatrix:"Permission Matrix",websiteSettings:"Website Settings",websiteTitle:"Website Title",logoUrl:"Logo URL (optional)",saveSettings:"Save Settings",signIn:"Sign In",forgotPassword:"Forgot password?",createAccount:"Create account",verificationCode:"Verification Code",name:"Name",email:"Email",phoneNumber:"Phone Number",password:"Password",changePassword:"Change Password",edit:"Edit",currentPassword:"Current Password",newPassword:"New Password",confirmPassword:"Confirm New Password",updatePassword:"Update Password",verifyCodeReset:"Verify Code & Reset Password",loginAccount:"Login Account"} };
+const translations = { en: {home:"Home",profile:"Profile",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode",services:"Services",products:"Products",workshops:"Workshops",technicians:"Technicians",contacts:"Contacts",user:"User",role:"Role",permission:"Permission",settings:"Settings",users:"Users",refresh:"Refresh",inviteUser:"Invite User",userType:"User Type",emailAddress:"Email Address",sendInvitation:"Send Invitation",refreshUsers:"Refresh Users",userList:"User List",roleAssignments:"Role Assignments",permissionMatrix:"Permission Matrix",websiteSettings:"Website Settings",websiteTitle:"Website Title",logoUrl:"Logo URL (optional)",saveSettings:"Save Settings",signIn:"Sign In",forgotPassword:"Forgot password?",createAccount:"Create account",verificationCode:"Verification Code",name:"Name",email:"Email",phoneNumber:"Phone Number",password:"Password",changePassword:"Change Password",edit:"Edit",currentPassword:"Current Password",newPassword:"New Password",confirmPassword:"Confirm New Password",updatePassword:"Update Password",verifyCodeReset:"Verify Code & Reset Password",loginAccount:"Login Account"} };
 function applyEnglishText() {
   document.documentElement.lang = "en";
   document.documentElement.dir = "ltr";
@@ -672,24 +672,24 @@ if(siteSettingsForm)void loadSiteSettingsForm();
 // Core content modules: each module uses its existing Supabase table and RLS policies.
 const dashboardContentModules = {
   services: { table:"services", title:"Service", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","text",false],
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["images","Images","files",false],["products","Products","multiselect",false],
     ["workshops","Workshops","multiselect",false],["technicians","Technicians","multiselect",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","visibility"] },
   products: { table:"products", title:"Product", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","text",false],
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["images","Images","files",false],["workshops","Workshops","multiselect",false],
     ["technicians","Technicians","multiselect",false],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","visibility"] },
   workshops: { table:"workshops", title:"Workshop", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","text",false],
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["images","Images","files",false],["location","Location","text",false],["address","Address","text",false],
     ["services","Services","multiselect",false],["products","Products","multiselect",false],
     ["technicians","Technicians","multiselect",false],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","location","address","visibility"] },
   technicians: { table:"technicians", title:"Technician", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","text",false],
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["images","Images","files",false],["skill","Skill / Expertise","text",false],
     ["services","Services","multiselect",false],["workshops","Workshops","multiselect",false],
     ["phone","Phone","tel",false],["whatsapp","WhatsApp","text",false],["email","Email","email",false],
@@ -807,6 +807,16 @@ function createModuleField(field) {
   wrapper.className = "module-form-field";
   let control;
   if (type === "textarea") { control=document.createElement("textarea"); control.rows=3; }
+  else if (type === "countries") {
+    const host=document.createElement("div");host.className="module-related-options";host.dataset.countryOptions="true";
+    for(const value of ["Global","Bangladesh","Saudi Arabia"]){
+      const option=document.createElement("label");option.className="module-related-option";
+      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=value;checkbox.dataset.countryValue=value;
+      option.append(checkbox,document.createTextNode(value));host.append(option);
+    }
+    wrapper.append(addTextElement(wrapper,"span","",label),host);
+    return wrapper;
+  }
   else if (type === "multiselect") {
     const relatedWrapper=document.createElement("div");
     relatedWrapper.className="module-form-field module-related-field";
@@ -830,7 +840,6 @@ function createModuleField(field) {
     if (name==="currency") control.value="SAR";
   }
   control.name=name; control.required=Boolean(required);
-  if(name==="country")control.placeholder="e.g. Saudi Arabia, Bangladesh";
   if (type === "files") {
     wrapper.append(addTextElement(wrapper,"span","",label),control,addTextElement(wrapper,"small","muted","Select multiple images. New uploads are added to the existing gallery."));
   } else if (type === "file") {
@@ -929,6 +938,7 @@ async function renderModuleList(moduleName,records) {
         else if(key==="name")input.value=record.name||record.title||"";
         else if(key==="technician")input.value=record.trainer||"";
         else if(key==="images")input.value="";
+        else if(key==="country"){const selected=String(record.country||"").split(",").map(value=>value.trim());form.querySelectorAll("[data-country-value]").forEach(box=>{box.checked=selected.includes(box.dataset.countryValue);});}
         else if(key==="service_information")input.value=Array.isArray(record.service_information)?record.service_information.join("\n"):"";
         else input.value=record[moduleDatabaseKey(moduleName,key)]==null?"":String(record[moduleDatabaseKey(moduleName,key)]);
       }
@@ -1014,8 +1024,9 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     try {
       const payload={};
       for (const [key] of config.fields) {
-        const input=form.elements.namedItem(key); if (!input || key==="images" || key==="visibility" || moduleRelationships[moduleName]?.[key]) continue;
+        const input=form.elements.namedItem(key); if ((!input && key!=="country") || key==="images" || key==="visibility" || moduleRelationships[moduleName]?.[key]) continue;
         const dbKey=moduleDatabaseKey(moduleName,key);
+        if(key==="country"){payload[dbKey]=[...form.querySelectorAll("[data-country-value]:checked")].map(box=>box.dataset.countryValue).join(", ")||null;continue;}
         if(key==="service_information") payload[dbKey]=input.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);
         else if(key==="price") {
           const raw=input.value.trim();
@@ -1107,38 +1118,6 @@ dashboardTabs.forEach((tab, index) => {
 });
 
 
-
-
-// Audit module: read-only recent administrative activity.
-const auditList = document.querySelector("#audit-log-list");
-async function loadAuditLogs() {
-  if (!auditList || currentDashboardRole !== "owner") return;
-  auditList.replaceChildren();
-  const { data, error } = await supabase
-    .from("audit_logs")
-    .select("id,actor_id,action,resource_type,resource_id,metadata,result,device,created_at")
-    .order("created_at", { ascending: false })
-    .limit(50);
-  if (error) {
-    addTextElement(auditList, "p", "muted", "Audit history is temporarily unavailable.");
-    return;
-  }
-  if (!data?.length) {
-    addTextElement(auditList, "p", "muted", "No audit events recorded yet.");
-    return;
-  }
-  for (const entry of data) {
-    const row = document.createElement("article");
-    row.className = "admin-list-row";
-    const title = [entry.action, entry.resource_type].filter(Boolean).join(" · ");
-    addTextElement(row, "strong", "", title || "Activity");
-    const detail = [entry.actor_id ? "Actor: " + entry.actor_id : "",entry.resource_id ? "Record: " + entry.resource_id : "",entry.result || "success",entry.device || "unknown",entry.created_at ? new Date(entry.created_at).toLocaleString() : ""].filter(Boolean).join(" · ");
-    addTextElement(row, "span", "muted", detail);
-    auditList.append(row);
-  }
-}
-document.querySelector('[data-dashboard-tab="audit"]')?.addEventListener("click", () => void loadAuditLogs());
-document.querySelector("#audit-refresh")?.addEventListener("click", () => void loadAuditLogs());
 
 
 // Initialize extended Owner-only modules after core dashboard handlers.
