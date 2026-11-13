@@ -1022,7 +1022,7 @@ function renderModuleList(moduleName,records) {
     const edit=document.createElement("button"); edit.type="button"; edit.className="secondary-button"; edit.textContent="Edit";
     edit.addEventListener("click",async()=>{
       const form=document.querySelector('[data-module-form="'+moduleName+'"]'); form.dataset.editId=record.id;
-      form.dataset.currentPhotoUrl=record.photo_url||""; form.dataset.currentGalleryUrls=JSON.stringify(record.gallery_urls||[]); form.dataset.removePhoto="false"; form.dataset.slugManual="false";
+      form.dataset.currentPhotoUrl=record.photo_url||""; form.dataset.currentGalleryUrls=JSON.stringify([...new Set([record.photo_url,...(record.gallery_urls||[])].filter(Boolean))]); form.dataset.removePhoto="false"; form.dataset.slugManual="false";
       for (const [key] of config.fields) {
         const input=form.elements.namedItem(key); if (!input) continue;
         if (key==="visibility") input.value=recordVisibility(moduleName,record);
@@ -1115,7 +1115,6 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       else payload.status=visibility==="visible"?(moduleName==="workshops"?"published":"active"):"draft";
       const imagesInput=form.elements.namedItem("images");
       const imageUrls=JSON.parse(form.dataset.currentGalleryUrls||"[]");
-      const newlyUploadedUrls=[];
       if(imagesInput?.files?.length){
         for(const file of Array.from(imagesInput.files)){
           if(!file.type.startsWith("image/")) throw new Error("Please select image files only.");
@@ -1126,7 +1125,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
           if(uploadError) throw uploadError;
           const publicUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;
           imageUrls.push(publicUrl);
-          newlyUploadedUrls.push(publicUrl);
+          uploadedUrls.push(publicUrl);
         }
       }
       uploadedUrls=newlyUploadedUrls;\n      payload.gallery_urls=imageUrls;
