@@ -726,3 +726,16 @@ button[data-size="large"],input[data-size="large"],select[data-size="large"],tex
   .home-content-fallback{font-size:var(--text-large);text-align:start}.site-header,.site-menu,.dashboard-module-nav,.dashboard-module-panel,.module-form-grid,.admin-list-row,.home-card-grid,.catalogue-detail{direction:rtl}.site-menu{inset-inline-end:max(20px,calc((100% - 1120px)/2));inset-inline-start:auto;text-align:start}.site-menu a,.site-menu button,.site-menu label{text-align:start}.brand{direction:rtl}.brand-logo,.brand-title{display:flex;align-items:center}.menu-tools{display:grid;gap:8px}.menu-tool{display:flex;align-items:center;justify-content:space-between;gap:10px}.menu-tool select{min-width:110px;min-height:34px;padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--page-text)}input,select,textarea{direction:rtl;text-align:start}input[type=email],input[type=url],input[type=tel],input[type=password]{direction:ltr;text-align:start}@media(max-width:600px){.site-menu{inset-inline:12px;min-width:0}.admin-list-row{align-items:flex-start}}
 
 .health-ok{color:var(--page-text);font-weight:700}.health-error{color:var(--page-text);font-weight:700}
+
+/* Dashboard module-specific icons and visitor analytics */
+.dashboard-module-tab[data-icon]::before{content:attr(data-icon);display:inline-block;margin-inline-end:8px;font-size:1.05em;line-height:1}
+.analytics-stat{position:relative;padding-inline-start:58px}
+.analytics-icon{position:absolute;inset-inline-start:16px;inset-block-start:18px;font-size:24px;line-height:1}
+.analytics-privacy-note{margin:8px 0 16px;padding:10px 12px;border-inline-start:3px solid var(--muted);background:var(--hover);font-size:var(--text-small)}
+
+/* Contextual icons for navigation items */
+.menu-link[data-icon]::before{content:attr(data-icon);display:inline-block;margin-inline-end:10px;min-width:1.25em;text-align:center;line-height:1}
+.menu-tool[data-icon]::before{content:attr(data-icon);display:inline-block;margin-inline-end:7px;line-height:1}
+
+.dashboard-card[data-icon]{position:relative;padding-inline-start:58px}
+.dashboard-card[data-icon]::before{content:attr(data-icon);position:absolute;inset-inline-start:16px;inset-block-start:18px;font-size:24px;line-height:1}
