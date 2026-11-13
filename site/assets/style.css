@@ -1318,17 +1318,6 @@ input:disabled,select:disabled,textarea:disabled{opacity:.7;cursor:not-allowed}
 
 
 /* Customer-first catalogue listing and related provider details */
-.catalogue-search{
-  width:100%;
-  min-height:46px;
-  margin:18px 0 4px;
-  padding:11px 14px;
-  border:1px solid var(--line);
-  border-radius:10px;
-  background:var(--surface);
-  color:var(--page-text);
-  font:inherit;
-}
 .catalogue-category-grid{margin-block:8px 4px}
 .catalogue-category-grid .home-taxonomy-card.is-active{
   border-color:var(--page-text);
