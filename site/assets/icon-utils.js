@@ -14,6 +14,9 @@ const ICONS={
   shield:'<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>',
   network:'<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="m11 7-5 10m7-10 5 10M7 19h10"/>',
   receiver:'<rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 21h10M8 10h8m-8 4h.01m3 0h.01m3 0h.01"/>',
+  camera:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="m8 7 1.5-3h5L16 7"/><circle cx="12" cy="13.5" r="4"/><circle cx="18" cy="10" r=".8" fill="currentColor"/>',
+  computer:'<rect x="2.5" y="3" width="19" height="14" rx="2"/><path d="M12 17v4m-5 0h10m-13-7h16"/>',
+  workshopAynulTv:'<rect x="2.5" y="3.5" width="15" height="11" rx="1.5"/><path d="m7 18 3-3 3 3m-6 3h7"/><path d="m17 16 4-4m-2-2 2 2-2 2m-4 4 2 2"/><path d="m7 1.5 3 2 3-2"/>',
   link:'<path d="M10 13a5 5 0 0 0 7.1 0l3-3A5 5 0 0 0 13 2.9l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.1 0l-3 3A5 5 0 0 0 11 21.1l1.7-1.7"/>',
   chart:'<path d="M3 3v18h18M7 14l4-4 4 3 6-7"/>',
   users:'<path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
@@ -129,7 +132,7 @@ const ITEM_ICON_MAP = {
     "connectors & splitters":"productSplitter"
   },
   workshops: {
-    "aynul tv servicing center":"workshopTv",
+    "aynul tv servicing center":"workshopAynulTv",
     "faruk mobile servicing center":"workshopMobile"
   }
 };
