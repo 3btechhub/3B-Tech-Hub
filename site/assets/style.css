@@ -1144,3 +1144,10 @@ output,
 @media(max-width:480px){
   .site-footer{min-height:50px;padding:12px 14px}
 }
+
+
+/* Keep standard spacing after the final homepage module without a separator. */
+.home-main.home-catalog{padding-bottom:clamp(44px,6vw,64px)}
+@media(max-width:420px){
+  .home-main.home-catalog{padding-bottom:40px}
+}
