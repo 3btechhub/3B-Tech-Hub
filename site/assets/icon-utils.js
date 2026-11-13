@@ -29,13 +29,64 @@ const ICONS={
   mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
   lock:'<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3"/>',
   search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
-  check:'<path d="m5 12 4 4L19 6"/>'
+  check:'<path d="m5 12 4 4L19 6"/>',
+
+  home:'<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1Z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  login:'<path d="M10 17l5-5-5-5M15 12H3"/><path d="M12 3h6a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3h-6"/>',
+  logout:'<path d="m14 17 5-5-5-5M19 12H8"/><path d="M12 3H6a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h6"/>',
+  mapPin:'<path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/>',
+  youtube:'<rect x="2.5" y="5" width="19" height="14" rx="4"/><path d="m10 9 5 3-5 3Z" fill="currentColor" stroke="none"/>',
+  reddit:'<circle cx="12" cy="13" r="8"/><path d="m9 8 1-4 5 1M15 5l2-2"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><path d="M9 16c2 2 4 2 6 0"/><circle cx="19" cy="8" r="2"/>',
+  x:'<path d="M4 3h4.5l11.5 18h-4.5L4 3Z"/><path d="M20 3 5 21"/>',
+  linkedin:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 10v7M8 7h.01M12 17v-4a3 3 0 0 1 6 0v4M12 10v7"/>',
+  instagram:'<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".8" fill="currentColor"/>',
+  whatsapp:'<path d="M20.5 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20l1.2-4.6A8.5 8.5 0 1 1 20.5 11.5Z"/><path d="M9 8.5c.5 3 2 4.5 5 5.5l1.2-1.5 2 1c-.3 1.5-1.4 2.5-3 2.5-3.5-.5-6.5-3.5-7-7 0-1.6 1-2.7 2.5-3l1 2Z"/>',
+  tiktok:'<path d="M14 3v11.5a4.5 4.5 0 1 1-4-4.47"/><path d="M14 3c.5 3 2.5 5 5.5 5.5"/>',
+  gmail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6M4 17V7m16 10V7"/>',
+  facebook:'<path d="M14 21v-8h3l.5-4H14V7c0-1 .5-1.5 1.5-1.5H18V2h-3c-3 0-5 2-5 5v2H7v4h3v8Z"/>',
+  imo:'<path d="M4 5h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-5 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><circle cx="8" cy="11.5" r=".8" fill="currentColor"/><circle cx="12" cy="11.5" r=".8" fill="currentColor"/><circle cx="16" cy="11.5" r=".8" fill="currentColor"/>'
+
 };
+let databaseSvgRegistry=Object.create(null);
+const SVG_NS="http://www.w3.org/2000/svg";
+function appendSafeRegistrySvg(target,source){
+ try{
+  if(typeof DOMParser==="undefined")return false;
+  const parsed=new DOMParser().parseFromString(String(source),"image/svg+xml");
+  const root=parsed.documentElement;
+  if(!root||root.localName!=="svg"||parsed.querySelector("parsererror"))return false;
+  const viewBox=root.getAttribute("viewBox");
+  if(viewBox&&viewBox!=="0 0 24 24")return false;
+  const allowedTags=new Set(["path","circle","rect","line","polyline","polygon","ellipse"]);
+  const allowedAttrs=new Set(["d","cx","cy","r","x","y","width","height","rx","ry","x1","x2","y1","y2","points","fill","stroke","stroke-width","stroke-linecap","stroke-linejoin","transform"]);
+  for(const child of root.children){
+   if(!allowedTags.has(child.localName))continue;
+   const clean=document.createElementNS(SVG_NS,child.localName);
+   for(const attr of Array.from(child.attributes))if(allowedAttrs.has(attr.name))clean.setAttribute(attr.name,attr.value);
+   target.append(clean);
+  }
+  return target.childNodes.length>0;
+ }catch{return false;}
+}
+export async function loadSvgIconRegistry(supabase){
+ try{
+  const {data,error}=await supabase.from("site_settings").select("setting_value").eq("setting_key","global_svg_icons").eq("is_public",true).maybeSingle();
+  if(error||!data?.setting_value?.icons)return false;
+  const next=Object.create(null);
+  for(const [key,value] of Object.entries(data.setting_value.icons)){
+   if(Object.prototype.hasOwnProperty.call(ICONS,key)&&typeof value==="string"&&value.length<12000)next[key]=value;
+  }
+  databaseSvgRegistry=next;
+  return Object.keys(next).length>0;
+ }catch(error){console.warn("SVG icon registry unavailable; using bundled SVGs.",error);return false;}
+}
 export function createIcon(name,className="svg-icon"){
- const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
- svg.setAttribute("viewBox","0 0 24 24");svg.setAttribute("fill","none");svg.setAttribute("stroke","currentColor");svg.setAttribute("stroke-width","1.8");svg.setAttribute("stroke-linecap","round");svg.setAttribute("stroke-linejoin","round");svg.setAttribute("aria-hidden","true");svg.setAttribute("focusable","false");svg.classList.add(...String(className||"svg-icon").split(/\s+/).filter(Boolean));
+ const svg=document.createElementNS(SVG_NS,"svg");
+ svg.setAttribute("viewBox","0 0 24 24");svg.setAttribute("fill","none");svg.setAttribute("stroke","currentColor");svg.setAttribute("stroke-width","1.8");svg.setAttribute("stroke-linecap","round");svg.setAttribute("stroke-linejoin","round");svg.setAttribute("aria-hidden","true");svg.setAttribute("focusable","false");svg.classList.add(...String(className||"svg-icon").split(/\\s+/).filter(Boolean));
  const key=String(name||"link").replace(/[^a-zA-Z]/g,"");
- const markup=ICONS[key]||ICONS.link;svg.innerHTML=markup;return svg;
+ if(databaseSvgRegistry[key]&&appendSafeRegistrySvg(svg,databaseSvgRegistry[key]))return svg;
+ svg.innerHTML=ICONS[key]||ICONS.link;return svg;
 }
 const MODULE_ICONS={services:"wrench",products:"package",workshops:"building",technicians:"technician",contacts:"contact"};
 export function getModuleIcon(module){return MODULE_ICONS[module]||"link";}
@@ -47,7 +98,10 @@ export function getItemIconName(name,module){
   if(/mobile/.test(v)&&/parts/.test(v))return "cpu";
   if(/satellite/.test(v)&&/installation/.test(v))return "satellite";
   if(/satellite/.test(v)&&/servicing/.test(v))return "wrench";
-  if(/satellite/.test(v)&&/parts/.test(v))return "cpu";
+  if(/satellite/.test(v)&&/parts|sell/.test(v))return "cpu";
+  if(/satellite/.test(v)&&/dish/.test(v))return "satellite";
+  if(/charger|adapter/.test(v))return "plug";
+  if(/connector|connection|cable/.test(v))return "network";
  }
  if(module==="products"){
   if(/glass protector/.test(v))return "shield";
@@ -57,7 +111,7 @@ export function getItemIconName(name,module){
   if(/coaxial cable/.test(v))return "cable";
   if(/satellite receiver/.test(v))return "receiver";
   if(/charger|adapter/.test(v))return "plug";
-  if(/connector|splitter/.test(v))return "network";
+  if(/connector|splitter|connection/.test(v))return "network";
  }
  if(module==="workshops"){
   if(/tv/.test(v))return "building";
