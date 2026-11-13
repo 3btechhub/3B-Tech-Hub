@@ -1107,7 +1107,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         for(const file of Array.from(galleryInput.files)){
           if(!file.type.startsWith("image/")) throw new Error("Please select image files only.");
           if(file.size>10*1024*1024) throw new Error("Each gallery image must be 10 MB or smaller.");
-          const safeName=file.name.normalize("NFKD").replace(/[^\\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
+          const safeName=file.name.normalize("NFKD").replace(/[^\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
           const path="content/"+moduleName+"/gallery/"+crypto.randomUUID()+"-"+safeName;
           const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type,upsert:false});
           if(uploadError) throw uploadError;
