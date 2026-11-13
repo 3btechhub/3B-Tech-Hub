@@ -1173,6 +1173,24 @@ function activateDashboardModule(moduleName, focusTab = false) {
 }
 document.querySelectorAll("[data-dashboard-open]").forEach(card=>card.addEventListener("click",()=>activateDashboardModule(card.dataset.dashboardOpen)));
 activateDashboardModule("overview");
+async function loadDashboardSummaryCounts(){
+  if(!ownerDashboard||currentDashboardRole!=="owner")return;
+  const counts={
+    service_types:["service_types","id"],device_types:["device_types","id"],
+    services:["services","id"],products:["products","id"],workshops:["workshops","id"],
+    technicians:["technicians","id"],contacts:["contacts","id"],users:["user_profiles","user_id"],
+    roles:["app_roles","id"],permission:["permissions","id"]
+  };
+  await Promise.all(Object.entries(counts).map(async([key,[table,column]])=>{
+    const node=document.querySelector('[data-dashboard-count="'+key+'"]');
+    if(!node)return;
+    const {count,error}=await supabase.from(table).select(column,{count:"exact",head:true});
+    node.textContent=error?"—":String(count??0);
+    if(error)node.setAttribute("aria-label","Count unavailable");
+  }));
+}
+void loadDashboardSummaryCounts();
+
 dashboardTabs.forEach((tab, index) => {
   tab.addEventListener("click", () => activateDashboardModule(tab.dataset.dashboardTab));
   tab.addEventListener("keydown", (event) => {
