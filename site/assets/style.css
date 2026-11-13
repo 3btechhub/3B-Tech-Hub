@@ -1256,3 +1256,62 @@ output,
 }
 input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
 input:disabled,select:disabled,textarea:disabled{opacity:.7;cursor:not-allowed}
+
+
+/* Homepage service and product category navigation */
+.home-taxonomy-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.home-taxonomy-card{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-width:0;
+  min-height:82px;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--surface);
+  color:var(--page-text);
+  transition:transform .16s ease,border-color .16s ease,background .16s ease;
+}
+.home-taxonomy-card:hover{
+  transform:translateY(-2px);
+  border-color:var(--page-text);
+  background:var(--hover);
+}
+.home-taxonomy-icon{
+  display:grid;
+  place-items:center;
+  flex:0 0 42px;
+  width:42px;
+  height:42px;
+  border-radius:10px;
+  background:var(--hover);
+  color:var(--page-text);
+}
+.home-taxonomy-icon svg{width:23px;height:23px}
+.home-taxonomy-card strong{
+  min-width:0;
+  font-size:var(--text-medium);
+  line-height:1.4;
+  overflow-wrap:anywhere;
+}
+.home-taxonomy-card::after{
+  content:"›";
+  margin-inline-start:auto;
+  color:var(--muted);
+  font-size:22px;
+  line-height:1;
+}
+@media(max-width:760px){
+  .home-taxonomy-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+}
+@media(max-width:420px){
+  .home-taxonomy-card{min-height:74px;padding:10px;gap:9px}
+  .home-taxonomy-icon{flex-basis:36px;width:36px;height:36px}
+  .home-taxonomy-icon svg{width:20px;height:20px}
+  .home-taxonomy-card strong{font-size:var(--text-small)}
+}
