@@ -671,65 +671,95 @@ if(siteSettingsForm)void loadSiteSettingsForm();
 
 // Core content modules: each module uses its existing Supabase table and RLS policies.
 const dashboardContentModules = {
-  categories: { table:"categories", title:"Category", fields:[
-    ["title","Title","text",true],
-    ["type","Type","checklist",true,["Service","Device"]]
-  ], columns:["type"] },
-  services: { table:"services", title:"Service", fields:[
-    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],["categories","Categories","multiselect",false],
+  service_types: { table:"service_types", title:"Service Type", fields:[
+    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
+    ["device_types","Device Type","multiselect",false],["services","Services","multiselect",false],
     ["products","Products","multiselect",false],["workshops","Workshops","multiselect",false],
     ["technicians","Technicians","multiselect",false],["images","Images","files",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","visibility"] },
-  products: { table:"products", title:"Products", fields:[
-    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],["categories","Categories","multiselect",false],
+  device_types: { table:"device_types", title:"Device Type", fields:[
+    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
+    ["service_types","Service Type","multiselect",false],["services","Services","multiselect",false],
+    ["products","Products","multiselect",false],["workshops","Workshops","multiselect",false],
+    ["technicians","Technicians","multiselect",false],["images","Images","files",false],
+    ["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["country","visibility"] },
+  services: { table:"services", title:"Service", fields:[
+    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
+    ["service_types","Service Type","multiselect",false],["device_types","Device Type","multiselect",false],
+    ["products","Products","multiselect",false],["workshops","Workshops","multiselect",false],
+    ["technicians","Technicians","multiselect",false],["images","Images","files",false],
+    ["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["country","visibility"] },
+  products: { table:"products", title:"Product", fields:[
+    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
+    ["service_types","Service Type","multiselect",false],["device_types","Device Type","multiselect",false],
     ["services","Service","multiselect",false],["workshops","Workshops","multiselect",false],
     ["technicians","Technicians","multiselect",false],["images","Images","files",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","visibility"] },
-  workshops: { table:"workshops", title:"Workshops", fields:[
+  workshops: { table:"workshops", title:"Workshop", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
-    ["location","Location","text",false],["categories","Categories","multiselect",false],["services","Service","multiselect",false],
+    ["location","Location","text",false],["service_types","Service Type","multiselect",false],
+    ["device_types","Device Type","multiselect",false],["services","Service","multiselect",false],
     ["products","Products","multiselect",false],["technicians","Technicians","multiselect",false],
     ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","location","visibility"] },
-  technicians: { table:"technicians", title:"Technicians", fields:[
+  technicians: { table:"technicians", title:"Technician", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["skill","Skill/Expertise","text",false],["phone","Phone Number","tel",false],
     ["whatsapp","Whatsapp Number","tel",false],["link","Link","url",false],["email","Email","email",false],
-    ["categories","Categories","multiselect",false],["services","Service","multiselect",false],["products","Products","multiselect",false],
+    ["service_types","Service Type","multiselect",false],["device_types","Device Type","multiselect",false],
+    ["services","Service","multiselect",false],["products","Products","multiselect",false],
     ["workshops","Workshops","multiselect",false],["images","Images","files",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","skill","link","visibility"] }
 };
 const moduleRelationships = {
+  service_types: {
+    device_types:{table:"service_type_device_types",parent:"service_type_id",child:"device_type_id",target:"device_types",label:"title"},
+    services:{table:"service_type_services",parent:"service_type_id",child:"service_id",target:"services",label:"name"},
+    products:{table:"service_type_products",parent:"service_type_id",child:"product_id",target:"products",label:"name"},
+    workshops:{table:"service_type_workshops",parent:"service_type_id",child:"workshop_id",target:"workshops",label:"title"},
+    technicians:{table:"service_type_technicians",parent:"service_type_id",child:"technician_id",target:"technicians",label:"name"}
+  },
+  device_types: {
+    service_types:{table:"service_type_device_types",parent:"device_type_id",child:"service_type_id",target:"service_types",label:"title"},
+    services:{table:"device_type_services",parent:"device_type_id",child:"service_id",target:"services",label:"name"},
+    products:{table:"device_type_products",parent:"device_type_id",child:"product_id",target:"products",label:"name"},
+    workshops:{table:"device_type_workshops",parent:"device_type_id",child:"workshop_id",target:"workshops",label:"title"},
+    technicians:{table:"device_type_technicians",parent:"device_type_id",child:"technician_id",target:"technicians",label:"name"}
+  },
   services: {
-    categories:{table:"catalogue_categories",parent:"record_id",child:"category_id",target:"categories",label:"title",scope:"module_name"},
-    products:{table:"service_products",parent:"service_id",child:"product_id",target:"products",label:"name",filter:["status","active"]},
-    workshops:{table:"service_workshops",parent:"service_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]},
-    technicians:{table:"service_technicians",parent:"service_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
+    service_types:{table:"service_type_services",parent:"service_id",child:"service_type_id",target:"service_types",label:"title"},
+    device_types:{table:"device_type_services",parent:"service_id",child:"device_type_id",target:"device_types",label:"title"},
+    products:{table:"service_products",parent:"service_id",child:"product_id",target:"products",label:"name"},
+    workshops:{table:"service_workshops",parent:"service_id",child:"workshop_id",target:"workshops",label:"title"},
+    technicians:{table:"service_technicians",parent:"service_id",child:"technician_id",target:"technicians",label:"name"}
   },
   products: {
-    categories:{table:"catalogue_categories",parent:"record_id",child:"category_id",target:"categories",label:"title",scope:"module_name"},
-    services:{table:"service_products",parent:"product_id",child:"service_id",target:"services",label:"name",filter:["status","active"]},
-    workshops:{table:"product_workshops",parent:"product_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]},
-    technicians:{table:"product_technicians",parent:"product_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
+    service_types:{table:"service_type_products",parent:"product_id",child:"service_type_id",target:"service_types",label:"title"},
+    device_types:{table:"device_type_products",parent:"product_id",child:"device_type_id",target:"device_types",label:"title"},
+    services:{table:"service_products",parent:"product_id",child:"service_id",target:"services",label:"name"},
+    workshops:{table:"product_workshops",parent:"product_id",child:"workshop_id",target:"workshops",label:"title"},
+    technicians:{table:"product_technicians",parent:"product_id",child:"technician_id",target:"technicians",label:"name"}
   },
   workshops: {
-    categories:{table:"catalogue_categories",parent:"record_id",child:"category_id",target:"categories",label:"title",scope:"module_name"},
-    services:{table:"service_workshops",parent:"workshop_id",child:"service_id",target:"services",label:"name",filter:["status","active"]},
-    products:{table:"product_workshops",parent:"workshop_id",child:"product_id",target:"products",label:"name",filter:["status","active"]},
-    technicians:{table:"workshop_technicians",parent:"workshop_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
+    service_types:{table:"service_type_workshops",parent:"workshop_id",child:"service_type_id",target:"service_types",label:"title"},
+    device_types:{table:"device_type_workshops",parent:"workshop_id",child:"device_type_id",target:"device_types",label:"title"},
+    services:{table:"service_workshops",parent:"workshop_id",child:"service_id",target:"services",label:"name"},
+    products:{table:"product_workshops",parent:"workshop_id",child:"product_id",target:"products",label:"name"},
+    technicians:{table:"workshop_technicians",parent:"workshop_id",child:"technician_id",target:"technicians",label:"name"}
   },
   technicians: {
-    categories:{table:"catalogue_categories",parent:"record_id",child:"category_id",target:"categories",label:"title",scope:"module_name"},
-    services:{table:"service_technicians",parent:"technician_id",child:"service_id",target:"services",label:"name",filter:["status","active"]},
-    products:{table:"product_technicians",parent:"technician_id",child:"product_id",target:"products",label:"name",filter:["status","active"]},
-    workshops:{table:"workshop_technicians",parent:"technician_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]}
+    service_types:{table:"service_type_technicians",parent:"technician_id",child:"service_type_id",target:"service_types",label:"title"},
+    device_types:{table:"device_type_technicians",parent:"technician_id",child:"device_type_id",target:"device_types",label:"title"},
+    services:{table:"service_technicians",parent:"technician_id",child:"service_id",target:"services",label:"name"},
+    products:{table:"product_technicians",parent:"technician_id",child:"product_id",target:"products",label:"name"},
+    workshops:{table:"workshop_technicians",parent:"technician_id",child:"workshop_id",target:"workshops",label:"title"}
   }
 };
-
-
 async function loadModuleRelationOptions(moduleName,form) {
   const config=moduleRelationships[moduleName]||{};
   for(const [key,rel] of Object.entries(config)){
@@ -779,13 +809,14 @@ function slugFromName(value) {
     .replace(/[^\w.-]+/gu, "-").replace(/^-+|-+$/g, "");
 }
 function moduleDatabaseKey(moduleName,key) {
-  if (key === "title") return moduleName === "workshops" || moduleName === "categories" ? "title" : "name";
+  if (key === "title") return ["workshops","service_types","device_types"].includes(moduleName) ? "title" : "name";
   if (moduleName === "workshops" && key === "technician") return "trainer";
   if (moduleName === "products" && key === "price") return "price_minor";
   return key;
 }
 function recordVisibility(moduleName,record) {
   if (moduleName === "technicians") return record.is_published ? "visible" : "hidden";
+  if (moduleName === "service_types" || moduleName === "device_types") return record.status === "active" || record.status === "published" ? "visible" : "hidden";
   if (moduleName === "workshops") return record.status === "published" ? "visible" : "hidden";
   return record.status === "active" ? "visible" : "hidden";
 }
