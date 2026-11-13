@@ -859,10 +859,15 @@ const sharedDetailFields = [
 const dashboardContentModules = {
   services: { table:"services", title:"Service", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
+    ["workshop_ids","Related Workshops","multiselect",false],
+    ["technician_ids","Related Mechanicians","multiselect",false],
     ["category","Category","select",false,["Buy & Sell","Home Delivery","Setup & Installation","Repair & Maintenance"]],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["slug","category","visibility"] },
   products: { table:"products", title:"Product", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
+    ["price","Price (SAR)","number",false],["currency","Currency","text",false],
+    ["stock_qty","Stock quantity","number",false],["condition","Condition","select",false,["new","used","refurbished"]],
+    ["workshop_ids","Related Workshops","multiselect",false],
     ["category","Category","text",false],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["slug","category","visibility"] },
   workshops: { table:"workshops", title:"Workshop", fields:[
@@ -889,7 +894,59 @@ function slugFromName(value) {
 function moduleDatabaseKey(moduleName,key) {
   if (moduleName === "workshops" && key === "name") return "title";
   if (moduleName === "workshops" && key === "technician") return "trainer";
+  if (moduleName === "products" && key === "price") return "price_minor";
   return key;
+}
+const moduleRelationships = {
+  services: [
+    {field:"workshop_ids",table:"service_workshops",parentColumn:"service_id",relatedColumn:"workshop_id",source:"workshops",labelColumn:"title",statusColumn:"status",visibleValue:"published"},
+    {field:"technician_ids",table:"service_technicians",parentColumn:"service_id",relatedColumn:"technician_id",source:"technicians",labelColumn:"name",statusColumn:"is_published",visibleValue:true}
+  ],
+  products: [
+    {field:"workshop_ids",table:"product_workshops",parentColumn:"product_id",relatedColumn:"workshop_id",source:"workshops",labelColumn:"title",statusColumn:"status",visibleValue:"published"}
+  ]
+};
+const loadedRelationshipOptions = new Set();
+async function loadRelationshipOptions(moduleName) {
+  for (const relation of moduleRelationships[moduleName] || []) {
+    const key=moduleName+":"+relation.field;
+    if(loadedRelationshipOptions.has(key))continue;
+    const selectColumns=relation.source==="workshops"?"id,title,status":"id,name,is_published";
+    const {data,error}=await supabase.from(relation.source).select(selectColumns).order(relation.labelColumn,{ascending:true});
+    if(error)throw error;
+    const host=document.querySelector('[data-related-options="'+relation.field+'"]');
+    if(!host)continue;
+    host.replaceChildren();
+    if(!data?.length){addTextElement(host,"small","muted","No "+relation.source+" records available yet.");}
+    for(const record of data||[]){
+      const label=document.createElement("label");label.className="module-related-option";
+      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=record.id;checkbox.dataset.relatedField=relation.field;
+      const status=record[relation.statusColumn]===relation.visibleValue?"":" (hidden)";
+      label.append(checkbox,addTextElement(label,"span","",String(record[relation.labelColumn]||"Untitled")+status));
+      host.append(label);
+    }
+    loadedRelationshipOptions.add(key);
+  }
+}
+async function loadRecordRelationships(moduleName,recordId,form) {
+  for(const relation of moduleRelationships[moduleName]||[]){
+    const {data,error}=await supabase.from(relation.table).select(relation.relatedColumn).eq(relation.parentColumn,recordId);
+    if(error)throw error;
+    const selected=new Set((data||[]).map(row=>row[relation.relatedColumn]));
+    form.querySelectorAll('[data-related-field="'+relation.field+'"]').forEach(input=>{input.checked=selected.has(input.value);});
+  }
+}
+async function saveRecordRelationships(moduleName,recordId,form) {
+  for(const relation of moduleRelationships[moduleName]||[]){
+    const selected=Array.from(form.querySelectorAll('[data-related-field="'+relation.field+'"]:checked')).map(input=>input.value);
+    const {error:deleteError}=await supabase.from(relation.table).delete().eq(relation.parentColumn,recordId);
+    if(deleteError)throw deleteError;
+    if(selected.length){
+      const rows=selected.map(value=>({[relation.parentColumn]:recordId,[relation.relatedColumn]:value}));
+      const {error:insertError}=await supabase.from(relation.table).insert(rows);
+      if(insertError)throw insertError;
+    }
+  }
 }
 function recordVisibility(moduleName,record) {
   if (moduleName === "technicians") return record.is_published ? "visible" : "hidden";
@@ -926,6 +983,14 @@ function createModuleField(field) {
   wrapper.className = "module-form-field";
   let control;
   if (type === "textarea") { control=document.createElement("textarea"); control.rows=3; }
+  else if (type === "multiselect") {
+    wrapper.className="module-form-field module-related-field";
+    addTextElement(wrapper,"span","",label);
+    const host=document.createElement("div");host.className="module-related-options";host.dataset.relatedOptions=name;
+    host.append(addTextElement(host,"small","muted","Options load when this module opens."));
+    wrapper.append(host);
+    return wrapper;
+  }
   else if (type === "select") {
     control=document.createElement("select");
     const blank=document.createElement("option"); blank.value=""; blank.textContent="— Select —"; control.append(blank);
@@ -936,6 +1001,8 @@ function createModuleField(field) {
     control=document.createElement("input"); control.type=type==="files"?"file":type;
     if (type==="file" || type==="files") control.accept="image/jpeg,image/png,image/webp,image/avif,image/gif";
     if (type==="files") control.multiple=true;
+    if (type==="number") { control.min="0"; control.step=name==="price"?"0.01":"1"; }
+    if (name==="currency") control.value="SAR";
   }
   control.name=name; control.required=Boolean(required);
   if (type === "files") {
@@ -974,6 +1041,7 @@ function resetModuleForm(moduleName) {
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if (!form) return;
   form.reset(); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.currentGalleryUrls="[]"; form.dataset.removePhoto="false"; form.dataset.currentGalleryUrls="[]"; form.dataset.slugManual="false";
+  form.querySelectorAll("[data-related-field]").forEach(input=>{input.checked=false;});
   updateImagePreview(form,"");
   const config=dashboardContentModules[moduleName];
   document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Add "+config.title;
@@ -1019,12 +1087,14 @@ function renderModuleList(moduleName,records) {
     row.append(primary);
     const actions=document.createElement("div"); actions.className="editor-actions";
     const edit=document.createElement("button"); edit.type="button"; edit.className="secondary-button"; edit.textContent="Edit";
-    edit.addEventListener("click",()=>{
+    edit.addEventListener("click",async()=>{
       const form=document.querySelector('[data-module-form="'+moduleName+'"]'); form.dataset.editId=record.id;
       form.dataset.currentPhotoUrl=record.photo_url||""; form.dataset.currentGalleryUrls=JSON.stringify(record.gallery_urls||[]); form.dataset.removePhoto="false"; form.dataset.slugManual="false";
       for (const [key] of config.fields) {
+        if ((moduleRelationships[moduleName]||[]).some(relation=>relation.field===key)) continue;
         const input=form.elements.namedItem(key); if (!input) continue;
         if (key==="visibility") input.value=recordVisibility(moduleName,record);
+        else if (key==="price") input.value=record.price_minor==null?"":String(Number(record.price_minor)/100);
         else if (key==="name") input.value=record.name||record.title||"";
         else if (key==="technician") input.value=record.trainer||"";
         else if (key==="photo_url" || key==="gallery_urls") input.value="";
@@ -1032,6 +1102,7 @@ function renderModuleList(moduleName,records) {
         else input.value=record[moduleDatabaseKey(moduleName,key)]==null?"":String(record[moduleDatabaseKey(moduleName,key)]);
       }
       updateImagePreview(form,record.photo_url||"");
+      try{await loadRecordRelationships(moduleName,record.id,form);}catch(error){setModuleMessage(moduleName,error.message||"Could not load related records.","error");}
       document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Edit "+config.title;
       document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Update "+config.title;
       document.querySelector('[data-module-cancel="'+moduleName+'"]').hidden=false;
@@ -1058,6 +1129,7 @@ async function loadContentModule(moduleName) {
   const config=dashboardContentModules[moduleName];
   const container=document.querySelector('[data-module-list="'+moduleName+'"]');
   if (container) { container.replaceChildren(); addTextElement(container,"p","muted","Loading records…"); }
+  try{await loadRelationshipOptions(moduleName);}catch(error){if(container){container.replaceChildren();addTextElement(container,"p","muted",error.message||"Could not load related records.");}return;}
   const {data,error}=await supabase.from(config.table).select("*").order("created_at",{ascending:false});
   if (error) {
     if (container) { container.replaceChildren(); addTextElement(container,"p","muted",error.message||"Could not load records."); }
@@ -1087,10 +1159,21 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     try {
       const payload={};
       for (const [key] of config.fields) {
+        if ((moduleRelationships[moduleName]||[]).some(relation=>relation.field===key)) continue;
         const input=form.elements.namedItem(key); if (!input || key==="photo_url" || key==="gallery_urls" || key==="visibility") continue;
         const dbKey=moduleDatabaseKey(moduleName,key);
         if(key==="service_information") payload[dbKey]=input.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);
-        else payload[dbKey]=input.value.trim()===""?null:input.value.trim();
+        else if(key==="price") {
+          const raw=input.value.trim();
+          const value=raw===""?null:Number(raw);
+          if(value!==null&&!Number.isFinite(value))throw new Error("Enter a valid product price.");
+          payload[dbKey]=value===null?null:Math.round(value*100);
+        } else if(key==="stock_qty") {
+          const value=input.value.trim()===""?0:Number(input.value);
+          if(!Number.isInteger(value)||value<0)throw new Error("Stock quantity must be a whole number of zero or more.");
+          payload[dbKey]=value;
+        } else if(key==="condition") payload[dbKey]=input.value.trim()||"new";
+        else payload[dbKey]=input.value.trim()===""?(key==="currency"?"SAR":null):input.value.trim();
       }
       const nameValue=String(nameInput?.value||"").trim();
       const slugValue=String(slugInput?.value||"").trim()||slugFromName(nameValue);
@@ -1128,14 +1211,16 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         payload.photo_url=uploadedUrl;
       } else if (form.dataset.removePhoto==="true") payload.photo_url=null;
       const editId=form.dataset.editId; let result;
-      if (editId) result=await supabase.from(config.table).update(payload).eq("id",editId);
+      if (editId) result=await supabase.from(config.table).update(payload).eq("id",editId).select("id").single();
       else {
         const {data:authData}=await supabase.auth.getUser();
         if (moduleName==="workshops"&&authData?.user?.id) { payload.created_by=authData.user.id; payload.updated_by=authData.user.id; }
-        result=await supabase.from(config.table).insert(payload);
+        result=await supabase.from(config.table).insert(payload).select("id").single();
       }
       if (result.error) throw result.error;
       saved=true;
+      const savedRecordId=editId||result.data?.id;
+      if(savedRecordId)await saveRecordRelationships(moduleName,savedRecordId,form);
       const nextPhotoUrl=payload.photo_url===undefined?oldPhotoUrl:payload.photo_url;
       if (oldPhotoUrl&&oldPhotoUrl!==nextPhotoUrl) {
         try { await removeStoredImage(oldPhotoUrl); } catch (cleanupError) { console.warn("Old image cleanup failed.",cleanupError); }

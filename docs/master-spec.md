@@ -163,10 +163,21 @@ This standard applies to Services, Products, Workshops and Technicians.
 Use Supabase Storage for direct upload, replace, remove and preview. Show a fallback icon when an image is missing or broken.
 
 ### Services form
-Name, Slug, Description, Category, Image, Visibility.
+Name, Slug, Description, Category, Image, Visibility, Related Workshops, Related Mechanicians.
 
 ### Products form
-Name, Slug, Description, Category, Image, Visibility.
+Name, Slug, Description, Category, Image, Price, Currency, Stock Quantity, Condition, Visibility, Related Workshops.
+
+### Customer-first catalogue presentation
+- Keep the Home page and its existing sections, order, layout and cards unchanged.
+- Services and Products remain separate public listing pages.
+- Listing pages show category shortcuts and direct item cards together, so category navigation is optional rather than a required step.
+- Provide a search field on each listing page.
+- Every Service and Product has its own detail page.
+- Service detail pages present the service description, related Workshops, related Mechanicians and direct contact options.
+- Product detail pages present product information, price when supplied, stock/availability information, related Workshops or sales locations when assigned, and direct contact options.
+- Related Workshop and Mechanician assignments are managed from the Owner Dashboard and use explicit database relationships; do not infer provider assignments from category names.
+- If no provider has been assigned, do not invent or display an unrelated provider.
 
 ### Workshops form
 Name, Slug, Description, Location, Technician, Category, Image, Visibility.
