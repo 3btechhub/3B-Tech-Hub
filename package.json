@@ -5,6 +5,6 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "validate": "node --input-type=module --check < site/assets/app.js && node --input-type=module --check < site/assets/site-router.js && node --check site/assets/menu.js && node --check site/assets/route-boot.js && node --input-type=module --check < site/assets/runtime-config.js && npm test"
+    "validate": "node --input-type=module --check < site/assets/app.js && node --input-type=module --check < site/assets/site-router.js && node --check site/assets/menu.js && node --check site/assets/route-boot.js && node --input-type=module --check < site/assets/runtime-config.js && node --input-type=module --check < site/assets/catalogue.js && node --input-type=module --check < site/assets/admin-extended.js && npm test"
   }
 }
