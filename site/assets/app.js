@@ -902,7 +902,6 @@ async function loadModuleRelationOptions(moduleName,form) {
     host.replaceChildren();
     if(error){addTextElement(host,"small","muted","Could not load options.");continue;}
     for(const record of data||[]){
-      if(rel.filter&&record[rel.filter[0]]!==rel.filter[1])continue;
       const label=document.createElement("label");label.className="module-related-option";
       const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=record.id;checkbox.dataset.relatedId=record.id;
       label.append(checkbox,document.createTextNode(record[rel.label]||"Untitled"));host.append(label);
