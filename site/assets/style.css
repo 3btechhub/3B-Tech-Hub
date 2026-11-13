@@ -780,3 +780,189 @@ button[data-size="large"],input[data-size="large"],select[data-size="large"],tex
  .home-main.home-catalog .home-section-heading h2{font-size:clamp(1.2rem,5vw,1.45rem)}
  .home-main.home-catalog .home-section-heading .section-view-all{font-size:var(--text-small)}
 }
+
+
+/* Stable component sizing: content may wrap/scroll, but never determines component dimensions. */
+.content-editor-form input:not([type="file"]),
+.content-editor-form select,
+.content-editor-form textarea,
+.module-form-field input,
+.module-form-field select,
+.module-form-field textarea {
+  display:block;
+  width:100%;
+  min-width:0;
+  height:44px;
+  min-height:44px;
+  max-height:44px;
+  padding:10px 11px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.content-editor-form textarea,
+.module-form-field textarea {
+  height:104px;
+  min-height:104px;
+  max-height:104px;
+  resize:none;
+  overflow:auto;
+  white-space:pre-wrap;
+}
+.content-editor-form button,
+.editor-actions button,
+.company-contact-links a,
+.pill-button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex:0 0 120px;
+  width:120px;
+  min-width:120px;
+  max-width:120px;
+  height:42px;
+  min-height:42px;
+  max-height:42px;
+  padding:8px 10px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.content-editor-form,
+.admin-list,
+.module-form-field,
+.editor-actions { min-width:0; }
+.module-form-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+.module-form-grid > *,
+.module-form-field { min-width:0; }
+.dashboard-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.dashboard-card {
+  height:126px;
+  min-height:126px;
+  max-height:126px;
+  overflow:hidden;
+}
+.dashboard-card h2,
+.dashboard-card h3,
+.dashboard-card p { overflow:hidden; text-overflow:ellipsis; }
+.dashboard-function-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.dashboard-function-card {
+  height:88px;
+  min-height:88px;
+  max-height:88px;
+  overflow:hidden;
+}
+.service-card-grid,
+.technician-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.service-card {
+  height:94px;
+  min-height:94px;
+  max-height:94px;
+  min-width:0;
+  overflow:hidden;
+}
+.technician-card {
+  height:320px;
+  min-height:320px;
+  max-height:320px;
+  min-width:0;
+  overflow:hidden;
+}
+.technician-card > img {
+  width:100%;
+  height:180px;
+  min-height:180px;
+  max-height:180px;
+  object-fit:cover;
+}
+.home-card-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.home-content-card {
+  display:flex;
+  align-items:center;
+  width:100%;
+  height:88px;
+  min-height:88px;
+  max-height:88px;
+  min-width:0;
+  overflow:hidden;
+}
+.home-content-card-body,
+.home-content-card strong,
+.admin-list-row > div { min-width:0; }
+.home-content-card strong,
+.admin-list-row strong,
+.admin-list-row .muted {
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+  overflow-wrap:anywhere;
+}
+.home-content-visual {
+  flex:0 0 48px;
+  width:48px;
+  height:48px;
+  min-width:48px;
+  min-height:48px;
+  max-width:48px;
+  max-height:48px;
+}
+.admin-list-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  height:76px;
+  min-height:76px;
+  max-height:76px;
+  overflow:hidden;
+}
+.admin-list-row .editor-actions {
+  display:flex;
+  flex-wrap:nowrap;
+  align-items:center;
+  gap:8px;
+}
+.catalogue-detail-field {
+  max-height:180px;
+  overflow:auto;
+  overflow-wrap:anywhere;
+}
+input, select, textarea, button { min-width:0; }
+@media(max-width:760px) {
+  .dashboard-grid,
+  .dashboard-function-grid,
+  .service-card-grid,
+  .technician-grid,
+  .home-card-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .module-form-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:480px) {
+  .dashboard-grid,
+  .dashboard-function-grid,
+  .service-card-grid,
+  .technician-grid,
+  .module-form-grid { grid-template-columns:minmax(0,1fr); }
+  .home-card-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .dashboard-card { height:116px; min-height:116px; max-height:116px; }
+  .technician-card { height:300px; min-height:300px; max-height:300px; }
+  .admin-list-row { grid-template-columns:minmax(0,1fr) auto; }
+  .content-editor-form { width:100%; max-width:100%; }
+}
