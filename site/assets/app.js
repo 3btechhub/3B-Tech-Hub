@@ -933,7 +933,7 @@ function createModuleField(field) {
       const option=document.createElement("option"); option.value=value; option.textContent=value==="visible"?"Visible":value==="hidden"?"Hidden":value; control.append(option);
     }
   } else {
-    control=document.createElement("input"); control.type=type;
+    control=document.createElement("input"); control.type=type==="files"?"file":type;
     if (type==="file" || type==="files") control.accept="image/jpeg,image/png,image/webp,image/avif,image/gif";
     if (type==="files") control.multiple=true;
   }
