@@ -1,5 +1,5 @@
 import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
-import { initCataloguePage } from "./catalogue.js";
+import { getItemFallbackIcon, initCataloguePage } from "./catalogue.js";
 import { initExtendedDashboard } from "./admin-extended.js";
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
@@ -81,7 +81,7 @@ function renderHomeCard(module, record) {
   visual.className="home-content-visual"+(module.key==="technicians"?" home-content-visual--person":"");
   const fallback=document.createElement("span");
   fallback.className="home-content-fallback";
-  fallback.textContent=module.key==="technicians"?"👤":module.icon;
+  fallback.textContent=getItemFallbackIcon(record.name||record.title,module.icon);
   visual.append(fallback);
   if(record.photo_url) {
     const image=document.createElement("img");
