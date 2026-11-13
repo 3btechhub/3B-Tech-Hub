@@ -932,7 +932,7 @@ async function renderModuleList(moduleName,records) {
       form.dataset.currentGalleryUrls=JSON.stringify([...new Set([record.photo_url,...(record.gallery_urls||[])].filter(Boolean))]);
       form.dataset.removePhoto="false";form.dataset.slugManual="false";
       for(const [key] of config.fields){
-        const input=form.elements.namedItem(key);if(!input)continue;
+        const input=form.elements.namedItem(key);if(!input&&key!=="country")continue;
         if(key==="visibility")input.value=recordVisibility(moduleName,record);
         else if(key==="price")input.value=record.price_minor==null?"":String(Number(record.price_minor)/100);
         else if(key==="name")input.value=record.name||record.title||"";
