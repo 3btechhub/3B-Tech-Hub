@@ -1049,6 +1049,8 @@ async function loadContentModule(moduleName) {
     return;
   }
   moduleRecordCache[moduleName]=data||[];
+  const countNode=document.querySelector('[data-dashboard-count="'+moduleName+'"]');
+  if(countNode)countNode.textContent=String(moduleRecordCache[moduleName].length);
   await renderModuleList(moduleName,moduleRecordCache[moduleName]);
 }
 for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
@@ -1171,7 +1173,7 @@ function activateDashboardModule(moduleName, focusTab = false) {
     panel.classList.toggle("is-active", active);
   });
 }
-document.querySelectorAll("[data-dashboard-open]").forEach(card=>card.addEventListener("click",()=>activateDashboardModule(card.dataset.dashboardOpen)));
+document.querySelectorAll("[data-dashboard-open]").forEach(card=>card.addEventListener("click",()=>{const moduleName=card.dataset.dashboardOpen;activateDashboardModule(moduleName);if(dashboardContentModules[moduleName])void loadContentModule(moduleName);}));
 activateDashboardModule("overview");
 async function loadDashboardSummaryCounts(){
   if(!ownerDashboard||currentDashboardRole!=="owner")return;
