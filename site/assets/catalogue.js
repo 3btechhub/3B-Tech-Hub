@@ -1,4 +1,4 @@
-import { getContactActionLabel, getContactHref, getContactIcon } from "./contact-utils.js";
+import { getContactActionLabel, getContactHref, createContactIcon } from "./contact-utils.js";
 const definitions = {
   services: { title:"Services", table:"services", columns:"id,name,slug,description,category,photo_url,status", filter:["status","active"], icon:"🔧" },
   products: { title:"Products", table:"products", columns:"id,name,slug,description,category,photo_url,status", filter:["status","active"], icon:"📦" },
@@ -24,7 +24,7 @@ function link(path,label){const a=el("a","section-view-all",label);a.href="/3bte
 function renderCard(item,def,module){
  const card=el("a","home-content-card");card.href="/3btechhub/"+module+"/"+encodeURIComponent(item.slug)+"/";
  const visual=el("span","home-content-visual");
- visual.append(el("span","home-content-fallback",module==="contacts"?getContactIcon(item.value):getItemFallbackIcon(item.name,module)));
+ if(module==="contacts"){const icon=createContactIcon(item.value);icon.classList.add("home-content-fallback");visual.append(icon);}else visual.append(el("span","home-content-fallback",getItemFallbackIcon(item.name,module)));
  if(item.photo_url){const img=el("img");img.src=item.photo_url;img.alt="";img.loading="lazy";img.onerror=()=>img.remove();visual.append(img);}
  const body=el("span","home-content-card-body");body.append(el("strong","",item.name||"Untitled"));
  card.append(visual,body);return card;
