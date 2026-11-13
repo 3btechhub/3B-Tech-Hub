@@ -142,7 +142,7 @@ export async function initCataloguePage(supabase,module,slug){
  const selectedCategory=["services","products"].includes(module)?(new URLSearchParams(window.location.search).get("category")||"").trim():"";
  const heading=el("h1","catalogue-title",selectedCategory?def.title+" · "+selectedCategory:def.title);heading.prepend(createIcon(getModuleIcon(module)));root.append(heading);
  if(module==="services"){
-  const categories=[["Buy & Sell","package"],["Setup & Installation","plug"],["Repair & Maintenance","wrench"]];
+  const categories=[["Buy & Sell","package"],["Home Delivery","mapPin"],["Setup & Installation","plug"],["Repair & Maintenance","wrench"]];
   const categoryGrid=el("div","home-taxonomy-grid home-taxonomy-grid--services");
   categories.forEach(([name,iconName])=>{
    const card=el("a","home-taxonomy-card");card.href="/3btechhub/services/?category="+encodeURIComponent(name);
