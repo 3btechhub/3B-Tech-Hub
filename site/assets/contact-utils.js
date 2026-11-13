@@ -4,6 +4,8 @@ const PHONE_RE=/^\+?[\d\s().-]{7,}$/;
 export function getContactHref(value){
  const raw=String(value||"").trim();
  if(!raw)return "";
+ if(/^mailto:/i.test(raw))return raw;
+ if(/^tel:/i.test(raw))return raw;
  if(EMAIL_RE.test(raw))return "mailto:"+raw;
  if(PHONE_RE.test(raw))return "tel:"+raw.replace(/[^\d+]/g,"");
  let candidate=raw;
