@@ -1,45 +1,48 @@
 <main class="dashboard-main" id="owner-dashboard">
     <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
 <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" data-icon="chart" data-dashboard-tab="overview" tabindex="0">Overview</button>
-<button class="dashboard-module-tab" type="button" role="tab" id="tab-categories" aria-controls="panel-categories" aria-selected="false" data-icon="file" data-dashboard-tab="categories" tabindex="-1">Categories</button>
-<button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-services" aria-controls="panel-services" aria-selected="true" data-icon="wrench" data-dashboard-tab="services">Services</button>
+<button class="dashboard-module-tab" type="button" role="tab" id="tab-service-types" aria-controls="panel-service-types" aria-selected="false" data-icon="layers" data-dashboard-tab="service_types" tabindex="-1">Service Type</button>
+<button class="dashboard-module-tab" type="button" role="tab" id="tab-device-types" aria-controls="panel-device-types" aria-selected="false" data-icon="cpu" data-dashboard-tab="device_types" tabindex="-1">Device Type</button>
+<button class="dashboard-module-tab" type="button" role="tab" id="tab-services" aria-controls="panel-services" aria-selected="false" data-icon="wrench" data-dashboard-tab="services" tabindex="-1">Services</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" aria-controls="panel-products" aria-selected="false" data-icon="package" data-dashboard-tab="products" tabindex="-1">Products</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshops" aria-controls="panel-workshops" aria-selected="false" data-icon="building" data-dashboard-tab="workshops" tabindex="-1">Workshops</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-technicians" aria-controls="panel-technicians" aria-selected="false" data-icon="technician" data-dashboard-tab="technicians" tabindex="-1">Technicians</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-contacts" aria-controls="panel-contacts" aria-selected="false" data-icon="contact" data-dashboard-tab="contacts" tabindex="-1">Contacts</button>
-<button class="dashboard-module-tab" type="button" role="tab" id="tab-users" aria-controls="panel-users" aria-selected="false" data-icon="users" data-dashboard-tab="users" tabindex="-1">User</button>
+<button class="dashboard-module-tab" type="button" role="tab" id="tab-users" aria-controls="panel-users" aria-selected="false" data-icon="users" data-dashboard-tab="users" tabindex="-1">Users</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-roles" aria-controls="panel-roles" aria-selected="false" data-icon="shieldCheck" data-dashboard-tab="roles" tabindex="-1">Roles</button>
-<button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" aria-controls="panel-permission" aria-selected="false" data-icon="lock" data-dashboard-tab="permission" tabindex="-1">Permission</button>
+<button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" aria-controls="panel-permission" aria-selected="false" data-icon="lock" data-dashboard-tab="permission" tabindex="-1">Permissions</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-icon="settings" data-dashboard-tab="settings" tabindex="-1">Settings</button>
 </nav>
 
     <section class="dashboard-module-panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-dashboard-panel="overview">
-      <div class="dashboard-summary-grid">
-        <button class="dashboard-summary-card" type="button" data-dashboard-open="categories"><span>Categories</span><strong id="dashboard-categories-count">—</strong></button>
-        <button class="dashboard-summary-card" type="button" data-dashboard-open="services"><span>Services</span><strong id="dashboard-services-count">—</strong></button>
-        <button class="dashboard-summary-card" type="button" data-dashboard-open="products"><span>Products</span><strong id="dashboard-products-count">—</strong></button>
-        <button class="dashboard-summary-card" type="button" data-dashboard-open="workshops"><span>Workshops</span><strong id="dashboard-workshops-count">—</strong></button>
-        <button class="dashboard-summary-card" type="button" data-dashboard-open="technicians"><span>Technicians</span><strong id="dashboard-technicians-count">—</strong></button>
-        <button class="dashboard-summary-card" type="button" data-dashboard-open="contacts"><span>Contacts</span><strong id="dashboard-contacts-count">—</strong></button>
-        <button class="dashboard-summary-card" type="button" data-dashboard-open="users"><span>Users</span><strong id="dashboard-users-count">—</strong></button>
-        <button class="dashboard-summary-card" type="button" data-dashboard-open="roles"><span>Roles</span><strong id="dashboard-roles-count">—</strong></button>
-        <button class="dashboard-summary-card" type="button" data-dashboard-open="permission"><span>Permissions</span><strong id="dashboard-permissions-count">—</strong></button>
-      </div>
-    </section>
+<div class="dashboard-summary-grid">
+<button class="dashboard-summary-card" type="button" data-dashboard-open="service_types"><span>Service Type</span><strong data-dashboard-count="service_types">—</strong></button>
+<button class="dashboard-summary-card" type="button" data-dashboard-open="device_types"><span>Device Type</span><strong data-dashboard-count="device_types">—</strong></button>
+<button class="dashboard-summary-card" type="button" data-dashboard-open="services"><span>Services</span><strong data-dashboard-count="services">—</strong></button>
+<button class="dashboard-summary-card" type="button" data-dashboard-open="products"><span>Products</span><strong data-dashboard-count="products">—</strong></button>
+<button class="dashboard-summary-card" type="button" data-dashboard-open="workshops"><span>Workshops</span><strong data-dashboard-count="workshops">—</strong></button>
+<button class="dashboard-summary-card" type="button" data-dashboard-open="technicians"><span>Technicians</span><strong data-dashboard-count="technicians">—</strong></button>
+<button class="dashboard-summary-card" type="button" data-dashboard-open="contacts"><span>Contacts</span><strong data-dashboard-count="contacts">—</strong></button>
+<button class="dashboard-summary-card" type="button" data-dashboard-open="users"><span>Users</span><strong data-dashboard-count="users">—</strong></button>
+<button class="dashboard-summary-card" type="button" data-dashboard-open="roles"><span>Roles</span><strong data-dashboard-count="roles">—</strong></button>
+<button class="dashboard-summary-card" type="button" data-dashboard-open="permission"><span>Permissions</span><strong data-dashboard-count="permission">—</strong></button>
+</div></section>
 
-    <section class="dashboard-module-panel" id="panel-categories" role="tabpanel" aria-labelledby="tab-categories" data-dashboard-panel="categories" hidden>
-      <div class="admin-list">
-        <input class="module-search-input" type="search" data-module-search="categories" aria-label="Search categories">
-        <button class="secondary-button module-refresh-button" type="button" data-module-refresh="categories">Refresh</button>
-        <form class="content-editor-form" data-module-form="categories">
-          <h3 data-module-form-title="categories">Add category</h3>
-          <div class="module-form-grid" data-module-fields="categories"></div>
-          <div class="editor-actions"><button type="submit" data-module-submit="categories">Save category</button><button class="secondary-button" type="button" data-module-cancel="categories" hidden>Cancel Edit</button></div>
-          <p class="editor-message" role="status" data-module-message="categories"></p>
-        </form>
-        <div class="admin-list" data-module-list="categories" aria-live="polite"><p class="muted">Open this module to load records.</p></div>
-      </div>
-    </section>
+    <section class="dashboard-module-panel" id="panel-service-types" role="tabpanel" aria-labelledby="tab-service-types" data-dashboard-panel="service_types" hidden>
+<div class="admin-list"><input class="module-search-input" type="search" data-module-search="service_types" aria-label="Search Service Type">
+<button class="secondary-button module-refresh-button" type="button" data-module-refresh="service_types">Refresh</button>
+<form class="content-editor-form" data-module-form="service_types"><h3 data-module-form-title="service_types">Add service type</h3>
+<div class="module-form-grid" data-module-fields="service_types"></div>
+<div class="editor-actions"><button type="submit" data-module-submit="service_types">Save service type</button><button class="secondary-button" type="button" data-module-cancel="service_types" hidden>Cancel Edit</button></div>
+<p class="editor-message" role="status" data-module-message="service_types"></p></form>
+<div class="admin-list" data-module-list="service_types" aria-live="polite"><p class="muted">Open this module to load records.</p></div></div></section><section class="dashboard-module-panel" id="panel-device-types" role="tabpanel" aria-labelledby="tab-device-types" data-dashboard-panel="device_types" hidden>
+<div class="admin-list"><input class="module-search-input" type="search" data-module-search="device_types" aria-label="Search Device Type">
+<button class="secondary-button module-refresh-button" type="button" data-module-refresh="device_types">Refresh</button>
+<form class="content-editor-form" data-module-form="device_types"><h3 data-module-form-title="device_types">Add device type</h3>
+<div class="module-form-grid" data-module-fields="device_types"></div>
+<div class="editor-actions"><button type="submit" data-module-submit="device_types">Save device type</button><button class="secondary-button" type="button" data-module-cancel="device_types" hidden>Cancel Edit</button></div>
+<p class="editor-message" role="status" data-module-message="device_types"></p></form>
+<div class="admin-list" data-module-list="device_types" aria-live="polite"><p class="muted">Open this module to load records.</p></div></div></section>
 
     <section class="dashboard-module-panel" id="panel-services" role="tabpanel" aria-labelledby="tab-services" data-dashboard-panel="services" hidden>
       <div class="admin-list">
