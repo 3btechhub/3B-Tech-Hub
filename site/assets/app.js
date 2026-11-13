@@ -1140,11 +1140,10 @@ async function renderModuleList(moduleName,records) {
         }catch(error){setModuleMessage(moduleName,error.message||"Could not delete this record.","error");deleteButton.disabled=false;}
       });
       actions.append(deleteButton);
-      row.setAttribute("role","group");
-      row.tabIndex=-1;
-      row.append(form);
+      // Keep the shared create/update form in its original position above the list.
+      // Selecting a record only loads its values into that form.
       setModuleMessage(moduleName,"");
-      form.scrollIntoView({behavior:"smooth",block:"nearest"});
+      form.scrollIntoView({behavior:"smooth",block:"start"});
     };
     row.addEventListener("click",event=>{
       if(event.target.closest("form"))return;
