@@ -125,6 +125,8 @@ Deno.serve(async (request: Request) => {
       const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo });
       if (error) throw error;
       if (!data.user) throw new Error("Invite did not return a user.");
+      const { error: roleDeleteError } = await admin.from("user_roles").delete().eq("user_id", data.user.id).neq("role", "owner");
+      if (roleDeleteError) throw roleDeleteError;
       const { error: roleInsertError } = await admin.from("user_roles").insert({
         user_id: data.user.id,
         role,
