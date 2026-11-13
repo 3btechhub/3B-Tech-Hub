@@ -40,15 +40,18 @@ function publicIp(value: string | null): string | null {
 async function approximateLocation(ip: string | null): Promise<{ country: string | null; city: string | null }> {
   if (!ip) return { country: null, city: null };
   try {
-    const response = await fetch("https://ipwho.is/" + encodeURIComponent(ip), {
+    const response = await fetch("https://ipdata.free/" + encodeURIComponent(ip), {
       headers: { "Accept": "application/json" },
       signal: AbortSignal.timeout(2500),
     });
     if (!response.ok) return { country: null, city: null };
     const data = await response.json();
-    if (data?.success !== true) return { country: null, city: null };
+    const countryCode = typeof data.country === "string" ? data.country.trim().toUpperCase() : "";
+    const country = /^[A-Z]{2}$/.test(countryCode)
+      ? new Intl.DisplayNames(["en"], { type: "region" }).of(countryCode) || countryCode
+      : null;
     return {
-      country: typeof data.country === "string" ? data.country.slice(0, 120) : null,
+      country: country ? country.slice(0, 120) : null,
       city: typeof data.city === "string" ? data.city.slice(0, 120) : null,
     };
   } catch {
@@ -96,12 +99,26 @@ Deno.serve(async (request: Request) => {
     if (duplicateError) throw duplicateError;
     if (duplicate) return json({ recorded: true, duplicate: true }, 200, origin);
 
+    // Reuse today's location for repeat visits; never persist or return the raw IP.
+    const locationCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: previousVisit, error: previousError } = await admin
+      .from("visitor_analytics")
+      .select("country,city")
+      .eq("visitor_key", body.visitor_key)
+      .not("country", "is", null)
+      .gte("viewed_at", locationCutoff)
+      .order("viewed_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (previousError) throw previousError;
+
     // Prefer the gateway-provided client IP; never persist it or return it.
-    const realIp = request.headers.get("x-real-ip");
     const forwarded = request.headers.get("x-forwarded-for");
     const forwardedCandidate = forwarded?.split(",").map((part) => part.trim()).filter(Boolean).at(-1) || null;
-    const clientIp = publicIp(realIp || forwardedCandidate);
-    const location = await approximateLocation(clientIp);
+    const clientIp = publicIp(forwardedCandidate || request.headers.get("x-real-ip"));
+    const location = previousVisit?.country
+      ? { country: previousVisit.country as string, city: (previousVisit.city as string | null) || null }
+      : await approximateLocation(clientIp);
 
     const { error } = await admin.from("visitor_analytics").insert({
       visitor_key: body.visitor_key,
