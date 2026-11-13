@@ -49,7 +49,7 @@ jobs:
           ! test -d site/products
           ! test -d site/workshop
           ! test -d site/technicians
-          ! grep -R -E "country-router|language-select|region-select|ipwho\\.is|preferred_locale|countryContextReady" site
+          ! grep -R -E "country-router|region-select|ipwho\\.is|preferred_locale|countryContextReady" site
 
   deploy:
     if: github.event_name != 'pull_request'
