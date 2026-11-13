@@ -845,27 +845,35 @@ if(siteSettingsForm)void loadSiteSettingsForm();
 
 
 // Core content modules: each module uses its existing Supabase table and RLS policies.
+const sharedDetailFields = [
+  ["short_info","Short one-line information","text",false],
+  ["description","Detailed description","textarea",false],
+  ["service_information","Information / Features (one item per line)","textarea",false],
+  ["photo_url","Main image","file",false],
+  ["gallery_urls","Additional gallery images (multiple)","files",false],
+  ["location","Location / Address","text",false],
+  ["map_url","Map URL (optional)","url",false],
+  ["phone","Phone number","tel",false],
+  ["whatsapp","WhatsApp number or link","text",false]
+];
 const dashboardContentModules = {
   services: { table:"services", title:"Service", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
-    ["category","Category","text",false],
-    ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
+    ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
+    ["category","Category","text",false],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["slug","category","visibility"] },
   products: { table:"products", title:"Product", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
-    ["category","Category","text",false],
-    ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
+    ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
+    ["category","Category","text",false],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["slug","category","visibility"] },
   workshops: { table:"workshops", title:"Workshop", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
-    ["location","Location","text",false],["technician","Technician","text",false],
-    ["category","Category","text",false],
-    ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
+    ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
+    ["technician","Technician / Trainer","text",false],["category","Category","text",false],
+    ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["slug","location","technician","category","visibility"] },
   technicians: { table:"technicians", title:"Technician", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["description","Description","textarea",false],
+    ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
     ["skill","Skill","text",false],["category","Category","text",false],
-    ["photo_url","Image","file",false],["visibility","Visibility","select",false,["visible","hidden"]]
+    ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["slug","skill","category","visibility"] }
 };
 
@@ -926,10 +934,13 @@ function createModuleField(field) {
     }
   } else {
     control=document.createElement("input"); control.type=type;
-    if (type==="file") control.accept="image/jpeg,image/png,image/webp,image/avif,image/gif";
+    if (type==="file" || type==="files") control.accept="image/jpeg,image/png,image/webp,image/avif,image/gif";
+    if (type==="files") control.multiple=true;
   }
   control.name=name; control.required=Boolean(required);
-  if (type === "file") {
+  if (type === "files") {
+    wrapper.append(addTextElement(wrapper,"span","",label),control,addTextElement(wrapper,"small","muted","Select multiple images. New uploads are added to the existing gallery."));
+  } else if (type === "file") {
     wrapper.append(addTextElement(wrapper,"span","",label),control);
     const preview=document.createElement("img"); preview.className="module-image-preview"; preview.alt=label+" preview"; preview.hidden=true;
     const remove=document.createElement("button"); remove.type="button"; remove.className="secondary-button"; remove.textContent="Remove image"; remove.dataset.imageRemove="true"; remove.hidden=true;
@@ -962,7 +973,7 @@ function setModuleMessage(moduleName,message,kind="") {
 function resetModuleForm(moduleName) {
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if (!form) return;
-  form.reset(); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.removePhoto="false"; form.dataset.slugManual="false";
+  form.reset(); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.currentGalleryUrls="[]"; form.dataset.removePhoto="false"; form.dataset.currentGalleryUrls="[]"; form.dataset.slugManual="false";
   updateImagePreview(form,"");
   const config=dashboardContentModules[moduleName];
   document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Add "+config.title;
@@ -1010,13 +1021,14 @@ function renderModuleList(moduleName,records) {
     const edit=document.createElement("button"); edit.type="button"; edit.className="secondary-button"; edit.textContent="Edit";
     edit.addEventListener("click",()=>{
       const form=document.querySelector('[data-module-form="'+moduleName+'"]'); form.dataset.editId=record.id;
-      form.dataset.currentPhotoUrl=record.photo_url||""; form.dataset.removePhoto="false"; form.dataset.slugManual="false";
+      form.dataset.currentPhotoUrl=record.photo_url||""; form.dataset.currentGalleryUrls=JSON.stringify(record.gallery_urls||[]); form.dataset.removePhoto="false"; form.dataset.slugManual="false";
       for (const [key] of config.fields) {
         const input=form.elements.namedItem(key); if (!input) continue;
         if (key==="visibility") input.value=recordVisibility(moduleName,record);
         else if (key==="name") input.value=record.name||record.title||"";
         else if (key==="technician") input.value=record.trainer||"";
-        else if (key==="photo_url") input.value="";
+        else if (key==="photo_url" || key==="gallery_urls") input.value="";
+        else if (key==="service_information") input.value=Array.isArray(record.service_information)?record.service_information.join("\n"):"";
         else input.value=record[moduleDatabaseKey(moduleName,key)]==null?"":String(record[moduleDatabaseKey(moduleName,key)]);
       }
       updateImagePreview(form,record.photo_url||"");
@@ -1034,6 +1046,7 @@ function renderModuleList(moduleName,records) {
         const {error}=await supabase.from(config.table).delete().eq("id",record.id);
         if (error) throw error;
         await removeStoredImage(record.photo_url);
+        for(const url of (record.gallery_urls||[])){try{await removeStoredImage(url);}catch(cleanupError){console.warn("Gallery image cleanup failed.",cleanupError);}}
         setModuleMessage(moduleName,config.title+" deleted.","success"); await loadContentModule(moduleName);
       } catch(error) { setModuleMessage(moduleName,error.message||"Could not delete this record.","error"); remove.disabled=false; }
     });
@@ -1074,9 +1087,10 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     try {
       const payload={};
       for (const [key] of config.fields) {
-        const input=form.elements.namedItem(key); if (!input || key==="photo_url" || key==="visibility") continue;
+        const input=form.elements.namedItem(key); if (!input || key==="photo_url" || key==="gallery_urls" || key==="visibility") continue;
         const dbKey=moduleDatabaseKey(moduleName,key);
-        payload[dbKey]=input.value.trim()===""?null:input.value.trim();
+        if(key==="service_information") payload[dbKey]=input.value.split(/\\r?\\n/).map(value=>value.trim()).filter(Boolean);
+        else payload[dbKey]=input.value.trim()===""?null:input.value.trim();
       }
       const nameValue=String(nameInput?.value||"").trim();
       const slugValue=String(slugInput?.value||"").trim()||slugFromName(nameValue);
@@ -1087,6 +1101,20 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       const visibility=form.elements.namedItem("visibility")?.value||"hidden";
       if (moduleName==="technicians") payload.is_published=visibility==="visible";
       else payload.status=visibility==="visible"?(moduleName==="workshops"?"published":"active"):"draft";
+      const galleryInput=form.elements.namedItem("gallery_urls");
+      const galleryUrls=JSON.parse(form.dataset.currentGalleryUrls||"[]");
+      if(galleryInput?.files?.length){
+        for(const file of Array.from(galleryInput.files)){
+          if(!file.type.startsWith("image/")) throw new Error("Please select image files only.");
+          if(file.size>10*1024*1024) throw new Error("Each gallery image must be 10 MB or smaller.");
+          const safeName=file.name.normalize("NFKD").replace(/[^\\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
+          const path="content/"+moduleName+"/gallery/"+crypto.randomUUID()+"-"+safeName;
+          const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type,upsert:false});
+          if(uploadError) throw uploadError;
+          galleryUrls.push(supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl);
+        }
+      }
+      payload.gallery_urls=galleryUrls;
       const imageInput=form.elements.namedItem("photo_url");
       if (imageInput?.files?.[0]) {
         const file=imageInput.files[0];
