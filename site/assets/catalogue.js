@@ -38,8 +38,9 @@ export async function initCataloguePage(supabase,module,slug){
  const heading=el("h1","catalogue-title",def.title);heading.prepend(createIcon(getModuleIcon(module)));root.append(heading);
  let q=supabase.from(def.table).select(def.columns).order("created_at",{ascending:false});
  if(def.filter)q=q.eq(def.filter[0],def.filter[1]);
- const {data,error}=await q.limit(100);if(error){root.append(el("p","muted","Could not load "+def.title.toLowerCase()+"."));return;}
- const grid=el("div","home-card-grid");if(!data?.length)grid.append(el("p","home-empty","No "+def.title.toLowerCase()+" available yet."));
+ let data=[];let offset=0;const pageSize=1000;
+ while(true){const {data:page,error}=await q.range(offset,offset+pageSize-1);if(error){root.append(el("p","muted","Could not load "+def.title.toLowerCase()+"."));return;}if(!page?.length)break;data.push(...page);if(page.length<pageSize)break;offset+=pageSize;}
+ const grid=el("div","home-card-grid");if(!data.length)grid.append(el("p","home-empty","No "+def.title.toLowerCase()+" available yet."));
  else data.forEach(item=>grid.append(renderCard(item,def,module)));
  root.append(grid);
 }
