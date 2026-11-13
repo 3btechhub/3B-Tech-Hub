@@ -97,8 +97,6 @@ function renderHomeCard(module, record) {
   card.href="/3btechhub/"+module.key+"/"+encodeURIComponent(record.slug||"")+"/";
   const visual=document.createElement("div");
   visual.className="home-content-visual"+(module.key==="technicians"?" home-content-visual--person":"");
-  const fallback=document.createElement("span");
-  fallback.className="home-content-fallback";
   if(module.key==="contacts"){const icon=createContactIcon(record.value,record.name);icon.classList.add("home-content-fallback");visual.append(icon);}else{visual.append(getItemFallbackIcon(record.name||record.title,module.key));}
   if(record.photo_url) {
     const image=document.createElement("img");
@@ -116,6 +114,21 @@ function renderHomeCard(module, record) {
   card.append(visual,body);
   return card;
 }
+function renderHomeMoreCard(module) {
+  const card=document.createElement("a");
+  card.className="home-content-card home-content-more-card";
+  card.href="/3btechhub/"+module.key+"/";
+  const visual=document.createElement("div");
+  visual.className="home-content-visual";
+  visual.append(createIcon("arrow-right-circle"));
+  const body=document.createElement("div");
+  body.className="home-content-card-body";
+  const title=document.createElement("h3");
+  title.textContent="View All";
+  body.append(title);
+  card.append(visual,body);
+  return card;
+}
 
 async function loadHomeCatalog() {
   const root=document.querySelector(".home-catalog");
@@ -124,7 +137,7 @@ async function loadHomeCatalog() {
     const target=document.getElementById("home-"+module.key+"-cards");
     if(!target) continue;
     try {
-      let query=supabase.from(module.table).select(module.columns).limit(6);
+      let query=supabase.from(module.table).select(module.columns).limit(5);
       if(module.published) query=query.eq(module.published[0],module.published[1]);
       const {data,error}=await query;
       if(error) throw error;
@@ -136,7 +149,7 @@ async function loadHomeCatalog() {
         target.append(empty);
         continue;
       }
-      data.forEach(record=>target.append(renderHomeCard(module,record)));
+      data.slice(0,4).forEach(record=>target.append(renderHomeCard(module,record)));\n      if(data.length>4){target.replaceChildren(...data.slice(0,3).map(record=>renderHomeCard(module,record)),renderHomeMoreCard(module));}
     } catch(error) {
       console.error("Could not load public "+module.title.toLowerCase()+".",error);
       target.replaceChildren();
