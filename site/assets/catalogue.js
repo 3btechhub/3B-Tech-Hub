@@ -1,4 +1,5 @@
-import { getContactActionLabel, getContactHref, createContactIcon } from "./contact-utils.js";\nimport { createIcon, getModuleIcon, getItemFallbackIcon, getItemIconName } from "./icon-utils.js";
+import { getContactActionLabel, getContactHref, createContactIcon } from "./contact-utils.js";
+import { createIcon, getModuleIcon, getItemFallbackIcon, getItemIconName } from "./icon-utils.js";
 const definitions = {
   services: { title:"Services", table:"services", columns:"id,name,slug,description,category,photo_url,status", filter:["status","active"], icon:"wrench" },
   products: { title:"Products", table:"products", columns:"id,name,slug,description,category,photo_url,status", filter:["status","active"], icon:"package" },

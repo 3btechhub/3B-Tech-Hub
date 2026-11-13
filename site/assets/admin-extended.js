@@ -1,4 +1,5 @@
-import { createContactIcon } from "./contact-utils.js";\nimport { createIcon } from "./icon-utils.js";
+import { createContactIcon } from "./contact-utils.js";
+import { createIcon } from "./icon-utils.js";
 function node(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
 function message(id,text){const n=document.getElementById(id);if(n)n.textContent=text;}
 function slugify(s){return String(s||"").normalize("NFKD").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"item";}
