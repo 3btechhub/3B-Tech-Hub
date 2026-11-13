@@ -1,6 +1,7 @@
 import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
 import { getItemFallbackIcon, initCataloguePage } from "./catalogue.js";
 import { initExtendedDashboard } from "./admin-extended.js";
+import { getContactIcon } from "./contact-utils.js";
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const accountMenuLink = document.querySelector("#login-menu-link");
@@ -70,7 +71,7 @@ const homeCatalogModules = [
   { key:"products", table:"products", title:"Products", icon:"📦", published:["status","active"], columns:"name,slug,photo_url" },
   { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name:title,slug,photo_url" },
   { key:"technicians", table:"technicians", title:"Technicians", icon:"👨‍🔧", published:["is_published",true], columns:"name,slug,photo_url" },
-  { key:"contacts", table:"contacts", title:"Contacts", icon:"☎", published:null, columns:"name,slug" }
+  { key:"contacts", table:"contacts", title:"Contacts", icon:"☎️", published:null, columns:"name,slug,value" }
 ];
 
 function renderHomeCard(module, record) {
@@ -81,7 +82,7 @@ function renderHomeCard(module, record) {
   visual.className="home-content-visual"+(module.key==="technicians"?" home-content-visual--person":"");
   const fallback=document.createElement("span");
   fallback.className="home-content-fallback";
-  fallback.textContent=getItemFallbackIcon(record.name||record.title,module.icon);
+  fallback.textContent=module.key==="contacts"?getContactIcon(record.value):getItemFallbackIcon(record.name||record.title,module.key);
   visual.append(fallback);
   if(record.photo_url) {
     const image=document.createElement("img");
