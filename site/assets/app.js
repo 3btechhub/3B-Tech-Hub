@@ -2,7 +2,7 @@ import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
 import { initCataloguePage } from "./catalogue.js";
 import { initExtendedDashboard } from "./admin-extended.js";
 import { createContactIcon } from "./contact-utils.js";
-import { createIcon, getModuleIcon, getItemFallbackIcon } from "./icon-utils.js";
+import { createIcon, getModuleIcon, getItemFallbackIcon, loadSvgIconRegistry } from "./icon-utils.js";
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const accountMenuLink = document.querySelector("#login-menu-link");
@@ -11,6 +11,18 @@ const dashboardMenuLink = document.querySelector("#dashboard-menu-link");
 const themeToggle = document.querySelector("#theme-toggle");
 const savedTheme = localStorage.getItem("3b-theme");
 document.documentElement.dataset.theme = savedTheme === "dark" ? "dark" : "light";
+function renderSvgIconAttributes(root=document){
+ root.querySelectorAll("[data-icon],[data-svg-icon]").forEach(element=>{
+  const key=element.dataset.svgIcon||element.dataset.icon;
+  if(!key)return;
+  const existing=element.querySelector(":scope > svg[data-rendered-icon]");
+  if(existing)existing.remove();
+  const svg=createIcon(key);
+  svg.dataset.renderedIcon="true";
+  svg.setAttribute("aria-hidden","true");
+  element.prepend(svg);
+ });
+}
 function addTextElement(parent, tag, className, value) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -41,6 +53,7 @@ function applyTheme(theme) {
 }
 applyEnglishText();
 applyTheme(savedTheme === "dark" ? "dark" : "light");
+renderSvgIconAttributes(document);
 if (themeToggle) themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szacT";
@@ -65,6 +78,9 @@ async function setMenuSession(session) {
 const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
 supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 runtimeConfig = await loadRuntimeConfig(supabase);
+await loadSvgIconRegistry(supabase);
+renderSvgIconAttributes(document);
+applyTheme(savedTheme === "dark" ? "dark" : "light");
 applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 
 const homeCatalogModules = [
@@ -186,6 +202,7 @@ export async function initRoutePage() {
   window.__routeAuthSubscriptions?.forEach((subscription) => subscription.unsubscribe());
   window.__routeAuthSubscriptions = [];
   applyEnglishText();
+  renderSvgIconAttributes(document);
   const visitorKeyName="3b-visitor-key";let visitorKey=localStorage.getItem(visitorKeyName);if(!visitorKey){visitorKey=crypto.randomUUID();localStorage.setItem(visitorKeyName,visitorKey);}
   const ua=navigator.userAgent,device=/tablet|ipad/i.test(ua)?"tablet":/mobile|android|iphone/i.test(ua)?"mobile":"desktop";
   const os=/android/i.test(ua)?"Android":/iphone|ipad|ios/i.test(ua)?"iOS":/windows/i.test(ua)?"Windows":/mac os/i.test(ua)?"macOS":/linux/i.test(ua)?"Linux":"unknown";

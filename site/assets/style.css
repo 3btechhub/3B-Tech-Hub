@@ -1082,3 +1082,18 @@ output,
 
 /* SVG-first icon system */
 .svg-icon{width:1.25em;height:1.25em;display:inline-block;flex:0 0 auto;vertical-align:middle;stroke:currentColor}.item-svg-icon{width:1.8em;height:1.8em}.home-content-fallback .svg-icon,.home-content-visual>.svg-icon{width:32px;height:32px}.module-record-visual>.svg-icon{width:34px;height:34px}.dashboard-module-tab[data-icon]::before,.dashboard-card[data-icon]::before{content:none!important;display:none!important}.dashboard-module-tab>.svg-icon{margin-inline-end:8px}.dashboard-card>.svg-icon{position:absolute;inset-inline-start:16px;inset-block-start:18px;width:24px;height:24px}.home-section-title-link>.svg-icon,.catalogue-title>.svg-icon{margin-inline-end:9px}.analytics-icon>.svg-icon{width:24px;height:24px}.contact-icon-fallback{width:24px;height:24px}.contact-brand-icon{width:24px;height:24px;object-fit:contain;vertical-align:middle;flex:0 0 24px;margin-inline-end:8px}.home-content-visual img.contact-brand-icon{width:28px;height:28px;margin:0}.theme-icon>.svg-icon{width:20px;height:20px}
+
+/* SVG-only global icon rendering */
+.menu-link[data-icon]::before,.menu-tool[data-icon]::before{content:none!important;display:none!important}
+.menu-link>.svg-icon,.menu-tool>.svg-icon{width:1.15em;height:1.15em;margin-inline-end:9px;vertical-align:middle}
+.dashboard-module-tab>.svg-icon{width:1.1em;height:1.1em}
+.dashboard-card>.svg-icon{width:24px;height:24px}
+.contact-brand-icon{width:24px;height:24px;display:inline-block;vertical-align:middle;flex:0 0 24px;margin-inline-end:8px;object-fit:contain}
+.home-content-visual>.contact-brand-icon{width:28px;height:28px;margin:0}
+.menu-trigger{position:relative;z-index:12;display:grid;place-items:center}
+.menu-trigger .menu-icon{display:block;width:24px;height:24px;overflow:visible}
+.menu-trigger .menu-line{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;transition:transform .2s ease,opacity .16s ease;transform-box:fill-box;transform-origin:center}
+.menu-trigger.is-open .menu-line-top{transform:translateY(6px) rotate(45deg)}
+.menu-trigger.is-open .menu-line-middle{opacity:0;transform:scaleX(.35)}
+.menu-trigger.is-open .menu-line-bottom{transform:translateY(-6px) rotate(-45deg)}
+.theme-icon>.svg-icon{width:20px;height:20px}

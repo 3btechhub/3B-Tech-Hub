@@ -11,16 +11,16 @@ export function getContactHref(value){
  try{const url=new URL(candidate);if(url.protocol==="http:"||url.protocol==="https:")return url.href;}catch{}return "";
 }
 const BRANDS={
- youtube:{slug:"youtube",hosts:["youtube.com","youtu.be"]},
- reddit:{slug:"reddit",hosts:["reddit.com"]},
- x:{slug:"x",hosts:["x.com","twitter.com"]},
- linkedin:{slug:"linkedin",hosts:["linkedin.com"]},
- instagram:{slug:"instagram",hosts:["instagram.com"]},
- whatsapp:{slug:"whatsapp",hosts:["wa.me","whatsapp.com"]},
- tiktok:{slug:"tiktok",hosts:["tiktok.com"]},
- gmail:{slug:"gmail",hosts:["gmail.com","mail.google.com"]},
- facebook:{slug:"facebook",hosts:["facebook.com","fb.com"]},
- imo:{url:"https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/imo-icon.svg",hosts:["imoim.net","imo.im"]}
+ youtube:{icon:"youtube",hosts:["youtube.com","youtu.be"]},
+ reddit:{icon:"reddit",hosts:["reddit.com"]},
+ x:{icon:"x",hosts:["x.com","twitter.com"]},
+ linkedin:{icon:"linkedin",hosts:["linkedin.com"]},
+ instagram:{icon:"instagram",hosts:["instagram.com"]},
+ whatsapp:{icon:"whatsapp",hosts:["wa.me","whatsapp.com"]},
+ tiktok:{icon:"tiktok",hosts:["tiktok.com"]},
+ gmail:{icon:"gmail",hosts:["gmail.com","mail.google.com"]},
+ facebook:{icon:"facebook",hosts:["facebook.com","fb.com"]},
+ imo:{icon:"imo",hosts:["imoim.net","imo.im"]}
 };
 function identifyBrand(value,name){
  const n=String(name||"").toLowerCase().replace(/[^a-z]/g,"");
@@ -31,8 +31,7 @@ function identifyBrand(value,name){
  return "";
 }
 export function createContactIcon(value,name=""){
- const brand=identifyBrand(value,name),config=BRANDS[brand];
- if(config){const img=document.createElement("img");img.className="contact-brand-icon";img.alt=brand.toUpperCase()+" logo";img.width=24;img.height=24;img.loading="lazy";img.referrerPolicy="no-referrer";img.src=config.url||("https://cdn.simpleicons.org/"+config.slug);img.onerror=()=>img.replaceWith(createIcon("link","contact-icon-fallback svg-icon"));return img;}
- return createIcon("link","contact-icon-fallback svg-icon");
+ const brand=identifyBrand(value,name);
+ return createIcon(BRANDS[brand]?.icon||"link","contact-brand-icon svg-icon");
 }
 export function getContactActionLabel(value){const href=getContactHref(value);if(href.startsWith("mailto:"))return "Email";if(href.startsWith("tel:"))return "Call";if(/wa\.me|whatsapp\.com/i.test(href))return "WhatsApp";return "Open link";}
