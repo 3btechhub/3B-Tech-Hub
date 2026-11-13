@@ -584,7 +584,7 @@ if (ownerDashboard) {
       currentDashboardRole = "owner";
       const ownerEmail = document.querySelector("#dashboard-owner-email");
       if (ownerEmail) ownerEmail.textContent = authData.user.email || "";
-      const resources = [["user_roles","dashboard-users-count"],["services","dashboard-services-count"],["products","dashboard-products-count"],["workshops","dashboard-workshops-count"],["technicians","dashboard-technicians-count"],["contacts","dashboard-contacts-count"],["app_roles","dashboard-roles-count"],["permissions","dashboard-permissions-count"]];
+      const resources = [["user_roles","dashboard-users-count"],["services","dashboard-services-count"],["categories","dashboard-categories-count"],["products","dashboard-products-count"],["workshops","dashboard-workshops-count"],["technicians","dashboard-technicians-count"],["contacts","dashboard-contacts-count"],["app_roles","dashboard-roles-count"],["permissions","dashboard-permissions-count"]];
       const health=document.getElementById("dashboard-health-status");
       if(health){health.replaceChildren();const checks=[["Website","Online",true],["Supabase / Database","Checking…",null],["Authentication","Checking…",null],["Storage","Checking…",null],["Backend services","Checking…",null]];
         const [databaseCheck,authCheck,storageCheck,backendCheck]=await Promise.all([
@@ -671,6 +671,10 @@ if(siteSettingsForm)void loadSiteSettingsForm();
 
 // Core content modules: each module uses its existing Supabase table and RLS policies.
 const dashboardContentModules = {
+  categories: { table:"categories", title:"Category", fields:[
+    ["title","Title","text",true],
+    ["type","Type","select",true,["Service","Device"]]
+  ], columns:["type"] },
   services: { table:"services", title:"Service", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["products","Products","multiselect",false],["workshops","Workshops","multiselect",false],
@@ -771,7 +775,7 @@ function slugFromName(value) {
     .replace(/[^\w.-]+/gu, "-").replace(/^-+|-+$/g, "");
 }
 function moduleDatabaseKey(moduleName,key) {
-  if (key === "title") return moduleName === "workshops" ? "title" : "name";
+  if (key === "title") return moduleName === "workshops" || moduleName === "categories" ? "title" : "name";
   if (moduleName === "workshops" && key === "technician") return "trainer";
   if (moduleName === "products" && key === "price") return "price_minor";
   return key;
@@ -1045,31 +1049,40 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         else payload[dbKey]=input.value.trim()===""?(key==="currency"?"SAR":null):input.value.trim();
       }
       const titleValue=String(titleInput?.value||"").trim();
-      const slugValue=String(slugInput?.value||"").trim()||slugFromName(titleValue);
-      if (!titleValue || !slugValue) throw new Error("Title and Slug are required.");
+      if (!titleValue) throw new Error("Title is required.");
       payload[moduleDatabaseKey(moduleName,"title")]=titleValue;
-      payload.slug=slugValue;
-      if (moduleName==="services"||moduleName==="products") payload.description=payload.description||"";
-      const visibility=form.elements.namedItem("visibility")?.value||"hidden";
-      if (moduleName==="technicians") payload.is_published=visibility==="visible";
-      else payload.status=visibility==="visible"?(moduleName==="workshops"?"published":"active"):"draft";
-      const imagesInput=form.elements.namedItem("images");
-      const imageUrls=JSON.parse(form.dataset.currentGalleryUrls||"[]");
-      if(imagesInput?.files?.length){
-        for(const file of Array.from(imagesInput.files)){
-          if(!file.type.startsWith("image/")) throw new Error("Please select image files only.");
-          if(file.size>10*1024*1024) throw new Error("Each image must be 10 MB or smaller.");
-          const safeName=file.name.normalize("NFKD").replace(/[^\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
-          const path="content/"+moduleName+"/gallery/"+crypto.randomUUID()+"-"+safeName;
-          const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type,upsert:false});
-          if(uploadError) throw uploadError;
-          const publicUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;
-          imageUrls.push(publicUrl);
-          uploadedUrls.push(publicUrl);
-        }
+      if (moduleName==="categories") {
+        const selectedType=String(form.elements.namedItem("type")?.value||"");
+        if (!["Service","Device"].includes(selectedType)) throw new Error("Select a valid Category Type.");
+        payload.type=selectedType;
+      } else {
+        const slugValue=String(slugInput?.value||"").trim()||slugFromName(titleValue);
+        if (!slugValue) throw new Error("Slug is required.");
+        payload.slug=slugValue;
+        if (moduleName==="services"||moduleName==="products") payload.description=payload.description||"";
+        const visibility=form.elements.namedItem("visibility")?.value||"hidden";
+        if (moduleName==="technicians") payload.is_published=visibility==="visible";
+        else payload.status=visibility==="visible"?(moduleName==="workshops"?"published":"active"):"draft";
       }
-      payload.gallery_urls=imageUrls;
-      payload.photo_url=imageUrls[0]||null;
+      if (moduleName!=="categories") {
+        const imagesInput=form.elements.namedItem("images");
+        const imageUrls=JSON.parse(form.dataset.currentGalleryUrls||"[]");
+        if(imagesInput?.files?.length){
+          for(const file of Array.from(imagesInput.files)){
+            if(!file.type.startsWith("image/")) throw new Error("Please select image files only.");
+            if(file.size>10*1024*1024) throw new Error("Each image must be 10 MB or smaller.");
+            const safeName=file.name.normalize("NFKD").replace(/[^\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
+            const path="content/"+moduleName+"/gallery/"+crypto.randomUUID()+"-"+safeName;
+            const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type,upsert:false});
+            if(uploadError) throw uploadError;
+            const publicUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;
+            imageUrls.push(publicUrl);
+            uploadedUrls.push(publicUrl);
+          }
+        }
+        payload.gallery_urls=imageUrls;
+        payload.photo_url=imageUrls[0]||null;
+      }
       const editId=form.dataset.editId; let result;
       if (editId) result=await supabase.from(config.table).update(payload).eq("id",editId).select("id").single();
       else {
