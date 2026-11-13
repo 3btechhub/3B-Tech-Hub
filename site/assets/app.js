@@ -82,8 +82,7 @@ function renderHomeCard(module, record) {
   visual.className="home-content-visual"+(module.key==="technicians"?" home-content-visual--person":"");
   const fallback=document.createElement("span");
   fallback.className="home-content-fallback";
-  fallback.textContent=module.key==="contacts"?getContactIcon(record.value):getItemFallbackIcon(record.name||record.title,module.key);
-  visual.append(fallback);
+  if(module.key==="contacts"){const icon=createContactIcon(record.value);icon.classList.add("home-content-fallback");visual.append(icon);}else{fallback.textContent=getItemFallbackIcon(record.name||record.title,module.key);visual.append(fallback);}
   if(record.photo_url) {
     const image=document.createElement("img");
     image.src=record.photo_url;
