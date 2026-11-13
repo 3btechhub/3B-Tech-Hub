@@ -1089,7 +1089,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       for (const [key] of config.fields) {
         const input=form.elements.namedItem(key); if (!input || key==="photo_url" || key==="gallery_urls" || key==="visibility") continue;
         const dbKey=moduleDatabaseKey(moduleName,key);
-        if(key==="service_information") payload[dbKey]=input.value.split(/\\r?\\n/).map(value=>value.trim()).filter(Boolean);
+        if(key==="service_information") payload[dbKey]=input.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);
         else payload[dbKey]=input.value.trim()===""?null:input.value.trim();
       }
       const nameValue=String(nameInput?.value||"").trim();
