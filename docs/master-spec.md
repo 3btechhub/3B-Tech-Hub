@@ -92,7 +92,7 @@ Five independently controlled sections:
 4. Technicians
 5. Contacts
 
-Each section has its own On/Off visibility setting. Content is displayed as cards. Each content item has a detail page and unique slug, in addition to the module listing page.
+Each section has its own On/Off visibility setting. Public item cards on Home display only the uploaded image (or the module's fallback icon when no image is available) and the item title. The image/icon is placed at the logical start of the card: left in LTR and right in RTL. Do not display descriptions, categories, types, skills, locations or other metadata on Home cards. Categories remain available in Dashboard content-management forms and stored records; this is a display-only restriction, not a data/schema deletion. Each content item has a detail page and unique slug, in addition to the module listing page.
 
 A disabled section must not appear on Home.
 
@@ -341,11 +341,12 @@ The entire website must currently render in **LTR (Left-to-Right)**. LTR is the 
 Build the architecture so RTL can be enabled later without redesigning the whole website or rebuilding components.
 
 Requirements:
-- Use CSS Logical Properties.
+- Use CSS Logical Properties and inherited document direction; do not force RTL or LTR on individual shared components.
 - Build direction-aware reusable components.
 - Avoid hard-coded left/right assumptions.
 - Ensure layout, spacing, alignment and navigation can adapt to either direction.
 - Keep RTL and LTR compatibility in the component architecture.
+- In item cards and icon/title controls, place the image or icon at the logical start before the title: left in LTR and right in RTL, with a consistent gap.
 
 ### 15.4 Future activation
 Only after explicit approval may Settings expose direction controls or language-based automatic direction.
@@ -407,7 +408,7 @@ Use only three semantic sizes for text, buttons, inputs, outputs and boxes:
 - Medium
 - Large
 
-Design must be responsive, clean, simple and professional, with consistent cards, reusable components, spacing and typography. The current layout is LTR-first. Use distinct, semantically appropriate icons for different modules and actions; do not reuse one generic icon everywhere.
+Design must be responsive, clean, simple and professional, with consistent cards, reusable components, spacing and typography. The current layout is LTR-first. Use distinct, semantically appropriate icons for different modules and actions; do not reuse one generic icon everywhere. Public item cards on Home and module listing pages must contain only an uploaded image or fallback icon plus the item title; omit descriptions and secondary metadata. Keep full item details on the detail page and preserve all Dashboard editing fields.
 
 ## 19. Security Architecture
 
