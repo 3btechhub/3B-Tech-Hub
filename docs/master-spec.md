@@ -308,7 +308,7 @@ Keep these as distinct concerns and interfaces.
 - Result
 - Device
 
-Visitor Analytics and administrative Activity Logs must use separate data and interfaces. Collect page views, unique/repeat visitors, timestamps, device, OS, browser and approximate Country/City using server-side IP geolocation. Never store raw IP addresses. Disclose that a geolocation provider processes the request IP; location is approximate, not GPS. Restrict reads to Owner and retain analytics for 90 days.
+Visitor Analytics and administrative Activity Logs must use separate data and interfaces. Collect page views, unique/repeat visitors, timestamps, device, OS, browser and approximate Country/City using server-side IP geolocation. Never store raw IP addresses. Disclose that ipdata processes the request IP; location is approximate, not GPS. Show the required visible attribution link to ipdata.co wherever the geolocation data is displayed. Reuse a visitor's location for 24 hours to limit external lookups. Restrict reads to Owner and retain analytics for 90 days.
 
 ## 14. Settings Module
 
