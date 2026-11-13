@@ -1139,11 +1139,6 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       }
       if (result.error) throw result.error;
       saved=true;
-      const savedRecordId=editId||result.data?.id;
-      const nextPhotoUrl=payload.photo_url===undefined?oldPhotoUrl:payload.photo_url;
-      if (oldPhotoUrl&&oldPhotoUrl!==nextPhotoUrl) {
-        try { await removeStoredImage(oldPhotoUrl); } catch (cleanupError) { console.warn("Old image cleanup failed.",cleanupError); }
-      }
       resetModuleForm(moduleName); setModuleMessage(moduleName,config.title+(editId?" updated.":" created."),"success");
       await loadContentModule(moduleName);
     } catch(error) {
