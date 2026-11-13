@@ -166,11 +166,7 @@ async function renderContacts(root,record,supabase){
 function renderProviderCards(root,title,records,module,emptyText){
   const section=el("section","catalogue-detail-section");
   section.append(el("h2","catalogue-detail-heading",title));
-  if(!records.length){
-    section.append(el("p","catalogue-detail-field",emptyText||"Please contact us for more information."));
-    root.append(section);
-    return;
-  }
+  if(!records.length)return;
   const grid=el("div","catalogue-related-grid");
   records.forEach(record=>{
     const card=el("article","catalogue-related-card");

@@ -917,7 +917,6 @@ const loadedRelationshipOptions = new Set();
 async function loadRelationshipOptions(moduleName) {
   for (const relation of moduleRelationships[moduleName] || []) {
     const key=moduleName+":"+relation.field;
-    if(loadedRelationshipOptions.has(key))continue;
     const selectColumns=relation.source==="workshops"?"id,title,status":"id,name,is_published";
     const {data,error}=await supabase.from(relation.source).select(selectColumns).order(relation.labelColumn,{ascending:true});
     if(error)throw error;
@@ -932,7 +931,6 @@ async function loadRelationshipOptions(moduleName) {
       label.append(checkbox,addTextElement(label,"span","",String(record[relation.labelColumn]||"Untitled")+status));
       host.append(label);
     }
-    loadedRelationshipOptions.add(key);
   }
 }
 async function loadRecordRelationships(moduleName,recordId,form) {
