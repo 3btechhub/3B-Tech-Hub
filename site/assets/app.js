@@ -68,7 +68,7 @@ applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 const homeCatalogModules = [
   { key:"services", table:"services", title:"Services", icon:"🔧", published:["status","active"], columns:"name,slug,description,category,photo_url" },
   { key:"products", table:"products", title:"Products", icon:"📦", published:["status","active"], columns:"name,slug,description,category,photo_url" },
-  { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name,slug,description,location,trainer,category,photo_url" },
+  { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name:title,slug,description,location,trainer,category,photo_url" },
   { key:"technicians", table:"technicians", title:"Technicians", icon:"", published:["is_published",true], columns:"name,slug,description,skill,category,photo_url" },
   { key:"contacts", table:"contacts", title:"Contacts", icon:"☎", published:null, columns:"name,slug,value,type" }
 ];
@@ -188,9 +188,9 @@ export async function initRoutePage() {
   const visitorKeyName="3b-visitor-key";let visitorKey=localStorage.getItem(visitorKeyName);if(!visitorKey){visitorKey=crypto.randomUUID();localStorage.setItem(visitorKeyName,visitorKey);}
   const ua=navigator.userAgent,device=/tablet|ipad/i.test(ua)?"tablet":/mobile|android|iphone/i.test(ua)?"mobile":"desktop";
   const os=/android/i.test(ua)?"Android":/iphone|ipad|ios/i.test(ua)?"iOS":/windows/i.test(ua)?"Windows":/mac os/i.test(ua)?"macOS":/linux/i.test(ua)?"Linux":"unknown";
-  const browser=/edg\\//i.test(ua)?"Edge":/firefox\\//i.test(ua)?"Firefox":/chrome\\//i.test(ua)?"Chrome":/safari\\//i.test(ua)?"Safari":"unknown";
+  const browser=/edg\//i.test(ua)?"Edge":/firefox\//i.test(ua)?"Firefox":/chrome\//i.test(ua)?"Chrome":/safari\//i.test(ua)?"Safari":"unknown";
   void supabase.from("visitor_analytics").insert({visitor_key:visitorKey,page_path:location.pathname,referrer:document.referrer||"",device,operating_system:os,browser});
-  if(document.querySelector("#app-main[data-view=\\\"catalogue\\\"]")){await initCataloguePage(supabase,document.getElementById("app-main").dataset.module,document.getElementById("app-main").dataset.slug||"");return;}
+  if(document.querySelector('#app-main[data-view="catalogue"]')){await initCataloguePage(supabase,document.getElementById("app-main").dataset.module,document.getElementById("app-main").dataset.slug||"");return;}
   const form = document.querySelector("#auth-form");
 
 if (form) {
@@ -736,59 +736,46 @@ const siteSettingsMessage = document.querySelector("#site-settings-message");
 async function loadSiteSettingsForm() {
   if (!siteSettingsForm || currentDashboardRole !== "owner") return;
   if (siteSettingsMessage) siteSettingsMessage.textContent = "Loading website settings…";
-  const { data, error } = await supabase
-    .from("site_settings")
-    .select("setting_value")
-    .eq("setting_key", "site_profile")
-    .maybeSingle();
-  if (error) {
-    if (siteSettingsMessage) siteSettingsMessage.textContent = error.message || "Could not load website settings.";
-    return;
-  }
-  const settings = data?.setting_value && typeof data.setting_value === "object" ? data.setting_value : {};
-  siteSettingsForm.elements.website_title.value = typeof settings.website_title === "string" ? settings.website_title : "3B TECH HUB";
-  siteSettingsForm.elements.logo_url.value = typeof settings.logo_url === "string" ? settings.logo_url : "";
-  
-  if (siteSettingsMessage) siteSettingsMessage.textContent = "Website settings loaded.";
+  const [{data,error},{data:sectionData}] = await Promise.all([
+    supabase.from("site_settings").select("setting_value").eq("setting_key","site_profile").maybeSingle(),
+    supabase.from("site_settings").select("setting_value").eq("setting_key","home_sections").maybeSingle()
+  ]);
+  if (error) { if (siteSettingsMessage) siteSettingsMessage.textContent=error.message||"Could not load website settings."; return; }
+  const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
+  const sections=sectionData?.setting_value&&typeof sectionData.setting_value==="object"?sectionData.setting_value:{};
+  siteSettingsForm.elements.website_title.value=typeof settings.website_title==="string"?settings.website_title:"3B TECH HUB";
+  siteSettingsForm.elements.logo_url.value=typeof settings.logo_url==="string"?settings.logo_url:"";
+  const preview=document.getElementById("site-logo-preview");
+  if(preview&&settings.logo_url){preview.src=settings.logo_url;preview.hidden=false;}
+  for(const key of ["services","products","workshops","technicians","contacts"]){const field=siteSettingsForm.elements["section_"+key];if(field)field.checked=sections[key]!==false;}
+  if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings loaded.";
 }
-
-if (siteSettingsForm) {
-  siteSettingsForm.addEventListener("submit", async (event) => {
+if(siteSettingsForm){
+  document.getElementById("site-logo-remove")?.addEventListener("click",()=>{siteSettingsForm.dataset.removeLogo="true";siteSettingsForm.elements.logo_url.value="";siteSettingsForm.elements.logo_file.value="";const p=document.getElementById("site-logo-preview");if(p){p.removeAttribute("src");p.hidden=true;}});
+  siteSettingsForm.elements.logo_file?.addEventListener("change",()=>{const file=siteSettingsForm.elements.logo_file.files?.[0];if(file){const p=document.getElementById("site-logo-preview");if(p){p.src=URL.createObjectURL(file);p.hidden=false;}siteSettingsForm.dataset.removeLogo="false";}});
+  siteSettingsForm.addEventListener("submit",async(event)=>{
     event.preventDefault();
-    if (currentDashboardRole !== "owner") {
-      if (siteSettingsMessage) siteSettingsMessage.textContent = "Owner permission required.";
-      return;
-    }
-    const submit = document.querySelector("#site-settings-save");
-    const form = new FormData(siteSettingsForm);
-    const websiteTitle = String(form.get("website_title") || "").trim() || "3B TECH HUB";
-    const logoUrl = String(form.get("logo_url") || "").trim();
-    if (logoUrl) {
-      try { if (!["https:", "http:"].includes(new URL(logoUrl).protocol)) throw new Error("Invalid URL"); }
-      catch { if (siteSettingsMessage) siteSettingsMessage.textContent = "Logo URL must be a valid HTTP(S) address."; return; }
-    }
-    if (submit) submit.disabled = true;
-    if (siteSettingsMessage) siteSettingsMessage.textContent = "Saving website settings…";
-    try {
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
-      const settingValue = { website_title: websiteTitle, logo_url: logoUrl };
-      const { error } = await supabase.from("site_settings").upsert({
-        setting_key: "site_profile",
-        setting_value: settingValue,
-        is_public: true,
-        updated_by: authData.user.id,
-      }, { onConflict: "setting_key" });
-      if (error) throw error;
-      if (siteSettingsMessage) siteSettingsMessage.textContent = "Website settings saved.";
-    } catch (error) {
-      if (siteSettingsMessage) siteSettingsMessage.textContent = error.message || "Could not save website settings.";
-    } finally {
-      if (submit) submit.disabled = false;
-    }
+    if(currentDashboardRole!=="owner"){if(siteSettingsMessage)siteSettingsMessage.textContent="Owner permission required.";return;}
+    const submit=document.getElementById("site-settings-save"),form=new FormData(siteSettingsForm);
+    const websiteTitle=String(form.get("website_title")||"").trim()||"3B TECH HUB";
+    let logoUrl=String(form.get("logo_url")||"").trim();
+    const oldLogoUrl=logoUrl,file=siteSettingsForm.elements.logo_file.files?.[0];
+    if(logoUrl){try{if(!["https:","http:"].includes(new URL(logoUrl).protocol))throw new Error("Invalid URL");}catch{if(siteSettingsMessage)siteSettingsMessage.textContent="Logo URL must be a valid HTTP(S) address.";return;}}
+    if(submit)submit.disabled=true;if(siteSettingsMessage)siteSettingsMessage.textContent="Saving website settings…";
+    try{
+      const {data:authData,error:authError}=await supabase.auth.getUser();if(authError||!authData.user)throw new Error("Your session has expired. Sign in again.");
+      if(file){if(!file.type.startsWith("image/")||file.size>5*1024*1024)throw new Error("Choose an image up to 5 MB.");const path="branding/"+crypto.randomUUID()+"-"+file.name.replace(/[^a-zA-Z0-9._-]/g,"-");const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type});if(uploadError)throw uploadError;logoUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;}
+      if(siteSettingsForm.dataset.removeLogo==="true")logoUrl="";
+      const {error}=await supabase.from("site_settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(error)throw error;
+      const homeSections={};for(const key of ["services","products","workshops","technicians","contacts"])homeSections[key]=Boolean(siteSettingsForm.elements["section_"+key]?.checked);
+      const {error:sectionError}=await supabase.from("site_settings").upsert({setting_key:"home_sections",setting_value:homeSections,is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(sectionError)throw sectionError;
+      if(oldLogoUrl&&oldLogoUrl!==logoUrl){try{await removeStoredImage(oldLogoUrl);}catch(cleanupError){console.warn("Old logo cleanup failed.",cleanupError);}}
+      siteSettingsForm.dataset.removeLogo="false";if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings saved.";
+    }catch(error){if(siteSettingsMessage)siteSettingsMessage.textContent=error.message||"Could not save website settings.";}
+    finally{if(submit)submit.disabled=false;}
   });
 }
-if (siteSettingsForm) void loadSiteSettingsForm();
+if(siteSettingsForm)void loadSiteSettingsForm();
 
 
 // Core content modules: each module uses its existing Supabase table and RLS policies.
