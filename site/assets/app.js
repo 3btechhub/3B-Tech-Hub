@@ -1041,7 +1041,14 @@ function setModuleMessage(moduleName,message,kind="") {
 function resetModuleForm(moduleName) {
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if (!form) return;
-  form.reset(); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.currentGalleryUrls="[]"; form.dataset.removePhoto="false"; form.dataset.currentGalleryUrls="[]"; form.dataset.slugManual="false";
+  const deleteButton=form.querySelector("[data-inline-delete]");
+  if(deleteButton)deleteButton.remove();
+  if(form._moduleFormPlaceholder?.parentNode){
+    form._moduleFormPlaceholder.parentNode.insertBefore(form,form._moduleFormPlaceholder);
+    form._moduleFormPlaceholder.remove();
+    form._moduleFormPlaceholder=null;
+  }
+  form.reset(); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.currentGalleryUrls="[]"; form.dataset.removePhoto="false"; form.dataset.slugManual="false";
   updateImagePreview(form,"");
   const config=dashboardContentModules[moduleName];
   document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Add "+config.title;
@@ -1064,7 +1071,7 @@ function createModuleRecordVisual(moduleName,photoUrl,record) {
   visual.append(image,icon);
   return visual;
 }
-function renderModuleList(moduleName,records) {
+async function renderModuleList(moduleName,records) {
   const config=dashboardContentModules[moduleName];
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if(form)await loadModuleRelationOptions(moduleName,form);
@@ -1087,42 +1094,67 @@ function renderModuleList(moduleName,records) {
     addTextElement(textContent,"span","muted",details);
     primary.append(textContent);
     row.append(primary);
-    const actions=document.createElement("div"); actions.className="editor-actions";
-    const edit=document.createElement("button"); edit.type="button"; edit.className="secondary-button"; edit.textContent="Edit";
-    edit.addEventListener("click",async()=>{
-      const form=document.querySelector('[data-module-form="'+moduleName+'"]'); form.dataset.editId=record.id;
-      form.dataset.currentPhotoUrl=record.photo_url||""; form.dataset.currentGalleryUrls=JSON.stringify([...new Set([record.photo_url,...(record.gallery_urls||[])].filter(Boolean))]); form.dataset.removePhoto="false"; form.dataset.slugManual="false";
-      for (const [key] of config.fields) {
-        const input=form.elements.namedItem(key); if (!input) continue;
-        if (key==="visibility") input.value=recordVisibility(moduleName,record);
-        else if (key==="price") input.value=record.price_minor==null?"":String(Number(record.price_minor)/100);
-        else if (key==="name") input.value=record.name||record.title||"";
-        else if (key==="technician") input.value=record.trainer||"";
-        else if (key==="images") input.value="";
-        else if (key==="service_information") input.value=Array.isArray(record.service_information)?record.service_information.join("\n"):"";
+    row.classList.add("module-record-row--tap-edit");
+    row.tabIndex=0;
+    row.setAttribute("role","button");
+    row.setAttribute("aria-label","Edit "+(record.name||record.title||record.slug||config.title));
+    const openInlineEditor=async()=>{
+      const form=document.querySelector('[data-module-form="'+moduleName+'"]');
+      if(form.dataset.editId===record.id)return;
+      if(form.dataset.editId)resetModuleForm(moduleName);
+      form.dataset.editId=record.id;
+      form.dataset.currentPhotoUrl=record.photo_url||"";
+      form.dataset.currentGalleryUrls=JSON.stringify([...new Set([record.photo_url,...(record.gallery_urls||[])].filter(Boolean))]);
+      form.dataset.removePhoto="false";form.dataset.slugManual="false";
+      for(const [key] of config.fields){
+        const input=form.elements.namedItem(key);if(!input)continue;
+        if(key==="visibility")input.value=recordVisibility(moduleName,record);
+        else if(key==="price")input.value=record.price_minor==null?"":String(Number(record.price_minor)/100);
+        else if(key==="name")input.value=record.name||record.title||"";
+        else if(key==="technician")input.value=record.trainer||"";
+        else if(key==="images")input.value="";
+        else if(key==="service_information")input.value=Array.isArray(record.service_information)?record.service_information.join("\n"):"";
         else input.value=record[moduleDatabaseKey(moduleName,key)]==null?"":String(record[moduleDatabaseKey(moduleName,key)]);
       }
       updateImagePreview(form,record.photo_url||"");
-      await loadModuleRelationSelection(moduleName,record.id,form);
+      try{await loadModuleRelationSelection(moduleName,record.id,form);}
+      catch(error){setModuleMessage(moduleName,error.message||"Could not load related records.","error");return;}
       document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Edit "+config.title;
-      document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Update "+config.title;
+      document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Save";
+      document.querySelector('[data-module-cancel="'+moduleName+'"]').textContent="Cancel";
       document.querySelector('[data-module-cancel="'+moduleName+'"]').hidden=false;
-      setModuleMessage(moduleName,""); form.scrollIntoView({behavior:"smooth",block:"start"});
+      const actions=form.querySelector(".editor-actions");
+      const deleteButton=document.createElement("button");
+      deleteButton.type="button";deleteButton.className="secondary-button";deleteButton.textContent="Delete";deleteButton.dataset.inlineDelete="true";
+      deleteButton.addEventListener("click",async()=>{
+        const displayName=record.name||record.title||record.slug||"this record";
+        if(!window.confirm('Delete "'+displayName+'"? This cannot be undone.'))return;
+        deleteButton.disabled=true;
+        try{
+          const {error}=await supabase.from(config.table).delete().eq("id",record.id);
+          if(error)throw error;
+          for(const url of [...new Set([record.photo_url,...(record.gallery_urls||[])].filter(Boolean))]){
+            try{await removeStoredImage(url);}catch(cleanupError){console.warn("Image cleanup failed.",cleanupError);}
+          }
+          resetModuleForm(moduleName);
+          setModuleMessage(moduleName,config.title+" deleted.","success");
+          await loadContentModule(moduleName);
+        }catch(error){setModuleMessage(moduleName,error.message||"Could not delete this record.","error");deleteButton.disabled=false;}
+      });
+      actions.append(deleteButton);
+      const marker=document.createComment("module-form-home");
+      form.parentNode.insertBefore(marker,form);
+      form._moduleFormPlaceholder=marker;
+      row.append(form);
+      setModuleMessage(moduleName,"");
+      form.scrollIntoView({behavior:"smooth",block:"nearest"});
+    };
+    row.addEventListener("click",openInlineEditor);
+    row.addEventListener("keydown",event=>{
+      if(event.target!==row)return;
+      if(event.key==="Enter"||event.key===" "){event.preventDefault();openInlineEditor();}
     });
-    const remove=document.createElement("button"); remove.type="button"; remove.className="secondary-button"; remove.textContent="Delete";
-    remove.addEventListener("click",async()=>{
-      const displayName=record.name||record.title||record.slug||"this record";
-      if (!window.confirm('Delete "'+displayName+'"? This cannot be undone.')) return;
-      remove.disabled=true;
-      try {
-        const {error}=await supabase.from(config.table).delete().eq("id",record.id);
-        if (error) throw error;
-        await removeStoredImage(record.photo_url);
-        for(const url of (record.gallery_urls||[])){try{await removeStoredImage(url);}catch(cleanupError){console.warn("Gallery image cleanup failed.",cleanupError);}}
-        setModuleMessage(moduleName,config.title+" deleted.","success"); await loadContentModule(moduleName);
-      } catch(error) { setModuleMessage(moduleName,error.message||"Could not delete this record.","error"); remove.disabled=false; }
-    });
-    actions.append(edit,remove); row.append(actions); container.append(row);
+    container.append(row);
   }
 }
 async function loadContentModule(moduleName) {
@@ -1135,13 +1167,18 @@ async function loadContentModule(moduleName) {
     if (container) { container.replaceChildren(); addTextElement(container,"p","muted",error.message||"Could not load records."); }
     return;
   }
-  renderModuleList(moduleName,data||[]);
+  await renderModuleList(moduleName,data||[]);
 }
 for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
   const fieldsHost=document.querySelector('[data-module-fields="'+moduleName+'"]');
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if (!fieldsHost||!form) continue;
   for (const field of config.fields) fieldsHost.append(createModuleField(field));
+  if(!form._moduleFormPlaceholder){
+    const marker=document.createComment("module-form-home");
+    form.parentNode.insertBefore(marker,form);
+    form._moduleFormPlaceholder=marker;
+  }
   await loadModuleRelationOptions(moduleName,form);
   const nameInput=form.elements.namedItem("name");
   const slugInput=form.elements.namedItem("slug");
