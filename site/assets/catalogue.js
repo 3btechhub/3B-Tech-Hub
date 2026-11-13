@@ -139,9 +139,12 @@ export async function initCataloguePage(supabase,module,slug){
   }
   renderDetail(root,data,module,def);return;
  }
- const heading=el("h1","catalogue-title",def.title);heading.prepend(createIcon(getModuleIcon(module)));root.append(heading);
+ const selectedCategory=["services","products"].includes(module)?(new URLSearchParams(window.location.search).get("category")||"").trim():"";
+ const heading=el("h1","catalogue-title",selectedCategory?def.title+" · "+selectedCategory:def.title);heading.prepend(createIcon(getModuleIcon(module)));root.append(heading);
+ if(selectedCategory)root.append(link(module,"All "+def.title));
  let q=supabase.from(def.table).select(def.columns).order("created_at",{ascending:false});
  if(def.filter)q=q.eq(def.filter[0],def.filter[1]);
+ if(selectedCategory)q=q.eq("category",selectedCategory);
  let data=[];let offset=0;const pageSize=1000;
  while(true){const {data:page,error}=await q.range(offset,offset+pageSize-1);if(error){root.append(el("p","muted","Could not load "+def.title.toLowerCase()+"."));return;}if(!page?.length)break;data.push(...page);if(page.length<pageSize)break;offset+=pageSize;}
  const grid=el("div","home-card-grid");if(!data.length)grid.append(el("p","home-empty","No "+def.title.toLowerCase()+" available yet."));
