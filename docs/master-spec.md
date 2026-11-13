@@ -94,7 +94,7 @@ Five independently controlled sections:
 
 Each section has its own On/Off visibility setting. Public item cards on Home display only the uploaded image (or the module's fallback icon when no image is available) and the item title. The image/icon is placed at the logical start of the card: left in LTR and right in RTL. Do not display descriptions, categories, types, skills, locations or other metadata on Home cards. Categories remain available in Dashboard content-management forms and stored records; this is a display-only restriction, not a data/schema deletion. Each content item has a detail page and unique slug, in addition to the module listing page.
 
-A disabled section must not appear on Home.
+A disabled section must not appear on Home. Keep a consistent, responsive vertical gap between each Home section. Center-align every section title and style it at a clear headline-level size. When an item has no uploaded image, choose its fallback icon from the item name/meaning first, regardless of its parent module; use the module icon only when no item-name match is available. Apply the same item-name icon mapping on Home and public module listing pages. Uploaded images always take precedence over fallback icons.
 
 ## 6. Dashboard Architecture
 
