@@ -1045,8 +1045,6 @@ function resetModuleForm(moduleName) {
   if(deleteButton)deleteButton.remove();
   if(form._moduleFormPlaceholder?.parentNode){
     form._moduleFormPlaceholder.parentNode.insertBefore(form,form._moduleFormPlaceholder);
-    form._moduleFormPlaceholder.remove();
-    form._moduleFormPlaceholder=null;
   }
   form.reset(); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.currentGalleryUrls="[]"; form.dataset.removePhoto="false"; form.dataset.slugManual="false";
   updateImagePreview(form,"");
@@ -1142,6 +1140,8 @@ async function renderModuleList(moduleName,records) {
         }catch(error){setModuleMessage(moduleName,error.message||"Could not delete this record.","error");deleteButton.disabled=false;}
       });
       actions.append(deleteButton);
+      row.setAttribute("role","group");
+      row.tabIndex=-1;
       row.append(form);
       setModuleMessage(moduleName,"");
       form.scrollIntoView({behavior:"smooth",block:"nearest"});
