@@ -141,6 +141,16 @@ export async function initCataloguePage(supabase,module,slug){
  }
  const selectedCategory=["services","products"].includes(module)?(new URLSearchParams(window.location.search).get("category")||"").trim():"";
  const heading=el("h1","catalogue-title",selectedCategory?def.title+" · "+selectedCategory:def.title);heading.prepend(createIcon(getModuleIcon(module)));root.append(heading);
+ if(module==="services"){
+  const categories=[["Buy & Sell","package"],["Setup & Installation","plug"],["Repair & Maintenance","wrench"]];
+  const categoryGrid=el("div","home-taxonomy-grid home-taxonomy-grid--services");
+  categories.forEach(([name,iconName])=>{
+   const card=el("a","home-taxonomy-card");card.href="/3btechhub/services/?category="+encodeURIComponent(name);
+   const icon=el("span","home-taxonomy-icon");icon.append(createIcon(iconName));
+   card.append(icon,el("strong","",name));categoryGrid.append(card);
+  });
+  root.append(categoryGrid);
+ }
  if(selectedCategory)root.append(link(module,"All "+def.title));
  let q=supabase.from(def.table).select(def.columns).order("created_at",{ascending:false});
  if(def.filter)q=q.eq(def.filter[0],def.filter[1]);
