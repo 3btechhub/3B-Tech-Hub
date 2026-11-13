@@ -4,17 +4,17 @@
     </div>
 
     <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
-      <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" data-label="overview" aria-controls="panel-overview" aria-selected="true" data-dashboard-tab="overview">Overview</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-services" data-label="services" aria-controls="panel-services" aria-selected="false" data-dashboard-tab="services" tabindex="-1">Services</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" data-label="products" aria-controls="panel-products" aria-selected="false" data-dashboard-tab="products" tabindex="-1">Products</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshops" data-label="workshops" aria-controls="panel-workshops" aria-selected="false" data-dashboard-tab="workshops" tabindex="-1">Workshops</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-technicians" data-label="technicians" aria-controls="panel-technicians" aria-selected="false" data-dashboard-tab="technicians" tabindex="-1">Technicians</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-audit" data-label="audit" aria-controls="panel-audit" aria-selected="false" data-dashboard-tab="audit" tabindex="-1">Audits &amp; Logs</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-contacts" data-label="contacts" aria-controls="panel-contacts" aria-selected="false" data-dashboard-tab="contacts" tabindex="-1">Contacts</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" data-label="user" aria-controls="panel-user" aria-selected="false" data-dashboard-tab="user" tabindex="-1">User</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" data-label="role" aria-controls="panel-role" aria-selected="false" data-dashboard-tab="role" tabindex="-1">Role</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" data-label="permission" aria-controls="panel-permission" aria-selected="false" data-dashboard-tab="permission" tabindex="-1">Permission</button>
-      <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" data-label="settings" aria-controls="panel-settings" aria-selected="false" data-dashboard-tab="settings" tabindex="-1">Settings</button>
+      <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" data-label="overview" aria-controls="panel-overview" aria-selected="true" data-icon="📊" data-dashboard-tab="overview">Overview</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-services" data-label="services" aria-controls="panel-services" aria-selected="false" data-icon="🛠️" data-dashboard-tab="services" tabindex="-1">Services</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" data-label="products" aria-controls="panel-products" aria-selected="false" data-icon="📦" data-dashboard-tab="products" tabindex="-1">Products</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshops" data-label="workshops" aria-controls="panel-workshops" aria-selected="false" data-icon="🏫" data-dashboard-tab="workshops" tabindex="-1">Workshops</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-technicians" data-label="technicians" aria-controls="panel-technicians" aria-selected="false" data-icon="👨‍🔧" data-dashboard-tab="technicians" tabindex="-1">Technicians</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-audit" data-label="audit" aria-controls="panel-audit" aria-selected="false" data-icon="📋" data-dashboard-tab="audit" tabindex="-1">Audits &amp; Logs</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-contacts" data-label="contacts" aria-controls="panel-contacts" aria-selected="false" data-icon="☎️" data-dashboard-tab="contacts" tabindex="-1">Contacts</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-user" data-label="user" aria-controls="panel-user" aria-selected="false" data-icon="👥" data-dashboard-tab="user" tabindex="-1">User</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-role" data-label="role" aria-controls="panel-role" aria-selected="false" data-icon="🛡️" data-dashboard-tab="role" tabindex="-1">Role</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" data-label="permission" aria-controls="panel-permission" aria-selected="false" data-icon="🔐" data-dashboard-tab="permission" tabindex="-1">Permission</button>
+      <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" data-label="settings" aria-controls="panel-settings" aria-selected="false" data-icon="⚙️" data-dashboard-tab="settings" tabindex="-1">Settings</button>
     </nav>
 
     <section class="dashboard-module-panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-dashboard-panel="overview">
@@ -85,7 +85,7 @@
     <section class="dashboard-module-panel" id="panel-audit" role="tabpanel" aria-labelledby="tab-audit" data-dashboard-panel="audit" hidden>
       <div class="admin-list">
         <div class="dashboard-heading"><h2 data-label="auditHistory">Audit History</h2><button class="secondary-button" id="audit-refresh" type="button" data-label="refresh">Refresh</button></div>
-        <h3>Activity Logs</h3><div id="audit-log-list" aria-live="polite"><p class="muted">Select Audits &amp; Logs to load recent activity.</p></div><div class="dashboard-heading"><h3>Visitor Analytics</h3><button class="secondary-button" id="analytics-refresh" type="button">Refresh</button></div><div id="visitor-analytics-summary" class="dashboard-grid"></div><div id="visitor-analytics-pages" class="admin-list" aria-live="polite"></div>
+        <h3>Activity Logs</h3><div id="audit-log-list" aria-live="polite"><p class="muted">Select Audits &amp; Logs to load recent activity.</p></div><div class="dashboard-heading"><h3>Visitor Analytics</h3><button class="secondary-button" id="analytics-refresh" type="button">Refresh</button></div><p class="muted analytics-privacy-note">Country and city are approximate IP-based estimates. Raw IP addresses are not stored; a geolocation provider processes the request IP to determine location.</p><div id="visitor-analytics-summary" class="dashboard-grid"></div><div id="visitor-analytics-locations" class="admin-list" aria-live="polite"></div><div id="visitor-analytics-pages" class="admin-list" aria-live="polite"></div>
       </div>
     </section>
 
