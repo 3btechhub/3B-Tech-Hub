@@ -911,8 +911,11 @@ function createModuleRecordVisual(moduleName,photoUrl,record) {
   visual.append(image,icon);
   return visual;
 }
+const moduleRecordCache = {};
 async function renderModuleList(moduleName,records) {
   const config=dashboardContentModules[moduleName];
+  const searchQuery=String(document.querySelector('[data-module-search="'+moduleName+'"]')?.value||"").trim().toLocaleLowerCase();
+  if(searchQuery)records=records.filter(record=>[record.title,record.name,record.type].filter(Boolean).join(" ").toLocaleLowerCase().includes(searchQuery));
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if(form)await loadModuleRelationOptions(moduleName,form);
   const container=document.querySelector('[data-module-list="'+moduleName+'"]');
@@ -1002,7 +1005,8 @@ async function loadContentModule(moduleName) {
     if (container) { container.replaceChildren(); addTextElement(container,"p","muted",error.message||"Could not load records."); }
     return;
   }
-  await renderModuleList(moduleName,data||[]);
+  moduleRecordCache[moduleName]=data||[];
+  await renderModuleList(moduleName,moduleRecordCache[moduleName]);
 }
 for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
   const fieldsHost=document.querySelector('[data-module-fields="'+moduleName+'"]');
@@ -1102,6 +1106,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
   });
   document.querySelector('[data-module-cancel="'+moduleName+'"]')?.addEventListener("click",()=>resetModuleForm(moduleName));
   document.querySelector('[data-module-refresh="'+moduleName+'"]')?.addEventListener("click",()=>void loadContentModule(moduleName));
+  document.querySelector('[data-module-search="'+moduleName+'"]')?.addEventListener("input",()=>void renderModuleList(moduleName,moduleRecordCache[moduleName]||[]));
   document.querySelector('[data-dashboard-tab="'+moduleName+'"]')?.addEventListener("click",()=>void loadContentModule(moduleName));
 }
 
