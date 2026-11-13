@@ -672,29 +672,31 @@ if(siteSettingsForm)void loadSiteSettingsForm();
 // Core content modules: each module uses its existing Supabase table and RLS policies.
 const dashboardContentModules = {
   services: { table:"services", title:"Service", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
-    ["images","Images","files",false],["products","Products","multiselect",false],
-    ["workshops","Workshops","multiselect",false],["technicians","Technicians","multiselect",false],
+    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
+    ["products","Products","multiselect",false],["workshops","Workshops","multiselect",false],
+    ["technicians","Technicians","multiselect",false],["images","Images","files",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","visibility"] },
-  products: { table:"products", title:"Product", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
-    ["images","Images","files",false],["workshops","Workshops","multiselect",false],
-    ["technicians","Technicians","multiselect",false],["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["country","visibility"] },
-  workshops: { table:"workshops", title:"Workshop", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
-    ["images","Images","files",false],["location","Location","text",false],["address","Address","text",false],
-    ["services","Services","multiselect",false],["products","Products","multiselect",false],
-    ["technicians","Technicians","multiselect",false],["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["country","location","address","visibility"] },
-  technicians: { table:"technicians", title:"Technician", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
-    ["images","Images","files",false],["skill","Skill / Expertise","text",false],
-    ["services","Services","multiselect",false],["workshops","Workshops","multiselect",false],
-    ["phone","Phone","tel",false],["whatsapp","WhatsApp","text",false],["email","Email","email",false],
+  products: { table:"products", title:"Products", fields:[
+    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
+    ["services","Service","multiselect",false],["workshops","Workshops","multiselect",false],
+    ["technicians","Technicians","multiselect",false],["images","Images","files",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["country","skill","visibility"] }
+  ], columns:["country","visibility"] },
+  workshops: { table:"workshops", title:"Workshops", fields:[
+    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
+    ["location","Location","text",false],["services","Service","multiselect",false],
+    ["products","Products","multiselect",false],["technicians","Technicians","multiselect",false],
+    ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["country","location","visibility"] },
+  technicians: { table:"technicians", title:"Technicians", fields:[
+    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
+    ["skill","Skill/Expertise","text",false],["phone","Phone Number","tel",false],
+    ["whatsapp","Whatsapp Number","tel",false],["link","Link","url",false],["email","Email","email",false],
+    ["services","Service","multiselect",false],["products","Products","multiselect",false],
+    ["workshops","Workshops","multiselect",false],["images","Images","files",false],
+    ["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["country","skill","link","visibility"] }
 };
 const moduleRelationships = {
   services: {
@@ -703,6 +705,7 @@ const moduleRelationships = {
     technicians:{table:"service_technicians",parent:"service_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
   },
   products: {
+    services:{table:"service_products",parent:"product_id",child:"service_id",target:"services",label:"name",filter:["status","active"]},
     workshops:{table:"product_workshops",parent:"product_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]},
     technicians:{table:"product_technicians",parent:"product_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
   },
@@ -713,6 +716,7 @@ const moduleRelationships = {
   },
   technicians: {
     services:{table:"service_technicians",parent:"technician_id",child:"service_id",target:"services",label:"name",filter:["status","active"]},
+    products:{table:"product_technicians",parent:"technician_id",child:"product_id",target:"products",label:"name",filter:["status","active"]},
     workshops:{table:"workshop_technicians",parent:"technician_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]}
   }
 };
@@ -767,7 +771,7 @@ function slugFromName(value) {
     .replace(/[^\w.-]+/gu, "-").replace(/^-+|-+$/g, "");
 }
 function moduleDatabaseKey(moduleName,key) {
-  if (moduleName === "workshops" && key === "name") return "title";
+  if (key === "title") return moduleName === "workshops" ? "title" : "name";
   if (moduleName === "workshops" && key === "technician") return "trainer";
   if (moduleName === "products" && key === "price") return "price_minor";
   return key;
@@ -935,7 +939,7 @@ async function renderModuleList(moduleName,records) {
         const input=form.elements.namedItem(key);if(!input&&key!=="country")continue;
         if(key==="visibility")input.value=recordVisibility(moduleName,record);
         else if(key==="price")input.value=record.price_minor==null?"":String(Number(record.price_minor)/100);
-        else if(key==="name")input.value=record.name||record.title||"";
+        else if(key==="title")input.value=record[moduleDatabaseKey(moduleName,key)]||"";
         else if(key==="technician")input.value=record.trainer||"";
         else if(key==="images")input.value="";
         else if(key==="country"){const selected=String(record.country||"").split(",").map(value=>value.trim());form.querySelectorAll("[data-country-value]").forEach(box=>{box.checked=selected.includes(box.dataset.countryValue);});}
@@ -1007,11 +1011,11 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     form._moduleFormPlaceholder=marker;
   }
   await loadModuleRelationOptions(moduleName,form);
-  const nameInput=form.elements.namedItem("name");
+  const titleInput=form.elements.namedItem("title");
   const slugInput=form.elements.namedItem("slug");
-  if (nameInput&&slugInput) {
-    nameInput.addEventListener("input",()=>{
-      if (form.dataset.slugManual!=="true") slugInput.value=slugFromName(nameInput.value);
+  if (titleInput&&slugInput) {
+    titleInput.addEventListener("input",()=>{
+      if (form.dataset.slugManual!=="true") slugInput.value=slugFromName(titleInput.value);
     });
     slugInput.addEventListener("input",()=>{ form.dataset.slugManual="true"; });
   }
@@ -1040,10 +1044,10 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         } else if(key==="condition") payload[dbKey]=input.value.trim()||"new";
         else payload[dbKey]=input.value.trim()===""?(key==="currency"?"SAR":null):input.value.trim();
       }
-      const nameValue=String(nameInput?.value||"").trim();
-      const slugValue=String(slugInput?.value||"").trim()||slugFromName(nameValue);
-      if (!nameValue || !slugValue) throw new Error("Name and Slug are required.");
-      payload[moduleDatabaseKey(moduleName,"name")]=nameValue;
+      const titleValue=String(titleInput?.value||"").trim();
+      const slugValue=String(slugInput?.value||"").trim()||slugFromName(titleValue);
+      if (!titleValue || !slugValue) throw new Error("Title and Slug are required.");
+      payload[moduleDatabaseKey(moduleName,"title")]=titleValue;
       payload.slug=slugValue;
       if (moduleName==="services"||moduleName==="products") payload.description=payload.description||"";
       const visibility=form.elements.namedItem("visibility")?.value||"hidden";
