@@ -54,7 +54,7 @@ export function initExtendedDashboard(supabase,role){
   async save(form){const title=form.elements.title.value.trim(),value=form.elements.value.value.trim(),id=form.dataset.editId;if(!title||!value)throw new Error("Title and Value are required.");const type=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)?"email":/^https?:\/\//i.test(value)?"link":"phone";const result=id?await supabase.from("contacts").update({name:title,value,type}).eq("id",id):await supabase.from("contacts").insert({name:title,value,type,slug:slug(title)+"-"+crypto.randomUUID().slice(0,8)});if(result.error)throw result.error;},
   async remove(id){const {error}=await supabase.from("contacts").delete().eq("id",id);if(error)throw error;}
  });
- if(cf){cf.dataset.messageId="contacts-message";cf.querySelector("[data-refresh]")?.addEventListener("click",()=>void cf._sharedRefresh());}
+ if(cf)cf.dataset.messageId="contacts-message";
 
  // Users: Title plus the email required by Supabase Auth, Roles and direct Permissions.
  const uf=document.getElementById("users-form"),ul=document.getElementById("users-list"),uro=document.getElementById("user-role-options"),upo=document.getElementById("user-permission-options");
