@@ -1,5 +1,6 @@
 <main class="dashboard-main" id="owner-dashboard">
     <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
+<button class="dashboard-module-tab" type="button" role="tab" id="tab-categories" aria-controls="panel-categories" aria-selected="false" data-icon="layers" data-dashboard-tab="categories" tabindex="-1">Categories</button>
 <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-services" aria-controls="panel-services" aria-selected="true" data-icon="wrench" data-dashboard-tab="services">Services</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" aria-controls="panel-products" aria-selected="false" data-icon="package" data-dashboard-tab="products" tabindex="-1">Products</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-workshops" aria-controls="panel-workshops" aria-selected="false" data-icon="building" data-dashboard-tab="workshops" tabindex="-1">Workshops</button>
@@ -10,6 +11,19 @@
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-permission" aria-controls="panel-permission" aria-selected="false" data-icon="lock" data-dashboard-tab="permission" tabindex="-1">Permission</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-icon="settings" data-dashboard-tab="settings" tabindex="-1">Settings</button>
 </nav>
+
+    <section class="dashboard-module-panel" id="panel-categories" role="tabpanel" aria-labelledby="tab-categories" data-dashboard-panel="categories" hidden>
+      <div class="admin-list">
+        <button class="secondary-button module-refresh-button" type="button" data-module-refresh="categories">Refresh</button>
+        <form class="content-editor-form" data-module-form="categories">
+          <h3 data-module-form-title="categories">Add category</h3>
+          <div class="module-form-grid" data-module-fields="categories"></div>
+          <div class="editor-actions"><button type="submit" data-module-submit="categories">Save category</button><button class="secondary-button" type="button" data-module-cancel="categories" hidden>Cancel Edit</button></div>
+          <p class="editor-message" role="status" data-module-message="categories"></p>
+        </form>
+        <div class="admin-list" data-module-list="categories" aria-live="polite"><p class="muted">Open this module to load records.</p></div>
+      </div>
+    </section>
 
     <section class="dashboard-module-panel" id="panel-services" role="tabpanel" aria-labelledby="tab-services" data-dashboard-panel="services" hidden>
       <div class="admin-list">
