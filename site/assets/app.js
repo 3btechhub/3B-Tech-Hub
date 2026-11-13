@@ -66,11 +66,11 @@ runtimeConfig = await loadRuntimeConfig(supabase);
 applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 
 const homeCatalogModules = [
-  { key:"services", table:"services", title:"Services", icon:"🔧", published:["status","active"], columns:"name,slug,description,category,photo_url" },
-  { key:"products", table:"products", title:"Products", icon:"📦", published:["status","active"], columns:"name,slug,description,category,photo_url" },
-  { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name:title,slug,description,location,trainer,category,photo_url" },
-  { key:"technicians", table:"technicians", title:"Technicians", icon:"👨‍🔧", published:["is_published",true], columns:"name,slug,description,skill,category,photo_url" },
-  { key:"contacts", table:"contacts", title:"Contacts", icon:"☎", published:null, columns:"name,slug,value,type" }
+  { key:"services", table:"services", title:"Services", icon:"🔧", published:["status","active"], columns:"name,slug,photo_url" },
+  { key:"products", table:"products", title:"Products", icon:"📦", published:["status","active"], columns:"name,slug,photo_url" },
+  { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name:title,slug,photo_url" },
+  { key:"technicians", table:"technicians", title:"Technicians", icon:"👨‍🔧", published:["is_published",true], columns:"name,slug,photo_url" },
+  { key:"contacts", table:"contacts", title:"Contacts", icon:"☎", published:null, columns:"name,slug" }
 ];
 
 function renderHomeCard(module, record) {
@@ -96,12 +96,6 @@ function renderHomeCard(module, record) {
   const title=document.createElement("h3");
   title.textContent=record.name||record.title||"Untitled";
   body.append(title);
-  const detail=module.key==="contacts"?record.type:module.key==="technicians"?record.skill:module.key==="workshops"?(record.location||record.category):record.category;
-  if(detail) {
-    const meta=document.createElement("p");
-    meta.textContent=detail;
-    body.append(meta);
-  }
   card.append(visual,body);
   return card;
 }
