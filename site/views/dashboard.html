@@ -64,40 +64,90 @@
     </section>
 
     <section class="dashboard-module-panel" id="panel-contacts" role="tabpanel" aria-labelledby="tab-contacts" data-dashboard-panel="contacts" hidden>
-<div class="admin-list"><form id="contacts-form" class="content-editor-form"><h3 id="contacts-form-title">Add contact</h3><div class="module-form-grid"><label class="module-form-field"><span>Name</span><input name="name" maxlength="160" required></label><label class="module-form-field"><span>Value</span><input name="value" maxlength="2000" required></label></div><div class="editor-actions"><button type="submit" id="contacts-submit">Save</button><button class="secondary-button" id="contacts-cancel" type="button" hidden>Cancel</button><button class="secondary-button" id="contacts-delete" type="button" hidden>Delete</button><button class="secondary-button" id="contacts-refresh" type="button">Refresh</button></div><p id="contacts-message" class="editor-message" role="status"></p></form><div id="contacts-list" class="admin-list" aria-live="polite"></div></div>
-</section>
+      <div class="admin-list">
+        <form id="contacts-form" class="content-editor-form">
+          <h3 id="contacts-form-title">Add contact</h3>
+          <div class="module-form-grid">
+            <label class="module-form-field"><span>Title</span><input name="title" maxlength="160" required></label>
+            <label class="module-form-field"><span>Value</span><input name="value" maxlength="2000" required></label>
+          </div>
+          <div class="editor-actions">
+            <button type="submit" id="contacts-submit">Save</button>
+            <button class="secondary-button" type="button" data-cancel hidden>Cancel</button>
+            <button class="secondary-button" type="button" data-delete hidden>Delete</button>
+            <button class="secondary-button" type="button" data-refresh>Refresh</button>
+          </div>
+          <p id="contacts-message" class="editor-message" role="status"></p>
+        </form>
+        <div id="contacts-list" class="admin-list" aria-live="polite"></div>
+      </div>
+    </section>
     <section class="dashboard-module-panel" id="panel-users" role="tabpanel" aria-labelledby="tab-users" data-dashboard-panel="users" hidden>
-<div class="admin-list"><form id="users-form" class="content-editor-form"><h3 id="users-form-title">Add user</h3><div class="module-form-grid">
-<label class="module-form-field"><span>Name</span><input name="name" maxlength="160" required></label>
-<label class="module-form-field"><span>Email</span><input name="email" type="email" maxlength="254" autocomplete="email" required></label>
-<label class="module-form-field"><span>Phone</span><input name="phone" type="tel" maxlength="40"></label>
-<div class="module-form-field module-related-field"><span>Roles</span><div id="user-role-options" class="module-related-options"></div></div>
-<label class="module-form-field"><span>Status</span><select name="status"><option value="active">Active</option><option value="blocked">Blocked</option></select></label>
-</div><div class="editor-actions"><button type="submit" id="users-submit">Save</button><button class="secondary-button" id="users-cancel" type="button" hidden>Cancel</button><button class="secondary-button" id="users-refresh" type="button">Refresh</button></div><p id="users-message" class="editor-message" role="status"></p></form><div id="users-list" class="admin-list" aria-live="polite"></div></div>
-</section>
+      <div class="admin-list">
+        <form id="users-form" class="content-editor-form">
+          <h3 id="users-form-title">Add user</h3>
+          <div class="module-form-grid">
+            <label class="module-form-field"><span>Title</span><input name="title" maxlength="160" required></label>
+            <label class="module-form-field"><span>Email (account invitation)</span><input name="email" type="email" maxlength="254" autocomplete="email" required></label>
+            <div class="module-form-field module-related-field"><span>Roles</span><div id="user-role-options" class="module-related-options"></div></div>
+            <div class="module-form-field module-related-field"><span>Permissions</span><div id="user-permission-options" class="module-related-options"></div></div>
+          </div>
+          <div class="editor-actions">
+            <button type="submit" id="users-submit">Save</button>
+            <button class="secondary-button" id="users-cancel" type="button" hidden>Cancel</button>
+            <button class="secondary-button" id="users-refresh" type="button">Refresh</button>
+          </div>
+          <p id="users-message" class="editor-message" role="status"></p>
+        </form>
+        <div id="users-list" class="admin-list" aria-live="polite"></div>
+      </div>
+    </section>
     <section class="dashboard-module-panel" id="panel-roles" role="tabpanel" aria-labelledby="tab-roles" data-dashboard-panel="roles" hidden>
-<div class="admin-list"><form id="roles-form" class="content-editor-form"><h3 id="roles-form-title">Add role</h3><div class="module-form-grid">
-<label class="module-form-field"><span>Name</span><input name="name" maxlength="80" required></label>
-<label class="module-form-field"><span>Key</span><input name="key" maxlength="64" required></label>
-<div class="module-form-field module-related-field"><span>Permissions</span><div id="role-permission-options" class="module-related-options"></div></div>
-<label class="module-form-field"><span>Status</span><select name="status"><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
-</div><div class="editor-actions"><button type="submit" id="roles-submit">Save</button><button class="secondary-button" id="roles-cancel" type="button" hidden>Cancel</button><button class="secondary-button" id="roles-delete" type="button" hidden>Delete</button><button class="secondary-button" id="roles-refresh" type="button">Refresh</button></div><p id="roles-message" class="editor-message" role="status"></p></form><div id="roles-list" class="admin-list" aria-live="polite"></div></div>
-</section>
+      <div class="admin-list">
+        <form id="roles-form" class="content-editor-form">
+          <h3 id="roles-form-title">Add role</h3>
+          <div class="module-form-grid">
+            <label class="module-form-field"><span>Title</span><input name="title" maxlength="80" required></label>
+            <div class="module-form-field module-related-field"><span>Users</span><div id="role-user-options" class="module-related-options"></div></div>
+            <div class="module-form-field module-related-field"><span>Permissions</span><div id="role-permission-options" class="module-related-options"></div></div>
+          </div>
+          <div class="editor-actions">
+            <button type="submit" id="roles-submit">Save</button>
+            <button class="secondary-button" id="roles-cancel" type="button" hidden>Cancel</button>
+            <button class="secondary-button" id="roles-delete" type="button" hidden>Delete</button>
+            <button class="secondary-button" id="roles-refresh" type="button">Refresh</button>
+          </div>
+          <p id="roles-message" class="editor-message" role="status"></p>
+        </form>
+        <div id="roles-list" class="admin-list" aria-live="polite"></div>
+      </div>
+    </section>
     <section class="dashboard-module-panel" id="panel-permission" role="tabpanel" aria-labelledby="tab-permission" data-dashboard-panel="permission" hidden>
-<div class="admin-list"><form id="permission-form" class="content-editor-form"><h3 id="permission-form-title">Add permission</h3><div class="module-form-grid">
-<label class="module-form-field"><span>Name</span><input name="name" maxlength="100" required></label>
-<label class="module-form-field"><span>Key</span><input name="key" maxlength="120" required></label>
-<label class="module-form-field"><span>Module / Resource</span><input name="resource" maxlength="80" required></label>
-<label class="module-form-field"><span>Action Type</span><select name="action" required><option value="create">Create</option><option value="view">View</option><option value="edit">Edit</option><option value="delete">Delete</option><option value="publish">Publish</option><option value="hide">Hide</option><option value="manage">Manage</option></select></label>
-<label class="module-form-field"><span>Status</span><select name="status"><option value="active">Active</option><option value="inactive">Inactive</option></select></label>
-</div><div class="editor-actions"><button type="submit" id="permission-submit">Save</button><button class="secondary-button" id="permission-cancel" type="button" hidden>Cancel</button><button class="secondary-button" id="permission-delete" type="button" hidden>Delete</button><button class="secondary-button" id="permission-refresh" type="button">Refresh</button></div><p id="permission-message" class="editor-message" role="status"></p></form><div id="permissions-list" class="admin-list" aria-live="polite"></div></div>
-</section>
+      <div class="admin-list">
+        <form id="permission-form" class="content-editor-form">
+          <h3 id="permission-form-title">Add permission</h3>
+          <div class="module-form-grid">
+            <label class="module-form-field"><span>Title</span><input name="title" maxlength="100" required></label>
+            <div class="module-form-field module-related-field"><span>Users</span><div id="permission-user-options" class="module-related-options"></div></div>
+            <div class="module-form-field module-related-field"><span>Roles</span><div id="permission-role-options" class="module-related-options"></div></div>
+          </div>
+          <div class="editor-actions">
+            <button type="submit" id="permission-submit">Save</button>
+            <button class="secondary-button" id="permission-cancel" type="button" hidden>Cancel</button>
+            <button class="secondary-button" id="permission-delete" type="button" hidden>Delete</button>
+            <button class="secondary-button" id="permission-refresh" type="button">Refresh</button>
+          </div>
+          <p id="permission-message" class="editor-message" role="status"></p>
+        </form>
+        <div id="permissions-list" class="admin-list" aria-live="polite"></div>
+      </div>
+    </section>
     <section class="dashboard-module-panel" id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" data-dashboard-panel="settings" hidden>
       <form id="site-settings-form" class="content-editor-form">
         <h2 data-label="websiteSettings">Website Settings</h2>
-        <label class="module-form-field"><span>Intro</span><textarea name="home_intro" rows="5" maxlength="5000" placeholder="Write a short introduction for the homepage…"></textarea></label>
-        <label><span data-label="websiteTitle">Website Title</span><input name="website_title" maxlength="100" placeholder="3B TECH HUB"></label>
-        <input name="logo_url" type="hidden"><label><span>Website Logo (direct Upload / Replace)</span><input name="logo_file" id="site-logo-file" type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif"></label><img id="site-logo-preview" class="module-image-preview" alt="Website logo preview" hidden><fieldset class="content-editor-form"><legend>Home Section Visibility</legend><div class="module-form-grid"><label><input type="checkbox" name="section_intro" checked> Intro</label><label><input type="checkbox" name="section_services" checked> Services</label><label><input type="checkbox" name="section_products" checked> Products</label><label><input type="checkbox" name="section_workshops" checked> Workshops</label><label><input type="checkbox" name="section_technicians" checked> Technicians</label><label><input type="checkbox" name="section_contacts" checked> Contacts</label></div></fieldset>
+        <label class="module-form-field"><span>Website Intro</span><textarea name="home_intro" rows="5" maxlength="5000" ></textarea></label>
+        <label><span data-label="websiteTitle">Website Title</span><input name="website_title" maxlength="100" ></label>
+        <input name="logo_url" type="hidden"><label><span>Website Logo (direct Upload / Replace)</span><input name="logo_file" id="site-logo-file" type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif"></label><img id="site-logo-preview" class="module-image-preview" alt="Website logo preview" hidden><fieldset class="content-editor-form"><legend>Homepage Module Management</legend><div class="module-form-grid"><label><input type="checkbox" name="section_intro" checked> Intro</label><label><input type="checkbox" name="section_services" checked> Services</label><label><input type="checkbox" name="section_products" checked> Products</label><label><input type="checkbox" name="section_workshops" checked> Workshops</label><label><input type="checkbox" name="section_technicians" checked> Technicians</label><label><input type="checkbox" name="section_contacts" checked> Contacts</label></div></fieldset>
         <div class="editor-actions"><button type="submit" id="site-settings-save" data-label="saveSettings">Save Settings</button></div>
         <p class="editor-message" id="site-settings-message" role="status"></p>
       </form>
