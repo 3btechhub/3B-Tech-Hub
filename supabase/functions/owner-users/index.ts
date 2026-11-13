@@ -1,205 +1,40 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-
-const allowedOrigins = new Set(["https://3btechhub.github.io"]);
-const allowedRoles = new Set(["member", "visitor"]);
-const primaryOwnerEmail = "3btechhub@gmail.com";
-const redirectTo = "https://3btechhub.github.io/3btechhub/account/";
-
-function response(body: unknown, status: number, origin: string | null) {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    "Vary": "Origin",
-  };
-  if (origin && allowedOrigins.has(origin)) {
-    headers["Access-Control-Allow-Origin"] = origin;
-    headers["Access-Control-Allow-Headers"] = "authorization, apikey, content-type, x-client-info";
-    headers["Access-Control-Allow-Methods"] = "POST, OPTIONS";
+const allowedOrigins=new Set(["https://3btechhub.github.io"]),primaryOwnerEmail="3btechhub@gmail.com",redirectTo="https://3btechhub.github.io/3btechhub/account/";
+function response(body:unknown,status:number,origin:string|null){const h:Record<string,string>={"Content-Type":"application/json","Vary":"Origin"};if(origin&&allowedOrigins.has(origin)){h["Access-Control-Allow-Origin"]=origin;h["Access-Control-Allow-Headers"]="authorization, apikey, content-type, x-client-info";h["Access-Control-Allow-Methods"]="POST, OPTIONS";}return new Response(JSON.stringify(body),{status,headers:h});}
+async function audit(admin:ReturnType<typeof createClient>,actor:string,action:string,id:string,metadata:Record<string,unknown>={}){const {error}=await admin.from("audit_logs").insert({actor_id:actor,action,resource_type:"auth.users",resource_id:id,metadata});return error?.message||null;}
+function uuid(v:unknown):v is string{return typeof v==="string"&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);}
+function roleArray(v:unknown):v is string[]{return Array.isArray(v)&&v.length>0&&v.length<=20&&v.every(x=>typeof x==="string"&&/^[a-z0-9][a-z0-9_-]{1,63}$/.test(x))&&new Set(v).size===v.length;}
+Deno.serve(async(req:Request)=>{
+ const origin=req.headers.get("Origin");if(origin&&!allowedOrigins.has(origin))return response({error:"Origin not allowed."},403,null);if(req.method==="OPTIONS")return response({ok:true},200,origin);if(req.method!=="POST")return response({error:"Method not allowed."},405,origin);
+ const auth=req.headers.get("Authorization")||"",token=auth.startsWith("Bearer ")?auth.slice(7):"";if(!token)return response({error:"Authentication required."},401,origin);
+ const url=Deno.env.get("SUPABASE_URL"),key=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!url||!key)return response({error:"Server configuration is incomplete."},503,origin);
+ const admin=createClient(url,key,{auth:{autoRefreshToken:false,persistSession:false}});
+ try{
+  const {data:authData,error:authError}=await admin.auth.getUser(token),actor=authData.user;if(authError||!actor)return response({error:"Invalid session."},401,origin);
+  const {data:owner,error:ownerError}=await admin.from("user_roles").select("role").eq("user_id",actor.id).eq("role","owner").maybeSingle();if(ownerError||!owner)return response({error:"Owner permission required."},403,origin);
+  const body=await req.json().catch(()=>null);if(!body||typeof body!=="object"||typeof body.action!=="string")return response({error:"Invalid request body."},400,origin);if(body.action==="health")return response({ok:true},200,origin);
+  if(body.action==="list"){
+   const page=Math.max(1,Math.min(1000,Number.isInteger(body.page)?body.page:1)),perPage=Math.max(1,Math.min(50,Number.isInteger(body.perPage)?body.perPage:50)),{data,error}=await admin.auth.admin.listUsers({page,perPage});if(error)throw error;
+   const all=data.users||[],ids=all.map(u=>u.id),[rr,pr]=await Promise.all([ids.length?admin.from("user_roles").select("user_id,role").in("user_id",ids):Promise.resolve({data:[],error:null}),ids.length?admin.from("user_profiles").select("user_id,display_name,phone").in("user_id",ids):Promise.resolve({data:[],error:null})]);if(rr.error)throw rr.error;if(pr.error)throw pr.error;
+   const roleMap=new Map<string,string[]>();for(const x of rr.data||[]){const a=roleMap.get(x.user_id)||[];a.push(x.role);roleMap.set(x.user_id,a);}const profileMap=new Map((pr.data||[]).map(x=>[x.user_id,x]));
+   return response({users:all.map(u=>{const p=profileMap.get(u.id)||{},roles=roleMap.get(u.id)||["member"];return{id:u.id,email:u.email||"",full_name:p.display_name||u.user_metadata?.full_name||u.user_metadata?.name||"",phone:p.phone||"",roles,role:roles[0]||"member",email_confirmed_at:u.email_confirmed_at||null,created_at:u.created_at,last_sign_in_at:u.last_sign_in_at,banned_until:u.banned_until};}),page,perPage,total:data.total??all.length},200,origin);
   }
-  return new Response(JSON.stringify(body), { status, headers });
-}
-
-async function recordAudit(
-  admin: ReturnType<typeof createClient>,
-  actorId: string,
-  action: string,
-  resourceId: string,
-  metadata: Record<string, unknown> = {},
-) {
-  const { error } = await admin.from("audit_logs").insert({
-    actor_id: actorId,
-    action,
-    resource_type: "auth.users",
-    resource_id: resourceId,
-    metadata,
-  });
-  return error?.message || null;
-}
-
-function validUuid(value: unknown): value is string {
-  return typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
-}
-
-Deno.serve(async (request: Request) => {
-  const origin = request.headers.get("Origin");
-  if (origin && !allowedOrigins.has(origin)) return response({ error: "Origin not allowed." }, 403, null);
-  if (request.method === "OPTIONS") return response({ ok: true }, 200, origin);
-  if (request.method !== "POST") return response({ error: "Method not allowed." }, 405, origin);
-
-  const authorization = request.headers.get("Authorization") || "";
-  const token = authorization.startsWith("Bearer ") ? authorization.slice(7) : "";
-  if (!token) return response({ error: "Authentication required." }, 401, origin);
-
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!supabaseUrl || !serviceRoleKey) return response({ error: "Server configuration is incomplete." }, 503, origin);
-
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-
-  try {
-    const { data: authData, error: authError } = await admin.auth.getUser(token);
-    const actor = authData.user;
-    if (authError || !actor) return response({ error: "Invalid session." }, 401, origin);
-
-    const { data: ownerRole, error: ownerError } = await admin
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", actor.id)
-      .eq("role", "owner")
-      .maybeSingle();
-    if (ownerError || !ownerRole) return response({ error: "Owner permission required." }, 403, origin);
-
-    const body = await request.json().catch(() => null);
-    if (!body || typeof body !== "object" || typeof body.action !== "string") {
-      return response({ error: "Invalid request body." }, 400, origin);
-    }
-
-    if (body.action === "health") return response({ ok: true }, 200, origin);
-
-    if (body.action === "list") {
-      const page = Math.max(1, Math.min(1000, Number.isInteger(body.page) ? body.page : 1));
-      const perPage = Math.max(1, Math.min(50, Number.isInteger(body.perPage) ? body.perPage : 50));
-      const { data, error } = await admin.auth.admin.listUsers({ page, perPage });
-      if (error) throw error;
-      const users = data.users || [];
-      const ids = users.map((user) => user.id);
-      const { data: roles, error: rolesError } = ids.length
-        ? await admin.from("user_roles").select("user_id,role").in("user_id", ids)
-        : { data: [], error: null };
-      if (rolesError) throw rolesError;
-      const roleByUser = new Map((roles || []).map((row) => [row.user_id, row.role]));
-      const { data: profiles, error: profilesError } = ids.length
-        ? await admin.from("user_profiles").select("user_id,display_name,phone").in("user_id", ids)
-        : { data: [], error: null };
-      if (profilesError) throw profilesError;
-      const profileByUser = new Map((profiles || []).map((row) => [row.user_id, row]));
-      return response({
-        users: users.map((user) => {
-          const profile = profileByUser.get(user.id) || {};
-          return {
-          id: user.id,
-          email: user.email || "",
-          full_name: profile.display_name || user.user_metadata?.full_name || user.user_metadata?.name || "",
-          phone: profile.phone || "",
-          email_confirmed_at: user.email_confirmed_at || null,
-          created_at: user.created_at,
-          last_sign_in_at: user.last_sign_in_at,
-          banned_until: user.banned_until,
-          role: roleByUser.get(user.id) || "member",
-        };}),
-        page,
-        perPage,
-        total: data.total ?? users.length,
-      }, 200, origin);
-    }
-
-    if (body.action === "invite") {
-      const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-      const role = typeof body.role === "string" ? body.role : "member";
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return response({ error: "Enter a valid email address." }, 400, origin);
-      if (email === primaryOwnerEmail || !allowedRoles.has(role)) return response({ error: "This role or account cannot be invited." }, 400, origin);
-      const { data: roleConfig, error: roleConfigError } = await admin.from("app_roles").select("is_active").eq("slug", role).maybeSingle();
-      if (roleConfigError) throw roleConfigError;
-      if (!roleConfig?.is_active) return response({ error: "This role is inactive." }, 400, origin);
-      const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo });
-      if (error) throw error;
-      if (!data.user) throw new Error("Invite did not return a user.");
-      const { error: roleDeleteError } = await admin.from("user_roles").delete().eq("user_id", data.user.id).neq("role", "owner");
-      if (roleDeleteError) throw roleDeleteError;
-      const { error: roleInsertError } = await admin.from("user_roles").insert({
-        user_id: data.user.id,
-        role,
-        created_by: actor.id,
-      });
-      if (roleInsertError) throw roleInsertError;
-      const auditWarning = await recordAudit(admin, actor.id, "user_invited", data.user.id, { role });
-      return response({ invited: true, user: { id: data.user.id, email: data.user.email, role }, auditWarning }, 201, origin);
-    }
-
-    if (body.action === "set-role") {
-      if (!validUuid(body.userId) || typeof body.role !== "string" || !allowedRoles.has(body.role)) {
-        return response({ error: "Invalid user or role." }, 400, origin);
-      }
-      const { data: roleConfig, error: roleConfigError } = await admin.from("app_roles").select("is_active").eq("slug", body.role).maybeSingle();
-      if (roleConfigError) throw roleConfigError;
-      if (!roleConfig?.is_active) return response({ error: "This role is inactive." }, 400, origin);
-      const { data: targetData, error: targetError } = await admin.auth.admin.getUserById(body.userId);
-      if (targetError || !targetData.user) return response({ error: "User not found." }, 404, origin);
-      const { data: targetRole, error: targetRoleError } = await admin.from("user_roles").select("role").eq("user_id", body.userId).maybeSingle();
-      if (targetRoleError) throw targetRoleError;
-      if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail || targetRole?.role === "owner") {
-        return response({ error: "Owner accounts are protected." }, 403, origin);
-      }
-      const { error: deleteError } = await admin.from("user_roles").delete().eq("user_id", body.userId).neq("role", "owner");
-      if (deleteError) throw deleteError;
-      const { error: insertError } = await admin.from("user_roles").insert({
-        user_id: body.userId,
-        role: body.role,
-        created_by: actor.id,
-      });
-      if (insertError) throw insertError;
-      const auditWarning = await recordAudit(admin, actor.id, "user_role_changed", body.userId, { role: body.role });
-      return response({ updated: true, userId: body.userId, role: body.role, auditWarning }, 200, origin);
-    }
-
-    if (body.action === "set-status") {
-      if (!validUuid(body.userId) || typeof body.blocked !== "boolean") {
-        return response({ error: "Invalid user status request." }, 400, origin);
-      }
-      const { data: targetData, error: targetError } = await admin.auth.admin.getUserById(body.userId);
-      if (targetError || !targetData.user) return response({ error: "User not found." }, 404, origin);
-      const { data: targetRole, error: targetRoleError } = await admin.from("user_roles").select("role").eq("user_id", body.userId).maybeSingle();
-      if (targetRoleError) throw targetRoleError;
-      if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail || targetRole?.role === "owner") {
-        return response({ error: "Owner accounts cannot be blocked." }, 403, origin);
-      }
-      const { error } = await admin.auth.admin.updateUserById(body.userId, {
-        ban_duration: body.blocked ? "876000h" : "none",
-      });
-      if (error) throw error;
-      const auditWarning = await recordAudit(admin, actor.id, body.blocked ? "user_blocked" : "user_unblocked", body.userId);
-      return response({ updated: true, userId: body.userId, blocked: body.blocked, auditWarning }, 200, origin);
-    }
-
-    if (body.action === "reset-password") {
-      if (!validUuid(body.userId)) return response({ error: "Invalid user." }, 400, origin);
-      const { data: targetData, error: targetError } = await admin.auth.admin.getUserById(body.userId);
-      if (targetError || !targetData.user?.email) return response({ error: "User not found." }, 404, origin);
-      const { data: targetRole, error: targetRoleError } = await admin.from("user_roles").select("role").eq("user_id", body.userId).maybeSingle();
-      if (targetRoleError) throw targetRoleError;
-      if (targetData.user.email.toLowerCase() === primaryOwnerEmail || targetRole?.role === "owner") {
-        return response({ error: "Use the Owner's own account recovery flow." }, 403, origin);
-      }
-      const { error } = await admin.auth.resetPasswordForEmail(targetData.user.email, { redirectTo });
-      if (error) throw error;
-      const auditWarning = await recordAudit(admin, actor.id, "password_reset_requested", body.userId);
-      return response({ sent: true, auditWarning }, 200, origin);
-    }
-
-    return response({ error: "Unsupported action." }, 400, origin);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Unexpected server error.";
-    return response({ error: message }, 400, origin);
+  async function allowedRoles(slugs:string[]){if(!roleArray(slugs)||slugs.includes("owner"))throw new Error("Select one or more valid non-owner Roles.");const {data,error}=await admin.from("app_roles").select("slug,is_active").in("slug",slugs);if(error)throw error;const active=new Set((data||[]).filter(x=>x.is_active).map(x=>x.slug));if(active.size!==slugs.length)throw new Error("One or more selected Roles are unavailable or inactive.");return slugs;}
+  if(body.action==="invite"){
+   const email=typeof body.email==="string"?body.email.trim().toLowerCase():"",name=typeof body.name==="string"?body.name.trim():"",phone=typeof body.phone==="string"?body.phone.trim():"",roles=await allowedRoles(body.roles);if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email===primaryOwnerEmail||!name||name.length>160||phone.length>40)return response({error:"Enter valid Name, Email and Phone details."},400,origin);
+   const {data,error}=await admin.auth.admin.inviteUserByEmail(email,{redirectTo,data:{full_name:name}});if(error)throw error;if(!data.user)throw new Error("Invite did not return a user.");
+   const {error:pe}=await admin.from("user_profiles").upsert({user_id:data.user.id,display_name:name,phone},{onConflict:"user_id"});if(pe)throw pe;const {error:re}=await admin.from("user_roles").insert(roles.map(role=>({user_id:data.user!.id,role,created_by:actor.id})));if(re)throw re;const warning=await audit(admin,actor.id,"user_invited",data.user.id,{roles});return response({invited:true,user:{id:data.user.id,email:data.user.email,roles},auditWarning:warning},201,origin);
   }
+  if(body.action==="set-profile"){
+   if(!uuid(body.userId)||typeof body.name!=="string"||!body.name.trim()||body.name.trim().length>160||typeof body.phone!=="string"||body.phone.length>40)return response({error:"Invalid user profile."},400,origin);const {data:target,error:te}=await admin.auth.admin.getUserById(body.userId);if(te||!target)return response({error:"User not found."},404,origin);if((target.user.email||"").toLowerCase()===primaryOwnerEmail)return response({error:"The primary Owner profile is protected."},403,origin);const {error}=await admin.from("user_profiles").upsert({user_id:body.userId,display_name:body.name.trim(),phone:body.phone.trim()},{onConflict:"user_id"});if(error)throw error;const warning=await audit(admin,actor.id,"user_profile_updated",body.userId);return response({updated:true,userId:body.userId,auditWarning:warning},200,origin);
+  }
+  if(body.action==="set-roles"||body.action==="set-role"){
+   if(!uuid(body.userId))return response({error:"Invalid user."},400,origin);const target=await admin.auth.admin.getUserById(body.userId);if(target.error||!target.data.user)return response({error:"User not found."},404,origin);const {data:old,error:oe}=await admin.from("user_roles").select("role").eq("user_id",body.userId);if(oe)throw oe;if((target.data.user.email||"").toLowerCase()===primaryOwnerEmail||(old||[]).some(x=>x.role==="owner"))return response({error:"Owner accounts and their Roles are protected."},403,origin);
+   const selected=body.action==="set-role"&&typeof body.role==="string"?[body.role]:body.roles,roles=await allowedRoles(selected);const {error:de}=await admin.from("user_roles").delete().eq("user_id",body.userId);if(de)throw de;const {error}=await admin.from("user_roles").insert(roles.map(role=>({user_id:body.userId,role,created_by:actor.id})));if(error)throw error;const warning=await audit(admin,actor.id,"user_roles_changed",body.userId,{roles});return response({updated:true,userId:body.userId,roles,auditWarning:warning},200,origin);
+  }
+  if(body.action==="set-status"){
+   if(!uuid(body.userId)||typeof body.blocked!=="boolean")return response({error:"Invalid user status request."},400,origin);const {data:target,error:te}=await admin.auth.admin.getUserById(body.userId);if(te||!target)return response({error:"User not found."},404,origin);const {data:assigned,error:ae}=await admin.from("user_roles").select("role").eq("user_id",body.userId);if(ae)throw ae;if((target.user.email||"").toLowerCase()===primaryOwnerEmail||(assigned||[]).some(x=>x.role==="owner"))return response({error:"Owner accounts cannot be blocked."},403,origin);const {error}=await admin.auth.admin.updateUserById(body.userId,{ban_duration:body.blocked?"876000h":"none"});if(error)throw error;const warning=await audit(admin,actor.id,body.blocked?"user_blocked":"user_unblocked",body.userId);return response({updated:true,userId:body.userId,blocked:body.blocked,auditWarning:warning},200,origin);
+  }
+  return response({error:"Unsupported action."},400,origin);
+ }catch(e){return response({error:e instanceof Error?e.message:"Unexpected server error."},400,origin);}
 });
