@@ -163,13 +163,18 @@ async function loadHomeCatalog() {
 }
 
 async function applyPublicSiteSettings() {
-  const [{data,error},{data:sectionsData}] = await Promise.all([
+  const [{data,error},{data:sectionsData},{data:introData}] = await Promise.all([
     supabase.from("site_settings").select("setting_value").eq("setting_key","site_profile").eq("is_public",true).maybeSingle(),
-    supabase.from("site_settings").select("setting_value").eq("setting_key","home_sections").eq("is_public",true).maybeSingle()
+    supabase.from("site_settings").select("setting_value").eq("setting_key","home_sections").eq("is_public",true).maybeSingle(),
+    supabase.from("site_settings").select("setting_value").eq("setting_key","home_intro").eq("is_public",true).maybeSingle()
   ]);
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
   const sections=sectionsData?.setting_value&&typeof sectionsData.setting_value==="object"?sectionsData.setting_value:{};
   document.querySelectorAll("[data-home-section]").forEach(section=>{const key=section.dataset.homeSection;if(typeof sections[key]==="boolean")section.hidden=!sections[key];});
+  const intro=typeof introData?.setting_value?.content==="string"?introData.setting_value.content.trim():"";
+  const introSection=document.getElementById("home-intro-section");
+  const introContent=document.getElementById("home-intro-content");
+  if(introSection&&introContent){introContent.textContent=intro;introSection.hidden=!intro;}
   const websiteTitle = typeof settings.website_title === "string" && settings.website_title.trim()
     ? settings.website_title.trim() : "3B TECH HUB";
   document.querySelectorAll(".brand-title, .home-hero h1, .home-main h1").forEach((node) => { node.textContent = websiteTitle; });
@@ -792,13 +797,16 @@ const siteSettingsMessage = document.querySelector("#site-settings-message");
 async function loadSiteSettingsForm() {
   if (!siteSettingsForm || currentDashboardRole !== "owner") return;
   if (siteSettingsMessage) siteSettingsMessage.textContent = "Loading website settings…";
-  const [{data,error},{data:sectionData}] = await Promise.all([
+  const [{data,error},{data:sectionData},{data:introData}] = await Promise.all([
     supabase.from("site_settings").select("setting_value").eq("setting_key","site_profile").maybeSingle(),
-    supabase.from("site_settings").select("setting_value").eq("setting_key","home_sections").maybeSingle()
+    supabase.from("site_settings").select("setting_value").eq("setting_key","home_sections").maybeSingle(),
+    supabase.from("site_settings").select("setting_value").eq("setting_key","home_intro").maybeSingle()
   ]);
   if (error) { if (siteSettingsMessage) siteSettingsMessage.textContent=error.message||"Could not load website settings."; return; }
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
   const sections=sectionData?.setting_value&&typeof sectionData.setting_value==="object"?sectionData.setting_value:{};
+  const intro=introData?.setting_value&&typeof introData.setting_value.content==="string"?introData.setting_value.content:"";
+  siteSettingsForm.elements.home_intro.value=intro;
   siteSettingsForm.elements.website_title.value=typeof settings.website_title==="string"?settings.website_title:"3B TECH HUB";
   siteSettingsForm.elements.logo_url.value=typeof settings.logo_url==="string"?settings.logo_url:"";
   const preview=document.getElementById("site-logo-preview");
@@ -825,6 +833,8 @@ if(siteSettingsForm){
       const {error}=await supabase.from("site_settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(error)throw error;
       const homeSections={};for(const key of ["services","products","workshops","technicians","contacts"])homeSections[key]=Boolean(siteSettingsForm.elements["section_"+key]?.checked);
       const {error:sectionError}=await supabase.from("site_settings").upsert({setting_key:"home_sections",setting_value:homeSections,is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(sectionError)throw sectionError;
+      const homeIntro=String(form.get("home_intro")||"").trim();
+      const {error:introError}=await supabase.from("site_settings").upsert({setting_key:"home_intro",setting_value:{content:homeIntro},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(introError)throw introError;
       if(oldLogoUrl&&oldLogoUrl!==logoUrl){try{await removeStoredImage(oldLogoUrl);}catch(cleanupError){console.warn("Old logo cleanup failed.",cleanupError);}}
       siteSettingsForm.dataset.removeLogo="false";if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings saved.";
     }catch(error){if(siteSettingsMessage)siteSettingsMessage.textContent=error.message||"Could not save website settings.";}
