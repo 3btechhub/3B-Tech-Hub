@@ -104,13 +104,13 @@ The Dashboard has these 12 modules:
 3. Categories
 4. Services
 5. Products
-5. Workshops
-6. Technicians
-7. Contacts
-8. User
-9. Role
-10. Permission
-11. Settings
+6. Workshops
+7. Technicians
+8. Contacts
+9. User
+10. Role
+11. Permission
+12. Settings
 
 Modules are independently structured and extensible.
 
