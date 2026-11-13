@@ -865,7 +865,7 @@ const dashboardContentModules = {
   ], columns:["slug","category","visibility"] },
   products: { table:"products", title:"Product", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
-    ["price","Price (SAR)","number",false],["currency","Currency","text",false],
+    ["price","Price","number",false],["currency","Currency","text",false],
     ["stock_qty","Stock quantity","number",false],["condition","Condition","select",false,["new","used","refurbished"]],
     ["workshop_ids","Related Workshops","multiselect",false],
     ["category","Category","text",false],["visibility","Visibility","select",false,["visible","hidden"]]
