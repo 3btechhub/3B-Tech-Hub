@@ -16,7 +16,7 @@ function safeExternalUrl(value){
   try{const url=new URL(String(value||""));return ["http:","https:"].includes(url.protocol)?url.href:"";}catch{return "";}
 }
 function addField(root,label,value){
-  if(!value)return;
+  if(value==null || (typeof value==="string" && !value.trim()))return;
   const section=el("section","catalogue-detail-section");
   section.append(el("h2","catalogue-detail-heading",label),el("p","catalogue-detail-field",value));
   root.append(section);
@@ -55,13 +55,16 @@ function openLightbox(url,label){
   if(!dialog.open)dialog.showModal();
 }
 function renderLocation(root,record){
+  const location=String(record.location||"").trim();
+  const suppliedMapUrl=safeExternalUrl(record.map_url);
+  if(!location&&!suppliedMapUrl)return;
   const section=el("section","catalogue-detail-section");
   section.append(el("h2","catalogue-detail-heading","Our Location"));
   const card=el("div","catalogue-location-card");
   const icon=el("div","catalogue-location-icon");icon.append(createIcon("map-pin"));
   const body=el("div","catalogue-location-body");
-  body.append(el("strong","",record.location||"Location details will be updated soon"));
-  const mapUrl=safeExternalUrl(record.map_url)||(record.location?"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(record.location):"");
+  body.append(el("strong","",location));
+  const mapUrl=suppliedMapUrl||(location?"https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(location):"");
   if(mapUrl){const map=el("a","catalogue-map-link","View Location on Map");map.href=mapUrl;map.target="_blank";map.rel="noopener noreferrer";map.append(createIcon("external-link"));body.append(map);}
   else body.append(el("span","muted","Map location is not available yet."));
   card.append(icon,body);section.append(card);root.append(section);
