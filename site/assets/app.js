@@ -53,6 +53,7 @@ function applyTheme(theme) {
 }
 applyEnglishText();
 applyTheme(savedTheme === "dark" ? "dark" : "light");
+renderSvgIconAttributes(document);
 if (themeToggle) themeToggle.addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
 const SUPABASE_URL = "https://sburxeuxkrilbfppxylm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_lqGGahZ0ST267jqsI3Zelg_477szacT";
