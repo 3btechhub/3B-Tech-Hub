@@ -828,7 +828,7 @@ if(siteSettingsForm){
     if(submit)submit.disabled=true;if(siteSettingsMessage)siteSettingsMessage.textContent="Saving website settings…";
     try{
       const {data:authData,error:authError}=await supabase.auth.getUser();if(authError||!authData.user)throw new Error("Your session has expired. Sign in again.");
-      if(file){if(!file.type.startsWith("image/")||file.size>5*1024*1024)throw new Error("Choose an image up to 5 MB.");const path="branding/"+crypto.randomUUID()+"-"+file.name.replace(/[^a-zA-Z0-9._-]/g,"-");const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type});if(uploadError)throw uploadError;logoUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;}
+      if(file){if(!file.type.startsWith("image/")||file.size>5*1024*1024)throw new Error("Choose an image up to 5 MB.");const path="branding/"+crypto.randomUUID()+"-"+file.name.replace(/[^\w.-]+/g,"-");const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type});if(uploadError)throw uploadError;logoUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;}
       if(siteSettingsForm.dataset.removeLogo==="true")logoUrl="";
       const {error}=await supabase.from("site_settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(error)throw error;
       const homeSections={};for(const key of ["services","products","workshops","technicians","contacts"])homeSections[key]=Boolean(siteSettingsForm.elements["section_"+key]?.checked);
@@ -874,7 +874,7 @@ function moduleLabel(value) {
 }
 function slugFromName(value) {
   return String(value || "").normalize("NFKC").trim().toLocaleLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "");
+    .replace(/[^\w.-]+/gu, "-").replace(/^-+|-+$/g, "");
 }
 function moduleDatabaseKey(moduleName,key) {
   if (moduleName === "workshops" && key === "name") return "title";
@@ -1119,7 +1119,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         for(const file of Array.from(imagesInput.files)){
           if(!file.type.startsWith("image/")) throw new Error("Please select image files only.");
           if(file.size>10*1024*1024) throw new Error("Each image must be 10 MB or smaller.");
-          const safeName=file.name.normalize("NFKD").replace(/[^\\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
+          const safeName=file.name.normalize("NFKD").replace(/[^\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
           const path="content/"+moduleName+"/gallery/"+crypto.randomUUID()+"-"+safeName;
           const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type,upsert:false});
           if(uploadError) throw uploadError;
