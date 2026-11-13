@@ -1151,7 +1151,6 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     } finally { submit.disabled=false; }
   });
   document.querySelector('[data-module-cancel="'+moduleName+'"]')?.addEventListener("click",()=>resetModuleForm(moduleName));
-  document.querySelector('[data-module-refresh="'+moduleName+'"]')?.addEventListener("click",()=>void loadContentModule(moduleName));
   document.querySelector('[data-module-search="'+moduleName+'"]')?.addEventListener("input",()=>void renderModuleList(moduleName,moduleRecordCache[moduleName]||[]));
   document.querySelector('[data-dashboard-tab="'+moduleName+'"]')?.addEventListener("click",()=>void loadContentModule(moduleName));
 }
