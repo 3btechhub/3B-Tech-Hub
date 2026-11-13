@@ -750,40 +750,59 @@ button[data-size="large"],input[data-size="large"],select[data-size="large"],tex
 .dashboard-card[data-icon]::before{content:attr(data-icon);position:absolute;inset-inline-start:16px;inset-block-start:18px;font-size:24px;line-height:1}
 
 
-/* Homepage section rhythm and centered section titles */
+/* Homepage module separators and centered module titles */
 .home-main.home-catalog{
  display:grid;
  grid-template-columns:minmax(0,1fr);
  align-content:start;
- gap:clamp(34px,5vw,56px);
+ gap:clamp(28px,4vw,42px);
 }
 .home-main.home-catalog>.home-catalog-section{min-width:0;margin:0;padding:0;border:0}
+.home-main.home-catalog>.home-catalog-section + .home-catalog-section{
+ border-top:1px solid var(--line);
+ padding-top:clamp(24px,3vw,34px);
+}
 .home-main.home-catalog .home-section-heading{
- display:grid;
- grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+ display:flex;
  align-items:center;
+ justify-content:center;
  gap:12px;
  margin:0 0 20px;
 }
-.home-main.home-catalog .home-section-heading h2{
- grid-column:2;
- grid-row:1;
- justify-self:center;
+.home-main.home-catalog .home-section-title-link{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ gap:9px;
  margin:0;
+ color:var(--page-text);
  font-size:clamp(1.35rem,2.3vw,1.75rem);
+ font-weight:650;
  line-height:1.2;
  text-align:center;
+ text-decoration:none;
 }
-.home-main.home-catalog .home-section-heading .section-view-all{
- grid-column:3;
- grid-row:1;
- justify-self:end;
+.home-main.home-catalog .home-section-title-link:hover{text-decoration:none}
+.home-content-more-card{
+ justify-content:center;
+ border:1px dashed var(--line);
+ background:var(--hover);
+ text-decoration:none;
 }
+.home-content-more-card .home-content-visual{
+ display:grid;
+ place-items:center;
+}
+.home-content-more-card .home-content-visual svg{
+ width:28px;
+ height:28px;
+}
+.home-content-more-card h3{font-weight:700}
 @media(max-width:420px){
- .home-main.home-catalog{gap:32px}
+ .home-main.home-catalog{gap:26px}
+ .home-main.home-catalog>.home-catalog-section + .home-catalog-section{padding-top:22px}
  .home-main.home-catalog .home-section-heading{gap:7px;margin-bottom:15px}
- .home-main.home-catalog .home-section-heading h2{font-size:clamp(1.2rem,5vw,1.45rem)}
- .home-main.home-catalog .home-section-heading .section-view-all{font-size:var(--text-small)}
+ .home-main.home-catalog .home-section-title-link{font-size:clamp(1.2rem,5vw,1.45rem)}
 }
 
 
