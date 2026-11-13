@@ -1128,7 +1128,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
           uploadedUrls.push(publicUrl);
         }
       }
-      uploadedUrls=newlyUploadedUrls;\n      payload.gallery_urls=imageUrls;
+      payload.gallery_urls=imageUrls;
       payload.photo_url=imageUrls[0]||null;
       const editId=form.dataset.editId; let result;
       if (editId) result=await supabase.from(config.table).update(payload).eq("id",editId).select("id").single();
