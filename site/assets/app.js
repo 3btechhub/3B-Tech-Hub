@@ -1065,6 +1065,8 @@ function createModuleRecordVisual(moduleName,photoUrl,record) {
 }
 function renderModuleList(moduleName,records) {
   const config=dashboardContentModules[moduleName];
+  const form=document.querySelector('[data-module-form="'+moduleName+'"]');
+  if(form)await loadModuleRelationOptions(moduleName,form);
   const container=document.querySelector('[data-module-list="'+moduleName+'"]');
   if (!container) return;
   container.replaceChildren();
@@ -1139,7 +1141,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if (!fieldsHost||!form) continue;
   for (const field of config.fields) fieldsHost.append(createModuleField(field));
-  void loadModuleRelationOptions(moduleName,form);
+  await loadModuleRelationOptions(moduleName,form);
   const nameInput=form.elements.namedItem("name");
   const slugInput=form.elements.namedItem("slug");
   if (nameInput&&slugInput) {
