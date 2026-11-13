@@ -956,8 +956,6 @@ function createModuleRecordVisual(moduleName,photoUrl,record) {
 const moduleRecordCache = {};
 async function renderModuleList(moduleName,records) {
   const config=dashboardContentModules[moduleName];
-  const searchQuery=String(document.querySelector('[data-module-search="'+moduleName+'"]')?.value||"").trim().toLocaleLowerCase();
-  if(searchQuery)records=records.filter(record=>[record.title,record.name,record.type].filter(Boolean).join(" ").toLocaleLowerCase().includes(searchQuery));
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if(form)await loadModuleRelationOptions(moduleName,form);
   const container=document.querySelector('[data-module-list="'+moduleName+'"]');
@@ -1151,7 +1149,6 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     } finally { submit.disabled=false; }
   });
   document.querySelector('[data-module-cancel="'+moduleName+'"]')?.addEventListener("click",()=>resetModuleForm(moduleName));
-  document.querySelector('[data-module-search="'+moduleName+'"]')?.addEventListener("input",()=>void renderModuleList(moduleName,moduleRecordCache[moduleName]||[]));
   document.querySelector('[data-dashboard-tab="'+moduleName+'"]')?.addEventListener("click",()=>void loadContentModule(moduleName));
 }
 
