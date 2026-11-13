@@ -904,6 +904,9 @@ const moduleRelationships = {
   ],
   products: [
     {field:"workshop_ids",table:"product_workshops",parentColumn:"product_id",relatedColumn:"workshop_id",source:"workshops",labelColumn:"title",statusColumn:"status",visibleValue:"published"}
+  ],
+  technicians: [
+    {field:"workshop_ids",table:"workshop_technicians",parentColumn:"technician_id",relatedColumn:"workshop_id",source:"workshops",labelColumn:"title",statusColumn:"status",visibleValue:"published"}
   ]
 };
 const loadedRelationshipOptions = new Set();

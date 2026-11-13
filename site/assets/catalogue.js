@@ -251,6 +251,36 @@ async function loadProductWorkshops(supabase,productId){
   if(workshopError)throw workshopError;
   return data||[];
 }
+async function loadWorkshopRelationships(supabase,workshopId){
+  const [serviceLinks,productLinks,technicianLinks]=await Promise.all([
+    supabase.from("service_workshops").select("service_id").eq("workshop_id",workshopId),
+    supabase.from("product_workshops").select("product_id").eq("workshop_id",workshopId),
+    supabase.from("workshop_technicians").select("technician_id").eq("workshop_id",workshopId)
+  ]);
+  for(const result of [serviceLinks,productLinks,technicianLinks])if(result.error)throw result.error;
+  const [services,products,technicians]=await Promise.all([
+    serviceLinks.data?.length?supabase.from("services").select("id,name,slug,short_info,description,photo_url").in("id",serviceLinks.data.map(x=>x.service_id)).eq("status","active"):{data:[],error:null},
+    productLinks.data?.length?supabase.from("products").select("id,name,slug,short_info,description,photo_url,price_minor,currency").in("id",productLinks.data.map(x=>x.product_id)).eq("status","active"):{data:[],error:null},
+    technicianLinks.data?.length?supabase.from("technicians").select("id,name,slug,short_info,description,skill,photo_url,phone,whatsapp").in("id",technicianLinks.data.map(x=>x.technician_id)).eq("is_published",true):{data:[],error:null}
+  ]);
+  for(const result of [services,products,technicians])if(result.error)throw result.error;
+  return {services:services.data||[],products:products.data||[],technicians:technicians.data||[]};
+}
+async function loadTechnicianRelationships(supabase,technicianId){
+  const [workshopLinks,serviceLinks]=await Promise.all([
+    supabase.from("workshop_technicians").select("workshop_id").eq("technician_id",technicianId),
+    supabase.from("service_technicians").select("service_id").eq("technician_id",technicianId)
+  ]);
+  if(workshopLinks.error)throw workshopLinks.error;
+  if(serviceLinks.error)throw serviceLinks.error;
+  const [workshops,services]=await Promise.all([
+    workshopLinks.data?.length?supabase.from("workshops").select("id,title,slug,short_info,description,location,phone,whatsapp,photo_url").in("id",workshopLinks.data.map(x=>x.workshop_id)).eq("status","published"):{data:[],error:null},
+    serviceLinks.data?.length?supabase.from("services").select("id,name,slug,short_info,description,photo_url").in("id",serviceLinks.data.map(x=>x.service_id)).eq("status","active"):{data:[],error:null}
+  ]);
+  if(workshops.error)throw workshops.error;
+  if(services.error)throw services.error;
+  return {workshops:workshops.data||[],services:services.data||[]};
+}
 function formatPrice(record){
   if(record.price_minor==null)return "Contact for price";
   const amount=Number(record.price_minor)/100;
@@ -323,6 +353,16 @@ async function renderDetail(root,data,module,def,supabase){
     if(module==="technicians"&&data.skill)addField(root,"Skill",data.skill);
     renderGallery(root,data,module);
     renderLocation(root,data);
+    if(module==="workshops"){
+      const related=await loadWorkshopRelationships(supabase,data.id);
+      renderProviderCards(root,"Related Services",related.services,"services");
+      renderProviderCards(root,"Products Available Here",related.products,"products");
+      renderProviderCards(root,"Workshop Technicians",related.technicians,"technicians");
+    }else if(module==="technicians"){
+      const related=await loadTechnicianRelationships(supabase,data.id);
+      renderProviderCards(root,"Works At",related.workshops,"workshops");
+      renderProviderCards(root,"Services Performed",related.services,"services");
+    }
     await renderContacts(root,data,supabase);
   }
   root.append(link(module,"Back to "+def.title));
