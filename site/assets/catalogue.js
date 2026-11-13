@@ -1,7 +1,7 @@
 const definitions = {
   services: { title:"Services", table:"services", columns:"id,name,slug,description,category,photo_url,status", filter:["status","active"], icon:"🔧" },
   products: { title:"Products", table:"products", columns:"id,name,slug,description,category,photo_url,status", filter:["status","active"], icon:"📦" },
-  workshops: { title:"Workshops", table:"workshops", columns:"id,title as name,slug,description,location,trainer,category,photo_url,status", filter:["status","published"], icon:"🎓" },
+  workshops: { title:"Workshops", table:"workshops", columns:"id,name:title,slug,description,location,trainer,category,photo_url,status", filter:["status","published"], icon:"🎓" },
   technicians: { title:"Technicians", table:"technicians", columns:"id,name,slug,description,skill,category,photo_url,is_published", filter:["is_published",true], icon:"👤" },
   contacts: { title:"Contacts", table:"contacts", columns:"id,name,slug,value,type", filter:null, icon:"☎" }
 };
