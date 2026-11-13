@@ -120,7 +120,7 @@ function renderHomeMoreCard(module) {
   card.href="/3btechhub/"+module.key+"/";
   const visual=document.createElement("div");
   visual.className="home-content-visual";
-  visual.append(createIcon("arrow-right-circle"));
+  visual.append(createIcon("file"));
   const body=document.createElement("div");
   body.className="home-content-card-body";
   const title=document.createElement("h3");
