@@ -1112,7 +1112,7 @@ async function loadAuditLogs() {
   auditList.replaceChildren();
   const { data, error } = await supabase
     .from("audit_logs")
-    .select("id,action,resource_type,resource_id,metadata,created_at")
+    .select("id,actor_id,action,resource_type,resource_id,metadata,result,device,created_at")
     .order("created_at", { ascending: false })
     .limit(50);
   if (error) {
@@ -1128,7 +1128,7 @@ async function loadAuditLogs() {
     row.className = "admin-list-row";
     const title = [entry.action, entry.resource_type].filter(Boolean).join(" · ");
     addTextElement(row, "strong", "", title || "Activity");
-    const detail = [entry.resource_id ? "ID: " + entry.resource_id : "", entry.created_at ? new Date(entry.created_at).toLocaleString() : ""].filter(Boolean).join(" · ");
+    const detail = [entry.actor_id ? "Actor: " + entry.actor_id : "",entry.resource_id ? "Record: " + entry.resource_id : "",entry.result || "success",entry.device || "unknown",entry.created_at ? new Date(entry.created_at).toLocaleString() : ""].filter(Boolean).join(" · ");
     addTextElement(row, "span", "muted", detail);
     auditList.append(row);
   }
