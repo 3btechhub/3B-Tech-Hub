@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="en" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,21 +12,32 @@
 </head>
 <body>
 <header class="site-header">
-<div class="brand" aria-label="3B TECH HUB"><span class="brand-mark" aria-hidden="true">3B</span><span class="brand-title">3B TECH HUB</span></div>
-<button class="menu-trigger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu"><span></span><span></span><span></span></button>
-<nav class="site-menu" id="site-menu" aria-label="Site menu" hidden>
-<div class="menu-section menu-primary">
-<a class="menu-link" href="/3btechhub/home/" id="home-menu-link" data-label="home" hidden>Home</a>
-<a class="menu-link" href="/3btechhub/account/" id="login-menu-link" data-label="login">Account</a>
-<button class="menu-link" type="button" id="logout-menu-link" data-label="logout" hidden>Logout</button>
-</div>
-<div class="menu-divider" role="separator"></div>
-<div class="menu-tools">
-<button class="menu-tool theme-tool" id="theme-toggle" type="button" aria-label="Switch theme"><span>Dark/Light:</span> <span class="theme-icon icon-for-light" aria-hidden="true">☾</span><span class="theme-icon icon-for-dark" aria-hidden="true">☀</span></button>
-</div>
-<div class="menu-divider" role="separator"></div>
-<div class="menu-section menu-secondary"><a class="menu-link" href="/3btechhub/dashboard/" id="dashboard-menu-link" data-label="dashboard" hidden>Dashboard</a></div>
-</nav>
+  <div class="brand" aria-label="3B TECH HUB">
+    <div class="brand-logo" aria-hidden="true"><span class="brand-mark">3B</span></div>
+    <div class="brand-title">3B TECH HUB</div>
+  </div>
+  <button class="menu-trigger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu"><span></span><span></span><span></span></button>
+  <nav class="site-menu" id="site-menu" aria-label="Site menu" hidden>
+    <div class="menu-section menu-primary">
+      <a class="menu-link" href="/3btechhub/home/" id="home-menu-link" data-label="home">Home</a>
+      <a class="menu-link" href="/3btechhub/profile/" id="profile-menu-link" hidden>Profile</a>
+      <a class="menu-link" href="/3btechhub/services/" data-label="services">Services</a>
+      <a class="menu-link" href="/3btechhub/products/" data-label="products">Products</a>
+      <a class="menu-link" href="/3btechhub/workshops/" data-label="workshops">Workshops</a>
+      <a class="menu-link" href="/3btechhub/technicians/" data-label="technicians">Technicians</a>
+      <a class="menu-link" href="/3btechhub/contacts/" data-label="contacts">Contacts</a>
+      <a class="menu-link" href="/3btechhub/account/" id="login-menu-link" data-label="login">Login</a>
+      <button class="menu-link" type="button" id="logout-menu-link" data-label="logout" hidden>Logout</button>
+    </div>
+    <div class="menu-divider" role="separator"></div>
+    <div class="menu-tools">
+      <button class="menu-tool theme-tool" id="theme-toggle" type="button" aria-label="Switch theme"><span>Theme</span> <span class="theme-icon icon-for-light" aria-hidden="true">☾</span><span class="theme-icon icon-for-dark" aria-hidden="true">☀</span></button>
+      <label class="menu-tool">Language <select id="language-select" aria-label="Language"><option value="en" selected>English</option></select></label>
+      <label class="menu-tool">Country <select id="country-select" aria-label="Country"><option value="global" selected>Global</option></select></label>
+    </div>
+    <div class="menu-divider" role="separator"></div>
+    <div class="menu-section menu-secondary"><a class="menu-link" href="/3btechhub/dashboard/" id="dashboard-menu-link" data-label="dashboard" hidden>Dashboard</a></div>
+  </nav>
 </header>
 <main id="app-main" aria-live="polite"><p>Loading page…</p></main>
 <footer class="site-footer"><span>© 2026 3B TECH HUB. All rights reserved.</span></footer>
