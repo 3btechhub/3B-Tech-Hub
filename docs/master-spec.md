@@ -178,15 +178,11 @@ Name, Slug, Description, Skill, Category, Image, Visibility.
 
 Contacts has its own schema:
 - Name
-- Value
-- Type
+- Value (URL, email address or phone number)
 
-Type options:
-- Phone Number
-- Email
-- Link
+There is no Type field or Type column. Determine the contact destination and icon from the Value itself. Use URL host/domain matching for social and messaging services (including YouTube, Reddit, X, LinkedIn, Instagram, TikTok, WhatsApp, IMO and Facebook), email detection for mail addresses, and telephone detection for phone numbers. Unknown valid web URLs use a generic website icon. Generate safe actions from the value: mailto for email, tel for phone, normalized HTTPS links for websites and messaging URLs. Do not rely on a separately stored contact type or infer icons from another content module.
 
-Manage website-wide phone numbers, emails and links. Operations: Create, View, Edit and Delete. Provide a separate listing page and detail page. Do not impose the common content-module fields on Contacts.
+Operations: Create, View, Edit and Delete. Provide a separate listing page and detail page. Do not impose the common content-module fields on Contacts.
 
 ## 11. Authentication and Profile
 
@@ -408,7 +404,15 @@ Use only three semantic sizes for text, buttons, inputs, outputs and boxes:
 - Medium
 - Large
 
-Design must be responsive, clean, simple and professional, with consistent cards, reusable components, spacing and typography. The current layout is LTR-first. Use distinct, semantically appropriate icons for different modules and actions; do not reuse one generic icon everywhere. Public item cards on Home and module listing pages must contain only an uploaded image or fallback icon plus the item title; omit descriptions and secondary metadata. Keep full item details on the detail page and preserve all Dashboard editing fields.
+Design must be responsive, clean, simple and professional, with consistent cards, reusable components, spacing and typography. The current layout is LTR-first. Use distinct, semantically appropriate icons for different modules and actions; do not reuse one generic icon everywhere. Keep icon mappings and fallback rules isolated by module: changing a Services icon rule must not change Products, Workshops, Technicians or Contacts. Public item cards on Home and module listing pages must contain only an uploaded image or fallback icon plus the item title; omit descriptions and secondary metadata. Keep full item details on the detail page and preserve all Dashboard editing fields.
+
+### Content-independent component sizing and responsive layout
+- Component dimensions must not grow or shrink according to the amount or length of content.
+- Inputs, selects, textareas, output areas, buttons and cards use consistent, explicitly defined dimensions within each device breakpoint.
+- Long text must wrap, truncate or scroll inside the existing component dimensions; it must not resize the component.
+- Responsive changes remain enabled for viewport/device width: grid columns, layout, alignment and spacing may change at defined breakpoints.
+- Do not use intrinsic/content-driven sizing (such as content-sized columns, auto-fit sizing or fit-content sizing) for the standard component system.
+- Apply the same sizing tokens consistently across equivalent components and keep touch controls usable on mobile.
 
 ## 19. Security Architecture
 
