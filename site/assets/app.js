@@ -984,12 +984,13 @@ function createModuleField(field) {
   let control;
   if (type === "textarea") { control=document.createElement("textarea"); control.rows=3; }
   else if (type === "multiselect") {
-    wrapper.className="module-form-field module-related-field";
-    addTextElement(wrapper,"span","",label);
+    const relatedWrapper=document.createElement("div");
+    relatedWrapper.className="module-form-field module-related-field";
+    addTextElement(relatedWrapper,"span","",label);
     const host=document.createElement("div");host.className="module-related-options";host.dataset.relatedOptions=name;
     host.append(addTextElement(host,"small","muted","Options load when this module opens."));
-    wrapper.append(host);
-    return wrapper;
+    relatedWrapper.append(host);
+    return relatedWrapper;
   }
   else if (type === "select") {
     control=document.createElement("select");
@@ -1005,6 +1006,7 @@ function createModuleField(field) {
     if (name==="currency") control.value="SAR";
   }
   control.name=name; control.required=Boolean(required);
+  if(name==="country")control.placeholder="e.g. Saudi Arabia, Bangladesh";
   if (type === "files") {
     wrapper.append(addTextElement(wrapper,"span","",label),control,addTextElement(wrapper,"small","muted","Select multiple images. New uploads are added to the existing gallery."));
   } else if (type === "file") {
