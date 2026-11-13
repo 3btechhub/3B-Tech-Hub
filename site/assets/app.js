@@ -1116,7 +1116,7 @@ async function renderModuleList(moduleName,records) {
       }
       updateImagePreview(form,record.photo_url||"");
       try{await loadModuleRelationSelection(moduleName,record.id,form);}
-      catch(error){setModuleMessage(moduleName,error.message||"Could not load related records.","error");return;}
+      catch(error){resetModuleForm(moduleName);setModuleMessage(moduleName,error.message||"Could not load related records.","error");return;}
       document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Edit "+config.title;
       document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Save";
       document.querySelector('[data-module-cancel="'+moduleName+'"]').textContent="Cancel";
