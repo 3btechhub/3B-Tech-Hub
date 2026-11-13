@@ -83,7 +83,7 @@ export async function loadSvgIconRegistry(supabase){
 }
 export function createIcon(name,className="svg-icon"){
  const svg=document.createElementNS(SVG_NS,"svg");
- svg.setAttribute("viewBox","0 0 24 24");svg.setAttribute("fill","none");svg.setAttribute("stroke","currentColor");svg.setAttribute("stroke-width","1.8");svg.setAttribute("stroke-linecap","round");svg.setAttribute("stroke-linejoin","round");svg.setAttribute("aria-hidden","true");svg.setAttribute("focusable","false");svg.classList.add(...String(className||"svg-icon").split(/\\s+/).filter(Boolean));
+ svg.setAttribute("viewBox","0 0 24 24");svg.setAttribute("fill","none");svg.setAttribute("stroke","currentColor");svg.setAttribute("stroke-width","1.8");svg.setAttribute("stroke-linecap","round");svg.setAttribute("stroke-linejoin","round");svg.setAttribute("aria-hidden","true");svg.setAttribute("focusable","false");svg.classList.add(...String(className||"svg-icon").split(/\s+/).filter(Boolean));
  const key=String(name||"link").replace(/[^a-zA-Z]/g,"");
  if(databaseSvgRegistry[key]&&appendSafeRegistrySvg(svg,databaseSvgRegistry[key]))return svg;
  svg.innerHTML=ICONS[key]||ICONS.link;return svg;
