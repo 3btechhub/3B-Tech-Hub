@@ -17,7 +17,7 @@ function routeDetails(path) {
   const first = pathname.slice(BASE.length).split("/").filter(Boolean)[0] || "";
   if (first === "login") return { view:"account" };
   if (["home","account","profile","dashboard"].includes(first)) return { view:first };
-  if (["services","products","workshops","technicians","contacts"].includes(first)) return { view:"catalogue", module:first, slug:pathname.slice(BASE.length).split("/").filter(Boolean)[1] || "" };
+  if (["services","products","workshops","technicians","contacts"].includes(first)) { const slugPart=pathname.slice(BASE.length).split("/").filter(Boolean)[1] || ""; return { view:"catalogue", module:first, slug:slugPart ? decodeURIComponent(slugPart) : "" }; }
   return { view:"home" };
 }
 function resolveFragmentLinks(container, routePath) {
