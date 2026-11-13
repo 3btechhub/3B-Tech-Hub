@@ -27,7 +27,7 @@ export async function initCataloguePage(supabase,module,slug){
   let q=supabase.from(def.table).select(def.columns).eq("slug",slug).limit(1);
   if(def.filter)q=q.eq(def.filter[0],def.filter[1]);
   const {data,error}=await q.maybeSingle();if(error||!data){root.append(el("h1","","Content not found"),link(module,"Back to "+def.title));return;}
-  const heading=el("h1","catalogue-title",data.name||def.title);heading.prepend(createIcon(getItemIconName(data.name,module)));root.append(heading);
+  const heading=el("h1","catalogue-title",data.name||def.title);heading.prepend(module==="contacts"?createContactIcon(data.value,data.name):createIcon(getItemIconName(data.name,module)));root.append(heading);
   if(data.photo_url){const img=el("img","catalogue-detail-image");img.src=data.photo_url;img.alt=data.name||"";root.append(img);}
   if(data.description)root.append(el("p","catalogue-detail-field",data.description));
   const detail=module==="contacts"?data.value:module==="workshops"?[data.location,data.trainer].filter(Boolean).join(" · "):module==="technicians"?data.skill:data.category;

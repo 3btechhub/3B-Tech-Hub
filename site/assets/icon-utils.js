@@ -42,8 +42,8 @@ export function getModuleIcon(module){return MODULE_ICONS[module]||"link";}
 export function getItemIconName(name,module){
  const v=String(name||"").toLowerCase();
  if(module==="services"){
-  if(/tv/.test(v))return "tv";
-  if(/mobile/.test(v)&&/repair/.test(v))return "phone";
+  if(/tv/.test(v))return "wrench";
+  if(/mobile/.test(v)&&/repair/.test(v))return "wrench";
   if(/mobile/.test(v)&&/parts/.test(v))return "cpu";
   if(/satellite/.test(v)&&/installation/.test(v))return "satellite";
   if(/satellite/.test(v)&&/servicing/.test(v))return "wrench";

@@ -35,8 +35,8 @@ export function initExtendedDashboard(supabase,role){
   const error=summaryResult.error||pageResult.error||recentResult.error||locationResult.error;
   if(error){pages.textContent=error.message;return;}
   const totals=summaryResult.data||{total_visitors:0,total_page_views:0,repeat_visitors:0};
-  for(const [icon,label,value] of [["👥","Visitors",totals.total_visitors],["📄","Page Views",totals.total_page_views],["🔁","Repeat Visitors",totals.repeat_visitors]]){
-    const card=node("section","dashboard-card analytics-stat");card.append(node("span","analytics-icon",icon),node("h3","",label),node("strong","dashboard-count",String(value)));summary.append(card);
+  for(const [icon,label,value] of [["users","Visitors",totals.total_visitors],["file","Page Views",totals.total_page_views],["repeat","Repeat Visitors",totals.repeat_visitors]]){
+    const visual=node("span","analytics-icon");visual.append(createIcon(icon));const card=node("section","dashboard-card analytics-stat");card.append(visual,node("h3","",label),node("strong","dashboard-count",String(value)));summary.append(card);
   }
   pages.append(node("h3","","Most Visited Pages"));
   for(const r of pageResult.data||[]){const row=node("article","admin-list-row");row.append(node("strong","",r.page_path),node("span","muted",r.page_views+" views"));pages.append(row);}
