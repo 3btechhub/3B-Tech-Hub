@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const allowedOrigins = new Set(["https://3btechhub.github.io"]);
-const allowedRoles = new Set(["admin", "member"]);
+const allowedRoles = new Set(["member", "visitor"]);
 const primaryOwnerEmail = "3btechhub@gmail.com";
 const redirectTo = "https://3btechhub.github.io/3btechhub/account/";
 
@@ -87,15 +87,25 @@ Deno.serve(async (request: Request) => {
         : { data: [], error: null };
       if (rolesError) throw rolesError;
       const roleByUser = new Map((roles || []).map((row) => [row.user_id, row.role]));
+      const { data: profiles, error: profilesError } = ids.length
+        ? await admin.from("user_profiles").select("user_id,display_name,phone").in("user_id", ids)
+        : { data: [], error: null };
+      if (profilesError) throw profilesError;
+      const profileByUser = new Map((profiles || []).map((row) => [row.user_id, row]));
       return response({
-        users: users.map((user) => ({
+        users: users.map((user) => {
+          const profile = profileByUser.get(user.id) || {};
+          return {
           id: user.id,
           email: user.email || "",
+          full_name: profile.display_name || user.user_metadata?.full_name || user.user_metadata?.name || "",
+          phone: profile.phone || "",
+          email_confirmed_at: user.email_confirmed_at || null,
           created_at: user.created_at,
           last_sign_in_at: user.last_sign_in_at,
           banned_until: user.banned_until,
           role: roleByUser.get(user.id) || "member",
-        })),
+        };}),
         page,
         perPage,
         total: data.total ?? users.length,
