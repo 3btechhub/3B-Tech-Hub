@@ -1,102 +1,495 @@
-# 3B TECH HUB — Master Specification
+# 3B TECH HUB — MASTER SPECIFICATION
 
-This document is the sole product-scope authority for the website. Production UI, routes, modules, data models and tests must stay within this specification. Anything not listed here is out of scope and must not be introduced.
+**Version:** Fixed Master Specification — 13 November 2026  
+**Project:** 3B TECH HUB  
+**Technology:** GitHub + Supabase  
+**Status:** Canonical Requirement Source of Truth
 
-## 1. Website structure
+> This document is the single authoritative specification for the Website project. It supersedes all earlier project specifications and documentation. If any repository note or legacy document conflicts with this file, this specification takes precedence.
+
+---
+
+## 1. Project Overview
+
+Build a modern, simple, clean, professional, responsive, Hybrid Dashboard Driven Modular Website.
+
+Core principles:
+- Modular Architecture
+- Dashboard-driven Content Management
+- Secure Authentication
+- Role & Permission Management
+- Responsive Design
+- RTL-first presentation
+- Future LTR readiness
+- Maintainable, reusable and scalable components
+
+The architecture must support future extension of modules, languages, routes, countries, roles and permissions. Future capabilities must not be activated without explicit approval.
+
+## 2. Technology Architecture
+
+Approved platforms:
+- **GitHub:** source code and version control.
+- **Supabase:** database, authentication, storage and backend services.
+
+Do not introduce Vercel, Appwrite, Cloudflare or another hosting/backend platform.
+
+## 3. Main Pages and Layout
+
+Pages:
+1. Home
+2. Login
+3. Create Account
+4. Forgot Password
+5. Profile
+6. Dashboard
+7. Services
+8. Products
+9. Workshops
+10. Technicians
+11. Contacts
+
+Shared layout: Header, Main Area and Footer.
+
+Each content module has a listing page and individual detail pages.
+
+## 4. Header Specification
+
+The Header contains three separate components:
+1. Website Logo
+2. Website Title
+3. Navigation Menu
+
+Logo and Title must remain separate components. Clicking either must perform no navigation or action.
+
+### Menu items
 - Home
-- Account
 - Profile
-- Dashboard
-
-## 2. Shared layout
-- Header
-- Main Area
-- Footer
-
-The Header, Main Area and Footer form one persistent shared layout. The root entry (`/`) loads this shared layout; its Main Area initially displays the independent Home page. The Home page has its own canonical route (`/home/`), view file and static route entry, just like Account, Profile and Dashboard. Navigation swaps only the Main Area while Header and Footer remain mounted. Each page view is maintained once under `site/views/`.
-
-## 3. Features
-- Separate Logo and Website Title components
-- Menu
-- Dark / Light theme
-- English-only interface
-- Authentication
-- CRUD
-- Icons and fallback visuals
-- Cards
-- Pill buttons
-
-There is one website and one fixed interface language: English. No country detection, country-specific versions, language switching, translation catalogue, locale preference, or right-to-left layout is part of the product.
-
-## 4. Dashboard modules
-Only these modules may exist:
-- Overview
-- Audit
 - Services
 - Products
 - Workshops
 - Technicians
+- Contacts
+- Login / Logout
+- Divider
+- Light / Dark Theme
+- Language Dropdown
+- Country Dropdown
+- Divider
+- Dashboard
+
+### Visibility and authorization
+- Profile and Logout are visible only while authenticated.
+- Login is visible while unauthenticated.
+- Dashboard menu item is visible only to Owner; Member and Visitor must not see it.
+- Hiding a menu item is not authorization. Routes, backend operations and database access must independently enforce permissions.
+
+## 5. Home Page
+
+Five independently controlled sections:
+1. Services
+2. Products
+3. Workshops
+4. Technicians
+5. Contacts
+
+Each section has its own On/Off visibility setting. Content is displayed as cards. Each content item has a detail page and unique slug, in addition to the module listing page.
+
+A disabled section must not appear on Home.
+
+## 6. Dashboard Architecture
+
+The Dashboard has exactly these 11 modules:
+1. Overview
+2. Audits & Logs
+3. Services
+4. Products
+5. Workshops
+6. Technicians
+7. Contacts
+8. User
+9. Role
+10. Permission
+11. Settings
+
+Modules are independently structured and extensible.
+
+## 7. Overview Module
+
+Show counts for:
+- Services
+- Products
+- Workshops
+- Technicians
+- Contacts
+- Users
+- Roles
+- Permissions
+
+Also show Website Health Status, limited to verifiable checks:
+- Website availability
+- Supabase connection
+- Database
+- Storage
+- Authentication service
+- Backend services
+
+Never infer a healthy/active status when it has not actually been checked.
+
+## 8. Content Management Modules
+
+Modules: Services, Products, Workshops, Technicians, Contacts, User, Role and Permission.
+
+Where applicable, operations include Create, View, Edit, Delete and Show/Hide. Each module has its own form and fields. Do not force a shared content schema onto Contacts, User, Role or Permission.
+
+## 9. Content Management Standard
+
+This standard applies to Services, Products, Workshops and Technicians.
+
+### Common fields
+- Name (required)
+- Slug (required)
+- Description (optional)
+- Category (optional)
+- Image (optional)
+- Visibility (required system state)
+
+### Slug rules
+- Generate automatically from Name.
+- Allow manual editing.
+- Slug must be unique.
+- Enforce uniqueness at database level.
+
+### Image management
+Use Supabase Storage for direct upload, replace, remove and preview. Show a fallback icon when an image is missing or broken.
+
+### Services form
+Name, Slug, Description, Category, Image, Visibility.
+
+### Products form
+Name, Slug, Description, Category, Image, Visibility.
+
+### Workshops form
+Name, Slug, Description, Location, Technician, Category, Image, Visibility.
+
+### Technicians form
+Name, Slug, Description, Skill, Category, Image, Visibility.
+
+## 10. Contacts Module
+
+Contacts has its own schema:
+- Name
+- Value
+- Type
+
+Type options:
+- Phone Number
+- Email
+- Link
+
+Manage website-wide phone numbers, emails and links. Operations: Create, View, Edit and Delete. Provide a separate listing page and detail page. Do not impose the common content-module fields on Contacts.
+
+## 11. Authentication and Profile
+
+Preserve the existing Authentication System and its currently functioning flows. Do not unnecessarily replace or disrupt Login, Create Account or Forgot Password.
+
+Profile is a separate page and is available from the Header only while logged in.
+
+Keep the user Profile simple:
+- Name
+- Email
+- Phone Number
+- Change Password
+
+Do not add unrelated dashboard sections or statistics to Profile.
+
+## 12. User, Role and Permission System
+
+Preserve the existing working User, Role and Permission architecture and workflows while aligning the supported role model below. Inspect the current implementation before changing detailed fields or operations.
+
+### Supported roles
+1. Owner
+2. Member
+3. Visitor
+
+Future roles and permissions must be extensible without an architectural overhaul.
+
+### Primary Owner
+**3btechhub@gmail.com**
+
+The primary Owner must never be deleted, blocked, demoted or replaced.
+
+### 12.1 User Module
+
+Suggested form fields:
+- Full Name (required)
+- Email Address (required)
+- Phone Number (optional)
+- Assigned Role (required)
+- Account Status
+- Email Verification Status (system-derived/read-only)
+- Created Date (system-derived/read-only)
+
+Potential operations, subject to existing system capabilities and permissions:
+- Create
+- View
+- Edit Profile
+- Assign or Change Role
+- Activate / Deactivate
+- Block / Unblock
+- Delete
+
+Never expose a user's password for viewing or direct editing in the Dashboard. Use secure authentication flows. Maintain the relationship between Auth User and Profile data. Owner protection applies to every operation.
+
+### 12.2 Role Module
+
+Suggested fields:
+- Role Name (required)
+- Role Slug / Identifier (required, unique)
+- Description (optional)
+- Assigned Permissions
+- Role Status
+
+Potential operations:
+- Create, View, Edit, Delete
+- Assign / Remove Permissions
+- Activate / Deactivate
+
+The Owner role cannot be deleted or deactivated. A role with assigned users must not be deleted without safe reassignment.
+
+### 12.3 Permission Module
+
+Suggested fields:
+- Permission Name (required)
+- Permission Key (required, unique)
+- Description (optional)
+- Module / Resource (required)
+- Action Type (required)
+- Permission Status
+
+Action types:
+- Create
+- View
+- Edit
+- Delete
+- Publish
+- Hide
+- Manage
+
+Potential operations:
+- Create, View, Edit, Delete
+- Activate / Deactivate
+- Assign to Role / Remove from Role
+
+Permission keys must be unique. Role-Permission relationships must be flexible. New modules must be able to define their own permissions.
+
+**Important:** User, Role and Permission form details above are recommendations, not permission to replace existing behavior. Verify the existing implementation and preserve required working workflows before finalizing changes.
+
+## 13. Audits & Logs
+
+Keep these as distinct concerns and interfaces.
+
+### 13.1 Visitor Analytics
+- Total Visitors
+- Page Views
+- Visited Pages
+- Date and Time
+- Approximate Country / City
+- Device
+- Operating System
+- Browser
+- Repeat Visits
+
+### 13.2 Activity Logs
+- Actor
+- Action
+- Module
+- Record
+- Date and Time
+- Result
+- Device
+
+Visitor Analytics and administrative Activity Logs must use separate data and interfaces. IP-based geolocation is approximate, not GPS. Apply appropriate access controls and retention limits. Do not claim visitor analytics already exists unless verified.
+
+## 14. Settings Module
+
+### Website identity
+- Website Title
+- Website Logo
+
+Logo operations: Upload, Replace, Preview and Remove. Title and Logo are managed separately and remain separate components.
+
+### Home section visibility
+Provide five independent toggles:
+- Services
+- Products
+- Workshops
+- Technicians
+- Contacts
+
+## 15. RTL / LTR Direction Policy
+
+### 15.1 Current default: RTL Only
+
+The entire website must currently render in **RTL (Right-to-Left)**. RTL is the only active display direction.
+
+Apply RTL to:
+- HTML document direction
+- Header and navigation
+- Dashboard and sidebar
+- Cards
+- Forms and tables
+- Buttons and inputs
+- Text flow, alignment, spacing and layout
+
+### 15.2 Current UI restrictions
+- Do not display an RTL/LTR switch.
+- Do not display a direction selector.
+- Do not activate LTR now.
+- RTL is the sole current default and active direction.
+
+### 15.3 Future LTR readiness
+Build the architecture so LTR can be enabled easily later, without redesigning the whole website or rebuilding components.
+
+Requirements:
+- Use CSS Logical Properties.
+- Build direction-aware reusable components.
+- Avoid hard-coded left/right assumptions.
+- Ensure layout, spacing, alignment and navigation can adapt to either direction.
+- Keep RTL and LTR compatibility in the component architecture.
+
+### 15.4 Future activation
+Only after explicit approval may Settings expose LTR controls. A future version may support RTL, LTR and Auto Direction, including language-based automatic direction.
+
+**Fixed decision: RTL Only now; prepare the architecture for easy future LTR enablement.**
+
+## 16. Route-Based View
+
+Current implementation uses one global route context. Keep architecture extensible for future multi-route and region-based routing.
+
+Proposed routes:
+- /
+- /services
+- /services/:slug
+- /products
+- /products/:slug
+- /workshops
+- /workshops/:slug
+- /technicians
+- /technicians/:slug
+- /contacts
+- /contacts/:slug
+- /dashboard
+- /login
+- /register
+- /forgot-password
+- /profile
+
+Dashboard modules may have separate routes. Route architecture must not activate unapproved regional or country variants.
+
+## 17. Multi-language and Country
+
+The current interface language is English. Keep the architecture ready for future Bangla, Arabic and other languages.
+
+- Keep translation resources separate.
+- Support Arabic RTL.
+- Manage language and route independently.
+- Header includes Language Dropdown and Country Dropdown.
+- Current country context is global.
+- Future country-specific content, regions and routes require approval.
+
+Do not activate languages or country features beyond the approved current scope.
+
+## 18. Design System
+
+### Colors
+Use only three primary colors:
+- Black
+- White
+- Neutral Gray
+
+### Themes
+- Light Mode
+- Dark Mode
+
+### Sizes
+Use only three semantic sizes for text, buttons, inputs, outputs and boxes:
+- Small
+- Medium
+- Large
+
+Design must be responsive, clean, simple and professional, with consistent cards, reusable components, spacing and typography. The current layout is RTL-first.
+
+## 19. Security Architecture
+
+Use:
+- Supabase Authentication
+- Row Level Security (RLS)
+- Trusted Edge Functions
+- Server-side permission validation
+- Database constraints
+- Owner protection
+- Secure User management
+- Validated Role-Permission relationships
+
+Frontend visibility is never a substitute for authorization. Every sensitive operation must be checked by trusted backend/database controls. A user must not be able to exceed their permissions by changing their own role or permissions.
+
+## 20. Future Extensibility
+
+Prepare the architecture for future:
+- Modules
+- Languages
+- Countries
+- Routes and Regions
+- Roles
+- Permissions
+- Features
+- LTR Direction
+
+Architecture readiness does not authorize activation. Every new feature or scope change requires explicit user approval.
+
+## 21. Scope Control and Cleanup
+
+Review and remove only verified, unused or out-of-scope legacy modules, features, tables, columns, APIs, Edge Functions, UI components, workflows, code and data.
+
+Preserve necessary working systems, especially:
+- Authentication
 - User
 - Role
 - Permission
-- Settings
 
-Services, Products, Workshops and Technicians are approved content-management modules. No Media Library, booking or other additional dashboard module is permitted.
+Before deleting any database object, inspect dependencies, relationships, foreign keys, RLS policies, Storage references, application references and existing data. Never perform blind destructive operations.
 
-### Content module fields
-- Services: Name (required), Slug (required), Description, Category, Image, Visibility.
-- Products: Name (required), Slug (required), Description, Category, Image, Visibility.
-- Workshops: Name (required), Slug (required), Description, Location, Technician, Category, Image, Visibility.
-- Technicians: Name (required), Slug (required), Description, Skill, Category, Image, Visibility.
-- Slugs are generated from Name automatically and remain manually editable; they must be unique.
-- Image files are uploaded directly to Supabase Storage and can be removed or replaced.
-- In every content module, show the uploaded image when present; if absent or failed to load, show a module-appropriate fallback icon. Technicians alone use a human avatar fallback.
-- Only Name and Slug are required; all other fields are optional.
-- Content records are shared across the one website; there is no country-based filtering.
+## 22. Final Development Principles
 
-## 5. User types
-- Owner — fixed primary account: 3btechhub@gmail.com
-- Admin
-- Member
-- Visitor
+1. Simple
+2. Modular
+3. Secure
+4. Scalable
+5. Maintainable
+6. Reusable
+7. Future-ready
+8. Responsive
+9. RTL-first
+10. Permission-controlled
 
-Visitor is the anonymous/public access level and does not need a Supabase Auth role assignment. Owner must never be demoted, deleted, blocked, or replaced. Admin permissions are explicitly delegated; Member is a normal authenticated account.
+## 23. Project Change Approval Policy
 
-## 6. Website routes
-- Home: `/home/`
-- Account: `/account/`
-- Profile: `/profile/`
-- Dashboard: `/dashboard/`
-- `/` is the shared-layout entry point and resolves to the independent Home page at `/home/`; it is not a separate content page.
-- `/login/` remains a compatibility alias for Account.
+This Master Specification is the canonical design and requirements reference.
 
-All four are independent page routes within one website. The Header and Footer remain mounted while the Main Area changes.
+Before making a real project change:
+1. Inspect the current GitHub and Supabase implementation.
+2. Compare the existing implementation with this specification.
+3. Explain the required changes clearly.
+4. Explain impact and risks.
+5. Wait for explicit user approval.
 
-## 7. Language
-- The entire website is permanently English.
-- The document language is `en` and layout direction is LTR.
-- No language selector, language switching, translation system, language-specific storage, or user locale field is permitted.
+Without explicit approval, do not change GitHub code, Supabase database, Storage, Authentication, deployment or any other project resource.
 
-## 8. Design system
-- Monochrome black and white, with neutral gray only for hierarchy and states.
-- Two icon appearances: light-theme and dark-theme variants.
-- Text, buttons, and input/output controls have only three semantic sizes: Small, Medium, Large.
-- Reuse centralized design tokens and shared components; do not duplicate page-level styles.
-- Simple, clean, responsive, accessible and consistent.
+---
 
-## 9. Engineering conditions
-Fast, clean, reliable, usable, easy to maintain, secure, safe, consistent, centralized, minimal required configuration, maximum optional fields, minimal hard-coded values, and simple design.
-- Keep authorization in Supabase RLS and trusted server-side functions, never in UI visibility alone.
-- Never expose service-role or secret keys to the browser.
-- Owner identity and role are enforced using verified Auth identity and protected database logic.
-- Prefer shared components over duplicated page implementations.
-- Every approved page has a safe fallback.
-- Do not add product or service functionality outside the approved module list.
+**END OF FIXED MASTER SPECIFICATION**
 
-## 10. Platform constraints
-- GitHub Pages: static frontend, source and CI/CD.
-- Supabase: Auth, PostgreSQL, RLS, Storage and Edge Functions.
-- Do not add Vercel, Appwrite, Cloudflare, Next.js server hosting, or any other platform.
-
-## 11. Scope acceptance
-A production page, menu item, dashboard tab, database feature or workflow is allowed only when it directly implements an item in sections 1–5 or a required shared behavior in sections 6–10. Otherwise remove it from the active product.
+**Project:** 3B TECH HUB  
+**Technology:** GitHub + Supabase  
+**Current Direction:** RTL Only  
+**Future Direction:** LTR-ready Architecture
