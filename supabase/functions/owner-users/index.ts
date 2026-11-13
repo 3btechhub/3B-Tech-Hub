@@ -75,6 +75,8 @@ Deno.serve(async (request: Request) => {
       return response({ error: "Invalid request body." }, 400, origin);
     }
 
+    if (body.action === "health") return response({ ok: true }, 200, origin);
+
     if (body.action === "list") {
       const page = Math.max(1, Math.min(1000, Number.isInteger(body.page) ? body.page : 1));
       const perPage = Math.max(1, Math.min(50, Number.isInteger(body.perPage) ? body.perPage : 50));
