@@ -332,27 +332,11 @@ export async function initCataloguePage(supabase,module,slug){
     offset+=pageSize;
   }
 
-  const search=el("input","catalogue-search");
-  search.type="search";
-  search.placeholder="Search "+def.title.toLowerCase()+"...";
-  search.setAttribute("aria-label","Search "+def.title.toLowerCase());
-  root.append(search);
-  const filteredRecords=()=>records.filter(record=>{
-    const name=String(record.name||record.title||"");
-    const term=search.value.trim().toLocaleLowerCase();
-    return !term||(name+" "+String(record.country||"")+" "+String(record.location||"")+" "+String(record.skill||"")).toLocaleLowerCase().includes(term);
-  });
   const grid=el("div","home-card-grid catalogue-results-grid");
-  const renderResults=()=>{
-    grid.replaceChildren();
-    const visible=filteredRecords();
-    if(!visible.length){
-      grid.append(el("p","home-empty",records.length?"No matching items found.":"No "+def.title.toLowerCase()+" available yet."));
-      return;
-    }
-    visible.forEach(record=>grid.append(renderCard(record,module)));
-  };
-  search.addEventListener("input",renderResults);
-  renderResults();
+  if(!records.length){
+    grid.append(el("p","home-empty","No "+def.title.toLowerCase()+" available yet."));
+  }else{
+    records.forEach(record=>grid.append(renderCard(record,module)));
+  }
   root.append(grid);
 }
