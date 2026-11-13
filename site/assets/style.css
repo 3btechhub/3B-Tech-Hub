@@ -26,7 +26,7 @@ body{background:var(--page-bg);color:var(--page-text);font-size:var(--text-mediu
 
 /* Compact auto-fit menu with centered navigation items */
 .site-menu{
-  width:max-content;
+  width:220px;
   min-width:0;
   max-width:calc(100vw - 28px);
   justify-items:stretch;
@@ -68,7 +68,7 @@ body{background:var(--page-bg);color:var(--page-text);font-size:var(--text-mediu
 /* Owner dashboard */
 .dashboard-main{flex:1;width:min(1080px,100%);margin:0 auto;padding:34px 22px 48px}
 .dashboard-heading{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:24px}
-.dashboard-heading h1{margin:0;font-size:var(--text-large);color:var(--muted);font-size:var(--text-medium);grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));gap:14px}
+.dashboard-heading h1{margin:0;font-size:var(--text-large);color:var(--muted);font-size:var(--text-medium);gap:14px}
 .dashboard-card{padding:18px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 .dashboard-card h2{margin:0 0 14px;font-size:var(--text-medium);font-weight:600}
 .dashboard-count{font-size:var(--text-large);font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums}
@@ -159,7 +159,7 @@ body{background:var(--page-bg);color:var(--page-text);font-size:var(--text-mediu
 /* Dashboard module function panels */
 .dashboard-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin:0 0 20px}
 .dashboard-panel-heading h1{margin:0;font-size:var(--text-large);color:var(--muted);font-size:var(--text-medium);line-height:1.55}
-.dashboard-function-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}
+.dashboard-function-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .dashboard-function-card{display:flex;align-items:flex-start;gap:12px;min-height:86px;padding:16px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 .dashboard-function-number{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border-radius:8px;background:var(--hover);color:var(--muted);font-size:var(--text-small);font-weight:700;font-variant-numeric:tabular-nums}
 .dashboard-function-card h2{margin:2px 0 0;font-size:var(--text-medium);font-weight:600;line-height:1.5}
@@ -258,7 +258,7 @@ body{background:var(--page-bg);color:var(--page-text);font-size:var(--text-mediu
 
 
 /* Compact technician cards with an accessible full-profile dialog */
-.technician-grid { grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr)); gap: 10px; }
+.technician-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap: 10px; }
 .technician-card {
   display:flex; align-items:center; gap:11px; width:100%; min-width:0; min-height:82px;
   padding:10px; color:var(--page-text); font:inherit; text-align:start; cursor:pointer;
@@ -304,7 +304,7 @@ body{background:var(--page-bg);color:var(--page-text);font-size:var(--text-mediu
 
 
 /* Workshop cards share the compact Services/Technicians card pattern */
-#workshops-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr)); gap:10px; }
+#workshops-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
 .workshop-card {
   display:flex; align-items:center; gap:11px; width:100%; min-width:0; min-height:82px;
   padding:10px; border:1px solid var(--line); border-radius:11px; background:var(--surface);
@@ -356,7 +356,7 @@ body{background:var(--page-bg);color:var(--page-text);font-size:var(--text-mediu
 
 
 /* Product catalogue: display only product groups and types, never individual SKUs. */
-.product-type-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.product-type-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .product-type-card{display:flex;align-items:center;gap:12px;min-height:76px;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--surface)}
 .product-type-icon{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border-radius:9px;background:var(--hover);font-size:var(--text-large);font-size:var(--text-medium);line-height:1.4}
 .product-type-group{margin:0 0 24px}
@@ -377,7 +377,7 @@ body{background:var(--page-bg);color:var(--page-text);font-size:var(--text-mediu
 /* Refined homepage product category cards */
 .home-products-section{margin-top:48px;padding-top:28px}
 .home-products-section>.home-section-heading{margin-bottom:18px}
-.product-catalogue{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px}
+.product-catalogue{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .product-group{min-width:0;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--surface);box-shadow:0 5px 18px #00000008}
 .product-group:first-child{padding:20px}
 .product-group-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
@@ -582,7 +582,7 @@ body{background:var(--page-bg);color:var(--page-text);font-size:var(--text-mediu
 .catalogue-detail-image{width:100%;max-height:360px;object-fit:cover;border-radius:12px}
 .catalogue-detail-field{margin:0;color:var(--muted);font-size:var(--text-medium);line-height:1.7;white-space:pre-line}
 .catalogue-detail-field strong{color:var(--page-text)}
-.catalogue-detail .service-back-link{margin-top:8px;display:inline-flex;width:max-content;padding:10px 14px;border:1px solid var(--line);border-radius:8px}
+.catalogue-detail .service-back-link{margin-top:8px;display:inline-flex;width:120px;min-width:120px;max-width:120px;height:42px;min-height:42px;padding:10px 14px;justify-content:center;border:1px solid var(--line);border-radius:8px}
 .catalogue-detail .service-back-link:hover{background:var(--hover)}
 @media(max-width:520px){.section-list-page{padding:20px 14px 36px}.catalogue-detail{padding:16px;border-radius:12px}}
 
@@ -670,7 +670,7 @@ button[data-size="large"],input[data-size="large"],select[data-size="large"],tex
 }
 .home-card-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(min(100%,205px),1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   gap:11px;
 }
 /* Content item cards show only image/icon and title, in the logical start position. */
@@ -983,4 +983,45 @@ output,
   max-height:120px;
   overflow:auto;
   overflow-wrap:anywhere;
+}
+
+/* Explicit viewport breakpoints replace all intrinsic/content-sized grids. */
+.site-menu { width:220px; min-width:220px; }
+.product-type-list { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.product-type-card {
+  height:76px; min-height:76px; max-height:76px; overflow:hidden;
+}
+.product-type-card > :last-child {
+  min-width:0; overflow:hidden; text-overflow:ellipsis;
+}
+.product-catalogue { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.product-group { height:260px; min-height:260px; max-height:260px; overflow:auto; }
+.product-group-item { height:44px; min-height:44px; max-height:44px; overflow:hidden; }
+#workshops-list { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.workshop-card {
+  height:82px; min-height:82px; max-height:82px; overflow:hidden;
+}
+.catalogue-detail .service-back-link {
+  display:inline-flex; flex:0 0 120px; width:120px; min-width:120px; max-width:120px;
+  height:42px; min-height:42px; max-height:42px; align-items:center; justify-content:center;
+  overflow:hidden; white-space:nowrap;
+}
+.content-editor-form input[type="checkbox"],
+.content-editor-form input[type="radio"],
+.module-form-field input[type="checkbox"],
+.module-form-field input[type="radio"] {
+  display:inline-block; width:18px; min-width:18px; max-width:18px;
+  height:18px; min-height:18px; max-height:18px; padding:0; overflow:visible;
+}
+@media(max-width:760px) {
+  .product-type-list,
+  #workshops-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .product-catalogue { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:480px) {
+  .site-menu { width:auto; min-width:0; }
+  .product-type-list,
+  .product-catalogue,
+  #workshops-list { grid-template-columns:minmax(0,1fr); }
+  .product-group { height:240px; min-height:240px; max-height:240px; }
 }
