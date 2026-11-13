@@ -201,7 +201,7 @@ export async function initRoutePage() {
   window.__routeAuthSubscriptions?.forEach((subscription) => subscription.unsubscribe());
   window.__routeAuthSubscriptions = [];
   applyEnglishText();
-  renderSvgIconAttributes(document.getElementById("app-main")||document);
+  renderSvgIconAttributes(document);
   const visitorKeyName="3b-visitor-key";let visitorKey=localStorage.getItem(visitorKeyName);if(!visitorKey){visitorKey=crypto.randomUUID();localStorage.setItem(visitorKeyName,visitorKey);}
   const ua=navigator.userAgent,device=/tablet|ipad/i.test(ua)?"tablet":/mobile|android|iphone/i.test(ua)?"mobile":"desktop";
   const os=/android/i.test(ua)?"Android":/iphone|ipad|ios/i.test(ua)?"iOS":/windows/i.test(ua)?"Windows":/mac os/i.test(ua)?"macOS":/linux/i.test(ua)?"Linux":"unknown";
