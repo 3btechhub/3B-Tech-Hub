@@ -29,7 +29,7 @@ export async function initCataloguePage(supabase,module,slug){
   if(detail)root.append(el("p","catalogue-detail-field",detail));
   if(module==="contacts"&&data.type==="email"){const a=el("a","pill-button","Email");a.href="mailto:"+data.value;root.append(a);}
   if(module==="contacts"&&data.type==="phone"){const a=el("a","pill-button","Call");a.href="tel:"+data.value;root.append(a);}
-  if(module==="contacts"&&data.type==="link"){const a=el("a","pill-button","Open link");a.href=data.value;a.target="_blank";a.rel="noopener noreferrer";root.append(a);}
+  if(module==="contacts"&&data.type==="link"){try{const url=new URL(data.value,location.origin);if(["https:","http:"].includes(url.protocol)){const a=el("a","pill-button","Open link");a.href=url.href;a.target="_blank";a.rel="noopener noreferrer";root.append(a);}}catch{root.append(el("p","muted","This contact link is invalid."));}}
   root.append(link(module,"Back to "+def.title));return;
  }
  root.append(el("h1","",def.title));
