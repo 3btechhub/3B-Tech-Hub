@@ -20,6 +20,26 @@ export function initExtendedDashboard(supabase,role){
  document.getElementById("permission-cancel")?.addEventListener("click",()=>{permissionEdit=null;permForm.reset();permForm.elements.permission_key.disabled=false;document.getElementById("permission-cancel").hidden=true;});
  document.getElementById("role-permission-form")?.addEventListener("submit",async e=>{e.preventDefault();const id=roleSelect.value;const ids=[...permOptions.querySelectorAll("input:checked")].map(x=>x.value);const {error:delError}=await supabase.from("role_permissions").delete().eq("role_id",id);if(delError){message("role-permission-message",delError.message);return;}const {error}=ids.length?await supabase.from("role_permissions").insert(ids.map(permission_id=>({role_id:id,permission_id}))):{error:null};message("role-permission-message",error?.message||"Role permissions saved.");});
  loadRoles().then(loadPermissions);
- async function loadAnalytics(){const summary=document.getElementById("visitor-analytics-summary"),pages=document.getElementById("visitor-analytics-pages");if(!summary||!pages)return;summary.replaceChildren();pages.replaceChildren();const {data,error}=await supabase.from("visitor_analytics").select("visitor_key,page_path,viewed_at,device,operating_system,browser,country,city,referrer").order("viewed_at",{ascending:false}).limit(5000);if(error){pages.textContent=error.message;return;}const rows=data||[],byVisitor=new Map();for(const r of rows)byVisitor.set(r.visitor_key,(byVisitor.get(r.visitor_key)||0)+1);const visitors=byVisitor.size,repeats=[...byVisitor.values()].filter(n=>n>1).length;for(const [label,value] of [["Visitors",visitors],["Page Views",rows.length],["Repeat Visitors",repeats]]){const card=node("section","dashboard-card");card.append(node("h3","",label),node("strong","dashboard-count",String(value)));summary.append(card);}const counts=new Map();for(const r of rows)counts.set(r.page_path,(counts.get(r.page_path)||0)+1);pages.append(node("h3","","Most Visited Pages"));for(const [path,count] of [...counts.entries()].sort((a,b)=>b[1]-a[1])){const row=node("article","admin-list-row");row.append(node("strong","",path),node("span","muted",count+" views"));pages.append(row);}pages.append(node("h3","","Recent Visits"));for(const r of rows.slice(0,20)){const row=node("article","admin-list-row"),meta=[r.device,r.operating_system,r.browser,[r.city,r.country].filter(Boolean).join(", ")||"Location unavailable",new Date(r.viewed_at).toLocaleString()].join(" · ");row.append(node("strong","",r.page_path),node("span","muted",meta));pages.append(row);}if(!rows.length)pages.append(node("p","muted","No visitor analytics recorded yet."));}
+ async function loadAnalytics(){
+  const summary=document.getElementById("visitor-analytics-summary"),pages=document.getElementById("visitor-analytics-pages");
+  if(!summary||!pages)return;
+  summary.replaceChildren();pages.replaceChildren();
+  const [summaryResult,pageResult,recentResult]=await Promise.all([
+    supabase.from("visitor_analytics_summary").select("*").maybeSingle(),
+    supabase.from("visitor_page_views").select("*").order("page_views",{ascending:false}).limit(50),
+    supabase.from("visitor_analytics").select("visitor_key,page_path,viewed_at,device,operating_system,browser,country,city,referrer").order("viewed_at",{ascending:false}).limit(20)
+  ]);
+  const error=summaryResult.error||pageResult.error||recentResult.error;
+  if(error){pages.textContent=error.message;return;}
+  const totals=summaryResult.data||{total_visitors:0,total_page_views:0,repeat_visitors:0};
+  for(const [label,value] of [["Visitors",totals.total_visitors],["Page Views",totals.total_page_views],["Repeat Visitors",totals.repeat_visitors]]){
+    const card=node("section","dashboard-card");card.append(node("h3","",label),node("strong","dashboard-count",String(value)));summary.append(card);
+  }
+  pages.append(node("h3","","Most Visited Pages"));
+  for(const r of pageResult.data||[]){const row=node("article","admin-list-row");row.append(node("strong","",r.page_path),node("span","muted",r.page_views+" views"));pages.append(row);}
+  pages.append(node("h3","","Recent Visits"));
+  for(const r of recentResult.data||[]){const row=node("article","admin-list-row"),meta=[r.device,r.operating_system,r.browser,[r.city,r.country].filter(Boolean).join(", ")||"Location unavailable",new Date(r.viewed_at).toLocaleString()].join(" · ");row.append(node("strong","",r.page_path),node("span","muted",meta));pages.append(row);}
+  if(!(recentResult.data||[]).length)pages.append(node("p","muted","No visitor analytics recorded yet."));
+}
  document.getElementById("analytics-refresh")?.addEventListener("click",loadAnalytics);document.querySelector('[data-dashboard-tab="audit"]')?.addEventListener("click",loadAnalytics);loadAnalytics();
 }
