@@ -117,6 +117,9 @@ Deno.serve(async (request: Request) => {
       const role = typeof body.role === "string" ? body.role : "member";
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return response({ error: "Enter a valid email address." }, 400, origin);
       if (email === primaryOwnerEmail || !allowedRoles.has(role)) return response({ error: "This role or account cannot be invited." }, 400, origin);
+      const { data: roleConfig, error: roleConfigError } = await admin.from("app_roles").select("is_active").eq("slug", role).maybeSingle();
+      if (roleConfigError) throw roleConfigError;
+      if (!roleConfig?.is_active) return response({ error: "This role is inactive." }, 400, origin);
       const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo });
       if (error) throw error;
       if (!data.user) throw new Error("Invite did not return a user.");
@@ -134,6 +137,9 @@ Deno.serve(async (request: Request) => {
       if (!validUuid(body.userId) || typeof body.role !== "string" || !allowedRoles.has(body.role)) {
         return response({ error: "Invalid user or role." }, 400, origin);
       }
+      const { data: roleConfig, error: roleConfigError } = await admin.from("app_roles").select("is_active").eq("slug", body.role).maybeSingle();
+      if (roleConfigError) throw roleConfigError;
+      if (!roleConfig?.is_active) return response({ error: "This role is inactive." }, 400, origin);
       const { data: targetData, error: targetError } = await admin.auth.admin.getUserById(body.userId);
       if (targetError || !targetData.user) return response({ error: "User not found." }, 404, origin);
       if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail) {
