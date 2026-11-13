@@ -1,4 +1,5 @@
 import { createContactIcon } from "./contact-utils.js";
+import { createIcon } from "./icon-utils.js";
 function node(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
 function message(id,text){const n=document.getElementById(id);if(n)n.textContent=text;}
 function slugify(s){return String(s||"").normalize("NFKD").toLowerCase().trim().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")||"item";}
@@ -7,7 +8,7 @@ export function initExtendedDashboard(supabase,role){
  if(role!=="owner")return;
  const contactForm=document.getElementById("contacts-form"),contactList=document.getElementById("contacts-list");
  let contactEdit=null;
- async function loadContacts(){if(!contactList)return;contactList.replaceChildren();const {data,error}=await supabase.from("contacts").select("*").order("created_at",{ascending:false});if(error){contactList.append(node("p","muted",error.message));return;}for(const row of data||[]){const item=node("article","admin-list-row");const info=node("div");const heading=node("strong","");heading.append(createContactIcon(row.value),document.createTextNode(" "+row.name));info.append(heading,node("span","muted",row.value));const actions=node("div","editor-actions");actions.append(button("Edit","secondary-button",()=>{contactEdit=row.id;contactForm.elements.name.value=row.name;contactForm.elements.value.value=row.value;document.getElementById("contacts-form-title").textContent="Edit contact";document.getElementById("contacts-cancel").hidden=false;}),button("Delete","secondary-button",async()=>{if(!confirm("Delete this contact?"))return;const {error}=await supabase.from("contacts").delete().eq("id",row.id);message("contacts-message",error?.message||"Contact deleted.");if(!error)loadContacts();}));item.append(info,actions);contactList.append(item);}}
+ async function loadContacts(){if(!contactList)return;contactList.replaceChildren();const {data,error}=await supabase.from("contacts").select("*").order("created_at",{ascending:false});if(error){contactList.append(node("p","muted",error.message));return;}for(const row of data||[]){const item=node("article","admin-list-row");const info=node("div");const heading=node("strong","");heading.append(createContactIcon(row.value,row.name),document.createTextNode(" "+row.name));info.append(heading,node("span","muted",row.value));const actions=node("div","editor-actions");actions.append(button("Edit","secondary-button",()=>{contactEdit=row.id;contactForm.elements.name.value=row.name;contactForm.elements.value.value=row.value;document.getElementById("contacts-form-title").textContent="Edit contact";document.getElementById("contacts-cancel").hidden=false;}),button("Delete","secondary-button",async()=>{if(!confirm("Delete this contact?"))return;const {error}=await supabase.from("contacts").delete().eq("id",row.id);message("contacts-message",error?.message||"Contact deleted.");if(!error)loadContacts();}));item.append(info,actions);contactList.append(item);}}
  if(contactForm){contactForm.addEventListener("submit",async e=>{e.preventDefault();const payload={name:contactForm.elements.name.value.trim(),value:contactForm.elements.value.value.trim()};payload.slug=slugify(payload.name)+"-"+crypto.randomUUID().slice(0,8);const result=contactEdit?await supabase.from("contacts").update(payload).eq("id",contactEdit):await supabase.from("contacts").insert(payload);message("contacts-message",result.error?.message||(contactEdit?"Contact updated.":"Contact created."));if(!result.error){contactForm.reset();contactEdit=null;document.getElementById("contacts-form-title").textContent="Add contact";document.getElementById("contacts-cancel").hidden=true;loadContacts();}});document.getElementById("contacts-cancel")?.addEventListener("click",()=>{contactEdit=null;contactForm.reset();document.getElementById("contacts-form-title").textContent="Add contact";document.getElementById("contacts-cancel").hidden=true;});document.getElementById("contacts-refresh")?.addEventListener("click",loadContacts);loadContacts();}
  const roleForm=document.getElementById("role-form"),rolesList=document.getElementById("roles-list"),permForm=document.getElementById("permission-form"),permsList=document.getElementById("permissions-list"),roleSelect=document.getElementById("permission-role-select"),permOptions=document.getElementById("role-permission-options");
  let roleEdit=null,permissionEdit=null,roles=[],permissions=[];
@@ -34,16 +35,16 @@ export function initExtendedDashboard(supabase,role){
   const error=summaryResult.error||pageResult.error||recentResult.error||locationResult.error;
   if(error){pages.textContent=error.message;return;}
   const totals=summaryResult.data||{total_visitors:0,total_page_views:0,repeat_visitors:0};
-  for(const [icon,label,value] of [["👥","Visitors",totals.total_visitors],["📄","Page Views",totals.total_page_views],["🔁","Repeat Visitors",totals.repeat_visitors]]){
-    const card=node("section","dashboard-card analytics-stat");card.append(node("span","analytics-icon",icon),node("h3","",label),node("strong","dashboard-count",String(value)));summary.append(card);
+  for(const [icon,label,value] of [["users","Visitors",totals.total_visitors],["file","Page Views",totals.total_page_views],["repeat","Repeat Visitors",totals.repeat_visitors]]){
+    const visual=node("span","analytics-icon");visual.append(createIcon(icon));const card=node("section","dashboard-card analytics-stat");card.append(visual,node("h3","",label),node("strong","dashboard-count",String(value)));summary.append(card);
   }
-  pages.append(node("h3","","📊 Most Visited Pages"));
+  pages.append(node("h3","","Most Visited Pages"));
   for(const r of pageResult.data||[]){const row=node("article","admin-list-row");row.append(node("strong","",r.page_path),node("span","muted",r.page_views+" views"));pages.append(row);}
   if(!(pageResult.data||[]).length)pages.append(node("p","muted","No page views recorded yet."));
-  locations.append(node("h3","","🌍 Visitors by Country / City"));
+  locations.append(node("h3","","Visitors by Country / City"));
   for(const r of locationResult.data||[]){const row=node("article","admin-list-row"),place=[r.city,r.country].filter(Boolean).join(", ")||"Location unavailable";row.append(node("strong","",place),node("span","muted",r.visitors+" visitors · "+r.page_views+" page views"));locations.append(row);}
   if(!(locationResult.data||[]).length)locations.append(node("p","muted","Location data will appear after visits are recorded."));
-  pages.append(node("h3","","🕘 Recent Visits"));
+  pages.append(node("h3","","Recent Visits"));
   for(const r of recentResult.data||[]){const row=node("article","admin-list-row"),meta=[r.device,r.operating_system,r.browser,[r.city,r.country].filter(Boolean).join(", ")||"Location unavailable",new Date(r.viewed_at).toLocaleString()].join(" · ");row.append(node("strong","",r.page_path),node("span","muted",meta));pages.append(row);}
   if(!(recentResult.data||[]).length)pages.append(node("p","muted","No visitor analytics recorded yet."));
 

@@ -1,7 +1,8 @@
 import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
-import { getItemFallbackIcon, initCataloguePage } from "./catalogue.js";
+import { initCataloguePage } from "./catalogue.js";
 import { initExtendedDashboard } from "./admin-extended.js";
 import { createContactIcon } from "./contact-utils.js";
+import { createIcon, getModuleIcon, getItemFallbackIcon } from "./icon-utils.js";
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const accountMenuLink = document.querySelector("#login-menu-link");
@@ -33,7 +34,7 @@ function applyTheme(theme) {
   applyRuntimeConfig(runtimeConfig, dark ? "dark" : "light");
   if (themeToggle) {
     const themeIcon = themeToggle.querySelector(".theme-icon");
-    if (themeIcon) themeIcon.textContent = dark ? "☀" : "☾";
+    if (themeIcon) { themeIcon.replaceChildren(createIcon(dark ? "sun" : "moon")); }
     themeToggle.setAttribute("aria-label", dark ? translations.en.light : translations.en.dark);
   }
   localStorage.setItem("3b-theme", dark ? "dark" : "light");
@@ -67,11 +68,11 @@ runtimeConfig = await loadRuntimeConfig(supabase);
 applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 
 const homeCatalogModules = [
-  { key:"services", table:"services", title:"Services", icon:"🔧", published:["status","active"], columns:"name,slug,photo_url" },
-  { key:"products", table:"products", title:"Products", icon:"📦", published:["status","active"], columns:"name,slug,photo_url" },
-  { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name:title,slug,photo_url" },
-  { key:"technicians", table:"technicians", title:"Technicians", icon:"👨‍🔧", published:["is_published",true], columns:"name,slug,photo_url" },
-  { key:"contacts", table:"contacts", title:"Contacts", icon:"☎️", published:null, columns:"name,slug,value" }
+  { key:"services", table:"services", title:"Services", icon:"wrench", published:["status","active"], columns:"name,slug,photo_url" },
+  { key:"products", table:"products", title:"Products", icon:"package", published:["status","active"], columns:"name,slug,photo_url" },
+  { key:"workshops", table:"workshops", title:"Workshops", icon:"building", published:["status","published"], columns:"name:title,slug,photo_url" },
+  { key:"technicians", table:"technicians", title:"Technicians", icon:"technician", published:["is_published",true], columns:"name,slug,photo_url" },
+  { key:"contacts", table:"contacts", title:"Contacts", icon:"contact", published:null, columns:"name,slug,value" }
 ];
 
 function renderHomeCard(module, record) {
@@ -82,7 +83,7 @@ function renderHomeCard(module, record) {
   visual.className="home-content-visual"+(module.key==="technicians"?" home-content-visual--person":"");
   const fallback=document.createElement("span");
   fallback.className="home-content-fallback";
-  if(module.key==="contacts"){const icon=createContactIcon(record.value);icon.classList.add("home-content-fallback");visual.append(icon);}else{fallback.textContent=getItemFallbackIcon(record.name||record.title,module.key);visual.append(fallback);}
+  if(module.key==="contacts"){const icon=createContactIcon(record.value,record.name);icon.classList.add("home-content-fallback");visual.append(icon);}else{visual.append(getItemFallbackIcon(record.name||record.title,module.key));}
   if(record.photo_url) {
     const image=document.createElement("img");
     image.src=record.photo_url;
@@ -927,27 +928,20 @@ function resetModuleForm(moduleName) {
   document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Save "+config.title;
   document.querySelector('[data-module-cancel="'+moduleName+'"]').hidden=true;
 }
-function createModuleRecordVisual(moduleName,photoUrl) {
+function createModuleRecordVisual(moduleName,photoUrl,record) {
   const visual=document.createElement("span");
   visual.className="module-record-visual";
-  const fallback=document.createElement("span");
-  fallback.className="module-record-fallback";
-  fallback.setAttribute("aria-hidden","true");
-  const fallbacks={services:"🔧",products:"📦",workshops:"🎓",technicians:"👤"};
-  fallback.textContent=fallbacks[moduleName]||"◆";
-  if (moduleName==="technicians") fallback.classList.add("module-record-fallback--person");
+  const icon=getItemFallbackIcon(record?.name||record?.title||moduleName,moduleName);
+  if(moduleName==="technicians")icon.classList.add("module-record-fallback--person");
   const image=document.createElement("img");
   image.className="module-record-image";
   image.alt="";
   image.loading="lazy";
   image.hidden=!photoUrl;
-  fallback.hidden=Boolean(photoUrl);
-  image.addEventListener("error",()=>{
-    image.hidden=true;
-    fallback.hidden=false;
-  });
-  if (photoUrl) image.src=photoUrl;
-  visual.append(image,fallback);
+  icon.hidden=Boolean(photoUrl);
+  image.addEventListener("error",()=>{image.hidden=true;icon.hidden=false;});
+  if(photoUrl)image.src=photoUrl;
+  visual.append(image,icon);
   return visual;
 }
 function renderModuleList(moduleName,records) {
@@ -960,7 +954,7 @@ function renderModuleList(moduleName,records) {
     const row=document.createElement("article"); row.className="admin-list-row module-record-row";
     const primary=document.createElement("div");
     primary.className="module-record-primary";
-    primary.append(createModuleRecordVisual(moduleName,record.photo_url));
+    primary.append(createModuleRecordVisual(moduleName,record.photo_url,record));
     const textContent=document.createElement("div"); textContent.className="module-record-text";
     addTextElement(textContent,"strong","",record.name||record.title||record.slug||"Untitled");
     const details=config.columns.map((key)=>{

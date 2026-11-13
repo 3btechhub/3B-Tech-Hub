@@ -569,7 +569,12 @@ body{background:var(--page-bg);color:var(--page-text);font-size:var(--text-mediu
   .product-showcase-visual{height:88px;margin-bottom:10px}
   .product-showcase-title{font-size:var(--text-small);bottom:9px;width:24px;height:24px}
 }
-\n\n/* Products: progressively reveal additional product cards */\n.product-more-button{grid-column:1/-1;justify-self:center;min-width:110px;min-height:40px;padding:8px 22px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--page-text);font:inherit;font-weight:600;cursor:pointer}\n.product-more-button:hover,.product-more-button:focus-visible{background:var(--hover);border-color:var(--page-text)}\n
+
+
+/* Products: progressively reveal additional product cards */
+.product-more-button{grid-column:1/-1;justify-self:center;min-width:110px;min-height:40px;padding:8px 22px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--page-text);font:inherit;font-weight:600;cursor:pointer}
+.product-more-button:hover,.product-more-button:focus-visible{background:var(--hover);border-color:var(--page-text)}
+
 
 /* Dedicated section listings and full-page item details */
 .home-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -1074,3 +1079,6 @@ output,
  .home-main.home-catalog .home-section-title-link{font-size:clamp(1.2rem,5vw,1.45rem)}
  .home-main.home-catalog .section-view-all{font-size:11px}
 }
+
+/* SVG-first icon system */
+.svg-icon{width:1.25em;height:1.25em;display:inline-block;flex:0 0 auto;vertical-align:middle;stroke:currentColor}.item-svg-icon{width:1.8em;height:1.8em}.home-content-fallback .svg-icon,.home-content-visual>.svg-icon{width:32px;height:32px}.module-record-visual>.svg-icon{width:34px;height:34px}.dashboard-module-tab[data-icon]::before,.dashboard-card[data-icon]::before{content:none!important;display:none!important}.dashboard-module-tab>.svg-icon{margin-inline-end:8px}.dashboard-card>.svg-icon{position:absolute;inset-inline-start:16px;inset-block-start:18px;width:24px;height:24px}.home-section-title-link>.svg-icon,.catalogue-title>.svg-icon{margin-inline-end:9px}.analytics-icon>.svg-icon{width:24px;height:24px}.contact-icon-fallback{width:24px;height:24px}.contact-brand-icon{width:24px;height:24px;object-fit:contain;vertical-align:middle;flex:0 0 24px;margin-inline-end:8px}.home-content-visual img.contact-brand-icon{width:28px;height:28px;margin:0}.theme-icon>.svg-icon{width:20px;height:20px}
