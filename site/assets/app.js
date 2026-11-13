@@ -545,7 +545,7 @@ if (ownerDashboard) {
       const health=document.getElementById("dashboard-health-status");
       if(health){health.replaceChildren();const checks=[["Website","Online",true],["Database","Checking…",null],["Authentication","Checking…",null],["Storage","Not verified",null],["Backend services","Not verified",null]];
         const databaseCheck=await supabase.from("site_settings").select("setting_key").limit(1);
-        const authCheck=await supabase.auth.getSession();
+        const authCheck=await supabase.auth.getUser();
         checks[1]=["Database",databaseCheck.error?"Unavailable":"Connected",!databaseCheck.error];
         checks[2]=["Authentication",authCheck.error?"Unavailable":"Available",!authCheck.error];
         for(const [label,value,ok] of checks){const card=document.createElement("section");card.className="dashboard-card";addTextElement(card,"h3","",label);addTextElement(card,"p",ok===true?"health-ok":ok===false?"health-error":"muted",value);health.append(card);}
