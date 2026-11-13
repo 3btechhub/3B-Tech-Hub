@@ -541,7 +541,7 @@ if (ownerDashboard) {
       currentDashboardRole = "owner";
       const ownerEmail = document.querySelector("#dashboard-owner-email");
       if (ownerEmail) ownerEmail.textContent = authData.user.email || "";
-      const resources = [["user_roles","dashboard-users-count"],["services","dashboard-services-count"],["products","dashboard-products-count"],["workshops","dashboard-workshops-count"],["technicians","dashboard-technicians-count"],["contacts","dashboard-contacts-count"],["app_roles","dashboard-roles-count"],["permissions","dashboard-permissions-count"],["audit_logs","dashboard-audit-count"],["site_settings","dashboard-settings-count"]];
+      const resources = [["user_roles","dashboard-users-count"],["services","dashboard-services-count"],["products","dashboard-products-count"],["workshops","dashboard-workshops-count"],["technicians","dashboard-technicians-count"],["contacts","dashboard-contacts-count"],["app_roles","dashboard-roles-count"],["permissions","dashboard-permissions-count"]];
       const health=document.getElementById("dashboard-health-status");
       if(health){health.replaceChildren();const checks=[["Website","Online",true],["Database","Checking…",null],["Authentication","Checking…",null],["Storage","Not verified",null],["Backend services","Not verified",null]];
         const databaseCheck=await supabase.from("site_settings").select("setting_key").limit(1);
