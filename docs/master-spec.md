@@ -20,7 +20,7 @@ Core principles:
 - Role & Permission Management
 - Responsive Design
 - LTR-first presentation
-- Future LTR readiness
+- Future RTL readiness
 - Maintainable, reusable and scalable components
 
 The architecture must support future extension of modules, languages, routes, countries, roles and permissions. Future capabilities must not be activated without explicit approval.
@@ -433,7 +433,7 @@ Prepare the architecture for future:
 - Roles
 - Permissions
 - Features
-- LTR Direction
+- RTL Direction
 
 Architecture readiness does not authorize activation. Every new feature or scope change requires explicit user approval. Use a distinct, semantically appropriate icon for each Dashboard module and content type.
 
