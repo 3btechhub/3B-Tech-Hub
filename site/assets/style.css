@@ -1225,3 +1225,34 @@ output,
 .catalogue-contact-button .svg-icon{width:20px;height:20px}
 .catalogue-detail-page>.service-back-link{margin-top:4px}
 @media(max-width:520px){.catalogue-detail-page{padding:16px;gap:19px}.catalogue-gallery{grid-template-columns:1fr}.catalogue-gallery-item img{aspect-ratio:16/10}.catalogue-location-card{min-height:130px;padding:16px;gap:12px}.catalogue-contact-actions{grid-template-columns:1fr 1fr}}
+
+/* Correct form control contrast in both light and dark themes.
+   Overrides legacy editor rules that inverted foreground/background values. */
+:root:not([data-theme="dark"]) input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+:root:not([data-theme="dark"]) select,
+:root:not([data-theme="dark"]) textarea,
+:root:not([data-theme="dark"]) .content-editor-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+:root:not([data-theme="dark"]) .content-editor-form textarea,
+:root:not([data-theme="dark"]) .module-form-field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+:root:not([data-theme="dark"]) .module-form-field select,
+:root:not([data-theme="dark"]) .module-form-field textarea {
+  background-color:#fff !important;
+  color:#171717 !important;
+  border-color:#d5d5d5 !important;
+  color-scheme:light;
+}
+:root[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]),
+:root[data-theme="dark"] select,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] .content-editor-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+:root[data-theme="dark"] .content-editor-form textarea,
+:root[data-theme="dark"] .module-form-field input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+:root[data-theme="dark"] .module-form-field select,
+:root[data-theme="dark"] .module-form-field textarea {
+  background-color:var(--surface) !important;
+  color:var(--page-text) !important;
+  border-color:var(--line) !important;
+  color-scheme:dark;
+}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:1}
+input:disabled,select:disabled,textarea:disabled{opacity:.7;cursor:not-allowed}
