@@ -783,10 +783,10 @@ button[data-size="large"],input[data-size="large"],select[data-size="large"],tex
 
 
 /* Stable component sizing: content may wrap/scroll, but never determines component dimensions. */
-.content-editor-form input:not([type="file"]),
+.content-editor-form input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .content-editor-form select,
 .content-editor-form textarea,
-.module-form-field input,
+.module-form-field input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
 .module-form-field select,
 .module-form-field textarea {
   display:block;
@@ -965,4 +965,22 @@ input, select, textarea, button { min-width:0; }
   .technician-card { height:300px; min-height:300px; max-height:300px; }
   .admin-list-row { grid-template-columns:minmax(0,1fr) auto; }
   .content-editor-form { width:100%; max-width:100%; }
+}
+
+.editor-message,
+output,
+.form-output {
+  display:block;
+  height:38px;
+  min-height:38px;
+  max-height:38px;
+  overflow:auto;
+  overflow-wrap:anywhere;
+}
+.catalogue-detail-field {
+  height:120px;
+  min-height:120px;
+  max-height:120px;
+  overflow:auto;
+  overflow-wrap:anywhere;
 }
