@@ -847,26 +847,92 @@ if(siteSettingsForm)void loadSiteSettingsForm();
 // Core content modules: each module uses its existing Supabase table and RLS policies.
 const dashboardContentModules = {
   services: { table:"services", title:"Service", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Country","text",false],
-    ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","text",false],
+    ["images","Images","files",false],["products","Products","multiselect",false],
+    ["workshops","Workshops","multiselect",false],["technicians","Technicians","multiselect",false],
+    ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","visibility"] },
   products: { table:"products", title:"Product", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Country","text",false],
-    ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","text",false],
+    ["images","Images","files",false],["workshops","Workshops","multiselect",false],
+    ["technicians","Technicians","multiselect",false],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","visibility"] },
   workshops: { table:"workshops", title:"Workshop", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Country","text",false],
-    ["location","Location","text",false],["address","Address","text",false],
-    ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","text",false],
+    ["images","Images","files",false],["location","Location","text",false],["address","Address","text",false],
+    ["services","Services","multiselect",false],["products","Products","multiselect",false],
+    ["technicians","Technicians","multiselect",false],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","location","address","visibility"] },
   technicians: { table:"technicians", title:"Technician", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],["country","Country","text",false],
-    ["skill","Skill / Expertise","text",false],["images","Images","files",false],
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Countries","text",false],
+    ["images","Images","files",false],["skill","Skill / Expertise","text",false],
+    ["services","Services","multiselect",false],["workshops","Workshops","multiselect",false],
     ["phone","Phone","tel",false],["whatsapp","WhatsApp","text",false],["email","Email","email",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","skill","visibility"] }
 };
+const moduleRelationships = {
+  services: {
+    products:{table:"service_products",parent:"service_id",child:"product_id",target:"products",label:"name",filter:["status","active"]},
+    workshops:{table:"service_workshops",parent:"service_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]},
+    technicians:{table:"service_technicians",parent:"service_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
+  },
+  products: {
+    workshops:{table:"product_workshops",parent:"product_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]},
+    technicians:{table:"product_technicians",parent:"product_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
+  },
+  workshops: {
+    services:{table:"service_workshops",parent:"workshop_id",child:"service_id",target:"services",label:"name",filter:["status","active"]},
+    products:{table:"product_workshops",parent:"workshop_id",child:"product_id",target:"products",label:"name",filter:["status","active"]},
+    technicians:{table:"workshop_technicians",parent:"workshop_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
+  },
+  technicians: {
+    services:{table:"service_technicians",parent:"technician_id",child:"service_id",target:"services",label:"name",filter:["status","active"]},
+    workshops:{table:"workshop_technicians",parent:"technician_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]}
+  }
+};
 
+
+async function loadModuleRelationOptions(moduleName) {
+  const config=moduleRelationships[moduleName]||{};
+  for(const [key,rel] of Object.entries(config)){
+    const host=document.querySelector('[data-related-options="'+key+'"]');
+    if(!host)continue;
+    const {data,error}=await supabase.from(rel.target).select("id,"+rel.label).order(rel.label);
+    host.replaceChildren();
+    if(error){addTextElement(host,"small","muted","Could not load options.");continue;}
+    for(const record of data||[]){
+      if(rel.filter&&record[rel.filter[0]]!==rel.filter[1])continue;
+      const label=document.createElement("label");label.className="module-related-option";
+      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=record.id;checkbox.dataset.relatedId=record.id;
+      label.append(checkbox,document.createTextNode(record[rel.label]||"Untitled"));host.append(label);
+    }
+    if(!host.childElementCount)addTextElement(host,"small","muted","No available records yet.");
+  }
+}
+async function loadModuleRelationSelection(moduleName,recordId){
+  const config=moduleRelationships[moduleName]||{};
+  for(const [key,rel] of Object.entries(config)){
+    const {data,error}=await supabase.from(rel.table).select(rel.child).eq(rel.parent,recordId);
+    if(error)throw error;
+    const selected=new Set((data||[]).map(row=>row[rel.child]));
+    document.querySelectorAll('[data-related-options="'+key+'"] input[data-related-id]').forEach(input=>{input.checked=selected.has(input.dataset.relatedId);});
+  }
+}
+async function saveModuleRelationships(moduleName,recordId){
+  const config=moduleRelationships[moduleName]||{};
+  for(const [key,rel] of Object.entries(config)){
+    const host=document.querySelector('[data-related-options="'+key+'"]');
+    const ids=host?[...host.querySelectorAll('input[data-related-id]:checked')].map(input=>input.dataset.relatedId):[];
+    const {error:deleteError}=await supabase.from(rel.table).delete().eq(rel.parent,recordId);
+    if(deleteError)throw deleteError;
+    if(ids.length){
+      const rows=ids.map(id=>({[rel.parent]:recordId,[rel.child]:id}));
+      const {error}=await supabase.from(rel.table).insert(rows);
+      if(error)throw error;
+    }
+  }
+}
 function moduleLabel(value) {
   if (typeof value === "boolean") return value ? "Visible" : "Hidden";
   if (value == null || value === "") return "—";
@@ -1034,6 +1100,7 @@ function renderModuleList(moduleName,records) {
         else input.value=record[moduleDatabaseKey(moduleName,key)]==null?"":String(record[moduleDatabaseKey(moduleName,key)]);
       }
       updateImagePreview(form,record.photo_url||"");
+      await loadModuleRelationSelection(moduleName,record.id);
       document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Edit "+config.title;
       document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Update "+config.title;
       document.querySelector('[data-module-cancel="'+moduleName+'"]').hidden=false;
@@ -1072,6 +1139,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if (!fieldsHost||!form) continue;
   for (const field of config.fields) fieldsHost.append(createModuleField(field));
+  void loadModuleRelationOptions(moduleName);
   const nameInput=form.elements.namedItem("name");
   const slugInput=form.elements.namedItem("slug");
   if (nameInput&&slugInput) {
@@ -1089,7 +1157,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     try {
       const payload={};
       for (const [key] of config.fields) {
-        const input=form.elements.namedItem(key); if (!input || key==="images" || key==="visibility") continue;
+        const input=form.elements.namedItem(key); if (!input || key==="images" || key==="visibility" || moduleRelationships[moduleName]?.[key]) continue;
         const dbKey=moduleDatabaseKey(moduleName,key);
         if(key==="service_information") payload[dbKey]=input.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);
         else if(key==="price") {
@@ -1138,6 +1206,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         result=await supabase.from(config.table).insert(payload).select("id").single();
       }
       if (result.error) throw result.error;
+      await saveModuleRelationships(moduleName,result.data.id);
       saved=true;
       resetModuleForm(moduleName); setModuleMessage(moduleName,config.title+(editId?" updated.":" created."),"success");
       await loadContentModule(moduleName);
