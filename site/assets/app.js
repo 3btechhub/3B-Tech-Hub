@@ -1142,14 +1142,14 @@ async function renderModuleList(moduleName,records) {
         }catch(error){setModuleMessage(moduleName,error.message||"Could not delete this record.","error");deleteButton.disabled=false;}
       });
       actions.append(deleteButton);
-      const marker=document.createComment("module-form-home");
-      form.parentNode.insertBefore(marker,form);
-      form._moduleFormPlaceholder=marker;
       row.append(form);
       setModuleMessage(moduleName,"");
       form.scrollIntoView({behavior:"smooth",block:"nearest"});
     };
-    row.addEventListener("click",openInlineEditor);
+    row.addEventListener("click",event=>{
+      if(event.target.closest("form"))return;
+      openInlineEditor();
+    });
     row.addEventListener("keydown",event=>{
       if(event.target!==row)return;
       if(event.key==="Enter"||event.key===" "){event.preventDefault();openInlineEditor();}
