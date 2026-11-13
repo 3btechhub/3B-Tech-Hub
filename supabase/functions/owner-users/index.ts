@@ -146,8 +146,10 @@ Deno.serve(async (request: Request) => {
       if (!roleConfig?.is_active) return response({ error: "This role is inactive." }, 400, origin);
       const { data: targetData, error: targetError } = await admin.auth.admin.getUserById(body.userId);
       if (targetError || !targetData.user) return response({ error: "User not found." }, 404, origin);
-      if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail) {
-        return response({ error: "The primary Owner account is protected." }, 403, origin);
+      const { data: targetRole, error: targetRoleError } = await admin.from("user_roles").select("role").eq("user_id", body.userId).maybeSingle();
+      if (targetRoleError) throw targetRoleError;
+      if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail || targetRole?.role === "owner") {
+        return response({ error: "Owner accounts are protected." }, 403, origin);
       }
       const { error: deleteError } = await admin.from("user_roles").delete().eq("user_id", body.userId).neq("role", "owner");
       if (deleteError) throw deleteError;
@@ -167,8 +169,10 @@ Deno.serve(async (request: Request) => {
       }
       const { data: targetData, error: targetError } = await admin.auth.admin.getUserById(body.userId);
       if (targetError || !targetData.user) return response({ error: "User not found." }, 404, origin);
-      if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail) {
-        return response({ error: "The primary Owner account cannot be blocked." }, 403, origin);
+      const { data: targetRole, error: targetRoleError } = await admin.from("user_roles").select("role").eq("user_id", body.userId).maybeSingle();
+      if (targetRoleError) throw targetRoleError;
+      if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail || targetRole?.role === "owner") {
+        return response({ error: "Owner accounts cannot be blocked." }, 403, origin);
       }
       const { error } = await admin.auth.admin.updateUserById(body.userId, {
         ban_duration: body.blocked ? "876000h" : "none",
@@ -182,8 +186,10 @@ Deno.serve(async (request: Request) => {
       if (!validUuid(body.userId)) return response({ error: "Invalid user." }, 400, origin);
       const { data: targetData, error: targetError } = await admin.auth.admin.getUserById(body.userId);
       if (targetError || !targetData.user?.email) return response({ error: "User not found." }, 404, origin);
-      if (targetData.user.email.toLowerCase() === primaryOwnerEmail) {
-        return response({ error: "Use the primary Owner's own account recovery flow." }, 403, origin);
+      const { data: targetRole, error: targetRoleError } = await admin.from("user_roles").select("role").eq("user_id", body.userId).maybeSingle();
+      if (targetRoleError) throw targetRoleError;
+      if (targetData.user.email.toLowerCase() === primaryOwnerEmail || targetRole?.role === "owner") {
+        return response({ error: "Use the Owner's own account recovery flow." }, 403, origin);
       }
       const { error } = await admin.auth.resetPasswordForEmail(targetData.user.email, { redirectTo });
       if (error) throw error;
