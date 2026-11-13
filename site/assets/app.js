@@ -859,7 +859,7 @@ const sharedDetailFields = [
 const dashboardContentModules = {
   services: { table:"services", title:"Service", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
-    ["category","Category","select",false,["Buy & Sell","Setup & Installation","Repair & Maintenance"]],["visibility","Visibility","select",false,["visible","hidden"]]
+    ["category","Category","select",false,["Buy & Sell","Home Delivery","Setup & Installation","Repair & Maintenance"]],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["slug","category","visibility"] },
   products: { table:"products", title:"Product", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
