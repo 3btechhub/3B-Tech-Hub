@@ -48,7 +48,7 @@ async function renderRoute(requestedPath, { replace = false } = {}) {
   document.documentElement.lang = "en";
   document.documentElement.dir = "rtl";
   const homeLink = document.getElementById("home-menu-link");
-  if (homeLink) homeLink.hidden = details.view === "home";
+  if (homeLink) homeLink.hidden = false;
   const robotsMeta = document.querySelector('meta[name="robots"]');
   if (details.view === "dashboard") {
     const meta = robotsMeta || document.head.appendChild(document.createElement("meta"));
