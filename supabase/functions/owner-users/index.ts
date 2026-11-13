@@ -1,7 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const allowedOrigins = new Set(["https://3btechhub.github.io"]);
-const allowedRoles = new Set(["admin", "member"]);
+const allowedRoles = new Set(["member", "visitor"]);
 const primaryOwnerEmail = "3btechhub@gmail.com";
 const redirectTo = "https://3btechhub.github.io/3btechhub/account/";
 
@@ -75,6 +75,8 @@ Deno.serve(async (request: Request) => {
       return response({ error: "Invalid request body." }, 400, origin);
     }
 
+    if (body.action === "health") return response({ ok: true }, 200, origin);
+
     if (body.action === "list") {
       const page = Math.max(1, Math.min(1000, Number.isInteger(body.page) ? body.page : 1));
       const perPage = Math.max(1, Math.min(50, Number.isInteger(body.perPage) ? body.perPage : 50));
@@ -87,15 +89,25 @@ Deno.serve(async (request: Request) => {
         : { data: [], error: null };
       if (rolesError) throw rolesError;
       const roleByUser = new Map((roles || []).map((row) => [row.user_id, row.role]));
+      const { data: profiles, error: profilesError } = ids.length
+        ? await admin.from("user_profiles").select("user_id,display_name,phone").in("user_id", ids)
+        : { data: [], error: null };
+      if (profilesError) throw profilesError;
+      const profileByUser = new Map((profiles || []).map((row) => [row.user_id, row]));
       return response({
-        users: users.map((user) => ({
+        users: users.map((user) => {
+          const profile = profileByUser.get(user.id) || {};
+          return {
           id: user.id,
           email: user.email || "",
+          full_name: profile.display_name || user.user_metadata?.full_name || user.user_metadata?.name || "",
+          phone: profile.phone || "",
+          email_confirmed_at: user.email_confirmed_at || null,
           created_at: user.created_at,
           last_sign_in_at: user.last_sign_in_at,
           banned_until: user.banned_until,
           role: roleByUser.get(user.id) || "member",
-        })),
+        };}),
         page,
         perPage,
         total: data.total ?? users.length,
@@ -107,9 +119,14 @@ Deno.serve(async (request: Request) => {
       const role = typeof body.role === "string" ? body.role : "member";
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return response({ error: "Enter a valid email address." }, 400, origin);
       if (email === primaryOwnerEmail || !allowedRoles.has(role)) return response({ error: "This role or account cannot be invited." }, 400, origin);
+      const { data: roleConfig, error: roleConfigError } = await admin.from("app_roles").select("is_active").eq("slug", role).maybeSingle();
+      if (roleConfigError) throw roleConfigError;
+      if (!roleConfig?.is_active) return response({ error: "This role is inactive." }, 400, origin);
       const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { redirectTo });
       if (error) throw error;
       if (!data.user) throw new Error("Invite did not return a user.");
+      const { error: roleDeleteError } = await admin.from("user_roles").delete().eq("user_id", data.user.id).neq("role", "owner");
+      if (roleDeleteError) throw roleDeleteError;
       const { error: roleInsertError } = await admin.from("user_roles").insert({
         user_id: data.user.id,
         role,
@@ -124,10 +141,15 @@ Deno.serve(async (request: Request) => {
       if (!validUuid(body.userId) || typeof body.role !== "string" || !allowedRoles.has(body.role)) {
         return response({ error: "Invalid user or role." }, 400, origin);
       }
+      const { data: roleConfig, error: roleConfigError } = await admin.from("app_roles").select("is_active").eq("slug", body.role).maybeSingle();
+      if (roleConfigError) throw roleConfigError;
+      if (!roleConfig?.is_active) return response({ error: "This role is inactive." }, 400, origin);
       const { data: targetData, error: targetError } = await admin.auth.admin.getUserById(body.userId);
       if (targetError || !targetData.user) return response({ error: "User not found." }, 404, origin);
-      if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail) {
-        return response({ error: "The primary Owner account is protected." }, 403, origin);
+      const { data: targetRole, error: targetRoleError } = await admin.from("user_roles").select("role").eq("user_id", body.userId).maybeSingle();
+      if (targetRoleError) throw targetRoleError;
+      if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail || targetRole?.role === "owner") {
+        return response({ error: "Owner accounts are protected." }, 403, origin);
       }
       const { error: deleteError } = await admin.from("user_roles").delete().eq("user_id", body.userId).neq("role", "owner");
       if (deleteError) throw deleteError;
@@ -147,8 +169,10 @@ Deno.serve(async (request: Request) => {
       }
       const { data: targetData, error: targetError } = await admin.auth.admin.getUserById(body.userId);
       if (targetError || !targetData.user) return response({ error: "User not found." }, 404, origin);
-      if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail) {
-        return response({ error: "The primary Owner account cannot be blocked." }, 403, origin);
+      const { data: targetRole, error: targetRoleError } = await admin.from("user_roles").select("role").eq("user_id", body.userId).maybeSingle();
+      if (targetRoleError) throw targetRoleError;
+      if ((targetData.user.email || "").toLowerCase() === primaryOwnerEmail || targetRole?.role === "owner") {
+        return response({ error: "Owner accounts cannot be blocked." }, 403, origin);
       }
       const { error } = await admin.auth.admin.updateUserById(body.userId, {
         ban_duration: body.blocked ? "876000h" : "none",
@@ -162,8 +186,10 @@ Deno.serve(async (request: Request) => {
       if (!validUuid(body.userId)) return response({ error: "Invalid user." }, 400, origin);
       const { data: targetData, error: targetError } = await admin.auth.admin.getUserById(body.userId);
       if (targetError || !targetData.user?.email) return response({ error: "User not found." }, 404, origin);
-      if (targetData.user.email.toLowerCase() === primaryOwnerEmail) {
-        return response({ error: "Use the primary Owner's own account recovery flow." }, 403, origin);
+      const { data: targetRole, error: targetRoleError } = await admin.from("user_roles").select("role").eq("user_id", body.userId).maybeSingle();
+      if (targetRoleError) throw targetRoleError;
+      if (targetData.user.email.toLowerCase() === primaryOwnerEmail || targetRole?.role === "owner") {
+        return response({ error: "Use the Owner's own account recovery flow." }, 403, origin);
       }
       const { error } = await admin.auth.resetPasswordForEmail(targetData.user.email, { redirectTo });
       if (error) throw error;

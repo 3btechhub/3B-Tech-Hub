@@ -42,4 +42,4 @@ jobs:
           grep -q "signInWithPassword" site/assets/app.js
           grep -q "resetPasswordForEmail" site/assets/app.js
           ! grep -R -E "SUPABASE_SECRET_KEY|service_role" site
-          ! grep -R -E "country-router|language-select|region-select|ipwho\\.is|preferred_locale|countryContextReady" site
+          ! grep -R -E "country-router|region-select|ipwho\\.is|preferred_locale|countryContextReady" site

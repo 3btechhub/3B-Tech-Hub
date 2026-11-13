@@ -2,8 +2,8 @@ import { initRoutePage } from "./app.js";
 
 const BASE = "/3btechhub/";
 const main = document.getElementById("app-main");
-const viewFiles = { home:"home.html", account:"account.html", profile:"profile.html", dashboard:"dashboard.html" };
-const titles = { home:"3B TECH HUB", account:"Account | 3B TECH HUB", profile:"My Account | 3B TECH HUB", dashboard:"Dashboard | 3B TECH HUB" };
+const viewFiles = { home:"home.html", account:"account.html", profile:"profile.html", dashboard:"dashboard.html", catalogue:"catalogue.html" };
+const titles = { home:"3B TECH HUB", account:"Account | 3B TECH HUB", profile:"Profile | 3B TECH HUB", dashboard:"Dashboard | 3B TECH HUB", catalogue:"3B TECH HUB" };
 
 function normalizedPath(value) {
   const url = new URL(value, window.location.origin);
@@ -17,6 +17,7 @@ function routeDetails(path) {
   const first = pathname.slice(BASE.length).split("/").filter(Boolean)[0] || "";
   if (first === "login") return { view:"account" };
   if (["home","account","profile","dashboard"].includes(first)) return { view:first };
+  if (["services","products","workshops","technicians","contacts"].includes(first)) { const slugPart=pathname.slice(BASE.length).split("/").filter(Boolean)[1] || ""; return { view:"catalogue", module:first, slug:slugPart ? decodeURIComponent(slugPart) : "" }; }
   return { view:"home" };
 }
 function resolveFragmentLinks(container, routePath) {
@@ -39,13 +40,15 @@ async function renderRoute(requestedPath, { replace = false } = {}) {
   for (const attribute of Array.from(source.attributes)) if (attribute.name !== "id") main.setAttribute(attribute.name, attribute.value);
   main.id = "app-main";
   main.dataset.view = details.view;
+  if (details.module) main.dataset.module=details.module; else delete main.dataset.module;
+  if (details.slug) main.dataset.slug=details.slug; else delete main.dataset.slug;
   main.innerHTML = source.innerHTML;
   resolveFragmentLinks(main, path);
   document.title = titles[details.view];
   document.documentElement.lang = "en";
-  document.documentElement.dir = "ltr";
+  document.documentElement.dir = "rtl";
   const homeLink = document.getElementById("home-menu-link");
-  if (homeLink) homeLink.hidden = details.view === "home";
+  if (homeLink) homeLink.hidden = false;
   const robotsMeta = document.querySelector('meta[name="robots"]');
   if (details.view === "dashboard") {
     const meta = robotsMeta || document.head.appendChild(document.createElement("meta"));

@@ -1,7 +1,10 @@
 import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
+import { initCataloguePage } from "./catalogue.js";
+import { initExtendedDashboard } from "./admin-extended.js";
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const accountMenuLink = document.querySelector("#login-menu-link");
+const profileMenuLink = document.querySelector("#profile-menu-link");
 const dashboardMenuLink = document.querySelector("#dashboard-menu-link");
 const themeToggle = document.querySelector("#theme-toggle");
 const savedTheme = localStorage.getItem("3b-theme");
@@ -14,10 +17,10 @@ function addTextElement(parent, tag, className, value) {
   return node;
 }
 
-const translations = { en: {home:"Home",profile:"Profile",login:"Account",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode",overview:"Overview",services:"Services",products:"Products",workshops:"Workshops",technicians:"Technicians",audit:"Audit",user:"User",role:"Role",permission:"Permission",settings:"Settings",users:"Users",refresh:"Refresh",auditHistory:"Audit History",inviteUser:"Invite User",userType:"User Type",emailAddress:"Email Address",sendInvitation:"Send Invitation",refreshUsers:"Refresh Users",userList:"User List",roleAssignments:"Role Assignments",permissionMatrix:"Permission Matrix",websiteSettings:"Website Settings",websiteTitle:"Website Title",logoUrl:"Logo URL (optional)",saveSettings:"Save Settings",signIn:"Sign In",forgotPassword:"Forgot password?",createAccount:"Create account",verificationCode:"Verification Code",name:"Name",email:"Email",phoneNumber:"Phone Number",password:"Password",changePassword:"Change Password",edit:"Edit",currentPassword:"Current Password",newPassword:"New Password",confirmPassword:"Confirm New Password",updatePassword:"Update Password",verifyCodeReset:"Verify Code & Reset Password",loginAccount:"Login Account"} };
+const translations = { en: {home:"Home",profile:"Profile",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode",overview:"Overview",services:"Services",products:"Products",workshops:"Workshops",technicians:"Technicians",contacts:"Contacts",audit:"Audits & Logs",user:"User",role:"Role",permission:"Permission",settings:"Settings",users:"Users",refresh:"Refresh",auditHistory:"Audit History",inviteUser:"Invite User",userType:"User Type",emailAddress:"Email Address",sendInvitation:"Send Invitation",refreshUsers:"Refresh Users",userList:"User List",roleAssignments:"Role Assignments",permissionMatrix:"Permission Matrix",websiteSettings:"Website Settings",websiteTitle:"Website Title",logoUrl:"Logo URL (optional)",saveSettings:"Save Settings",signIn:"Sign In",forgotPassword:"Forgot password?",createAccount:"Create account",verificationCode:"Verification Code",name:"Name",email:"Email",phoneNumber:"Phone Number",password:"Password",changePassword:"Change Password",edit:"Edit",currentPassword:"Current Password",newPassword:"New Password",confirmPassword:"Confirm New Password",updatePassword:"Update Password",verifyCodeReset:"Verify Code & Reset Password",loginAccount:"Login Account"} };
 function applyEnglishText() {
   document.documentElement.lang = "en";
-  document.documentElement.dir = "ltr";
+  document.documentElement.dir = "rtl";
   document.querySelectorAll("[data-label]").forEach((element) => { const value=translations.en[element.dataset.label]; if(value) element.textContent=value; });
   document.querySelectorAll("[data-placeholder]").forEach((element) => { const value=translations.en[element.dataset.placeholder]; if(value) element.placeholder=value; });
   document.querySelectorAll("[data-aria-label]").forEach((element) => { const value=translations.en[element.dataset.ariaLabel]; if(value) element.setAttribute("aria-label",value); });
@@ -51,21 +54,10 @@ function closeSiteMenu() {
   menuButton.setAttribute("aria-label", "Open menu");
 }
 async function setMenuSession(session) {
-  if (accountMenuLink) {
-    const destination = new URL(session ? "profile/" : "account/", ROOT_URL);
-    accountMenuLink.href = destination.href;
-    accountMenuLink.hidden = false;
-  }
-  if (logoutMenuLink) logoutMenuLink.hidden = !session;
-  if (dashboardMenuLink) {
-    dashboardMenuLink.hidden = true;
-    if (session?.user?.id) {
-      const { data, error } = await supabase
-        .from("user_roles").select("role")
-        .eq("user_id", session.user.id).in("role", ["owner", "admin"]).limit(1).maybeSingle();
-      if (!error && data?.role) dashboardMenuLink.hidden = false;
-    }
-  }
+  if (accountMenuLink) { accountMenuLink.href=new URL("account/",ROOT_URL).href; accountMenuLink.hidden=Boolean(session); }
+  if (profileMenuLink) profileMenuLink.hidden=!session;
+  if (logoutMenuLink) logoutMenuLink.hidden=!session;
+  if (dashboardMenuLink) { dashboardMenuLink.hidden=true; if(session?.user?.id){const {data,error}=await supabase.from("user_roles").select("role").eq("user_id",session.user.id).eq("role","owner").maybeSingle();if(!error&&data?.role==="owner")dashboardMenuLink.hidden=false;} }
 }
 // Load authentication separately so a Supabase CDN issue cannot disable the menu.
 const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
@@ -76,13 +68,15 @@ applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 const homeCatalogModules = [
   { key:"services", table:"services", title:"Services", icon:"🔧", published:["status","active"], columns:"name,slug,description,category,photo_url" },
   { key:"products", table:"products", title:"Products", icon:"📦", published:["status","active"], columns:"name,slug,description,category,photo_url" },
-  { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name,slug,description,location,trainer,category,photo_url" },
-  { key:"technicians", table:"technicians", title:"Technicians", icon:"", published:["is_published",true], columns:"name,slug,description,skill,category,photo_url" }
+  { key:"workshops", table:"workshops", title:"Workshops", icon:"🎓", published:["status","published"], columns:"name:title,slug,description,location,trainer,category,photo_url" },
+  { key:"technicians", table:"technicians", title:"Technicians", icon:"", published:["is_published",true], columns:"name,slug,description,skill,category,photo_url" },
+  { key:"contacts", table:"contacts", title:"Contacts", icon:"☎", published:null, columns:"name,slug,value,type" }
 ];
 
 function renderHomeCard(module, record) {
-  const card=document.createElement("article");
+  const card=document.createElement("a");
   card.className="home-content-card";
+  card.href="/3btechhub/"+module.key+"/"+encodeURIComponent(record.slug||"")+"/";
   const visual=document.createElement("div");
   visual.className="home-content-visual"+(module.key==="technicians"?" home-content-visual--person":"");
   const fallback=document.createElement("span");
@@ -102,7 +96,7 @@ function renderHomeCard(module, record) {
   const title=document.createElement("h3");
   title.textContent=record.name||record.title||"Untitled";
   body.append(title);
-  const detail=module.key==="technicians"?record.skill:module.key==="workshops"?(record.location||record.category):record.category;
+  const detail=module.key==="contacts"?record.type:module.key==="technicians"?record.skill:module.key==="workshops"?(record.location||record.category):record.category;
   if(detail) {
     const meta=document.createElement("p");
     meta.textContent=detail;
@@ -120,7 +114,7 @@ async function loadHomeCatalog() {
     if(!target) continue;
     try {
       let query=supabase.from(module.table).select(module.columns).limit(6);
-      query=query.eq(module.published[0],module.published[1]);
+      if(module.published) query=query.eq(module.published[0],module.published[1]);
       const {data,error}=await query;
       if(error) throw error;
       target.replaceChildren();
@@ -144,27 +138,31 @@ async function loadHomeCatalog() {
 }
 
 async function applyPublicSiteSettings() {
-  if (document.querySelector("#app-main[data-view=\"dashboard\"]")) return;
-  const { data, error } = await supabase
-    .from("site_settings")
-    .select("setting_value")
-    .eq("setting_key", "site_profile")
-    .eq("is_public", true)
-    .maybeSingle();
-  if (error || !data?.setting_value || typeof data.setting_value !== "object") return;
-  const settings = data.setting_value;
+  const [{data,error},{data:sectionsData}] = await Promise.all([
+    supabase.from("site_settings").select("setting_value").eq("setting_key","site_profile").eq("is_public",true).maybeSingle(),
+    supabase.from("site_settings").select("setting_value").eq("setting_key","home_sections").eq("is_public",true).maybeSingle()
+  ]);
+  const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
+  const sections=sectionsData?.setting_value&&typeof sectionsData.setting_value==="object"?sectionsData.setting_value:{};
+  document.querySelectorAll("[data-home-section]").forEach(section=>{const key=section.dataset.homeSection;if(typeof sections[key]==="boolean")section.hidden=!sections[key];});
   const websiteTitle = typeof settings.website_title === "string" && settings.website_title.trim()
     ? settings.website_title.trim() : "3B TECH HUB";
   document.querySelectorAll(".brand-title, .home-hero h1, .home-main h1").forEach((node) => { node.textContent = websiteTitle; });
   document.title = websiteTitle;
-  const brand = document.querySelector(".brand");
-  if (brand && typeof settings.logo_url === "string" && /^https?:\/\//i.test(settings.logo_url)) {
-    const logo = document.createElement("img");
-    logo.src = settings.logo_url;
-    logo.alt = websiteTitle;
-    logo.className = "brand-image";
-    const mark = brand.querySelector(".brand-mark");
-    if (mark) mark.replaceWith(logo);
+  const brandLogo = document.querySelector(".brand-logo");
+  if (brandLogo) {
+    if (typeof settings.logo_url === "string" && /^https?:\/\//i.test(settings.logo_url)) {
+      const logo = document.createElement("img");
+      logo.src = settings.logo_url;
+      logo.alt = websiteTitle;
+      logo.className = "brand-image";
+      brandLogo.replaceChildren(logo);
+    } else {
+      const mark=document.createElement("span");
+      mark.className="brand-mark";
+      mark.textContent="3B";
+      brandLogo.replaceChildren(mark);
+    }
   }
 }
 
@@ -193,6 +191,12 @@ export async function initRoutePage() {
   window.__routeAuthSubscriptions?.forEach((subscription) => subscription.unsubscribe());
   window.__routeAuthSubscriptions = [];
   applyEnglishText();
+  const visitorKeyName="3b-visitor-key";let visitorKey=localStorage.getItem(visitorKeyName);if(!visitorKey){visitorKey=crypto.randomUUID();localStorage.setItem(visitorKeyName,visitorKey);}
+  const ua=navigator.userAgent,device=/tablet|ipad/i.test(ua)?"tablet":/mobile|android|iphone/i.test(ua)?"mobile":"desktop";
+  const os=/android/i.test(ua)?"Android":/iphone|ipad|ios/i.test(ua)?"iOS":/windows/i.test(ua)?"Windows":/mac os/i.test(ua)?"macOS":/linux/i.test(ua)?"Linux":"unknown";
+  const browser=/edg\//i.test(ua)?"Edge":/firefox\//i.test(ua)?"Firefox":/chrome\//i.test(ua)?"Chrome":/safari\//i.test(ua)?"Safari":"unknown";
+  void supabase.from("visitor_analytics").insert({visitor_key:visitorKey,page_path:location.pathname,referrer:document.referrer||"",device,operating_system:os,browser});
+  if(document.querySelector('#app-main[data-view="catalogue"]')){await applyPublicSiteSettings();await initCataloguePage(supabase,document.getElementById("app-main").dataset.module,document.getElementById("app-main").dataset.slug||"");return;}
   const form = document.querySelector("#auth-form");
 
 if (form) {
@@ -536,24 +540,28 @@ if (ownerDashboard) {
   } else {
     const { data: ownerRole, error: roleError } = await supabase
       .from("user_roles").select("role")
-      .eq("user_id", authData.user.id).in("role", ["owner", "admin"]).limit(1).maybeSingle();
-    if (roleError || !["owner", "admin"].includes(ownerRole?.role)) {
+      .eq("user_id", authData.user.id).eq("role", "owner").maybeSingle();
+    if (roleError || ownerRole?.role !== "owner") {
       window.navigateSiteRoute(new URL("profile/", ROOT_URL).pathname, { replace: true });
     } else {
-      currentDashboardRole = ownerRole.role;
-      if (currentDashboardRole !== "owner") {
-        for (const moduleName of ["user", "role", "permission", "settings"]) {
-          document.querySelector(`[data-dashboard-tab="${moduleName}"]`)?.remove();
-          document.querySelector(`[data-dashboard-panel="${moduleName}"]`)?.remove();
-        }
-      }
+      currentDashboardRole = "owner";
       const ownerEmail = document.querySelector("#dashboard-owner-email");
       if (ownerEmail) ownerEmail.textContent = authData.user.email || "";
-      const resources = [
-        ["user_roles", "dashboard-users-count"],
-        ["audit_logs", "dashboard-audit-count"],
-        ["site_settings", "dashboard-settings-count"],
-      ];
+      const resources = [["user_roles","dashboard-users-count"],["services","dashboard-services-count"],["products","dashboard-products-count"],["workshops","dashboard-workshops-count"],["technicians","dashboard-technicians-count"],["contacts","dashboard-contacts-count"],["app_roles","dashboard-roles-count"],["permissions","dashboard-permissions-count"]];
+      const health=document.getElementById("dashboard-health-status");
+      if(health){health.replaceChildren();const checks=[["Website","Online",true],["Supabase / Database","Checking…",null],["Authentication","Checking…",null],["Storage","Checking…",null],["Backend services","Checking…",null]];
+        const [databaseCheck,authCheck,storageCheck,backendCheck]=await Promise.all([
+          supabase.from("site_settings").select("setting_key").limit(1),
+          supabase.auth.getUser(),
+          supabase.storage.from("site-media").list("",{limit:1}),
+          supabase.functions.invoke("owner-users",{body:{action:"health"}})
+        ]);
+        checks[1]=["Supabase / Database",databaseCheck.error?"Unavailable":"Connected",!databaseCheck.error];
+        checks[2]=["Authentication",authCheck.error?"Unavailable":"Available",!authCheck.error];
+        checks[3]=["Storage",storageCheck.error?"Unavailable":"Connected",!storageCheck.error];
+        checks[4]=["Backend services",backendCheck.error?"Unavailable":"Available",!backendCheck.error];
+        for(const [label,value,ok] of checks){const card=document.createElement("section");card.className="dashboard-card";addTextElement(card,"h3","",label);addTextElement(card,"p",ok===true?"health-ok":ok===false?"health-error":"muted",value);health.append(card);}
+      }
       const results = await Promise.all(resources.map(async ([table, target]) => {
         const { count, error } = await supabase.from(table).select("*", { count: "exact", head: true });
         const element = document.getElementById(target);
@@ -586,13 +594,12 @@ async function callOwnerUsers(payload) {
 function renderRoleSummary(users) {
   if (!roleSummaryList) return;
   roleSummaryList.replaceChildren();
-  const roles = ["owner", "admin", "member", "visitor"];
+  const roles = ["owner", "member", "visitor"];
   for (const role of roles) {
     const row = document.createElement("article");
     row.className = "admin-list-row";
     const count = users.filter((user) => {
-      const normalized = user.role === "owner" ? "owner" : user.role === "admin" ? "admin" : "member";
-      return normalized === role;
+      return (user.role || "member") === role;
     }).length;
     addTextElement(row, "strong", "", role.charAt(0).toUpperCase() + role.slice(1));
     addTextElement(row, "span", "", String(count) + (count === 1 ? " account" : " accounts"));
@@ -608,19 +615,23 @@ function renderUserList(users) {
     return;
   }
 
-  const roles = ["member", "admin"];
+  const roles = ["member", "visitor"];
   for (const user of users) {
     const row = document.createElement("article");
     row.className = "admin-list-row";
     const primary = document.createElement("div");
-    addTextElement(primary, "strong", "", user.email || "Unknown email");
+    addTextElement(primary, "strong", "", user.full_name || user.email || "Unknown user");
+    addTextElement(primary, "span", "muted", user.email || "");
     const blocked = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
     const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Never signed in";
     addTextElement(primary, "span", "muted", [
-      user.role === "owner" ? "Owner" : user.role === "admin" ? "Admin" : "Member",
+      user.role === "owner" ? "Owner" : user.role === "visitor" ? "Visitor" : "Member",
       blocked ? "Blocked" : "Active",
+      user.email_confirmed_at ? "Email verified" : "Email not verified",
+      user.phone ? "Phone: " + user.phone : "",
+      "Created: " + (user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"),
       "Last sign-in: " + lastSignIn,
-    ].join(" · "));
+    ].filter(Boolean).join(" · "));
     row.append(primary);
 
     const actions = document.createElement("div");
@@ -638,7 +649,7 @@ function renderUserList(users) {
       option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
       roleSelect.append(option);
     }
-    roleSelect.value = ["admin", "member"].includes(user.role) ? user.role : "member";
+    roleSelect.value = ["member", "visitor"].includes(user.role) ? user.role : "member";
     roleSelect.disabled = user.role === "owner";
     actions.append(roleSelect);
 
@@ -749,59 +760,46 @@ const siteSettingsMessage = document.querySelector("#site-settings-message");
 async function loadSiteSettingsForm() {
   if (!siteSettingsForm || currentDashboardRole !== "owner") return;
   if (siteSettingsMessage) siteSettingsMessage.textContent = "Loading website settings…";
-  const { data, error } = await supabase
-    .from("site_settings")
-    .select("setting_value")
-    .eq("setting_key", "site_profile")
-    .maybeSingle();
-  if (error) {
-    if (siteSettingsMessage) siteSettingsMessage.textContent = error.message || "Could not load website settings.";
-    return;
-  }
-  const settings = data?.setting_value && typeof data.setting_value === "object" ? data.setting_value : {};
-  siteSettingsForm.elements.website_title.value = typeof settings.website_title === "string" ? settings.website_title : "3B TECH HUB";
-  siteSettingsForm.elements.logo_url.value = typeof settings.logo_url === "string" ? settings.logo_url : "";
-  
-  if (siteSettingsMessage) siteSettingsMessage.textContent = "Website settings loaded.";
+  const [{data,error},{data:sectionData}] = await Promise.all([
+    supabase.from("site_settings").select("setting_value").eq("setting_key","site_profile").maybeSingle(),
+    supabase.from("site_settings").select("setting_value").eq("setting_key","home_sections").maybeSingle()
+  ]);
+  if (error) { if (siteSettingsMessage) siteSettingsMessage.textContent=error.message||"Could not load website settings."; return; }
+  const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
+  const sections=sectionData?.setting_value&&typeof sectionData.setting_value==="object"?sectionData.setting_value:{};
+  siteSettingsForm.elements.website_title.value=typeof settings.website_title==="string"?settings.website_title:"3B TECH HUB";
+  siteSettingsForm.elements.logo_url.value=typeof settings.logo_url==="string"?settings.logo_url:"";
+  const preview=document.getElementById("site-logo-preview");
+  if(preview&&settings.logo_url){preview.src=settings.logo_url;preview.hidden=false;}
+  for(const key of ["services","products","workshops","technicians","contacts"]){const field=siteSettingsForm.elements["section_"+key];if(field)field.checked=sections[key]!==false;}
+  if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings loaded.";
 }
-
-if (siteSettingsForm) {
-  siteSettingsForm.addEventListener("submit", async (event) => {
+if(siteSettingsForm){
+  document.getElementById("site-logo-remove")?.addEventListener("click",()=>{siteSettingsForm.dataset.removeLogo="true";siteSettingsForm.elements.logo_url.value="";siteSettingsForm.elements.logo_file.value="";const p=document.getElementById("site-logo-preview");if(p){p.removeAttribute("src");p.hidden=true;}});
+  siteSettingsForm.elements.logo_file?.addEventListener("change",()=>{const file=siteSettingsForm.elements.logo_file.files?.[0];if(file){const p=document.getElementById("site-logo-preview");if(p){p.src=URL.createObjectURL(file);p.hidden=false;}siteSettingsForm.dataset.removeLogo="false";}});
+  siteSettingsForm.addEventListener("submit",async(event)=>{
     event.preventDefault();
-    if (currentDashboardRole !== "owner") {
-      if (siteSettingsMessage) siteSettingsMessage.textContent = "Owner permission required.";
-      return;
-    }
-    const submit = document.querySelector("#site-settings-save");
-    const form = new FormData(siteSettingsForm);
-    const websiteTitle = String(form.get("website_title") || "").trim() || "3B TECH HUB";
-    const logoUrl = String(form.get("logo_url") || "").trim();
-    if (logoUrl) {
-      try { if (!["https:", "http:"].includes(new URL(logoUrl).protocol)) throw new Error("Invalid URL"); }
-      catch { if (siteSettingsMessage) siteSettingsMessage.textContent = "Logo URL must be a valid HTTP(S) address."; return; }
-    }
-    if (submit) submit.disabled = true;
-    if (siteSettingsMessage) siteSettingsMessage.textContent = "Saving website settings…";
-    try {
-      const { data: authData, error: authError } = await supabase.auth.getUser();
-      if (authError || !authData.user) throw new Error("Your session has expired. Sign in again.");
-      const settingValue = { website_title: websiteTitle, logo_url: logoUrl };
-      const { error } = await supabase.from("site_settings").upsert({
-        setting_key: "site_profile",
-        setting_value: settingValue,
-        is_public: true,
-        updated_by: authData.user.id,
-      }, { onConflict: "setting_key" });
-      if (error) throw error;
-      if (siteSettingsMessage) siteSettingsMessage.textContent = "Website settings saved.";
-    } catch (error) {
-      if (siteSettingsMessage) siteSettingsMessage.textContent = error.message || "Could not save website settings.";
-    } finally {
-      if (submit) submit.disabled = false;
-    }
+    if(currentDashboardRole!=="owner"){if(siteSettingsMessage)siteSettingsMessage.textContent="Owner permission required.";return;}
+    const submit=document.getElementById("site-settings-save"),form=new FormData(siteSettingsForm);
+    const websiteTitle=String(form.get("website_title")||"").trim()||"3B TECH HUB";
+    let logoUrl=String(form.get("logo_url")||"").trim();
+    const oldLogoUrl=logoUrl,file=siteSettingsForm.elements.logo_file.files?.[0];
+    if(logoUrl){try{if(!["https:","http:"].includes(new URL(logoUrl).protocol))throw new Error("Invalid URL");}catch{if(siteSettingsMessage)siteSettingsMessage.textContent="Logo URL must be a valid HTTP(S) address.";return;}}
+    if(submit)submit.disabled=true;if(siteSettingsMessage)siteSettingsMessage.textContent="Saving website settings…";
+    try{
+      const {data:authData,error:authError}=await supabase.auth.getUser();if(authError||!authData.user)throw new Error("Your session has expired. Sign in again.");
+      if(file){if(!file.type.startsWith("image/")||file.size>5*1024*1024)throw new Error("Choose an image up to 5 MB.");const path="branding/"+crypto.randomUUID()+"-"+file.name.replace(/[^a-zA-Z0-9._-]/g,"-");const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type});if(uploadError)throw uploadError;logoUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;}
+      if(siteSettingsForm.dataset.removeLogo==="true")logoUrl="";
+      const {error}=await supabase.from("site_settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(error)throw error;
+      const homeSections={};for(const key of ["services","products","workshops","technicians","contacts"])homeSections[key]=Boolean(siteSettingsForm.elements["section_"+key]?.checked);
+      const {error:sectionError}=await supabase.from("site_settings").upsert({setting_key:"home_sections",setting_value:homeSections,is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(sectionError)throw sectionError;
+      if(oldLogoUrl&&oldLogoUrl!==logoUrl){try{await removeStoredImage(oldLogoUrl);}catch(cleanupError){console.warn("Old logo cleanup failed.",cleanupError);}}
+      siteSettingsForm.dataset.removeLogo="false";if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings saved.";
+    }catch(error){if(siteSettingsMessage)siteSettingsMessage.textContent=error.message||"Could not save website settings.";}
+    finally{if(submit)submit.disabled=false;}
   });
 }
-if (siteSettingsForm) void loadSiteSettingsForm();
+if(siteSettingsForm)void loadSiteSettingsForm();
 
 
 // Core content modules: each module uses its existing Supabase table and RLS policies.
@@ -1008,7 +1006,7 @@ function renderModuleList(moduleName,records) {
   }
 }
 async function loadContentModule(moduleName) {
-  if (!ownerDashboard || !["owner","admin"].includes(currentDashboardRole)) return;
+  if (!ownerDashboard || currentDashboardRole !== "owner") return;
   const config=dashboardContentModules[moduleName];
   const container=document.querySelector('[data-module-list="'+moduleName+'"]');
   if (container) { container.replaceChildren(); addTextElement(container,"p","muted","Loading records…"); }
@@ -1035,7 +1033,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
   form.dataset.removePhoto="false"; form.dataset.slugManual="false";
   form.addEventListener("submit",async(event)=>{
     event.preventDefault();
-    if (!["owner","admin"].includes(currentDashboardRole)) { setModuleMessage(moduleName,"Admin permission required.","error"); return; }
+    if (currentDashboardRole !== "owner") { setModuleMessage(moduleName,"Owner permission required.","error"); return; }
     const submit=document.querySelector('[data-module-submit="'+moduleName+'"]'); submit.disabled=true; setModuleMessage(moduleName,"Saving…");
     let uploadedUrl="", oldPhotoUrl=form.dataset.currentPhotoUrl||"", saved=false;
     try {
@@ -1126,11 +1124,11 @@ dashboardTabs.forEach((tab, index) => {
 // Audit module: read-only recent administrative activity.
 const auditList = document.querySelector("#audit-log-list");
 async function loadAuditLogs() {
-  if (!auditList || !["owner", "admin"].includes(currentDashboardRole)) return;
+  if (!auditList || currentDashboardRole !== "owner") return;
   auditList.replaceChildren();
   const { data, error } = await supabase
     .from("audit_logs")
-    .select("id,action,resource_type,resource_id,metadata,created_at")
+    .select("id,actor_id,action,resource_type,resource_id,metadata,result,device,created_at")
     .order("created_at", { ascending: false })
     .limit(50);
   if (error) {
@@ -1146,7 +1144,7 @@ async function loadAuditLogs() {
     row.className = "admin-list-row";
     const title = [entry.action, entry.resource_type].filter(Boolean).join(" · ");
     addTextElement(row, "strong", "", title || "Activity");
-    const detail = [entry.resource_id ? "ID: " + entry.resource_id : "", entry.created_at ? new Date(entry.created_at).toLocaleString() : ""].filter(Boolean).join(" · ");
+    const detail = [entry.actor_id ? "Actor: " + entry.actor_id : "",entry.resource_id ? "Record: " + entry.resource_id : "",entry.result || "success",entry.device || "unknown",entry.created_at ? new Date(entry.created_at).toLocaleString() : ""].filter(Boolean).join(" · ");
     addTextElement(row, "span", "muted", detail);
     auditList.append(row);
   }
@@ -1155,7 +1153,10 @@ document.querySelector('[data-dashboard-tab="audit"]')?.addEventListener("click"
 document.querySelector("#audit-refresh")?.addEventListener("click", () => void loadAuditLogs());
 
 
-// Load only published records for the four public homepage sections.
+// Initialize extended Owner-only modules after core dashboard handlers.
+if(ownerDashboard&&currentDashboardRole==="owner")initExtendedDashboard(supabase,currentDashboardRole);
+
+// Load only published records for the five public homepage sections.
 void applyPublicSiteSettings();
   void loadHomeCatalog();
 }
