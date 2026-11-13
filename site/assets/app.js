@@ -174,7 +174,7 @@ async function applyPublicSiteSettings() {
   const intro=typeof introData?.setting_value?.content==="string"?introData.setting_value.content.trim():"";
   const introSection=document.getElementById("home-intro-section");
   const introContent=document.getElementById("home-intro-content");
-  if(introSection&&introContent){introContent.textContent=intro;introSection.hidden=!intro;}
+  if(introSection&&introContent){introContent.textContent=intro;introSection.hidden=!intro||sections.intro===false;}
   const websiteTitle = typeof settings.website_title === "string" && settings.website_title.trim()
     ? settings.website_title.trim() : "3B TECH HUB";
   document.querySelectorAll(".brand-title, .home-hero h1, .home-main h1").forEach((node) => { node.textContent = websiteTitle; });
@@ -614,182 +614,7 @@ if (ownerDashboard) {
 }
 
 
-// Owner-only user administration is performed by a JWT-verified Supabase Edge Function.
-const userInviteForm = document.querySelector("#user-invite-form");
-const userItems = document.querySelector("#user-admin-items");
-const userMessage = document.querySelector("#user-message");
-const roleSummaryList = document.querySelector("#role-summary-list");
-const userRefreshButton = document.querySelector("#user-refresh");
-
-async function callOwnerUsers(payload) {
-  const { data, error } = await supabase.functions.invoke("owner-users", { body: payload });
-  if (error) throw new Error(error.message || "User administration request failed.");
-  if (data?.error) throw new Error(data.error);
-  return data;
-}
-
-function renderRoleSummary(users) {
-  if (!roleSummaryList) return;
-  roleSummaryList.replaceChildren();
-  const roles = ["owner", "member", "visitor"];
-  for (const role of roles) {
-    const row = document.createElement("article");
-    row.className = "admin-list-row";
-    const count = users.filter((user) => {
-      return (user.role || "member") === role;
-    }).length;
-    addTextElement(row, "strong", "", role.charAt(0).toUpperCase() + role.slice(1));
-    addTextElement(row, "span", "", String(count) + (count === 1 ? " account" : " accounts"));
-    roleSummaryList.append(row);
-  }
-}
-
-function renderUserList(users) {
-  if (!userItems) return;
-  userItems.replaceChildren();
-  if (!users.length) {
-    addTextElement(userItems, "p", "muted", "No accounts found.");
-    return;
-  }
-
-  const roles = ["member", "visitor"];
-  for (const user of users) {
-    const row = document.createElement("article");
-    row.className = "admin-list-row";
-    const primary = document.createElement("div");
-    addTextElement(primary, "strong", "", user.full_name || user.email || "Unknown user");
-    addTextElement(primary, "span", "muted", user.email || "");
-    const blocked = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
-    const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Never signed in";
-    addTextElement(primary, "span", "muted", [
-      user.role === "owner" ? "Owner" : user.role === "visitor" ? "Visitor" : "Member",
-      blocked ? "Blocked" : "Active",
-      user.email_confirmed_at ? "Email verified" : "Email not verified",
-      user.phone ? "Phone: " + user.phone : "",
-      "Created: " + (user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"),
-      "Last sign-in: " + lastSignIn,
-    ].filter(Boolean).join(" · "));
-    row.append(primary);
-
-    const actions = document.createElement("div");
-    actions.className = "editor-actions";
-    const roleSelect = document.createElement("select");
-    roleSelect.setAttribute("aria-label", "Role for " + (user.email || user.id));
-    const ownerOption = document.createElement("option");
-    ownerOption.value = "owner";
-    ownerOption.textContent = "Owner";
-    ownerOption.disabled = true;
-    roleSelect.append(ownerOption);
-    for (const role of roles) {
-      const option = document.createElement("option");
-      option.value = role;
-      option.textContent = role.charAt(0).toUpperCase() + role.slice(1);
-      roleSelect.append(option);
-    }
-    roleSelect.value = ["member", "visitor"].includes(user.role) ? user.role : "member";
-    roleSelect.disabled = user.role === "owner";
-    actions.append(roleSelect);
-
-    const saveRole = document.createElement("button");
-    saveRole.type = "button";
-    saveRole.textContent = "Save Role";
-    saveRole.disabled = user.role === "owner";
-    saveRole.addEventListener("click", async () => {
-      saveRole.disabled = true;
-      try {
-        await callOwnerUsers({ action: "set-role", userId: user.id, role: roleSelect.value });
-        if (userMessage) userMessage.textContent = "Role updated for " + user.email + ".";
-        await loadOwnerUsers();
-      } catch (error) {
-        if (userMessage) userMessage.textContent = error.message || "Could not update role.";
-      } finally {
-        saveRole.disabled = user.role === "owner";
-      }
-    });
-    actions.append(saveRole);
-
-    const statusButton = document.createElement("button");
-    statusButton.type = "button";
-    statusButton.className = "secondary-button";
-    statusButton.textContent = blocked ? "Unblock" : "Block";
-    statusButton.disabled = user.role === "owner";
-    statusButton.addEventListener("click", async () => {
-      statusButton.disabled = true;
-      try {
-        await callOwnerUsers({ action: "set-status", userId: user.id, blocked: !blocked });
-        if (userMessage) userMessage.textContent = user.email + (blocked ? " has been unblocked." : " has been blocked.");
-        await loadOwnerUsers();
-      } catch (error) {
-        if (userMessage) userMessage.textContent = error.message || "Could not change account status.";
-      } finally {
-        statusButton.disabled = user.role === "owner";
-      }
-    });
-    actions.append(statusButton);
-
-    const resetButton = document.createElement("button");
-    resetButton.type = "button";
-    resetButton.className = "secondary-button";
-    resetButton.textContent = "Send Password Reset";
-    resetButton.disabled = user.role === "owner";
-    resetButton.addEventListener("click", async () => {
-      resetButton.disabled = true;
-      try {
-        await callOwnerUsers({ action: "reset-password", userId: user.id });
-        if (userMessage) userMessage.textContent = "Password reset email sent to " + user.email + ".";
-      } catch (error) {
-        if (userMessage) userMessage.textContent = error.message || "Could not send password reset.";
-      } finally {
-        resetButton.disabled = user.role === "owner";
-      }
-    });
-    actions.append(resetButton);
-    row.append(actions);
-    userItems.append(row);
-  }
-}
-
-async function loadOwnerUsers() {
-  if (!ownerDashboard || currentDashboardRole !== "owner" || !userItems) return;
-  if (userMessage) userMessage.textContent = "Loading users…";
-  try {
-    const result = await callOwnerUsers({ action: "list", page: 1, perPage: 50 });
-    const users = Array.isArray(result.users) ? result.users : [];
-    renderUserList(users);
-    renderRoleSummary(users);
-    const count = document.querySelector("#dashboard-users-count");
-    if (count) count.textContent = String(result.total ?? users.length);
-    if (userMessage) userMessage.textContent = "Showing " + users.length + " of " + (result.total ?? users.length) + " accounts.";
-  } catch (error) {
-    if (userMessage) userMessage.textContent = error.message || "Could not load users.";
-    if (userItems) userItems.replaceChildren();
-  }
-}
-
-if (userInviteForm) {
-  userInviteForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const submit = document.querySelector("#user-invite-submit");
-    const form = new FormData(userInviteForm);
-    const email = String(form.get("email") || "").trim();
-    const role = String(form.get("role") || "member");
-    if (submit) submit.disabled = true;
-    if (userMessage) userMessage.textContent = "Sending invitation…";
-    try {
-      await callOwnerUsers({ action: "invite", email, role });
-      userInviteForm.reset();
-      if (userMessage) userMessage.textContent = "Invitation sent to " + email + ".";
-      await loadOwnerUsers();
-    } catch (error) {
-      if (userMessage) userMessage.textContent = error.message || "Could not invite user.";
-    } finally {
-      if (submit) submit.disabled = false;
-    }
-  });
-}
-if (userRefreshButton) userRefreshButton.addEventListener("click", () => void loadOwnerUsers());
-if (ownerDashboard && userItems) void loadOwnerUsers();
-
+// User administration is handled by the shared Users module in admin-extended.js.
 // Owner-only website profile settings stored as a single public configuration record.
 const siteSettingsForm = document.querySelector("#site-settings-form");
 const siteSettingsMessage = document.querySelector("#site-settings-message");
@@ -811,7 +636,7 @@ async function loadSiteSettingsForm() {
   siteSettingsForm.elements.logo_url.value=typeof settings.logo_url==="string"?settings.logo_url:"";
   const preview=document.getElementById("site-logo-preview");
   if(preview&&settings.logo_url){preview.src=settings.logo_url;preview.hidden=false;}
-  for(const key of ["services","products","workshops","technicians","contacts"]){const field=siteSettingsForm.elements["section_"+key];if(field)field.checked=sections[key]!==false;}
+  for(const key of ["intro","services","products","workshops","technicians","contacts"]){const field=siteSettingsForm.elements["section_"+key];if(field)field.checked=sections[key]!==false;}
   if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings loaded.";
 }
 if(siteSettingsForm){
@@ -831,7 +656,7 @@ if(siteSettingsForm){
       if(file){if(!file.type.startsWith("image/")||file.size>5*1024*1024)throw new Error("Choose an image up to 5 MB.");const path="branding/"+crypto.randomUUID()+"-"+file.name.replace(/[^\w.-]+/g,"-");const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type});if(uploadError)throw uploadError;logoUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;}
       if(siteSettingsForm.dataset.removeLogo==="true")logoUrl="";
       const {error}=await supabase.from("site_settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(error)throw error;
-      const homeSections={};for(const key of ["services","products","workshops","technicians","contacts"])homeSections[key]=Boolean(siteSettingsForm.elements["section_"+key]?.checked);
+      const homeSections={};for(const key of ["intro","services","products","workshops","technicians","contacts"])homeSections[key]=Boolean(siteSettingsForm.elements["section_"+key]?.checked);
       const {error:sectionError}=await supabase.from("site_settings").upsert({setting_key:"home_sections",setting_value:homeSections,is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(sectionError)throw sectionError;
       const homeIntro=String(form.get("home_intro")||"").trim();
       const {error:introError}=await supabase.from("site_settings").upsert({setting_key:"home_intro",setting_value:{content:homeIntro},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(introError)throw introError;
@@ -1084,14 +909,7 @@ async function renderModuleList(moduleName,records) {
     primary.append(createModuleRecordVisual(moduleName,record.photo_url,record));
     const textContent=document.createElement("div"); textContent.className="module-record-text";
     addTextElement(textContent,"strong","",record.name||record.title||record.slug||"Untitled");
-    const details=config.columns.map((key)=>{
-      const value=key==="visibility"?recordVisibility(moduleName,record)
-        :key==="technician"?record.trainer:record[key];
-      return key.replaceAll("_"," ")+": "+moduleLabel(value);
-    }).join(" · ");
-    addTextElement(textContent,"span","muted",details);
-    primary.append(textContent);
-    row.append(primary);
+    row.append(textContent);
     row.classList.add("module-record-row--tap-edit");
     row.tabIndex=0;
     row.setAttribute("role","button");
