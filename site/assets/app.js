@@ -138,7 +138,6 @@ async function loadHomeCatalog() {
 }
 
 async function applyPublicSiteSettings() {
-  if (document.querySelector("#app-main[data-view=\"dashboard\"]")) return;
   const [{data,error},{data:sectionsData}] = await Promise.all([
     supabase.from("site_settings").select("setting_value").eq("setting_key","site_profile").eq("is_public",true).maybeSingle(),
     supabase.from("site_settings").select("setting_value").eq("setting_key","home_sections").eq("is_public",true).maybeSingle()
@@ -151,12 +150,19 @@ async function applyPublicSiteSettings() {
   document.querySelectorAll(".brand-title, .home-hero h1, .home-main h1").forEach((node) => { node.textContent = websiteTitle; });
   document.title = websiteTitle;
   const brandLogo = document.querySelector(".brand-logo");
-  if (brandLogo && typeof settings.logo_url === "string" && /^https?:\/\//i.test(settings.logo_url)) {
-    const logo = document.createElement("img");
-    logo.src = settings.logo_url;
-    logo.alt = websiteTitle;
-    logo.className = "brand-image";
-    brandLogo.replaceChildren(logo);
+  if (brandLogo) {
+    if (typeof settings.logo_url === "string" && /^https?:\/\//i.test(settings.logo_url)) {
+      const logo = document.createElement("img");
+      logo.src = settings.logo_url;
+      logo.alt = websiteTitle;
+      logo.className = "brand-image";
+      brandLogo.replaceChildren(logo);
+    } else {
+      const mark=document.createElement("span");
+      mark.className="brand-mark";
+      mark.textContent="3B";
+      brandLogo.replaceChildren(mark);
+    }
   }
 }
 
@@ -190,7 +196,7 @@ export async function initRoutePage() {
   const os=/android/i.test(ua)?"Android":/iphone|ipad|ios/i.test(ua)?"iOS":/windows/i.test(ua)?"Windows":/mac os/i.test(ua)?"macOS":/linux/i.test(ua)?"Linux":"unknown";
   const browser=/edg\//i.test(ua)?"Edge":/firefox\//i.test(ua)?"Firefox":/chrome\//i.test(ua)?"Chrome":/safari\//i.test(ua)?"Safari":"unknown";
   void supabase.from("visitor_analytics").insert({visitor_key:visitorKey,page_path:location.pathname,referrer:document.referrer||"",device,operating_system:os,browser});
-  if(document.querySelector('#app-main[data-view="catalogue"]')){await initCataloguePage(supabase,document.getElementById("app-main").dataset.module,document.getElementById("app-main").dataset.slug||"");return;}
+  if(document.querySelector('#app-main[data-view="catalogue"]')){await applyPublicSiteSettings();await initCataloguePage(supabase,document.getElementById("app-main").dataset.module,document.getElementById("app-main").dataset.slug||"");return;}
   const form = document.querySelector("#auth-form");
 
 if (form) {
