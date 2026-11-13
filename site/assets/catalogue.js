@@ -9,11 +9,11 @@ function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className
 function link(path,label){const a=el("a","section-view-all",label);a.href="/3btechhub/"+path+"/";return a;}
 function renderCard(item,def,module){
  const card=el("a","home-content-card");card.href="/3btechhub/"+module+"/"+encodeURIComponent(item.slug)+"/";
- if(item.photo_url){const visual=el("span","home-content-visual");const img=el("img");img.src=item.photo_url;img.alt="";img.loading="lazy";img.onerror=()=>img.remove();visual.append(img);card.append(visual);}
- else {const visual=el("span","home-content-visual");visual.append(el("span","home-content-fallback",def.icon));card.append(visual);}
+ const visual=el("span","home-content-visual");
+ visual.append(el("span","home-content-fallback",def.icon));
+ if(item.photo_url){const img=el("img");img.src=item.photo_url;img.alt="";img.loading="lazy";img.onerror=()=>img.remove();visual.append(img);}
  const body=el("span","home-content-card-body");body.append(el("strong","",item.name||"Untitled"));
- const detail=module==="contacts"?item.type:module==="technicians"?item.skill:module==="workshops"?item.location||item.category:item.category;
- if(detail)body.append(el("span","muted",detail));card.append(body);return card;
+ card.append(visual,body);return card;
 }
 export async function initCataloguePage(supabase,module,slug){
  const root=document.getElementById("catalogue-root");const def=definitions[module];if(!root||!def){if(root)root.textContent="Page not found.";return;}
