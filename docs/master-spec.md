@@ -19,7 +19,7 @@ Core principles:
 - Secure Authentication
 - Role & Permission Management
 - Responsive Design
-- RTL-first presentation
+- LTR-first presentation
 - Future LTR readiness
 - Maintainable, reusable and scalable components
 
@@ -308,7 +308,7 @@ Keep these as distinct concerns and interfaces.
 - Result
 - Device
 
-Visitor Analytics and administrative Activity Logs must use separate data and interfaces. IP-based geolocation is approximate, not GPS. Apply appropriate access controls and retention limits. Do not claim visitor analytics already exists unless verified.
+Visitor Analytics and administrative Activity Logs must use separate data and interfaces. Collect page views, unique/repeat visitors, timestamps, device, OS, browser and approximate Country/City using server-side IP geolocation. Never store raw IP addresses. Disclose that a geolocation provider processes the request IP; location is approximate, not GPS. Restrict reads to Owner and retain analytics for 90 days.
 
 ## 14. Settings Module
 
@@ -328,27 +328,17 @@ Provide five independent toggles:
 
 ## 15. RTL / LTR Direction Policy
 
-### 15.1 Current default: RTL Only
+### 15.1 Current default: LTR Only
 
-The entire website must currently render in **RTL (Right-to-Left)**. RTL is the only active display direction.
-
-Apply RTL to:
-- HTML document direction
-- Header and navigation
-- Dashboard and sidebar
-- Cards
-- Forms and tables
-- Buttons and inputs
-- Text flow, alignment, spacing and layout
+The entire website must currently render in **LTR (Left-to-Right)**. LTR is the only active display direction and the default on every page, including Header, Dashboard, forms, tables, cards, navigation and content detail pages.
 
 ### 15.2 Current UI restrictions
 - Do not display an RTL/LTR switch.
 - Do not display a direction selector.
-- Do not activate LTR now.
-- RTL is the sole current default and active direction.
+- LTR is the sole current default and active direction.
 
-### 15.3 Future LTR readiness
-Build the architecture so LTR can be enabled easily later, without redesigning the whole website or rebuilding components.
+### 15.3 Future RTL readiness
+Build the architecture so RTL can be enabled later without redesigning the whole website or rebuilding components.
 
 Requirements:
 - Use CSS Logical Properties.
@@ -358,9 +348,9 @@ Requirements:
 - Keep RTL and LTR compatibility in the component architecture.
 
 ### 15.4 Future activation
-Only after explicit approval may Settings expose LTR controls. A future version may support RTL, LTR and Auto Direction, including language-based automatic direction.
+Only after explicit approval may Settings expose direction controls or language-based automatic direction.
 
-**Fixed decision: RTL Only now; prepare the architecture for easy future LTR enablement.**
+**Fixed decision: LTR Only now; prepare the architecture for easy future RTL enablement.**
 
 ## 16. Route-Based View
 
@@ -417,7 +407,7 @@ Use only three semantic sizes for text, buttons, inputs, outputs and boxes:
 - Medium
 - Large
 
-Design must be responsive, clean, simple and professional, with consistent cards, reusable components, spacing and typography. The current layout is RTL-first.
+Design must be responsive, clean, simple and professional, with consistent cards, reusable components, spacing and typography. The current layout is LTR-first. Use distinct, semantically appropriate icons for different modules and actions; do not reuse one generic icon everywhere.
 
 ## 19. Security Architecture
 
@@ -445,7 +435,7 @@ Prepare the architecture for future:
 - Features
 - LTR Direction
 
-Architecture readiness does not authorize activation. Every new feature or scope change requires explicit user approval.
+Architecture readiness does not authorize activation. Every new feature or scope change requires explicit user approval. Use a distinct, semantically appropriate icon for each Dashboard module and content type.
 
 ## 21. Scope Control and Cleanup
 
@@ -469,7 +459,7 @@ Before deleting any database object, inspect dependencies, relationships, foreig
 6. Reusable
 7. Future-ready
 8. Responsive
-9. RTL-first
+9. LTR-first
 10. Permission-controlled
 
 ## 23. Project Change Approval Policy
@@ -491,5 +481,5 @@ Without explicit approval, do not change GitHub code, Supabase database, Storage
 
 **Project:** 3B TECH HUB  
 **Technology:** GitHub + Supabase  
-**Current Direction:** RTL Only  
-**Future Direction:** LTR-ready Architecture
+**Current Direction:** LTR Only  
+**Future Direction:** RTL-ready Architecture
