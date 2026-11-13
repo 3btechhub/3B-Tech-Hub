@@ -5,12 +5,45 @@ const definitions = {
   technicians: { title:"Technicians", table:"technicians", columns:"id,name,slug,description,skill,category,photo_url,is_published", filter:["is_published",true], icon:"👨‍🔧" },
   contacts: { title:"Contacts", table:"contacts", columns:"id,name,slug,value,type", filter:null, icon:"☎" }
 };
-function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
+// Choose a fallback from the item's name first; use the module icon only when no match exists.
+export function getItemFallbackIcon(name,moduleIcon="🔧"){
+ const value=String(name||"").normalize("NFKC").toLowerCase();
+ const rules=[
+  [/\\b(cctv|surveillance|security camera|camera security)\\b/,"📹"],
+  [/\\b(laptop|notebook|macbook)\\b/,"💻"],
+  [/\\b(mobile|smartphone|iphone|android phone|cell ?phone)\\b/,"📱"],
+  [/\\b(tablet|ipad)\\b/,"📲"],
+  [/\\b(printer|printing|plotter)\\b/,"🖨️"],
+  [/\\b(camera|photography|webcam)\\b/,"📷"],
+  [/\\b(router|network|networking|wifi|wi-fi|internet|lan)\\b/,"🌐"],
+  [/\\b(monitor|display|screen)\\b/,"🖥️"],
+  [/\\b(keyboard)\\b/,"⌨️"],
+  [/\\b(mouse|trackpad)\\b/,"🖱️"],
+  [/\\b(charger|adapter|power supply|cable)\\b/,"🔌"],
+  [/\\b(battery|power bank)\\b/,"🔋"],
+  [/\\b(data recovery|backup|storage|ssd|hdd|hard ?drive|flash drive|usb drive)\\b/,"💾"],
+  [/\\b(website|web design|web development|domain|hosting)\\b/,"🌍"],
+  [/\\b(software|application|app development|programming)\\b/,"🧩"],
+  [/\\b(training|course|learning|workshop|class)\\b/,"🎓"],
+  [/\\b(technician|engineer|technical support|it support)\\b/,"🧑‍🔧"],
+  [/\\b(whatsapp|messenger|chat)\\b/,"💬"],
+  [/\\b(email|e-mail|mail)\\b/,"✉️"],
+  [/\\b(phone|telephone|call|contact)\\b/,"☎️"],
+  [/\\b(location|address|map)\\b/,"📍"],
+  [/\\b(delivery|shipping|courier)\\b/,"🚚"],
+  [/\\b(repair|maintenance|installation|service)\\b/,"🛠️"],
+  [/\\b(computer|desktop|pc)\\b/,"🖥️"],
+  [/\\b(accessories|accessory)\\b/,"🎧"]
+ ];
+ for(const [pattern,icon] of rules)if(pattern.test(value))return icon;
+ return moduleIcon;
+}
+\nfunction el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
 function link(path,label){const a=el("a","section-view-all",label);a.href="/3btechhub/"+path+"/";return a;}
 function renderCard(item,def,module){
  const card=el("a","home-content-card");card.href="/3btechhub/"+module+"/"+encodeURIComponent(item.slug)+"/";
  const visual=el("span","home-content-visual");
- visual.append(el("span","home-content-fallback",def.icon));
+ visual.append(el("span","home-content-fallback",getItemFallbackIcon(item.name,def.icon)));
  if(item.photo_url){const img=el("img");img.src=item.photo_url;img.alt="";img.loading="lazy";img.onerror=()=>img.remove();visual.append(img);}
  const body=el("span","home-content-card-body");body.append(el("strong","",item.name||"Untitled"));
  card.append(visual,body);return card;
