@@ -893,10 +893,10 @@ const moduleRelationships = {
 };
 
 
-async function loadModuleRelationOptions(moduleName) {
+async function loadModuleRelationOptions(moduleName,form) {
   const config=moduleRelationships[moduleName]||{};
   for(const [key,rel] of Object.entries(config)){
-    const host=document.querySelector('[data-related-options="'+key+'"]');
+    const host=form.querySelector('[data-related-options="'+key+'"]');
     if(!host)continue;
     const {data,error}=await supabase.from(rel.target).select("id,"+rel.label).order(rel.label);
     host.replaceChildren();
@@ -910,19 +910,19 @@ async function loadModuleRelationOptions(moduleName) {
     if(!host.childElementCount)addTextElement(host,"small","muted","No available records yet.");
   }
 }
-async function loadModuleRelationSelection(moduleName,recordId){
+async function loadModuleRelationSelection(moduleName,recordId,form){
   const config=moduleRelationships[moduleName]||{};
   for(const [key,rel] of Object.entries(config)){
     const {data,error}=await supabase.from(rel.table).select(rel.child).eq(rel.parent,recordId);
     if(error)throw error;
     const selected=new Set((data||[]).map(row=>row[rel.child]));
-    document.querySelectorAll('[data-related-options="'+key+'"] input[data-related-id]').forEach(input=>{input.checked=selected.has(input.dataset.relatedId);});
+    form.querySelectorAll('[data-related-options="'+key+'"] input[data-related-id]').forEach(input=>{input.checked=selected.has(input.dataset.relatedId);});
   }
 }
-async function saveModuleRelationships(moduleName,recordId){
+async function saveModuleRelationships(moduleName,recordId,form){
   const config=moduleRelationships[moduleName]||{};
   for(const [key,rel] of Object.entries(config)){
-    const host=document.querySelector('[data-related-options="'+key+'"]');
+    const host=form.querySelector('[data-related-options="'+key+'"]');
     const ids=host?[...host.querySelectorAll('input[data-related-id]:checked')].map(input=>input.dataset.relatedId):[];
     const {error:deleteError}=await supabase.from(rel.table).delete().eq(rel.parent,recordId);
     if(deleteError)throw deleteError;
@@ -1100,7 +1100,7 @@ function renderModuleList(moduleName,records) {
         else input.value=record[moduleDatabaseKey(moduleName,key)]==null?"":String(record[moduleDatabaseKey(moduleName,key)]);
       }
       updateImagePreview(form,record.photo_url||"");
-      await loadModuleRelationSelection(moduleName,record.id);
+      await loadModuleRelationSelection(moduleName,record.id,form);
       document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Edit "+config.title;
       document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Update "+config.title;
       document.querySelector('[data-module-cancel="'+moduleName+'"]').hidden=false;
@@ -1139,7 +1139,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if (!fieldsHost||!form) continue;
   for (const field of config.fields) fieldsHost.append(createModuleField(field));
-  void loadModuleRelationOptions(moduleName);
+  void loadModuleRelationOptions(moduleName,form);
   const nameInput=form.elements.namedItem("name");
   const slugInput=form.elements.namedItem("slug");
   if (nameInput&&slugInput) {
@@ -1206,7 +1206,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         result=await supabase.from(config.table).insert(payload).select("id").single();
       }
       if (result.error) throw result.error;
-      await saveModuleRelationships(moduleName,result.data.id);
+      await saveModuleRelationships(moduleName,result.data.id,form);
       saved=true;
       resetModuleForm(moduleName); setModuleMessage(moduleName,config.title+(editId?" updated.":" created."),"success");
       await loadContentModule(moduleName);
