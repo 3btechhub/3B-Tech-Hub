@@ -1025,3 +1025,9 @@ output,
   #workshops-list { grid-template-columns:minmax(0,1fr); }
   .product-group { height:240px; min-height:240px; max-height:240px; }
 }
+
+
+/* Contact brand marks are rendered from URL-matched SVG/favicon sources. */
+.contact-brand-icon{display:inline-block;width:24px;height:24px;object-fit:contain;vertical-align:middle;flex:0 0 24px;margin-inline-end:8px}
+.home-content-visual img.contact-brand-icon{position:relative;inset:auto;width:26px;height:26px;flex:0 0 26px;margin:0;object-fit:contain}
+.contact-icon-fallback{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px;margin-inline-end:8px;line-height:1}
