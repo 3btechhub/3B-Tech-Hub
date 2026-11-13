@@ -1,7 +1,7 @@
 import { applyRuntimeConfig, loadRuntimeConfig } from "./runtime-config.js";
 import { getItemFallbackIcon, initCataloguePage } from "./catalogue.js";
 import { initExtendedDashboard } from "./admin-extended.js";
-import { getContactIcon } from "./contact-utils.js";
+import { createContactIcon } from "./contact-utils.js";
 const menuButton = document.querySelector(".menu-trigger");
 const siteMenu = document.querySelector("#site-menu");
 const accountMenuLink = document.querySelector("#login-menu-link");
