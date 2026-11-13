@@ -542,6 +542,14 @@ if (ownerDashboard) {
       const ownerEmail = document.querySelector("#dashboard-owner-email");
       if (ownerEmail) ownerEmail.textContent = authData.user.email || "";
       const resources = [["user_roles","dashboard-users-count"],["services","dashboard-services-count"],["products","dashboard-products-count"],["workshops","dashboard-workshops-count"],["technicians","dashboard-technicians-count"],["contacts","dashboard-contacts-count"],["app_roles","dashboard-roles-count"],["permissions","dashboard-permissions-count"],["audit_logs","dashboard-audit-count"],["site_settings","dashboard-settings-count"]];
+      const health=document.getElementById("dashboard-health-status");
+      if(health){health.replaceChildren();const checks=[["Website","Online",true],["Database","Checking…",null],["Authentication","Checking…",null],["Storage","Not verified",null],["Backend services","Not verified",null]];
+        const databaseCheck=await supabase.from("site_settings").select("setting_key").limit(1);
+        const authCheck=await supabase.auth.getSession();
+        checks[1]=["Database",databaseCheck.error?"Unavailable":"Connected",!databaseCheck.error];
+        checks[2]=["Authentication",authCheck.error?"Unavailable":"Available",!authCheck.error];
+        for(const [label,value,ok] of checks){const card=document.createElement("section");card.className="dashboard-card";addTextElement(card,"h3","",label);addTextElement(card,"p",ok===true?"health-ok":ok===false?"health-error":"muted",value);health.append(card);}
+      }
       const results = await Promise.all(resources.map(async ([table, target]) => {
         const { count, error } = await supabase.from(table).select("*", { count: "exact", head: true });
         const element = document.getElementById(target);
