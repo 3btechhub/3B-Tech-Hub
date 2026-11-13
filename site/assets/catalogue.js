@@ -38,7 +38,8 @@ export function getItemFallbackIcon(name,moduleIcon="🔧"){
  for(const [pattern,icon] of rules)if(pattern.test(value))return icon;
  return moduleIcon;
 }
-\nfunction el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
+
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;}
 function link(path,label){const a=el("a","section-view-all",label);a.href="/3btechhub/"+path+"/";return a;}
 function renderCard(item,def,module){
  const card=el("a","home-content-card");card.href="/3btechhub/"+module+"/"+encodeURIComponent(item.slug)+"/";
