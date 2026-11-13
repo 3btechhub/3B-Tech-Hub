@@ -584,7 +584,7 @@ if (ownerDashboard) {
       currentDashboardRole = "owner";
       const ownerEmail = document.querySelector("#dashboard-owner-email");
       if (ownerEmail) ownerEmail.textContent = authData.user.email || "";
-      const resources = [["user_roles","dashboard-users-count"],["services","dashboard-services-count"],["categories","dashboard-categories-count"],["products","dashboard-products-count"],["workshops","dashboard-workshops-count"],["technicians","dashboard-technicians-count"],["contacts","dashboard-contacts-count"],["app_roles","dashboard-roles-count"],["permissions","dashboard-permissions-count"]];
+      const resources = [["user_profiles","dashboard-users-count"],["services","dashboard-services-count"],["categories","dashboard-categories-count"],["products","dashboard-products-count"],["workshops","dashboard-workshops-count"],["technicians","dashboard-technicians-count"],["contacts","dashboard-contacts-count"],["app_roles","dashboard-roles-count"],["permissions","dashboard-permissions-count"]];
       const health=document.getElementById("dashboard-health-status");
       if(health){health.replaceChildren();const checks=[["Website","Online",true],["Supabase / Database","Checking…",null],["Authentication","Checking…",null],["Storage","Checking…",null],["Backend services","Checking…",null]];
         const [databaseCheck,authCheck,storageCheck,backendCheck]=await Promise.all([
@@ -673,23 +673,23 @@ if(siteSettingsForm)void loadSiteSettingsForm();
 const dashboardContentModules = {
   categories: { table:"categories", title:"Category", fields:[
     ["title","Title","text",true],
-    ["type","Type","select",true,["Service","Device"]]
+    ["type","Type","checklist",true,["Service","Device"]]
   ], columns:["type"] },
   services: { table:"services", title:"Service", fields:[
-    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
+    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],["categories","Categories","multiselect",false],
     ["products","Products","multiselect",false],["workshops","Workshops","multiselect",false],
     ["technicians","Technicians","multiselect",false],["images","Images","files",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","visibility"] },
   products: { table:"products", title:"Products", fields:[
-    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
+    ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],["categories","Categories","multiselect",false],
     ["services","Service","multiselect",false],["workshops","Workshops","multiselect",false],
     ["technicians","Technicians","multiselect",false],["images","Images","files",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","visibility"] },
   workshops: { table:"workshops", title:"Workshops", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
-    ["location","Location","text",false],["services","Service","multiselect",false],
+    ["location","Location","text",false],["categories","Categories","multiselect",false],["services","Service","multiselect",false],
     ["products","Products","multiselect",false],["technicians","Technicians","multiselect",false],
     ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","location","visibility"] },
@@ -697,28 +697,32 @@ const dashboardContentModules = {
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["skill","Skill/Expertise","text",false],["phone","Phone Number","tel",false],
     ["whatsapp","Whatsapp Number","tel",false],["link","Link","url",false],["email","Email","email",false],
-    ["services","Service","multiselect",false],["products","Products","multiselect",false],
+    ["categories","Categories","multiselect",false],["services","Service","multiselect",false],["products","Products","multiselect",false],
     ["workshops","Workshops","multiselect",false],["images","Images","files",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","skill","link","visibility"] }
 };
 const moduleRelationships = {
   services: {
+    categories:{table:"catalogue_categories",parent:"record_id",child:"category_id",target:"categories",label:"title",scope:"module_name"},
     products:{table:"service_products",parent:"service_id",child:"product_id",target:"products",label:"name",filter:["status","active"]},
     workshops:{table:"service_workshops",parent:"service_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]},
     technicians:{table:"service_technicians",parent:"service_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
   },
   products: {
+    categories:{table:"catalogue_categories",parent:"record_id",child:"category_id",target:"categories",label:"title",scope:"module_name"},
     services:{table:"service_products",parent:"product_id",child:"service_id",target:"services",label:"name",filter:["status","active"]},
     workshops:{table:"product_workshops",parent:"product_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]},
     technicians:{table:"product_technicians",parent:"product_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
   },
   workshops: {
+    categories:{table:"catalogue_categories",parent:"record_id",child:"category_id",target:"categories",label:"title",scope:"module_name"},
     services:{table:"service_workshops",parent:"workshop_id",child:"service_id",target:"services",label:"name",filter:["status","active"]},
     products:{table:"product_workshops",parent:"workshop_id",child:"product_id",target:"products",label:"name",filter:["status","active"]},
     technicians:{table:"workshop_technicians",parent:"workshop_id",child:"technician_id",target:"technicians",label:"name",filter:["is_published",true]}
   },
   technicians: {
+    categories:{table:"catalogue_categories",parent:"record_id",child:"category_id",target:"categories",label:"title",scope:"module_name"},
     services:{table:"service_technicians",parent:"technician_id",child:"service_id",target:"services",label:"name",filter:["status","active"]},
     products:{table:"product_technicians",parent:"technician_id",child:"product_id",target:"products",label:"name",filter:["status","active"]},
     workshops:{table:"workshop_technicians",parent:"technician_id",child:"workshop_id",target:"workshops",label:"title",filter:["status","published"]}
@@ -745,7 +749,7 @@ async function loadModuleRelationOptions(moduleName,form) {
 async function loadModuleRelationSelection(moduleName,recordId,form){
   const config=moduleRelationships[moduleName]||{};
   for(const [key,rel] of Object.entries(config)){
-    const {data,error}=await supabase.from(rel.table).select(rel.child).eq(rel.parent,recordId);
+    let relationQuery=supabase.from(rel.table).select(rel.child).eq(rel.parent,recordId);if(rel.scope)relationQuery=relationQuery.eq(rel.scope,moduleName);const {data,error}=await relationQuery;
     if(error)throw error;
     const selected=new Set((data||[]).map(row=>row[rel.child]));
     form.querySelectorAll('[data-related-options="'+key+'"] input[data-related-id]').forEach(input=>{input.checked=selected.has(input.dataset.relatedId);});
@@ -756,10 +760,10 @@ async function saveModuleRelationships(moduleName,recordId,form){
   for(const [key,rel] of Object.entries(config)){
     const host=form.querySelector('[data-related-options="'+key+'"]');
     const ids=host?[...host.querySelectorAll('input[data-related-id]:checked')].map(input=>input.dataset.relatedId):[];
-    const {error:deleteError}=await supabase.from(rel.table).delete().eq(rel.parent,recordId);
+    let deleteQuery=supabase.from(rel.table).delete().eq(rel.parent,recordId);if(rel.scope)deleteQuery=deleteQuery.eq(rel.scope,moduleName);const {error:deleteError}=await deleteQuery;
     if(deleteError)throw deleteError;
     if(ids.length){
-      const rows=ids.map(id=>({[rel.parent]:recordId,[rel.child]:id}));
+      const rows=ids.map(id=>({[rel.parent]:recordId,[rel.child]:id,...(rel.scope?{[rel.scope]:moduleName}:{})}));
       const {error}=await supabase.from(rel.table).insert(rows);
       if(error)throw error;
     }
@@ -819,11 +823,18 @@ function createModuleField(field) {
     const host=document.createElement("div");host.className="module-related-options";host.dataset.countryOptions="true";
     for(const value of ["Global","Bangladesh","Saudi Arabia"]){
       const option=document.createElement("label");option.className="module-related-option";
-      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=value;checkbox.dataset.countryValue=value;
+      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=value;checkbox.dataset.countryValue=value;checkbox.checked=value==="Global";checkbox.defaultChecked=value==="Global";
+      checkbox.addEventListener("change",()=>{if(checkbox.checked){host.querySelectorAll("[data-country-value]").forEach(other=>{if(other!==checkbox&&(value==="Global"||other.dataset.countryValue==="Global"))other.checked=false;});}});
       option.append(checkbox,document.createTextNode(value));host.append(option);
     }
     wrapper.append(addTextElement(wrapper,"span","",label),host);
     return wrapper;
+  }
+  else if (type === "checklist") {
+    const relatedWrapper=document.createElement("div");relatedWrapper.className="module-form-field module-related-field";addTextElement(relatedWrapper,"span","",label);
+    const host=document.createElement("div");host.className="module-related-options";host.dataset.checklistOptions=name;
+    for(const value of options||[]){const option=document.createElement("label");option.className="module-related-option";const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=value;checkbox.dataset.checklistValue=value;option.append(checkbox,document.createTextNode(value));host.append(option);}
+    relatedWrapper.append(host);return relatedWrapper;
   }
   else if (type === "multiselect") {
     const relatedWrapper=document.createElement("div");
@@ -945,11 +956,12 @@ async function renderModuleList(moduleName,records) {
       for(const [key] of config.fields){
         const input=form.elements.namedItem(key);if(!input&&key!=="country"&&key!=="type")continue;
         if(key==="visibility")input.value=recordVisibility(moduleName,record);
+        else if(key==="type"&&moduleName==="categories"){const selected=new Set(Array.isArray(record.type)?record.type:[]);form.querySelectorAll("[data-checklist-value]").forEach(box=>box.checked=selected.has(box.dataset.checklistValue));}
         else if(key==="price")input.value=record.price_minor==null?"":String(Number(record.price_minor)/100);
         else if(key==="title")input.value=record[moduleDatabaseKey(moduleName,key)]||"";
         else if(key==="technician")input.value=record.trainer||"";
         else if(key==="images")input.value="";
-        else if(key==="country"){const selected=String(record.country||"").split(",").map(value=>value.trim());form.querySelectorAll("[data-country-value]").forEach(box=>{box.checked=selected.includes(box.dataset.countryValue);});}
+        else if(key==="country"){const selected=String(record.country||"").split(",").map(value=>value.trim());form.querySelectorAll("[data-country-value]").forEach(box=>{box.checked=selected.includes(box.dataset.countryValue)||(selected.length===0&&box.dataset.countryValue==="Global");});}
         else if(key==="service_information")input.value=Array.isArray(record.service_information)?record.service_information.join("\n"):"";
         else input.value=record[moduleDatabaseKey(moduleName,key)]==null?"":String(record[moduleDatabaseKey(moduleName,key)]);
       }
@@ -1036,9 +1048,10 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     try {
       const payload={};
       for (const [key] of config.fields) {
+        if(key==="type"&&moduleName==="categories"){payload.type=[...form.querySelectorAll("[data-checklist-value]:checked")].map(box=>box.dataset.checklistValue);continue;}
         const input=form.elements.namedItem(key); if ((!input && key!=="country") || key==="images" || key==="visibility" || moduleRelationships[moduleName]?.[key]) continue;
         const dbKey=moduleDatabaseKey(moduleName,key);
-        if(key==="country"){payload[dbKey]=[...form.querySelectorAll("[data-country-value]:checked")].map(box=>box.dataset.countryValue).join(", ")||null;continue;}
+        if(key==="country"){payload[dbKey]=[...form.querySelectorAll("[data-country-value]:checked")].map(box=>box.dataset.countryValue).join(", ")||"Global";continue;}
         if(key==="service_information") payload[dbKey]=input.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);
         else if(key==="price") {
           const raw=input.value.trim();
@@ -1056,9 +1069,9 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       if (!titleValue) throw new Error("Title is required.");
       payload[moduleDatabaseKey(moduleName,"title")]=titleValue;
       if (moduleName==="categories") {
-        const selectedType=String(form.elements.namedItem("type")?.value||"");
-        if (!["Service","Device"].includes(selectedType)) throw new Error("Select a valid Category Type.");
-        payload.type=selectedType;
+        const selectedTypes=[...form.querySelectorAll("[data-checklist-value]:checked")].map(box=>box.dataset.checklistValue);
+        if (!selectedTypes.length||selectedTypes.some(value=>!["Service","Device"].includes(value))) throw new Error("Select at least one valid Category Type.");
+        payload.type=selectedTypes;
       } else {
         const slugValue=String(slugInput?.value||"").trim()||slugFromName(titleValue);
         if (!slugValue) throw new Error("Slug is required.");
@@ -1127,6 +1140,8 @@ function activateDashboardModule(moduleName, focusTab = false) {
     panel.classList.toggle("is-active", active);
   });
 }
+document.querySelectorAll("[data-dashboard-open]").forEach(card=>card.addEventListener("click",()=>activateDashboardModule(card.dataset.dashboardOpen)));
+activateDashboardModule("overview");
 dashboardTabs.forEach((tab, index) => {
   tab.addEventListener("click", () => activateDashboardModule(tab.dataset.dashboardTab));
   tab.addEventListener("keydown", (event) => {
