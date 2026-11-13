@@ -1151,3 +1151,42 @@ output,
 @media(max-width:420px){
   .home-main.home-catalog{padding-bottom:40px}
 }
+
+
+/* Each homepage section owns its vertical spacing; separators add no spacing. */
+.home-main.home-catalog{
+  gap:0;
+  padding-bottom:0;
+}
+.home-main.home-catalog>.home-intro-section{
+  position:relative;
+  margin:0;
+  padding-block:clamp(44px,6vw,64px);
+  border:0;
+}
+.home-main.home-catalog>.home-catalog-section{
+  position:relative;
+  margin:0;
+  padding-block:clamp(44px,6vw,64px);
+  border:0;
+}
+.home-main.home-catalog>.home-catalog-section + .home-catalog-section{
+  padding-top:clamp(44px,6vw,64px);
+}
+.home-main.home-catalog>.home-catalog-section + .home-catalog-section::before{
+  content:"";
+  position:absolute;
+  inset-inline:0;
+  inset-block-start:0;
+  border-top:1px solid var(--line);
+}
+@media(max-width:420px){
+  .home-main.home-catalog{gap:0;padding-bottom:0}
+  .home-main.home-catalog>.home-intro-section,
+  .home-main.home-catalog>.home-catalog-section{
+    padding-block:40px;
+  }
+  .home-main.home-catalog>.home-catalog-section + .home-catalog-section{
+    padding-top:40px;
+  }
+}
