@@ -215,6 +215,27 @@ function renderProviderCards(root,title,records,module,emptyText){
   section.append(grid);
   root.append(section);
 }
+async function renderModuleRelationships(root,module,data,supabase){
+  const map={
+    services:[["Products","service_products","service_id","product_id","products"],["Workshops","service_workshops","service_id","workshop_id","workshops"],["Technicians","service_technicians","service_id","technician_id","technicians"]],
+    products:[["Workshops","product_workshops","product_id","workshop_id","workshops"],["Technicians","product_technicians","product_id","technician_id","technicians"]],
+    workshops:[["Services","service_workshops","workshop_id","service_id","services"],["Products","product_workshops","workshop_id","product_id","products"],["Technicians","workshop_technicians","workshop_id","technician_id","technicians"]],
+    technicians:[["Services","service_technicians","technician_id","service_id","services"],["Workshops","workshop_technicians","technician_id","workshop_id","workshops"]]
+  };
+  for(const [title,table,parent,child,target] of map[module]||[]){
+    const {data:links,error}=await supabase.from(table).select(child).eq(parent,data.id);
+    if(error)throw error;
+    const ids=(links||[]).map(row=>row[child]);
+    if(!ids.length)continue;
+    let query=supabase.from(target).select("*").in("id",ids);
+    if(target==="services"||target==="products")query=query.eq("status","active");
+    if(target==="workshops")query=query.eq("status","published");
+    if(target==="technicians")query=query.eq("is_published",true);
+    const {data:records,error:recordsError}=await query;
+    if(recordsError)throw recordsError;
+    renderProviderCards(root,title,records||[],target);
+  }
+}
 async function renderDetail(root,data,module,def,supabase){
   root.classList.add("catalogue-detail-page");
   const hero=el("header","catalogue-detail-hero");
@@ -228,7 +249,7 @@ async function renderDetail(root,data,module,def,supabase){
   }else visual.append(getItemFallbackIcon(data.name||data.title,module));
   hero.append(visual,el("h1","catalogue-detail-title",data.name||data.title||def.title));
   root.append(hero);
-  addField(root,"Country",data.country);
+  addField(root,"Countries",data.country);
   if(module==="workshops"){
     addField(root,"Location",data.location);
     addField(root,"Address",data.address);
@@ -240,6 +261,7 @@ async function renderDetail(root,data,module,def,supabase){
   }else{
     renderGallery(root,data,module);
   }
+  await renderModuleRelationships(root,module,data,supabase);
   root.append(link(module,"Back to "+def.title));
 }
 function renderCard(item,module){
