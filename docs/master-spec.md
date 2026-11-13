@@ -98,11 +98,12 @@ A disabled section must not appear on Home. Keep a consistent, responsive vertic
 
 ## 6. Dashboard Architecture
 
-The Dashboard has exactly these 11 modules:
+The Dashboard has these 12 modules:
 1. Overview
 2. Audits & Logs
-3. Services
-4. Products
+3. Categories
+4. Services
+5. Products
 5. Workshops
 6. Technicians
 7. Contacts
@@ -137,7 +138,7 @@ Never infer a healthy/active status when it has not actually been checked.
 
 ## 8. Content Management Modules
 
-Modules: Services, Products, Workshops, Technicians, Contacts, User, Role and Permission.
+Modules: Categories, Services, Products, Workshops, Technicians, Contacts, User, Role and Permission.
 
 Where applicable, operations include Create, View, Edit, Delete and Show/Hide. Each module has its own form and fields. Do not force a shared content schema onto Contacts, User, Role or Permission.
 
@@ -161,6 +162,11 @@ This standard applies to Services, Products, Workshops and Technicians.
 
 ### Image management
 Use Supabase Storage for direct upload, replace, remove and preview. Show a fallback icon when an image is missing or broken.
+
+### Categories form
+- Title (required)
+- Type (required; fixed options: Service, Device)
+- Type values are enforced by a database constraint and cannot be created or changed from the Dashboard.
 
 ### Services form
 Name, Slug, Description, Category, Image, Visibility, Related Workshops, Related Mechanicians.
