@@ -608,14 +608,18 @@ function renderUserList(users) {
     const row = document.createElement("article");
     row.className = "admin-list-row";
     const primary = document.createElement("div");
-    addTextElement(primary, "strong", "", user.email || "Unknown email");
+    addTextElement(primary, "strong", "", user.full_name || user.email || "Unknown user");
+    addTextElement(primary, "span", "muted", user.email || "");
     const blocked = Boolean(user.banned_until && new Date(user.banned_until).getTime() > Date.now());
     const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString() : "Never signed in";
     addTextElement(primary, "span", "muted", [
       user.role === "owner" ? "Owner" : user.role === "visitor" ? "Visitor" : "Member",
       blocked ? "Blocked" : "Active",
+      user.email_confirmed_at ? "Email verified" : "Email not verified",
+      user.phone ? "Phone: " + user.phone : "",
+      "Created: " + (user.created_at ? new Date(user.created_at).toLocaleDateString() : "—"),
       "Last sign-in: " + lastSignIn,
-    ].join(" · "));
+    ].filter(Boolean).join(" · "));
     row.append(primary);
 
     const actions = document.createElement("div");
