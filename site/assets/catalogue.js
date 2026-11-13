@@ -1,4 +1,4 @@
-import { getContactActionLabel, getContactHref } from "./contact-utils.js";
+import { createContactIcon, getContactActionLabel, getContactHref } from "./contact-utils.js";
 import { createIcon, getModuleIcon, getItemIconName } from "./icon-utils.js";
 
 const BASE = "/3btechhub/";
@@ -108,7 +108,7 @@ function renderLocation(root,record){
   section.append(card);
   root.append(section);
 }
-function renderContacts(root,record){
+async function renderContacts(root,record,supabase){
   const actions=el("div","catalogue-contact-actions");
   const phoneHref=getContactHref(record.phone);
   if(phoneHref){
@@ -123,13 +123,38 @@ function renderContacts(root,record){
     const digits=whatsappRaw.replace(/\D/g,"");
     if(digits.length>=7)whatsappHref="https://wa.me/"+digits;
   }
+
+  const {data:globalContacts,error}=await supabase.from("contacts").select("name,value");
+  const contacts=error?[]:(globalContacts||[]);
+  if(!phoneHref){
+    const globalCall=contacts.find(item=>/^(call|phone)$/i.test(String(item.name||"").trim()));
+    const href=getContactHref(globalCall?.value);
+    if(href){
+      const call=el("a","catalogue-contact-button","Call");
+      call.href=href;
+      call.prepend(createIcon("phone"));
+      actions.append(call);
+    }
+  }
+  if(!whatsappHref){
+    const globalWhatsapp=contacts.find(item=>/^whats?app$/i.test(String(item.name||"").trim()));
+    whatsappHref=getContactHref(globalWhatsapp?.value);
+  }
   if(whatsappHref){
     const whatsapp=el("a","catalogue-contact-button catalogue-contact-whatsapp","WhatsApp");
     whatsapp.href=whatsappHref;
     whatsapp.target="_blank";
     whatsapp.rel="noopener noreferrer";
-    whatsapp.prepend(createIcon("message-circle"));
+    whatsapp.prepend(createContactIcon(whatsappHref,"WhatsApp"));
     actions.append(whatsapp);
+  }
+  const globalEmail=contacts.find(item=>/^(gmail|email)$/i.test(String(item.name||"").trim()));
+  const emailHref=getContactHref(globalEmail?.value);
+  if(emailHref){
+    const email=el("a","catalogue-contact-button","Email");
+    email.href=emailHref;
+    email.prepend(createContactIcon(globalEmail.value,globalEmail.name));
+    actions.append(email);
   }
   if(!actions.childElementCount)return false;
   const section=el("section","catalogue-detail-section");
@@ -268,7 +293,7 @@ async function renderDetail(root,data,module,def,supabase){
     const workshops=await loadProductWorkshops(supabase,data.id);
     renderProviderCards(root,"Where to Buy / Related Workshops",workshops,"workshops","Contact us to confirm where this product is available.");
     renderLocation(root,data);
-    renderContacts(root,data);
+    await renderContacts(root,data,supabase);
   }else if(module==="services"){
     const info=Array.isArray(data.service_information)?data.service_information.filter(Boolean):[];
     if(info.length){
@@ -284,7 +309,7 @@ async function renderDetail(root,data,module,def,supabase){
     renderProviderCards(root,"Related Workshops",providers.workshops,"workshops","Please contact us to find an available workshop for this service.");
     renderProviderCards(root,"Related Mechanicians",providers.technicians,"technicians","Please contact us to find an available mechanician for this service.");
     renderLocation(root,data);
-    renderContacts(root,data);
+    await renderContacts(root,data,supabase);
   }else{
     const info=Array.isArray(data.service_information)?data.service_information.filter(Boolean):[];
     if(info.length){
@@ -298,7 +323,7 @@ async function renderDetail(root,data,module,def,supabase){
     if(module==="technicians"&&data.skill)addField(root,"Skill",data.skill);
     renderGallery(root,data,module);
     renderLocation(root,data);
-    renderContacts(root,data);
+    await renderContacts(root,data,supabase);
   }
   root.append(link(module,"Back to "+def.title));
 }
