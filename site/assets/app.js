@@ -149,7 +149,8 @@ async function loadHomeCatalog() {
         target.append(empty);
         continue;
       }
-      data.slice(0,4).forEach(record=>target.append(renderHomeCard(module,record)));\n      if(data.length>4){target.replaceChildren(...data.slice(0,3).map(record=>renderHomeCard(module,record)),renderHomeMoreCard(module));}
+      data.slice(0,4).forEach(record=>target.append(renderHomeCard(module,record)));
+      if(data.length>4){target.replaceChildren(...data.slice(0,3).map(record=>renderHomeCard(module,record)),renderHomeMoreCard(module));}
     } catch(error) {
       console.error("Could not load public "+module.title.toLowerCase()+".",error);
       target.replaceChildren();
