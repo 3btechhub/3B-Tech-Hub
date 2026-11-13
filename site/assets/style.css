@@ -1431,3 +1431,12 @@ input:disabled,select:disabled,textarea:disabled{opacity:.7;cursor:not-allowed}
 .module-record-row--tap-edit:hover,.module-record-row--tap-edit:focus-visible{background:var(--hover);outline:2px solid var(--line);outline-offset:2px}
 .module-record-row--tap-edit form{cursor:default;width:100%;flex:1 1 100%;margin-top:12px}
 .module-record-row--tap-edit[role="group"]{cursor:default}
+
+/* Owner Dashboard overview summary cards */
+.dashboard-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:8px 0 24px}
+.dashboard-summary-card{display:flex;min-height:112px;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px;border:1px solid var(--border-color,#d8d8d8);border-radius:16px;background:var(--surface,#fff);color:var(--text,#171717);text-align:left;cursor:pointer;transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease}
+.dashboard-summary-card:hover,.dashboard-summary-card:focus-visible{border-color:var(--text,#171717);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);outline:none}
+.dashboard-summary-card span{font-size:14px;font-weight:600;color:var(--muted,#666)}
+.dashboard-summary-card strong{font-size:30px;line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
+@media(max-width:760px){.dashboard-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.dashboard-summary-card{min-height:96px;padding:16px}}
+@media(max-width:380px){.dashboard-summary-grid{grid-template-columns:1fr}}

@@ -51,7 +51,7 @@ export function initExtendedDashboard(supabase,role){
   form:cf,list:cl,formTitle:"contacts-form-title",titleText:"Add contact",emptyText:"No records found.",
   load:loadContacts,
   edit(form,record){form.dataset.editId=record.id;form.elements.title.value=record.name||"";form.elements.value.value=record.value||"";},
-  async save(form){const title=form.elements.title.value.trim(),value=form.elements.value.value.trim(),id=form.dataset.editId;if(!title||!value)throw new Error("Title and Value are required.");const type=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)?"email":/^https?:\/\//i.test(value)?"link":"phone";const result=id?await supabase.from("contacts").update({name:title,value,type}).eq("id",id):await supabase.from("contacts").insert({name:title,value,type,slug:slug(title)+"-"+crypto.randomUUID().slice(0,8)});if(result.error)throw result.error;},
+  async save(form){const title=form.elements.title.value.trim(),value=form.elements.value.value.trim(),id=form.dataset.editId;if(!title||!value)throw new Error("Title and Value are required.");const result=id?await supabase.from("contacts").update({name:title,value}).eq("id",id):await supabase.from("contacts").insert({name:title,value,slug:slug(title)+"-"+crypto.randomUUID().slice(0,8)});if(result.error)throw result.error;},
   async remove(id){const {error}=await supabase.from("contacts").delete().eq("id",id);if(error)throw error;}
  });
  if(cf)cf.dataset.messageId="contacts-message";

@@ -1,5 +1,6 @@
 <main class="dashboard-main" id="owner-dashboard">
     <nav class="dashboard-module-nav" aria-label="Dashboard modules" role="tablist">
+<button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-overview" aria-controls="panel-overview" aria-selected="true" data-icon="layout-dashboard" data-dashboard-tab="overview" tabindex="0">Overview</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-categories" aria-controls="panel-categories" aria-selected="false" data-icon="file" data-dashboard-tab="categories" tabindex="-1">Categories</button>
 <button class="dashboard-module-tab is-active" type="button" role="tab" id="tab-services" aria-controls="panel-services" aria-selected="true" data-icon="wrench" data-dashboard-tab="services">Services</button>
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-products" aria-controls="panel-products" aria-selected="false" data-icon="package" data-dashboard-tab="products" tabindex="-1">Products</button>
@@ -12,9 +13,23 @@
 <button class="dashboard-module-tab" type="button" role="tab" id="tab-settings" aria-controls="panel-settings" aria-selected="false" data-icon="settings" data-dashboard-tab="settings" tabindex="-1">Settings</button>
 </nav>
 
+    <section class="dashboard-module-panel is-active" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" data-dashboard-panel="overview">
+      <div class="dashboard-summary-grid">
+        <button class="dashboard-summary-card" type="button" data-dashboard-open="categories"><span>Categories</span><strong id="dashboard-categories-count">—</strong></button>
+        <button class="dashboard-summary-card" type="button" data-dashboard-open="services"><span>Services</span><strong id="dashboard-services-count">—</strong></button>
+        <button class="dashboard-summary-card" type="button" data-dashboard-open="products"><span>Products</span><strong id="dashboard-products-count">—</strong></button>
+        <button class="dashboard-summary-card" type="button" data-dashboard-open="workshops"><span>Workshops</span><strong id="dashboard-workshops-count">—</strong></button>
+        <button class="dashboard-summary-card" type="button" data-dashboard-open="technicians"><span>Technicians</span><strong id="dashboard-technicians-count">—</strong></button>
+        <button class="dashboard-summary-card" type="button" data-dashboard-open="contacts"><span>Contacts</span><strong id="dashboard-contacts-count">—</strong></button>
+        <button class="dashboard-summary-card" type="button" data-dashboard-open="users"><span>Users</span><strong id="dashboard-users-count">—</strong></button>
+        <button class="dashboard-summary-card" type="button" data-dashboard-open="roles"><span>Roles</span><strong id="dashboard-roles-count">—</strong></button>
+        <button class="dashboard-summary-card" type="button" data-dashboard-open="permission"><span>Permissions</span><strong id="dashboard-permissions-count">—</strong></button>
+      </div>
+    </section>
+
     <section class="dashboard-module-panel" id="panel-categories" role="tabpanel" aria-labelledby="tab-categories" data-dashboard-panel="categories" hidden>
       <div class="admin-list">
-        <input class="module-search-input" type="search" data-module-search="categories" placeholder="Search categories" aria-label="Search categories">
+        <input class="module-search-input" type="search" data-module-search="categories" aria-label="Search categories">
         <button class="secondary-button module-refresh-button" type="button" data-module-refresh="categories">Refresh</button>
         <form class="content-editor-form" data-module-form="categories">
           <h3 data-module-form-title="categories">Add category</h3>

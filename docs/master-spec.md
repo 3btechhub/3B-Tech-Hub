@@ -505,3 +505,26 @@ Without explicit approval, do not change GitHub code, Supabase database, Storage
 **Technology:** GitHub + Supabase  
 **Current Direction:** LTR Only  
 **Future Direction:** RTL-ready Architecture
+
+## 24. Owner-approved Dashboard Module Specification — 14 November 2026
+
+This section records the latest explicit Owner-approved module specification and supersedes conflicting earlier field/form details in this document.
+
+### Overview
+Show a clickable summary-count card for every module except Settings: Categories, Services, Products, Workshops, Technicians, Contacts, Users, Roles and Permissions. Each card opens its matching module.
+
+### Module fields
+- Categories: Title; Type (fixed checklist options Service and Device; either or both may be selected).
+- Services: Title, Slug, Countries, Categories, Products, Workshops, Technicians, Images, Visibility.
+- Products: Title, Slug, Countries, Categories, Service, Workshops, Technicians, Images, Visibility.
+- Workshops: Title, Slug, Countries, Location, Categories, Service, Products, Technicians, Images, Visibility.
+- Technicians: Title, Slug, Countries, Skill/Expertise, Phone Number, Whatsapp Number, Link, Email, Categories, Service, Products, Workshops, Images, Visibility.
+- Contacts: Title, Value.
+- User: Title, Roles, Permissions.
+- Roles: Title, Users, Permissions.
+- Permission: Title, Users, Roles.
+- Settings: Website Logo, Website Title, Website Intro, Homepage Module Management.
+
+Each named module remains a distinct module with its own primary database table. Catalogue relationships are shared across Categories, Services, Products, Workshops and Technicians; access relationships are shared across Users, Roles and Permissions. The nine non-Settings CRUD modules use a consistent form/checklist/list/create/read/update/delete interaction pattern. Every displayed field is connected to its corresponding database data. Input boxes must not show placeholders. Countries includes Global, selected by default for new records. Keep the dashboard visually consistent with the website design and easy to understand.
+
+Relationship/junction tables represent shared many-to-many information while each module retains its own primary table. Existing authentication, role and permission safeguards remain in force.
