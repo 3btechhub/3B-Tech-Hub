@@ -45,7 +45,24 @@ const ICONS={
   tiktok:'<path d="M14 3v11.5a4.5 4.5 0 1 1-4-4.47"/><path d="M14 3c.5 3 2.5 5 5.5 5.5"/>',
   gmail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6M4 17V7m16 10V7"/>',
   facebook:'<path d="M14 21v-8h3l.5-4H14V7c0-1 .5-1.5 1.5-1.5H18V2h-3c-3 0-5 2-5 5v2H7v4h3v8Z"/>',
-  imo:'<path d="M4 5h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-5 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><circle cx="8" cy="11.5" r=".8" fill="currentColor"/><circle cx="12" cy="11.5" r=".8" fill="currentColor"/><circle cx="16" cy="11.5" r=".8" fill="currentColor"/>'
+  imo:'<path d="M4 5h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-7l-5 3v-3H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><circle cx="8" cy="11.5" r=".8" fill="currentColor"/><circle cx="12" cy="11.5" r=".8" fill="currentColor"/><circle cx="16" cy="11.5" r=".8" fill="currentColor"/>',
+  serviceTvRepair:'<rect x="2.5" y="4" width="15" height="11" rx="1.5"/><path d="m7 19 3-4 3 4M7 2l3 2 3-2"/><path d="m17 16 4-4m-2-2 2 2-2 2m-4 4 2 2"/>',
+  serviceMobileRepair:'<rect x="5" y="2" width="11" height="20" rx="2"/><path d="M9 18h3"/><path d="m17 7 4 4-6 6-3-3 5-5Z"/><path d="m16 8 3 3"/>',
+  serviceMobileParts:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h3v3H7zM14 9h3M14 12h3M7 16h10"/><path d="M8 2v3m8-3v3M8 19v3m8-3v3"/>',
+  serviceDishInstall:'<path d="M3 5c5-2 10 0 13 4s3 8 1 11"/><path d="m3 5 8 8"/><path d="M12 13 9 20h8"/><path d="M19 3v5m-2.5-2.5h5"/>',
+  serviceDishService:'<path d="M3 4c5-2 10 0 13 4s3 8 1 11"/><path d="m3 4 8 8"/><path d="m11 12 3 7m-5 0h10"/><circle cx="18.5" cy="5.5" r="2.5"/><path d="M18.5 1.5v1m0 6v1m-4-4h1m6 0h1"/>',
+  serviceDishParts:'<path d="M3 7c4-2 8-1 11 2"/><path d="m3 7 6 6"/><path d="m9 13 4 7h4"/><rect x="14" y="3" width="6" height="4" rx="1"/><path d="M17 7v4m-2-1h4"/>',
+  productGlassProtector:'<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M9 5h6M10 19h4"/><path d="m3 7 2-2m-2 6 2-2m14-4 2 2m-2 4 2 2"/>',
+  productEarbuds:'<path d="M5 13V9a4 4 0 0 1 8 0v4"/><rect x="3" y="12" width="4" height="7" rx="2"/><path d="M19 13V9a4 4 0 0 0-8 0"/><rect x="17" y="12" width="4" height="7" rx="2"/><path d="M12 16v3a3 3 0 0 1-3 3"/>',
+  productPhoneCase:'<rect x="5" y="2" width="14" height="20" rx="3"/><rect x="8" y="5" width="4" height="4" rx="1"/><circle cx="14.5" cy="7" r="1"/><path d="M8 13h8m-8 3h8m-5 3h2"/>',
+  productLnb:'<path d="M3 4c4-1 7 1 9 4s2 7 0 10"/><path d="m3 4 6 6"/><path d="m9 10 5 7"/><path d="M14 17h5l2 3h-8Z"/><path d="M16 17v-3m2 3v-3"/>',
+  productCoaxialCable:'<path d="M5 7c0-3 4-4 7-2s3 5 0 7-7 1-7-2 4-4 7-2 3 5 0 7-7 1-7-2"/><path d="m13 10 5-5m-2-2 4 4m-2-6 4 4"/><path d="m5 17-2 2 3 3 2-2"/>',
+  productSatelliteDish:'<path d="M3 5c6-2 12 1 14 7s0 9-3 10"/><path d="m3 5 9 9"/><path d="m12 14 4 6m-7 0h10"/><path d="M18 4c2 1 3 3 3 5"/>',
+  productReceiver:'<rect x="2.5" y="8" width="16" height="9" rx="2"/><path d="M6 12h5m-5 2h2"/><circle cx="15" cy="12.5" r="1"/><path d="M7 20h7m-3.5-3v3"/><path d="M20 5c1.5 1 2 2 2 3"/>',
+  productCharger:'<rect x="6" y="7" width="12" height="13" rx="2"/><path d="M9 7V3m6 4V3"/><path d="m13 9-3 5h3l-2 4 5-6h-3l2-3Z"/>',
+  productSplitter:'<path d="M12 3v6m0 0-7 6m7-6 7 6"/><rect x="9" y="2" width="6" height="4" rx="1"/><rect x="2" y="15" width="6" height="5" rx="1"/><rect x="16" y="15" width="6" height="5" rx="1"/><path d="M5 20v2m14-2v2"/>',
+  workshopTv:'<path d="M3 21h18M5 21V9h14v12"/><rect x="7" y="3" width="10" height="6" rx="1"/><path d="m10 6 2 1 2-1M8 13h8m-8 3h5"/>',
+  workshopMobile:'<path d="M3 21h18M5 21v-3h14v3"/><rect x="8" y="2" width="8" height="14" rx="2"/><path d="M10 4h4m-3 9h2"/><path d="m4 11-2 2 2 2m16-4 2 2-2 2"/>'
 
 };
 let databaseSvgRegistry=Object.create(null);
@@ -90,34 +107,36 @@ export function createIcon(name,className="svg-icon"){
 }
 const MODULE_ICONS={services:"wrench",products:"package",workshops:"building",technicians:"technician",contacts:"contact"};
 export function getModuleIcon(module){return MODULE_ICONS[module]||"link";}
+
+const ITEM_ICON_MAP = {
+  services: {
+    "tv repair":"serviceTvRepair",
+    "mobile repair":"serviceMobileRepair",
+    "mobile parts sell":"serviceMobileParts",
+    "satellite dish installation":"serviceDishInstall",
+    "satellite dish servicing":"serviceDishService",
+    "satellite dish parts sell":"serviceDishParts"
+  },
+  products: {
+    "glass protector":"productGlassProtector",
+    "earphones & headphones":"productEarbuds",
+    "phone cases & covers":"productPhoneCase",
+    "lnb":"productLnb",
+    "coaxial cables":"productCoaxialCable",
+    "satellite dishes":"productSatelliteDish",
+    "satellite receivers":"productReceiver",
+    "chargers & adapters":"productCharger",
+    "connectors & splitters":"productSplitter"
+  },
+  workshops: {
+    "aynul tv servicing center":"workshopTv",
+    "faruk mobile servicing center":"workshopMobile"
+  }
+};
 export function getItemIconName(name,module){
- const v=String(name||"").toLowerCase();
- if(module==="services"){
-  if(/tv/.test(v))return "wrench";
-  if(/mobile/.test(v)&&/repair/.test(v))return "wrench";
-  if(/mobile/.test(v)&&/parts/.test(v))return "cpu";
-  if(/satellite/.test(v)&&/installation/.test(v))return "satellite";
-  if(/satellite/.test(v)&&/servicing/.test(v))return "wrench";
-  if(/satellite/.test(v)&&/parts|sell/.test(v))return "cpu";
-  if(/satellite/.test(v)&&/dish/.test(v))return "satellite";
-  if(/charger|adapter/.test(v))return "plug";
-  if(/connector|connection|cable/.test(v))return "network";
- }
- if(module==="products"){
-  if(/glass protector/.test(v))return "shield";
-  if(/earphone|headphone/.test(v))return "headphones";
-  if(/phone case|cover/.test(v))return "phone";
-  if(/lnb|satellite dish/.test(v))return "satellite";
-  if(/coaxial cable/.test(v))return "cable";
-  if(/satellite receiver/.test(v))return "receiver";
-  if(/charger|adapter/.test(v))return "plug";
-  if(/connector|splitter|connection/.test(v))return "network";
- }
- if(module==="workshops"){
-  if(/tv/.test(v))return "building";
-  if(/mobile/.test(v))return "building";
-  return "building";
- }
+ const value=String(name||"").trim().toLowerCase();
+ const specific=ITEM_ICON_MAP[module]?.[value];
+ if(specific)return specific;
  if(module==="technicians")return "technician";
  return getModuleIcon(module);
 }
