@@ -872,11 +872,12 @@ const dashboardContentModules = {
   ], columns:["slug","category","visibility"] },
   workshops: { table:"workshops", title:"Workshop", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
-    ["technician","Technician / Trainer","text",false],["category","Category","text",false],
+    ["technician_ids","Related Technicians","multiselect",false],["category","Category","text",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["slug","location","technician","category","visibility"] },
+  ], columns:["slug","location","category","visibility"] },
   technicians: { table:"technicians", title:"Technician", fields:[
     ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
+    ["workshop_ids","Related Workshops","multiselect",false],
     ["skill","Skill","text",false],["category","Category","text",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["slug","skill","category","visibility"] }
@@ -904,6 +905,9 @@ const moduleRelationships = {
   ],
   products: [
     {field:"workshop_ids",table:"product_workshops",parentColumn:"product_id",relatedColumn:"workshop_id",source:"workshops",labelColumn:"title",statusColumn:"status",visibleValue:"published"}
+  ],
+  workshops: [
+    {field:"technician_ids",table:"workshop_technicians",parentColumn:"workshop_id",relatedColumn:"technician_id",source:"technicians",labelColumn:"name",statusColumn:"is_published",visibleValue:true}
   ],
   technicians: [
     {field:"workshop_ids",table:"workshop_technicians",parentColumn:"technician_id",relatedColumn:"workshop_id",source:"workshops",labelColumn:"title",statusColumn:"status",visibleValue:"published"}
