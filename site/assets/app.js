@@ -845,42 +845,26 @@ if(siteSettingsForm)void loadSiteSettingsForm();
 
 
 // Core content modules: each module uses its existing Supabase table and RLS policies.
-const sharedDetailFields = [
-  ["short_info","Short one-line information","text",false],
-  ["description","Detailed description","textarea",false],
-  ["service_information","Information / Features (one item per line)","textarea",false],
-  ["photo_url","Main image","file",false],
-  ["gallery_urls","Additional gallery images (multiple)","files",false],
-  ["location","Location / Address","text",false],
-  ["map_url","Map URL (optional)","url",false],
-  ["phone","Phone number","tel",false],
-  ["whatsapp","WhatsApp number or link","text",false]
-];
 const dashboardContentModules = {
   services: { table:"services", title:"Service", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
-    ["workshop_ids","Related Workshops","multiselect",false],
-    ["technician_ids","Related Mechanicians","multiselect",false],
-    ["category","Category","select",false,["Buy & Sell","Home Delivery","Setup & Installation","Repair & Maintenance"]],["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["slug","category","visibility"] },
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Country","text",false],
+    ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["country","visibility"] },
   products: { table:"products", title:"Product", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
-    ["price","Price","number",false],["currency","Currency","text",false],
-    ["stock_qty","Stock quantity","number",false],["condition","Condition","select",false,["new","used","refurbished"]],
-    ["workshop_ids","Related Workshops","multiselect",false],
-    ["category","Category","text",false],["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["slug","category","visibility"] },
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Country","text",false],
+    ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["country","visibility"] },
   workshops: { table:"workshops", title:"Workshop", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
-    ["technician_ids","Related Technicians","multiselect",false],["category","Category","text",false],
-    ["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["slug","location","category","visibility"] },
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Country","text",false],
+    ["location","Location","text",false],["address","Address","text",false],
+    ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["country","location","address","visibility"] },
   technicians: { table:"technicians", title:"Technician", fields:[
-    ["name","Name","text",true],["slug","Slug","text",true],...sharedDetailFields,
-    ["workshop_ids","Related Workshops","multiselect",false],
-    ["skill","Skill","text",false],["category","Category","text",false],
+    ["name","Name","text",true],["slug","Slug","text",true],["country","Country","text",false],
+    ["skill","Skill / Expertise","text",false],["images","Images","files",false],
+    ["phone","Phone","tel",false],["whatsapp","WhatsApp","text",false],["email","Email","email",false],
     ["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["slug","skill","category","visibility"] }
+  ], columns:["country","skill","visibility"] }
 };
 
 function moduleLabel(value) {
@@ -897,61 +881,6 @@ function moduleDatabaseKey(moduleName,key) {
   if (moduleName === "workshops" && key === "technician") return "trainer";
   if (moduleName === "products" && key === "price") return "price_minor";
   return key;
-}
-const moduleRelationships = {
-  services: [
-    {field:"workshop_ids",table:"service_workshops",parentColumn:"service_id",relatedColumn:"workshop_id",source:"workshops",labelColumn:"title",statusColumn:"status",visibleValue:"published"},
-    {field:"technician_ids",table:"service_technicians",parentColumn:"service_id",relatedColumn:"technician_id",source:"technicians",labelColumn:"name",statusColumn:"is_published",visibleValue:true}
-  ],
-  products: [
-    {field:"workshop_ids",table:"product_workshops",parentColumn:"product_id",relatedColumn:"workshop_id",source:"workshops",labelColumn:"title",statusColumn:"status",visibleValue:"published"}
-  ],
-  workshops: [
-    {field:"technician_ids",table:"workshop_technicians",parentColumn:"workshop_id",relatedColumn:"technician_id",source:"technicians",labelColumn:"name",statusColumn:"is_published",visibleValue:true}
-  ],
-  technicians: [
-    {field:"workshop_ids",table:"workshop_technicians",parentColumn:"technician_id",relatedColumn:"workshop_id",source:"workshops",labelColumn:"title",statusColumn:"status",visibleValue:"published"}
-  ]
-};
-const loadedRelationshipOptions = new Set();
-async function loadRelationshipOptions(moduleName) {
-  for (const relation of moduleRelationships[moduleName] || []) {
-    const key=moduleName+":"+relation.field;
-    const selectColumns=relation.source==="workshops"?"id,title,status":"id,name,is_published";
-    const {data,error}=await supabase.from(relation.source).select(selectColumns).order(relation.labelColumn,{ascending:true});
-    if(error)throw error;
-    const host=document.querySelector('[data-related-options="'+relation.field+'"]');
-    if(!host)continue;
-    host.replaceChildren();
-    if(!data?.length){addTextElement(host,"small","muted","No "+relation.source+" records available yet.");}
-    for(const record of data||[]){
-      const label=document.createElement("label");label.className="module-related-option";
-      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=record.id;checkbox.dataset.relatedField=relation.field;
-      const status=record[relation.statusColumn]===relation.visibleValue?"":" (hidden)";
-      label.append(checkbox,addTextElement(label,"span","",String(record[relation.labelColumn]||"Untitled")+status));
-      host.append(label);
-    }
-  }
-}
-async function loadRecordRelationships(moduleName,recordId,form) {
-  for(const relation of moduleRelationships[moduleName]||[]){
-    const {data,error}=await supabase.from(relation.table).select(relation.relatedColumn).eq(relation.parentColumn,recordId);
-    if(error)throw error;
-    const selected=new Set((data||[]).map(row=>row[relation.relatedColumn]));
-    form.querySelectorAll('[data-related-field="'+relation.field+'"]').forEach(input=>{input.checked=selected.has(input.value);});
-  }
-}
-async function saveRecordRelationships(moduleName,recordId,form) {
-  for(const relation of moduleRelationships[moduleName]||[]){
-    const selected=Array.from(form.querySelectorAll('[data-related-field="'+relation.field+'"]:checked')).map(input=>input.value);
-    const {error:deleteError}=await supabase.from(relation.table).delete().eq(relation.parentColumn,recordId);
-    if(deleteError)throw deleteError;
-    if(selected.length){
-      const rows=selected.map(value=>({[relation.parentColumn]:recordId,[relation.relatedColumn]:value}));
-      const {error:insertError}=await supabase.from(relation.table).insert(rows);
-      if(insertError)throw insertError;
-    }
-  }
 }
 function recordVisibility(moduleName,record) {
   if (moduleName === "technicians") return record.is_published ? "visible" : "hidden";
@@ -1046,7 +975,6 @@ function resetModuleForm(moduleName) {
   const form=document.querySelector('[data-module-form="'+moduleName+'"]');
   if (!form) return;
   form.reset(); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.currentGalleryUrls="[]"; form.dataset.removePhoto="false"; form.dataset.currentGalleryUrls="[]"; form.dataset.slugManual="false";
-  form.querySelectorAll("[data-related-field]").forEach(input=>{input.checked=false;});
   updateImagePreview(form,"");
   const config=dashboardContentModules[moduleName];
   document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Add "+config.title;
@@ -1096,18 +1024,16 @@ function renderModuleList(moduleName,records) {
       const form=document.querySelector('[data-module-form="'+moduleName+'"]'); form.dataset.editId=record.id;
       form.dataset.currentPhotoUrl=record.photo_url||""; form.dataset.currentGalleryUrls=JSON.stringify(record.gallery_urls||[]); form.dataset.removePhoto="false"; form.dataset.slugManual="false";
       for (const [key] of config.fields) {
-        if ((moduleRelationships[moduleName]||[]).some(relation=>relation.field===key)) continue;
         const input=form.elements.namedItem(key); if (!input) continue;
         if (key==="visibility") input.value=recordVisibility(moduleName,record);
         else if (key==="price") input.value=record.price_minor==null?"":String(Number(record.price_minor)/100);
         else if (key==="name") input.value=record.name||record.title||"";
         else if (key==="technician") input.value=record.trainer||"";
-        else if (key==="photo_url" || key==="gallery_urls") input.value="";
+        else if (key==="images") input.value="";
         else if (key==="service_information") input.value=Array.isArray(record.service_information)?record.service_information.join("\n"):"";
         else input.value=record[moduleDatabaseKey(moduleName,key)]==null?"":String(record[moduleDatabaseKey(moduleName,key)]);
       }
       updateImagePreview(form,record.photo_url||"");
-      try{await loadRecordRelationships(moduleName,record.id,form);}catch(error){setModuleMessage(moduleName,error.message||"Could not load related records.","error");}
       document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Edit "+config.title;
       document.querySelector('[data-module-submit="'+moduleName+'"]').textContent="Update "+config.title;
       document.querySelector('[data-module-cancel="'+moduleName+'"]').hidden=false;
@@ -1134,7 +1060,6 @@ async function loadContentModule(moduleName) {
   const config=dashboardContentModules[moduleName];
   const container=document.querySelector('[data-module-list="'+moduleName+'"]');
   if (container) { container.replaceChildren(); addTextElement(container,"p","muted","Loading records…"); }
-  try{await loadRelationshipOptions(moduleName);}catch(error){if(container){container.replaceChildren();addTextElement(container,"p","muted",error.message||"Could not load related records.");}return;}
   const {data,error}=await supabase.from(config.table).select("*").order("created_at",{ascending:false});
   if (error) {
     if (container) { container.replaceChildren(); addTextElement(container,"p","muted",error.message||"Could not load records."); }
@@ -1160,12 +1085,11 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     event.preventDefault();
     if (currentDashboardRole !== "owner") { setModuleMessage(moduleName,"Owner permission required.","error"); return; }
     const submit=document.querySelector('[data-module-submit="'+moduleName+'"]'); submit.disabled=true; setModuleMessage(moduleName,"Saving…");
-    let uploadedUrl="", oldPhotoUrl=form.dataset.currentPhotoUrl||"", saved=false;
+    let uploadedUrls=[], saved=false;
     try {
       const payload={};
       for (const [key] of config.fields) {
-        if ((moduleRelationships[moduleName]||[]).some(relation=>relation.field===key)) continue;
-        const input=form.elements.namedItem(key); if (!input || key==="photo_url" || key==="gallery_urls" || key==="visibility") continue;
+        const input=form.elements.namedItem(key); if (!input || key==="images" || key==="visibility") continue;
         const dbKey=moduleDatabaseKey(moduleName,key);
         if(key==="service_information") payload[dbKey]=input.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);
         else if(key==="price") {
@@ -1189,32 +1113,24 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       const visibility=form.elements.namedItem("visibility")?.value||"hidden";
       if (moduleName==="technicians") payload.is_published=visibility==="visible";
       else payload.status=visibility==="visible"?(moduleName==="workshops"?"published":"active"):"draft";
-      const galleryInput=form.elements.namedItem("gallery_urls");
-      const galleryUrls=JSON.parse(form.dataset.currentGalleryUrls||"[]");
-      if(galleryInput?.files?.length){
-        for(const file of Array.from(galleryInput.files)){
+      const imagesInput=form.elements.namedItem("images");
+      const imageUrls=JSON.parse(form.dataset.currentGalleryUrls||"[]");
+      const newlyUploadedUrls=[];
+      if(imagesInput?.files?.length){
+        for(const file of Array.from(imagesInput.files)){
           if(!file.type.startsWith("image/")) throw new Error("Please select image files only.");
-          if(file.size>10*1024*1024) throw new Error("Each gallery image must be 10 MB or smaller.");
-          const safeName=file.name.normalize("NFKD").replace(/[^\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
+          if(file.size>10*1024*1024) throw new Error("Each image must be 10 MB or smaller.");
+          const safeName=file.name.normalize("NFKD").replace(/[^\\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
           const path="content/"+moduleName+"/gallery/"+crypto.randomUUID()+"-"+safeName;
           const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type,upsert:false});
           if(uploadError) throw uploadError;
-          galleryUrls.push(supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl);
+          const publicUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;
+          imageUrls.push(publicUrl);
+          newlyUploadedUrls.push(publicUrl);
         }
       }
-      payload.gallery_urls=galleryUrls;
-      const imageInput=form.elements.namedItem("photo_url");
-      if (imageInput?.files?.[0]) {
-        const file=imageInput.files[0];
-        if (!file.type.startsWith("image/")) throw new Error("Please select an image file.");
-        if (file.size>10*1024*1024) throw new Error("Image must be 10 MB or smaller.");
-        const safeName=file.name.normalize("NFKD").replace(/[^\w.-]+/g,"-").replace(/^-+|-+$/g,"")||"image";
-        const path="content/"+moduleName+"/"+crypto.randomUUID()+"-"+safeName;
-        const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type,upsert:false});
-        if (uploadError) throw uploadError;
-        uploadedUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;
-        payload.photo_url=uploadedUrl;
-      } else if (form.dataset.removePhoto==="true") payload.photo_url=null;
+      uploadedUrls=newlyUploadedUrls;\n      payload.gallery_urls=imageUrls;
+      payload.photo_url=imageUrls[0]||null;
       const editId=form.dataset.editId; let result;
       if (editId) result=await supabase.from(config.table).update(payload).eq("id",editId).select("id").single();
       else {
@@ -1225,7 +1141,6 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       if (result.error) throw result.error;
       saved=true;
       const savedRecordId=editId||result.data?.id;
-      if(savedRecordId)await saveRecordRelationships(moduleName,savedRecordId,form);
       const nextPhotoUrl=payload.photo_url===undefined?oldPhotoUrl:payload.photo_url;
       if (oldPhotoUrl&&oldPhotoUrl!==nextPhotoUrl) {
         try { await removeStoredImage(oldPhotoUrl); } catch (cleanupError) { console.warn("Old image cleanup failed.",cleanupError); }
@@ -1233,7 +1148,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       resetModuleForm(moduleName); setModuleMessage(moduleName,config.title+(editId?" updated.":" created."),"success");
       await loadContentModule(moduleName);
     } catch(error) {
-      if (uploadedUrl&&!saved) { try { await removeStoredImage(uploadedUrl); } catch {} }
+      if (!saved) { for(const url of uploadedUrls){try{await removeStoredImage(url);}catch{}} }
       setModuleMessage(moduleName,error.message||"Could not save this record.","error");
     } finally { submit.disabled=false; }
   });
