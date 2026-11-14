@@ -232,9 +232,14 @@ export async function initRoutePage() {
     }).catch(error=>console.debug("Visitor analytics unavailable.",error));
   }
   if(document.querySelector('#app-main[data-view="catalogue"]')){await applyPublicSiteSettings();await initCataloguePage(supabase,document.getElementById("app-main").dataset.module,document.getElementById("app-main").dataset.recordKey||"");return;}
+  const accountMode = document.querySelector("#app-main")?.dataset.authMode || "login";
+  const accountAuthLayout = document.querySelector("#account-auth-layout");
+  const accountProfileLayout = document.querySelector("#profile-card");
+  if (accountAuthLayout) accountAuthLayout.hidden = ["profile","edit-profile"].includes(accountMode);
+  if (accountProfileLayout) accountProfileLayout.hidden = !["profile","edit-profile"].includes(accountMode);
   const form = document.querySelector("#auth-form");
 
-if (form) {
+if (form && !["profile","edit-profile"].includes(accountMode)) {
   const message = document.querySelector("#auth-message");
   const submit = document.querySelector("#auth-submit");
   const toggle = document.querySelector("#toggle-signup");
@@ -415,7 +420,7 @@ if (form) {
 }
 
 const profile = document.querySelector("#profile-card");
-if (profile) {
+if (profile && ["profile","edit-profile"].includes(accountMode)) {
   const status = document.querySelector("#profile-message");
   const form = document.querySelector("#profile-edit-form");
   const saveButton = document.querySelector("#profile-save");
@@ -571,6 +576,7 @@ if (profile) {
   });
 
   await loadProfile();
+  if (accountMode === "edit-profile") profile.querySelectorAll("[data-edit-field]").forEach((button) => button.click());
   const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
     if (!session) window.navigateSiteRoute(new URL("account/", ROOT_URL).pathname, { replace: true });
   });
