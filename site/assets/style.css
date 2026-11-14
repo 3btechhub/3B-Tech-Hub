@@ -1451,3 +1451,9 @@ input:disabled,select:disabled,textarea:disabled{opacity:.7;cursor:not-allowed}
 .contact-action-button .svg-icon{width:17px;height:17px}
 @media(max-width:760px){.contact-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.catalogue-listing-page{padding:28px 16px 38px;gap:16px}.catalogue-filter-bar{display:grid;grid-template-columns:1fr;padding:11px}.catalogue-filter{min-width:0}.contact-action-grid{grid-template-columns:1fr 1fr;gap:8px}.contact-action-card{min-height:106px;padding:12px}.catalogue-pagination{gap:7px}.catalogue-page-button{min-width:72px;padding-inline:9px}}
+
+/* Shared catalogue item information rows */
+.catalogue-item-information-list{display:grid;gap:10px}
+.catalogue-item-information-row{display:grid;gap:5px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.catalogue-item-information-label{color:var(--page-text);font-size:var(--text-small);font-weight:700}
+.catalogue-item-information-row .catalogue-detail-field{white-space:pre-line}
