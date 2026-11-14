@@ -520,3 +520,287 @@ Show a clickable summary-count card for every module except Settings: Categories
 Each named module remains a distinct module with its own primary database table. Catalogue relationships are shared across Categories, Services, Products, Workshops and Technicians; access relationships are shared across Users, Roles and Permissions. The nine non-Settings CRUD modules use a consistent form/checklist/list/create/read/update/delete interaction pattern. Every displayed field is connected to its corresponding database data. Input boxes must not show placeholders. Countries includes Global, selected by default for new records. Keep the dashboard visually consistent with the website design and easy to understand.
 
 Relationship/junction tables represent shared many-to-many information while each module retains its own primary table. Existing authentication, role and permission safeguards remain in force.
+
+## 25. Combined Master Specification — 14 November 2026 (Highest Priority)
+
+This section combines the previously approved Master Specification with the Owner's new Master Specification supplied on 14 November 2026. **This section takes priority over every conflicting earlier section.** Earlier requirements remain active only where they do not conflict with this section.
+
+### 25.1 Main Pages
+
+The only primary website pages are:
+1. Home
+2. Account
+3. Dashboard
+
+The Account page contains these layouts:
+- Login
+- Create Account
+- Reset Password
+- Profile
+
+Each Account layout has its own configurable slug. Account layouts remain part of the Account page architecture; they are not additional top-level pages.
+
+### 25.2 Main Dashboard Modules
+
+The primary module list, in this order, is:
+1. Overview
+2. Website Informations
+3. Service Types
+4. Product Types
+5. Services
+6. Products
+7. Workshops
+8. Technicians
+9. Countries
+10. Languages
+11. Users
+12. Roles
+13. Permissions
+14. Customizations
+15. Settings
+
+Each module has its own slug. Module slugs are configurable from the Settings module. A module slug is an identifier/configuration value only: modules do not receive independent standalone pages.
+
+### 25.3 Home Modules
+
+Home displays only these six catalogue modules:
+1. Service Types
+2. Product Types
+3. Services
+4. Products
+5. Workshops
+6. Technicians
+
+Customizations controls whether each Home module is shown or hidden and its display order. The Home order is user-configurable. The Home cards retain the existing simple image/icon plus title presentation; do not expose unrelated metadata on those cards.
+
+### 25.4 Design and UI Priorities
+
+- Primary viewport: Mobile first.
+- Default component size: Medium.
+- Current interface language: English.
+- Prefer Buttons, Input/Output Boxes and Cards.
+- Keep the existing Black, White and Neutral Gray palette and Light/Dark themes.
+- Preserve responsive, reusable, accessible components and content-independent sizing.
+- Preserve the earlier LTR-only current display policy and RTL-ready component architecture unless explicitly changed by a later Owner instruction.
+- Keep existing Header, Main Area and Footer where compatible with the three-page architecture.
+
+### 25.5 Form and Database Sections
+
+Exactly these 11 modules have two visible UI sections: Form and Database:
+1. Service Types
+2. Product Types
+3. Services
+4. Products
+5. Workshops
+6. Technicians
+7. Countries
+8. Languages
+9. Users
+10. Roles
+11. Permissions
+
+The same Form handles creating and updating a record and provides Delete when a record is selected. Selecting a record in the Database loads its values into that same Form. The Database also supports rearranging records. Keep the two sections visually distinct and usable on mobile.
+
+### 25.6 Fixed Defaults
+
+- Country selection: Global is checked by default and must remain checked. The user cannot uncheck Global. Other available countries remain independently selectable.
+- Visibility: Owner is checked by default and must remain checked. The user cannot uncheck Owner. Other available roles remain independently selectable.
+- Languages: English is pre-created and selected as the default language. If other languages exist, the user can select another available language.
+- These fixed selections must be enforced in the UI and protected by appropriate database logic, not only by a visual default.
+
+### 25.7 Module and Item Views
+
+- Supported views: List View and Details View.
+- Catalogue records created in Service Types, Product Types, Services, Products, Workshops and Technicians each have a unique slug.
+- Those catalogue item slugs do not create standalone pages.
+- Do not retain the previous independent public listing/detail routes as primary pages. Where a Details View is needed, show it within the existing Home or Dashboard experience rather than creating a separate page.
+
+### 25.8 Website Informations Fields
+
+- Logo
+- Title
+- Intro
+
+### 25.9 Catalogue and Reference Module Fields
+
+**Service Types**
+- Title
+- Description
+- Slug
+- Country
+- Product Types
+- Services
+- Products
+- Workshops
+- Technicians
+- Images
+- Visibility
+
+**Product Types**
+- Title
+- Description
+- Slug
+- Country
+- Service Types
+- Services
+- Products
+- Workshops
+- Technicians
+- Images
+- Visibility
+
+**Services**
+- Title
+- Description
+- Slug
+- Country
+- Service Types
+- Product Types
+- Products
+- Workshops
+- Technicians
+- Images
+- Visibility
+
+**Products**
+- Title
+- Description
+- Slug
+- Country
+- Service Types
+- Product Types
+- Services
+- Workshops
+- Technicians
+- Images
+- Visibility
+
+**Workshops**
+- Title
+- Description
+- Slug
+- Country
+- Service Types
+- Product Types
+- Services
+- Products
+- Technicians
+- Images
+- Visibility
+
+**Technicians**
+- Title
+- Description
+- Slug
+- Country
+- Service Types
+- Product Types
+- Services
+- Products
+- Workshops
+- Images
+- Visibility
+
+**Countries**
+- Title
+- Description
+- Slug
+- Service Types
+- Product Types
+- Services
+- Products
+- Workshops
+- Technicians
+- Images
+- Visibility
+
+**Languages**
+- Title
+- Description
+- Slug
+- Country
+- Service Types
+- Product Types
+- Services
+- Products
+- Workshops
+- Technicians
+- Images
+- Visibility
+
+### 25.10 User, Role and Permission Fields
+
+**Users**
+- Name
+- Email
+- Roles
+- Permissions
+- Images
+- Status
+
+**Roles**
+- Name
+- Email
+- Users
+- Permissions
+- Images
+- Status
+
+**Permissions**
+- Roles
+- Name
+- Email
+- Users
+- Roles
+- Images
+- Status
+
+Each of these three modules must provide the Status actions:
+- Active
+- Deactive
+- Block
+- Delete
+
+Keep all existing authentication protections, role/permission relationships, primary Owner protections and secure server-side authorization. Never expose passwords. The primary Owner account `3btechhub@gmail.com` must remain protected from deletion, blocking, demotion or replacement.
+
+### 25.11 Customizations
+
+The Customizations module manages:
+- Module on Home
+- Show/Hide system
+- Rearrange system
+
+Its module choices are Service Types, Product Types, Services, Products, Workshops and Technicians. Preserve role visibility rules and ensure hidden Home modules do not render publicly.
+
+### 25.12 Required Fields
+
+For each of the following modules, only Title and Slug are required:
+- Service Types
+- Product Types
+- Services
+- Products
+- Workshops
+- Technicians
+- Countries
+- Languages
+
+For each of the following modules, Email is required:
+- Users
+- Roles
+- Permissions
+
+Other fields remain optional unless a security or database invariant requires otherwise.
+
+### 25.13 Compatibility and Data Preservation
+
+The new specification replaces the older Categories / Device Types naming with Service Types / Product Types. Existing Device Types records and relationships must be preserved and presented as Product Types; do not delete or recreate them merely to change their display name.
+
+Preserve existing Services, Products, Workshops, Technicians, Countries, Users, Roles, Permissions, authentication records, Storage objects, contact data, location data, audit/analytics data and working security policies unless a verified conflict requires a safe migration. Contacts and Locations are no longer primary modules or Home sections under this specification; their existing records may remain as supporting/legacy data and must not be blindly deleted.
+
+Older requirements for separate catalogue listing pages and individual item detail pages are superseded by Sections 25.1 and 25.7. Older Home module choices are superseded by Section 25.3. The new field lists and required-field rules in Sections 25.8–25.12 supersede earlier conflicting form fields.
+
+### 25.14 Security, Quality and Deployment
+
+Retain the compatible earlier requirements for Supabase Authentication, RLS, trusted Edge Functions, database constraints, Owner protection, validated role-permission relationships, secure image uploads, audit/visitor analytics separation, privacy safeguards, responsive design, Light/Dark themes, reusable components and safe additive migrations.
+
+Do not remove existing records or database objects without checking dependencies, foreign keys, policies, Storage references, application references and existing data. Verify implementation and deployment before reporting that the site is live.
