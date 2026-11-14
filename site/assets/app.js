@@ -475,9 +475,10 @@ if (profile && ["profile","edit-profile"].includes(accountMode)) {
   }
   function setProfileValue(key, value, placeholder) {
     const field = fields[key];
-    const hasValue = Boolean(String(value || "").trim());
-    field.textContent = hasValue ? value : placeholder;
-    field.classList.toggle("is-placeholder", !hasValue);
+    const normalized = String(value || "").trim();
+    field.textContent = normalized;
+    field.dataset.placeholderText = placeholder;
+    field.classList.toggle("is-placeholder", !normalized);
   }
   function enableInlineEdit(button) {
     const key = button.dataset.editField;
@@ -487,8 +488,12 @@ if (profile && ["profile","edit-profile"].includes(accountMode)) {
       ? (currentUser.user_metadata?.display_name || currentUser.user_metadata?.full_name || currentUser.user_metadata?.name || "")
       : key === "email" ? (currentUser.email || "") : currentPhone;
     field.textContent = original;
+    field.classList.toggle("is-placeholder", !String(original || "").trim());
     field.contentEditable = "true";
     field.classList.add("is-editing");
+    field.addEventListener("input", () => {
+      field.classList.toggle("is-placeholder", !field.textContent.trim());
+    }, { once: true });
     button.dataset.saving = "true";
     button.textContent = "Save";
     field.focus();
