@@ -105,7 +105,7 @@ function openLightbox(url,label){
   if(!dialog.open)dialog.showModal();
 }
 function renderLocation(root,record){
-  const location=String(record.location||"").trim();
+  const location=String(record.location||record.address||"").trim();
   const suppliedMapUrl=safeExternalUrl(record.map_url);
   if(!location&&!suppliedMapUrl)return;
   const section=el("section","catalogue-detail-section");
@@ -245,24 +245,73 @@ function renderProviderCards(root,title,records,module,slugMap,emptyText){
   section.append(grid);
   root.append(section);
 }
+const ITEM_RELATION_ORDER={
+  "service-types":[["Device Types","service_type_device_types","service_type_id","device_type_id","device-types"],["Services","service_type_services","service_type_id","service_id","services"],["Products","service_type_products","service_type_id","product_id","products"],["Workshops","service_type_workshops","service_type_id","workshop_id","workshops"],["Technicians","service_type_technicians","service_type_id","technician_id","technicians"]],
+  "device-types":[["Service Types","service_type_device_types","device_type_id","service_type_id","service-types"],["Services","device_type_services","device_type_id","service_id","services"],["Products","device_type_products","device_type_id","product_id","products"],["Workshops","device_type_workshops","device_type_id","workshop_id","workshops"],["Technicians","device_type_technicians","device_type_id","technician_id","technicians"]],
+  services:[["Service Types","service_type_services","service_id","service_type_id","service-types"],["Device Types","device_type_services","service_id","device_type_id","device-types"],["Products","service_products","service_id","product_id","products"],["Workshops","service_workshops","service_id","workshop_id","workshops"],["Technicians","service_technicians","service_id","technician_id","technicians"]],
+  products:[["Service Types","service_type_products","product_id","service_type_id","service-types"],["Device Types","device_type_products","product_id","device_type_id","device-types"],["Services","service_products","product_id","service_id","services"],["Workshops","product_workshops","product_id","workshop_id","workshops"],["Technicians","product_technicians","product_id","technician_id","technicians"]],
+  workshops:[["Service Types","service_type_workshops","workshop_id","service_type_id","service-types"],["Device Types","device_type_workshops","workshop_id","device_type_id","device-types"],["Services","service_workshops","workshop_id","service_id","services"],["Products","product_workshops","workshop_id","product_id","products"],["Technicians","workshop_technicians","workshop_id","technician_id","technicians"]],
+  technicians:[["Service Types","service_type_technicians","technician_id","service_type_id","service-types"],["Device Types","device_type_technicians","technician_id","device_type_id","device-types"],["Services","service_technicians","technician_id","service_id","services"],["Products","product_technicians","technician_id","product_id","products"],["Workshops","workshop_technicians","technician_id","workshop_id","workshops"]]
+};
+const ITEM_FIELD_ORDER={
+  "service-types":["gallery","relationships"],
+  "device-types":["gallery","relationships"],
+  services:["gallery","details","relationships"],
+  products:["gallery","details","relationships"],
+  workshops:["gallery","location","details","contacts","relationships"],
+  technicians:["gallery","details","contacts","relationships"]
+};
+function applyPublicVisibility(query,module){
+  if(module==="service-types"||module==="device-types")return query.in("status",["active","published"]);
+  if(module==="services"||module==="products")return query.eq("status","active");
+  if(module==="workshops")return query.eq("status","published");
+  if(module==="technicians")return query.eq("is_published",true);
+  return query;
+}
 async function renderModuleRelationships(root,module,data,supabase){
-  const map={
-    services:[["Products","service_products","service_id","product_id","products"],["Workshops","service_workshops","service_id","workshop_id","workshops"],["Technicians","service_technicians","service_id","technician_id","technicians"]],
-    products:[["Workshops","product_workshops","product_id","workshop_id","workshops"],["Technicians","product_technicians","product_id","technician_id","technicians"]],
-    workshops:[["Services","service_workshops","workshop_id","service_id","services"],["Products","product_workshops","workshop_id","product_id","products"],["Technicians","workshop_technicians","workshop_id","technician_id","technicians"]],
-    technicians:[["Services","service_technicians","technician_id","service_id","services"],["Workshops","workshop_technicians","technician_id","workshop_id","workshops"]]
-  };
-  for(const [title,table,parent,child,target] of map[module]||[]){
+  for(const [title,table,parent,child,target] of ITEM_RELATION_ORDER[module]||[]){
     const {data:links,error}=await supabase.from(table).select(child).eq(parent,data.id);
     if(error)throw error;
-    const ids=(links||[]).map(row=>row[child]);
+    const ids=(links||[]).map(row=>row[child]).filter(Boolean);
     if(!ids.length)continue;
-    let query=supabase.from(target).select(publicColumns[target]).in("id",ids);
+    const targetTable=target==="service-types"?"service_types":target==="device-types"?"device_types":target;
+    let query=supabase.from(targetTable).select(publicColumns[targetTable]).in("id",ids);
+    query=applyPublicVisibility(query,target);
     const {data:records,error:recordsError}=await query;
     if(recordsError)throw recordsError;
-    const slugMap=target==="contacts"?new Map():await getPublicSlugMap(supabase,target);
+    const slugMap=await getPublicSlugMap(supabase,target);
     renderProviderCards(root,title,records||[],target,slugMap);
   }
+}
+function renderItemDetails(root,data,module){
+  const entries={
+    services:[
+      ["Description",data.description],["Information",data.short_info],["Service Information",data.service_information],["Location",data.location]
+    ],
+    products:[
+      ["Description",data.description],["Condition",data.condition],["Price",data.price_minor==null?null:(Number(data.price_minor)/100).toFixed(2)+" "+(data.currency||"SAR")],["Stock",data.stock_qty==null?null:Number(data.stock_qty)===0?"Out of stock":String(data.stock_qty)],["Information",data.short_info],["Product Information",data.service_information],["Location",data.location]
+    ],
+    workshops:[
+      ["Description",data.description],["Date",data.workshop_date],["Time",data.workshop_time],["Trainer",data.trainer||data.category],["Information",data.short_info],["Workshop Information",data.service_information]
+    ],
+    technicians:[
+      ["Skill / Expertise",data.skill||data.category],["Description",data.description],["Information",data.short_info],["Professional Information",data.service_information],["Location",data.location]
+    ]
+  }[module]||[];
+  const visible=entries.filter(([,value])=>hasDisplayValue(value));
+  if(!visible.length)return;
+  const section=el("section","catalogue-detail-section catalogue-item-information");
+  section.append(el("h2","catalogue-detail-heading","Details"));
+  const list=el("div","catalogue-item-information-list");
+  visible.forEach(([label,value])=>{
+    const row=el("div","catalogue-item-information-row");
+    row.append(el("strong","catalogue-item-information-label",label));
+    const text=Array.isArray(value)?value.filter(hasDisplayValue).join("\n"):String(value);
+    row.append(el("p","catalogue-detail-field",text));
+    list.append(row);
+  });
+  section.append(list);
+  root.append(section);
 }
 async function renderDetail(root,data,module,def,supabase){
   root.classList.add("catalogue-detail-page");
@@ -278,17 +327,14 @@ async function renderDetail(root,data,module,def,supabase){
   const itemTitle=data.name||data.title||"";
   if(itemTitle)hero.append(visual,el("h1","catalogue-detail-title",itemTitle));else hero.append(visual);
   root.append(hero);
-  const fields={
-    services:[data.description,data.short_info,data.service_information,data.location],
-    products:[data.description,data.condition,data.price_minor==null?null:(Number(data.price_minor)/100).toFixed(2)+" "+(data.currency||"SAR"),data.stock_qty,data.short_info,data.service_information,data.location],
-    workshops:[data.description,data.short_info,data.service_information,data.workshop_date,data.workshop_time,data.address,data.trainer],
-    technicians:[data.description,data.skill,data.short_info,data.service_information,data.location]
-  };
-  (fields[module]||[]).forEach(value=>addField(root,value));
-  if(module==="workshops")renderLocation(root,data);
-  if(module==="technicians"||module==="workshops")await renderContacts(root,data,supabase);
-  renderGallery(root,data,module);
-  await renderModuleRelationships(root,module,data,supabase);
+  const steps=ITEM_FIELD_ORDER[module]||["gallery","details","relationships"];
+  for(const step of steps){
+    if(step==="gallery")renderGallery(root,data,module);
+    else if(step==="details")renderItemDetails(root,data,module);
+    else if(step==="location"&&module==="workshops")renderLocation(root,data);
+    else if(step==="contacts"&&(module==="technicians"||module==="workshops"))await renderContacts(root,data,supabase);
+    else if(step==="relationships")await renderModuleRelationships(root,module,data,supabase);
+  }
 }
 function renderCard(item,module,slugMap){
   const route=itemRoute(module,item,slugMap);
