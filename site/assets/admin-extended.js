@@ -54,7 +54,7 @@ export function initExtendedDashboard(supabase,role){
   checks(contactVisibilityHost,options,[...new Set([...(selected||[]),"owner"])]);
  }
  async function loadContacts(){if(!cl)return;await loadLookups();renderContactVisibility();cl.replaceChildren();const {data,error}=await supabase.from("contacts").select("*").order("created_at",{ascending:false});if(error)throw error;if(!data?.length){cl.append(el("p","muted","No records found."));return;}for(const record of data)tap(cl,record.name,()=>cf._sharedEdit(record));}
- cf?.addEventListener("reset",()=>renderContactVisibility());
+ cf?.addEventListener("reset",()=>queueMicrotask(()=>renderContactVisibility()));
  bindSharedCrud({
   form:cf,list:cl,formTitle:"contacts-form-title",titleText:"Add contact",emptyText:"No records found.",
   load:loadContacts,
