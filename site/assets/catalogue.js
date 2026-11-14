@@ -2,12 +2,19 @@ import { createContactIcon, getContactActionLabel, getContactHref } from "./cont
 import { createIcon, getModuleIcon, getItemIconName } from "./icon-utils.js";
 
 const BASE = "/3btechhub/";
+const publicColumns = {
+  services:"id,name,description,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp",
+  products:"id,name,description,condition,price_minor,currency,stock_qty,category,category_group,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp",
+  workshops:"id,title,description,workshop_date,workshop_time,location,trainer,phone,whatsapp,photo_url,category,short_info,service_information,gallery_urls,map_url,address",
+  technicians:"id,name,description,category,phone,whatsapp,photo_url,skill,short_info,service_information,gallery_urls,location,map_url,email,link",
+  contacts:"id,name,value"
+};
 const definitions = {
-  services: { title:"Services", table:"services", filter:["status","active"], icon:"wrench" },
-  products: { title:"Products", table:"products", filter:["status","active"], icon:"package" },
-  workshops: { title:"Workshops", table:"workshops", filter:["status","published"], icon:"building" },
-  technicians: { title:"Technicians", table:"technicians", filter:["is_published",true], icon:"technician" },
-  contacts: { title:"Contacts", table:"contacts", icon:"contact" }
+  services: { title:"Services", table:"services", columns:publicColumns.services, icon:"wrench" },
+  products: { title:"Products", table:"products", columns:publicColumns.products, icon:"package" },
+  workshops: { title:"Workshops", table:"workshops", columns:publicColumns.workshops, icon:"building" },
+  technicians: { title:"Technicians", table:"technicians", columns:publicColumns.technicians, icon:"technician" },
+  contacts: { title:"Contacts", table:"contacts", columns:publicColumns.contacts, icon:"contact" }
 };
 
 
@@ -31,18 +38,23 @@ function safeExternalUrl(value){
     return ["http:","https:"].includes(url.protocol)?url.href:"";
   }catch{return "";}
 }
-function addField(root,label,value){
-  if(value==null || (typeof value==="string" && !value.trim()))return;
-  const section=el("section","catalogue-detail-section");
-  section.append(el("h2","catalogue-detail-heading",label),el("p","catalogue-detail-field",value));
-  root.append(section);
+function hasDisplayValue(value){
+  if(value==null)return false;
+  if(typeof value==="string")return Boolean(value.trim());
+  if(Array.isArray(value))return value.some(hasDisplayValue);
+  if(typeof value==="object")return Object.values(value).some(hasDisplayValue);
+  return true;
+}
+function addField(root,value){
+  if(!hasDisplayValue(value))return;
+  const values=Array.isArray(value)?value:[value];
+  values.forEach(item=>{if(hasDisplayValue(item))root.append(el("p","catalogue-detail-field",String(item)));});
 }
 function renderGallery(root,record,module){
   const urls=Array.isArray(record.gallery_urls)?record.gallery_urls.filter(Boolean):[];
   if(record.photo_url&&!urls.includes(record.photo_url))urls.unshift(record.photo_url);
   if(!urls.length)return;
   const section=el("section","catalogue-detail-section catalogue-gallery-section");
-  section.append(el("h2","catalogue-detail-heading","Gallery"));
   const gallery=el("div","catalogue-gallery");
   urls.forEach((url,index)=>{
     const button=el("button","catalogue-gallery-item");
@@ -84,7 +96,6 @@ function renderLocation(root,record){
   const suppliedMapUrl=safeExternalUrl(record.map_url);
   if(!location&&!suppliedMapUrl)return;
   const section=el("section","catalogue-detail-section");
-  section.append(el("h2","catalogue-detail-heading","Location"));
   const card=el("div","catalogue-location-card");
   const icon=el("div","catalogue-location-icon");
   icon.append(createIcon("map-pin"));
@@ -154,15 +165,14 @@ async function renderContacts(root,record,supabase){
   }
   if(!actions.childElementCount)return false;
   const section=el("section","catalogue-detail-section");
-  section.append(el("h2","catalogue-detail-heading","Contact"));
   section.append(actions);
   root.append(section);
   return true;
 }
 function renderProviderCards(root,title,records,module,emptyText){
+  if(!records.length)return;
   const section=el("section","catalogue-detail-section");
   section.append(el("h2","catalogue-detail-heading",title));
-  if(!records.length)return;
   const grid=el("div","catalogue-related-grid");
   records.forEach(record=>{
     const card=el("article","catalogue-related-card");
@@ -180,9 +190,7 @@ function renderProviderCards(root,title,records,module,emptyText){
       top.append(visual);
     }
     const name=record.name||record.title||"";
-    const titleLink=el("a","catalogue-related-name",name);
-    if(record.slug)titleLink.href=BASE+module+"/"+encodeURIComponent(record.slug)+"/";
-    top.append(titleLink);
+    if(name){const titleLink=el("a","catalogue-related-name",name);if(record.id)titleLink.href=BASE+module+"/"+encodeURIComponent(record.id)+"/";top.append(titleLink);}
     card.append(top);
     const summary=record.short_info||record.skill||record.description||"";
     if(summary)card.append(el("p","catalogue-related-summary",summary));
@@ -227,10 +235,7 @@ async function renderModuleRelationships(root,module,data,supabase){
     if(error)throw error;
     const ids=(links||[]).map(row=>row[child]);
     if(!ids.length)continue;
-    let query=supabase.from(target).select("*").in("id",ids);
-    if(target==="services"||target==="products")query=query.eq("status","active");
-    if(target==="workshops")query=query.eq("status","published");
-    if(target==="technicians")query=query.eq("is_published",true);
+    let query=supabase.from(target).select(publicColumns[target]).in("id",ids);
     const {data:records,error:recordsError}=await query;
     if(recordsError)throw recordsError;
     renderProviderCards(root,title,records||[],target);
@@ -247,25 +252,24 @@ async function renderDetail(root,data,module,def,supabase){
     image.addEventListener("error",()=>{image.remove();visual.append(getItemFallbackIcon(data.name||data.title,module));},{once:true});
     visual.append(image);
   }else visual.append(getItemFallbackIcon(data.name||data.title,module));
-  hero.append(visual,el("h1","catalogue-detail-title",data.name||data.title||def.title));
+  const itemTitle=data.name||data.title||"";
+  if(itemTitle)hero.append(visual,el("h1","catalogue-detail-title",itemTitle));else hero.append(visual);
   root.append(hero);
-  addField(root,"Countries",data.country);
-  if(module==="workshops"){
-    addField(root,"Location",data.location);
-    addField(root,"Address",data.address);
-    renderGallery(root,data,module);
-  }else if(module==="technicians"){
-    addField(root,"Skill / Expertise",data.skill);
-    renderGallery(root,data,module);
-    await renderContacts(root,data,supabase);
-  }else{
-    renderGallery(root,data,module);
-  }
+  const fields={
+    services:[data.description,data.short_info,data.service_information,data.location],
+    products:[data.description,data.condition,data.price_minor==null?null:(Number(data.price_minor)/100).toFixed(2)+" "+(data.currency||"SAR"),data.stock_qty,data.short_info,data.service_information,data.location],
+    workshops:[data.description,data.short_info,data.service_information,data.workshop_date,data.workshop_time,data.address,data.trainer],
+    technicians:[data.description,data.skill,data.short_info,data.service_information,data.location]
+  };
+  (fields[module]||[]).forEach(value=>addField(root,value));
+  if(module==="workshops")renderLocation(root,data);
+  if(module==="technicians"||module==="workshops")await renderContacts(root,data,supabase);
+  renderGallery(root,data,module);
   await renderModuleRelationships(root,module,data,supabase);
 }
 function renderCard(item,module){
   const card=el("a","home-content-card");
-  card.href=BASE+module+"/"+encodeURIComponent(item.slug)+"/";
+  if(item.id)card.href=BASE+module+"/"+encodeURIComponent(item.id)+"/";
   const visual=el("span","home-content-visual");
   visual.append(getItemFallbackIcon(item.name||item.title,module));
   if(item.photo_url){
@@ -277,26 +281,27 @@ function renderCard(item,module){
     visual.append(image);
   }
   const body=el("span","home-content-card-body");
-  body.append(el("strong","",item.name||item.title||"Untitled"));
-  if(item.country)body.append(el("small","home-content-card-meta",item.country));
+  const itemTitle=item.name||item.title||"";
+  if(itemTitle)body.append(el("strong","",itemTitle));
+
   card.append(visual,body);
   return card;
 }
-export async function initCataloguePage(supabase,module,slug){
+export async function initCataloguePage(supabase,module,recordId){
   const root=document.getElementById("catalogue-root");
   const def=definitions[module];
   if(!root||!def){if(root)root.textContent="Page not found.";return;}
   root.replaceChildren();
-  if(slug){
-    let query=supabase.from(def.table).select("*").eq("slug",slug).limit(1);
-    if(def.filter)query=query.eq(def.filter[0],def.filter[1]);
+  if(recordId){
+    const query=supabase.from(def.table).select(def.columns).eq("id",recordId).limit(1);
     const {data,error}=await query.maybeSingle();
     if(error||!data){
       root.append(el("h1","","Content not found"));
       return;
     }
     if(module==="contacts"){
-      root.append(el("h1","catalogue-title",data.name||def.title),el("p","catalogue-detail-field",data.value||""));
+      if(data.name)root.append(el("h1","catalogue-title",data.name));
+      if(data.value)root.append(el("p","catalogue-detail-field",data.value));
       const href=getContactHref(data.value);
       if(href){
         const action=el("a","pill-button",getContactActionLabel(data.value));
@@ -316,8 +321,7 @@ export async function initCataloguePage(supabase,module,slug){
   const heading=el("h1","catalogue-title",def.title);
   heading.prepend(createIcon(getModuleIcon(module)));
   root.append(heading);
-  let query=supabase.from(def.table).select("*").order("created_at",{ascending:false});
-  if(def.filter)query=query.eq(def.filter[0],def.filter[1]);
+  let query=supabase.from(def.table).select(def.columns);
   let records=[],offset=0;
   const pageSize=500;
   while(true){
@@ -333,7 +337,7 @@ export async function initCataloguePage(supabase,module,slug){
   if(!records.length){
     grid.append(el("p","home-empty","No "+def.title.toLowerCase()+" available yet."));
   }else{
-    records.forEach(record=>grid.append(renderCard(record,module)));
+    records.forEach(record=>{if(record.name||record.title||record.photo_url)grid.append(renderCard(record,module));});
   }
   root.append(grid);
 }
