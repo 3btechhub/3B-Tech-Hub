@@ -9,20 +9,22 @@ function normalizedPath(value) {
   const url = new URL(value, window.location.origin);
   let path = url.pathname;
   if (path === BASE.slice(0, -1) || path === BASE) path = BASE + "home/";
-  if (path === BASE + "account" || path === BASE + "account/") path = BASE + "login/";
   if (!path.startsWith(BASE)) return null;
   return (path.endsWith("/") ? path : path + "/") + url.search + url.hash;
 }
 function routeDetails(path) {
   const pathname = new URL(path, window.location.origin).pathname;
-  const first = pathname.slice(BASE.length).split("/").filter(Boolean)[0] || "";
-  if (first === "login") return { view:"account", authMode:"login" };
-  if (first === "create-account") return { view:"account", authMode:"signup" };
-  if (first === "forgot-password" || first === "reset-password") return { view:"account", authMode:"recovery-start" };
-  if (first === "profile") return { view:"account", authMode:"profile" };
-  if (first === "edit-profile") return { view:"account", authMode:"edit-profile" };
+  const parts = pathname.slice(BASE.length).split("/").filter(Boolean);
+  const first = parts[0] || "";
+  const legacy = { login:"login", "create-account":"signup", "forgot-password":"recovery-start", "reset-password":"recovery-start", profile:"profile", "edit-profile":"edit-profile" };
+  if (first === "account") {
+    const child = parts[1] || "login";
+    const modes = { login:"login", "create-account":"signup", "reset-password":"recovery-start", profile:"profile", "edit-profile":"edit-profile" };
+    return { view:"account", authMode:modes[child] || "login" };
+  }
+  if (legacy[first]) return { view:"account", authMode:legacy[first] };
   if (["home","dashboard"].includes(first)) return { view:first };
-  if (["service-types","device-types","services","products","workshops","technicians","contacts"].includes(first)) { const recordPart=pathname.slice(BASE.length).split("/").filter(Boolean)[1] || ""; return { view:"catalogue", module:first, recordKey:recordPart ? decodeURIComponent(recordPart) : "" }; }
+  if (["service-types","device-types","services","products","workshops","technicians","contacts"].includes(first)) { const recordPart=parts[1] || ""; return { view:"catalogue", module:first, recordKey:recordPart ? decodeURIComponent(recordPart) : "" }; }
   return { view:"home" };
 }
 function resolveFragmentLinks(container, routePath) {
