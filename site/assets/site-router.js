@@ -91,8 +91,14 @@ document.addEventListener("click", (event) => {
   window.navigateSiteRoute(url.pathname + url.search + url.hash);
 });
 window.addEventListener("popstate", () => { void renderRoute(window.location.pathname + window.location.search).catch((error) => { console.error("Website route could not be rendered.", error); main.textContent = "This page could not be loaded. Please refresh and try again."; }); });
-const routeParam = new URLSearchParams(window.location.search).get("route");
-const initialPath = normalizedPath(routeParam || (window.location.pathname + window.location.search + window.location.hash)) || (BASE + "home/");
+const initialParams = new URLSearchParams(window.location.search);
+const routeParam = initialParams.get("route");
+initialParams.delete("route");
+const passthroughQuery = initialParams.toString();
+const initialTarget = routeParam
+  ? routeParam + (passthroughQuery ? (routeParam.includes("?") ? "&" : "?") + passthroughQuery : "") + window.location.hash
+  : (window.location.pathname + window.location.search + window.location.hash);
+const initialPath = normalizedPath(initialTarget) || (BASE + "home/");
 try {
   await renderRoute(initialPath, { replace:true });
 } catch (error) {
