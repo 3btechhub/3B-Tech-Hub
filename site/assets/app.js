@@ -95,9 +95,13 @@ const homeCatalogModules = [
 
 function renderHomeCard(module, record) {
   const title=record.name||record.title||"";
-  const card=document.createElement(["service_types","device_types"].includes(module.key)?"div":"a");
+  const card=document.createElement(module.key==="contacts"?"article":"a");
   card.className="home-content-card";
-  if(card.tagName==="A"){const routeKey=module.key==="contacts"?record.id:record.publicSlug;if(routeKey)card.href="/3btechhub/"+module.key+"/"+encodeURIComponent(routeKey)+"/";}
+  if(card.tagName==="A"){
+    const routeModule=module.key==="service_types"?"service-types":module.key==="device_types"?"device-types":module.key;
+    const routeKey=module.key==="service_types"||module.key==="device_types"?record.slug:record.publicSlug;
+    if(routeKey)card.href="/3btechhub/"+routeModule+"/"+encodeURIComponent(routeKey)+"/";
+  }
   const visual=document.createElement("div");
   visual.className="home-content-visual"+(module.key==="technicians"?" home-content-visual--person":"");
   if(module.key==="contacts"){const icon=createContactIcon(record.value,title);icon.classList.add("home-content-fallback");visual.append(icon);}
@@ -125,7 +129,7 @@ async function loadHomeCatalog() {
     if(!target) continue;
     try {
       const publicColumns={
-        service_types:"id,title,photo_url,gallery_urls",device_types:"id,title,photo_url,gallery_urls",
+        service_types:"id,title,slug,photo_url,gallery_urls",device_types:"id,title,slug,photo_url,gallery_urls",
         services:"id,name,description,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp",
         products:"id,name,description,condition,price_minor,currency,stock_qty,category,category_group,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp",
         workshops:"id,title,description,workshop_date,workshop_time,location,trainer,phone,whatsapp,photo_url,category,short_info,service_information,gallery_urls,map_url,address",
