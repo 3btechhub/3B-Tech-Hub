@@ -813,6 +813,12 @@ function setVisibilityRoleSelection(form,selectedRoles) {
   const selected=new Set([...(selectedRoles||[]),"owner"]);
   form.querySelectorAll("[data-visibility-role]").forEach(input=>{input.checked=selected.has(input.value);});
 }
+window.addEventListener("site-roles-updated",()=>{
+  document.querySelectorAll("[data-visibility-roles]").forEach(form=>{
+    const selected=[...form.querySelectorAll("[data-visibility-role]:checked")].map(input=>input.value);
+    void loadVisibilityRoleOptions(form,selected);
+  });
+});
 async function loadModuleRelationOptions(moduleName,form) {
   await loadVisibilityRoleOptions(form,["owner"]);
   const config=moduleRelationships[moduleName]||{};
