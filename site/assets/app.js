@@ -623,8 +623,8 @@ async function loadSiteSettingsForm() {
   if (!siteSettingsForm || currentDashboardRole !== "owner") return;
   if (siteSettingsMessage) siteSettingsMessage.textContent = "Loading website settings…";
   const [{data,error},{data:introData}] = await Promise.all([
-    supabase.from("Settings").select("setting_value").eq("setting_key","site_profile").maybeSingle(),
-    supabase.from("Settings").select("setting_value").eq("setting_key","home_intro").maybeSingle()
+    supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","site_profile").maybeSingle(),
+    supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","home_intro").maybeSingle()
   ]);
   if (error) { if (siteSettingsMessage) siteSettingsMessage.textContent=error.message||"Could not load website settings."; return; }
   await loadVisibilityRoleOptions(siteSettingsForm,data?.visibility_roles||introData?.visibility_roles||["owner","visitor"]);
