@@ -193,8 +193,8 @@ function renderProviderCards(root,title,records,module,emptyText){
     if(name){const titleLink=el("a","catalogue-related-name",name);if(record.id)titleLink.href=BASE+module+"/"+encodeURIComponent(record.id)+"/";top.append(titleLink);}
     card.append(top);
     const summary=record.short_info||record.skill||record.description||"";
-    if(summary)card.append(el("p","catalogue-related-summary",summary));
-    if(record.location)card.append(el("p","catalogue-related-meta",record.location));
+    if(hasDisplayValue(summary))card.append(el("p","catalogue-related-summary",summary));
+    if(hasDisplayValue(record.location))card.append(el("p","catalogue-related-meta",record.location));
     const actions=el("div","catalogue-related-actions");
     const phoneHref=getContactHref(record.phone);
     if(phoneHref){
