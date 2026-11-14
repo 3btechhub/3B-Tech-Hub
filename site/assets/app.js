@@ -168,7 +168,6 @@ async function applyPublicSiteSettings() {
     supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","site_profile").maybeSingle(),
     supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","home_intro").maybeSingle()
   ]);
-  await loadVisibilityRoleOptions(siteSettingsForm,data?.visibility_roles||introData?.visibility_roles||["owner","visitor"]);
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
   const intro=typeof introData?.setting_value?.content==="string"?introData.setting_value.content.trim():"";
   const introSection=document.getElementById("home-intro-section");
@@ -628,6 +627,7 @@ async function loadSiteSettingsForm() {
     supabase.from("Settings").select("setting_value").eq("setting_key","home_intro").maybeSingle()
   ]);
   if (error) { if (siteSettingsMessage) siteSettingsMessage.textContent=error.message||"Could not load website settings."; return; }
+  await loadVisibilityRoleOptions(siteSettingsForm,data?.visibility_roles||introData?.visibility_roles||["owner","visitor"]);
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
   const intro=introData?.setting_value&&typeof introData.setting_value.content==="string"?introData.setting_value.content:"";
   siteSettingsForm.elements.home_intro.value=intro;
@@ -793,6 +793,7 @@ async function syncTechnicianContacts(technicianId,payload){
   }
 }
 async function loadVisibilityRoleOptions(form,selectedRoles) {
+  if(!form)return;
   const host=form.querySelector("[data-visibility-roles]");
   if(!host)return;
   const {data,error}=await supabase.from("Roles").select("name,slug").eq("is_active",true).order("name");
