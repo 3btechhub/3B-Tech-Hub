@@ -31,7 +31,7 @@ function addTextElement(parent, tag, className, value) {
   return node;
 }
 
-const translations = { en: {home:"Home",profile:"Profile",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode",services:"Services",products:"Products",workshops:"Workshops",technicians:"Technicians",contacts:"Contacts",user:"User",role:"Role",permission:"Permission",settings:"Settings",users:"Users",refresh:"Refresh",inviteUser:"Invite User",userType:"User Type",emailAddress:"Email Address",sendInvitation:"Send Invitation",refreshUsers:"Refresh Users",userList:"User List",roleAssignments:"Role Assignments",permissionMatrix:"Permission Matrix",websiteSettings:"Website Settings",websiteTitle:"Website Title",logoUrl:"Logo URL (optional)",saveSettings:"Save Settings",signIn:"Sign In",forgotPassword:"Forgot password?",createAccount:"Create account",verificationCode:"Verification Code",name:"Name",email:"Email",phoneNumber:"Phone Number",password:"Password",changePassword:"Change Password",edit:"Edit",currentPassword:"Current Password",newPassword:"New Password",confirmPassword:"Confirm New Password",updatePassword:"Update Password",verifyCodeReset:"Verify Code & Reset Password",loginAccount:"Login Account"} };
+const translations = { en: {home:"Home",profile:"Profile",login:"Login",logout:"Logout",dashboard:"Dashboard",accountLogin:"Account login",dark:"Switch to dark mode",light:"Switch to light mode",services:"Services",products:"Products",workshops:"Workshops",technicians:"Technicians",contacts:"Contacts",user:"User",role:"Role",permission:"Permission",settings:"Settings",users:"Users",refresh:"Refresh",inviteUser:"Invite User",userType:"User Type",emailAddress:"Email Address",sendInvitation:"Send Invitation",refreshUsers:"Refresh Users",userList:"User List",roleAssignments:"Role Assignments",permissionMatrix:"Permission Matrix",websiteSettings:"Website Settings",websiteTitle:"Website Title",logoUrl:"Logo URL (optional)",saveSettings:"Save Settings",signIn:"Sign In",sendResetCode:"Send Reset Code",forgotPassword:"Forgot password?",createAccount:"Create account",verificationCode:"Verification Code",name:"Name",email:"Email",phoneNumber:"Phone Number",password:"Password",changePassword:"Change Password",edit:"Edit",currentPassword:"Current Password",newPassword:"New Password",confirmPassword:"Confirm New Password",updatePassword:"Update Password",verifyCodeReset:"Verify Code & Reset Password",loginAccount:"Login Account"} };
 function applyEnglishText() {
   document.documentElement.lang = "en";
   document.documentElement.dir = "ltr";
@@ -242,7 +242,7 @@ if (form) {
   const emailInput = form.elements.email;
   const passwordInput = form.elements.password;
   const otpInput = form.elements.otp;
-  let mode = "login";
+  let mode = document.querySelector("#app-main")?.dataset.authMode || "login";
   let recoveryEmail = "";
 
   function showMessage(text, kind = "") {
@@ -253,15 +253,20 @@ if (form) {
   function render() {
     const signup = mode === "signup";
     const recovery = mode === "recovery" || mode === "recovery-link";
+    const recoveryStart = mode === "recovery-start";
     const recoveryLink = mode === "recovery-link";
     const labels = translations.en
-    submit.textContent = recoveryLink ? labels.updatePassword : recovery ? labels.verifyCodeReset : signup ? labels.createAccount : labels.signIn;
+    submit.textContent = recoveryLink ? labels.updatePassword : recovery ? labels.verifyCodeReset : recoveryStart ? labels.sendResetCode : signup ? labels.createAccount : labels.signIn;
     toggle.textContent = signup ? labels.loginAccount : labels.createAccount;
+    toggle.hidden = recoveryStart || recovery;
     toggle.disabled = recovery;
+    forgot.hidden = recoveryStart || recovery;
     forgot.disabled = recovery;
     emailInput.readOnly = mode === "recovery";
     otpInput.hidden = mode !== "recovery";
     otpInput.required = mode === "recovery";
+    passwordInput.hidden = recoveryStart;
+    passwordInput.required = !recoveryStart;
     passwordInput.autocomplete = recovery || signup ? "new-password" : "current-password";
     passwordInput.setAttribute("aria-label", recovery ? labels.newPassword : labels.password);
     passwordInput.placeholder = recovery ? labels.newPassword : labels.password;
@@ -310,7 +315,7 @@ if (form) {
       emailInput.focus();
       return showMessage("Enter your email address.", "error");
     }
-    if (password.length < 8) {
+    if (mode !== "recovery-start" && password.length < 8) {
       passwordInput.focus();
       return showMessage("Password must be at least 8 characters.", "error");
     }
@@ -320,9 +325,18 @@ if (form) {
     }
 
     submit.disabled = true;
-    showMessage(mode === "recovery" ? "Verifying code and updating password…" : mode === "signup" ? "Creating account…" : "Signing in…");
+    showMessage(mode === "recovery-start" ? "Sending password reset code…" : mode === "recovery" ? "Verifying code and updating password…" : mode === "signup" ? "Creating account…" : "Signing in…");
     try {
-      if (mode === "recovery-link") {
+      if (mode === "recovery-start") {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: new URL("account/?recovery=1", ROOT_URL).href });
+        if (error) throw error;
+        recoveryEmail = email;
+        mode = "recovery";
+        otpInput.value = "";
+        passwordInput.value = "";
+        render();
+        showMessage("A verification code has been sent to your email. Enter the code and your new password.", "success");
+      } else if (mode === "recovery-link") {
         const { error: updateError } = await supabase.auth.updateUser({ password });
         if (updateError) throw updateError;
         await supabase.auth.signOut();
