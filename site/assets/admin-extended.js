@@ -49,7 +49,7 @@ export function initExtendedDashboard(supabase,role){
  const contactVisibilityHost=el("div","module-related-options");contactVisibilityHost.id="contacts-visibility-options";
  const contactVisibilityField=el("div","module-form-field module-related-field");contactVisibilityField.append(el("span","","Visibility"),contactVisibilityHost);
  cf?.querySelector(".module-form-grid")?.append(contactVisibilityField);
- function renderContactVisibility(selected=["owner","visitor"]){
+ function renderContactVisibility(selected=["owner"]){
   const options=roles.filter(item=>item.is_active).map(item=>({value:item.slug,label:item.name,disabled:item.slug==="owner"}));
   checks(contactVisibilityHost,options,[...new Set([...(selected||[]),"owner"])]);
  }
@@ -58,7 +58,7 @@ export function initExtendedDashboard(supabase,role){
  bindSharedCrud({
   form:cf,list:cl,formTitle:"contacts-form-title",titleText:"Add contact",emptyText:"No records found.",
   load:loadContacts,
-  edit(form,record){form.dataset.editId=record.id;form.elements.title.value=record.name||"";form.elements.value.value=record.value||"";renderContactVisibility(record.visibility_roles||["owner","visitor"]);},
+  edit(form,record){form.dataset.editId=record.id;form.elements.title.value=record.name||"";form.elements.value.value=record.value||"";renderContactVisibility(record.visibility_roles||["owner"]);},
   async save(form){const title=form.elements.title.value.trim(),value=form.elements.value.value.trim(),id=form.dataset.editId,visibility_roles=[...new Set([...checked(contactVisibilityHost),"owner"])];if(!title)throw new Error("Title is required.");const payload={name:title,value:value||null,visibility_roles};const result=id?await supabase.from("contacts").update(payload).eq("id",id):await supabase.from("contacts").insert({...payload,slug:slug(title)+"-"+crypto.randomUUID().slice(0,8)});if(result.error)throw result.error;},
   async remove(id){const {error}=await supabase.from("contacts").delete().eq("id",id);if(error)throw error;}
  });
