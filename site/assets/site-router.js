@@ -9,7 +9,7 @@ function normalizedPath(value) {
   const url = new URL(value, window.location.origin);
   let path = url.pathname;
   if (path === BASE.slice(0, -1) || path === BASE) path = BASE + "home/";
-  if (path === BASE + "account" || path === BASE + "account/") path = BASE + "login/" + url.search + url.hash;
+  if (path === BASE + "account" || path === BASE + "account/") path = BASE + "login/";
   if (!path.startsWith(BASE)) return null;
   return (path.endsWith("/") ? path : path + "/") + url.search + url.hash;
 }
