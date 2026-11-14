@@ -793,7 +793,6 @@ async function loadModuleRelationOptions(moduleName,form) {
     const host=form.querySelector('[data-related-options="'+key+'"]');
     if(!host)continue;
     let query=supabase.from(rel.target).select("id,"+rel.label).order(rel.label);
-    if(rel.target==="countries"||rel.target==="locations")query=query.eq("status","active");
     const {data,error}=await query;
     host.replaceChildren();
     if(error){addTextElement(host,"small","muted","Could not load options.");continue;}
@@ -807,13 +806,13 @@ async function loadModuleRelationOptions(moduleName,form) {
   }
   const countrySelect=form.elements.namedItem("country_id");
   if(countrySelect){
-    const {data,error}=await supabase.from("countries").select("id,name").eq("status","active").order("name");
+    const {data,error}=await supabase.from("countries").select("id,name").order("name");
     countrySelect.replaceChildren(new Option("— Select —",""));
     if(!error)for(const item of data||[])countrySelect.append(new Option(item.name,item.id));
   }
   const locationSelect=form.elements.namedItem("location_id");
   if(locationSelect){
-    const {data,error}=await supabase.from("locations").select("id,name").eq("status","active").order("name");
+    const {data,error}=await supabase.from("locations").select("id,name").order("name");
     locationSelect.replaceChildren(new Option("— Select —",""));
     if(!error)for(const item of data||[])locationSelect.append(new Option(item.name,item.id));
   }
@@ -1112,7 +1111,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
     event.preventDefault();
     if (currentDashboardRole !== "owner") { setModuleMessage(moduleName,"Owner permission required.","error"); return; }
     const submit=document.querySelector('[data-module-submit="'+moduleName+'"]'); submit.disabled=true; setModuleMessage(moduleName,"Saving…");
-    let uploadedUrls=[], saved=false;
+    let uploadedUrls=[], saved=false, contactSyncWarning="";
     try {
       const payload={};
       for (const [key] of config.fields) {
@@ -1188,7 +1187,11 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       }
       if (result.error) throw result.error;
       await saveModuleRelationships(moduleName,result.data.id,form);
-      if(moduleName==="technicians")await syncTechnicianContacts(result.data.id,payload);
+      saved=true;
+      if(moduleName==="technicians"){
+        try{await syncTechnicianContacts(result.data.id,payload);}
+        catch(contactError){contactSyncWarning=contactError.message||"Shared contact synchronization failed.";}
+      }
       if(moduleName==="countries"){
         for(const target of ["service_types","device_types","services","products","workshops","technicians","locations"]){
           const targetForm=document.querySelector('[data-module-form="'+target+'"]');
@@ -1201,8 +1204,9 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
           if(targetForm)await loadModuleRelationOptions(target,targetForm);
         }
       }
-      saved=true;
-      resetModuleForm(moduleName); setModuleMessage(moduleName,config.title+(editId?" updated.":" created."),"success");
+      resetModuleForm(moduleName);
+      const successMessage=config.title+(editId?" updated.":" created.");
+      setModuleMessage(moduleName,contactSyncWarning?successMessage+" Shared contacts were not fully synchronized: "+contactSyncWarning:successMessage,contactSyncWarning?"error":"success");
       await loadContentModule(moduleName);
     } catch(error) {
       if (!saved) { for(const url of uploadedUrls){try{await removeStoredImage(url);}catch{}} }
