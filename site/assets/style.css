@@ -1487,3 +1487,21 @@ input:disabled,select:disabled,textarea:disabled{opacity:.7;cursor:not-allowed}
 .auth-links .text-button[hidden]{display:none}
 .auth-message{min-height:20px;margin:0;color:var(--muted);font-size:var(--text-small);line-height:1.45}
 @media(max-width:480px){.account-layout{padding:28px 18px}.auth-main{width:100%}}
+
+
+/* Keep the navigation menu fully opaque and above all page content. */
+.site-header{
+  position:relative;
+  z-index:1000;
+  isolation:isolate;
+}
+.site-header .site-menu{
+  position:absolute;
+  z-index:1001;
+  background-color:var(--surface,#fff)!important;
+  opacity:1;
+  isolation:isolate;
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+}
+.site-header .site-menu[hidden]{display:none!important}
