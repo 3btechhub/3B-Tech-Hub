@@ -84,10 +84,10 @@ export async function loadRuntimeConfig(client) {
   if (!client?.from) return null;
   try {
     const { data, error } = await client
-      .from("site_settings")
+      .from("Settings")
       .select("setting_value")
       .eq("setting_key", "runtime_config")
-      .eq("is_public", true)
+      
       .maybeSingle();
 
     if (error || !isPlainObject(data?.setting_value)) return null;
