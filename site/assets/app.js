@@ -1010,7 +1010,8 @@ async function renderModuleList(moduleName,records) {
         else if(key==="title")input.value=record[moduleDatabaseKey(moduleName,key)]||"";
         else if(key==="technician")input.value=record.trainer||"";
         else if(key==="images")input.value="";
-        else if(key==="country"){const selected=String(record.country||"").split(",").map(value=>value.trim());form.querySelectorAll("[data-country-value]").forEach(box=>{box.checked=selected.includes(box.dataset.countryValue)||(selected.length===0&&box.dataset.countryValue==="Global");});}
+        else if(key==="country"){const selected=String(record.country||"").split(",").map(value=>value.trim());form.querySelectorAll('[data-related-options="countries"] input[data-related-id]').forEach(box=>{box.checked=selected.includes(box.dataset.relatedName);});}
+        else if(input.type==="checkbox")input.checked=Boolean(record[moduleDatabaseKey(moduleName,key)]);
         else if(key==="service_information")input.value=Array.isArray(record.service_information)?record.service_information.join("\n"):"";
         else input.value=record[moduleDatabaseKey(moduleName,key)]==null?"":String(record[moduleDatabaseKey(moduleName,key)]);
       }
@@ -1102,8 +1103,17 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         if(key==="type"&&moduleName==="categories"){payload.type=[...form.querySelectorAll("[data-checklist-value]:checked")].map(box=>box.dataset.checklistValue);continue;}
         const input=form.elements.namedItem(key); if ((!input && key!=="country") || key==="images" || key==="visibility" || moduleRelationships[moduleName]?.[key]) continue;
         const dbKey=moduleDatabaseKey(moduleName,key);
-        if(key==="country"){payload[dbKey]=[...form.querySelectorAll("[data-country-value]:checked")].map(box=>box.dataset.countryValue).join(", ")||"Global";continue;}
-        if(key==="service_information") payload[dbKey]=input.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);
+        if(key==="country"){
+          let selected=[...form.querySelectorAll('[data-related-options="countries"] input[data-related-id]:checked')];
+          if(!selected.length){const global=form.querySelector('[data-related-options="countries"] input[data-related-name="Global"]');if(global){global.checked=true;selected=[global];}}
+          payload[dbKey]=selected.map(box=>box.dataset.relatedName).filter(Boolean).join(", ")||"Global";
+          continue;
+        }
+        if(key==="location_id"){
+          payload.location_id=input.value||null;
+          payload.location=input.value?input.selectedOptions[0]?.textContent||null:null;
+        } else if(input.type==="checkbox")payload[dbKey]=input.checked;
+        else if(key==="service_information") payload[dbKey]=input.value.split(/\r?\n/).map(value=>value.trim()).filter(Boolean);
         else if(key==="price") {
           const raw=input.value.trim();
           const value=raw===""?null:Number(raw);
@@ -1124,15 +1134,17 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
         if (!selectedTypes.length||selectedTypes.some(value=>!["Service","Device"].includes(value))) throw new Error("Select at least one valid Category Type.");
         payload.type=selectedTypes;
       } else {
-        const slugValue=String(slugInput?.value||"").trim()||slugFromName(titleValue);
-        if (!slugValue) throw new Error("Slug is required.");
-        payload.slug=slugValue;
+        if(!["countries","locations"].includes(moduleName)){
+          const slugValue=String(slugInput?.value||"").trim()||slugFromName(titleValue);
+          if (!slugValue) throw new Error("Slug is required.");
+          payload.slug=slugValue;
+        }
         if (moduleName==="services"||moduleName==="products") payload.description=payload.description||"";
         const visibility=form.elements.namedItem("visibility")?.value||"hidden";
         if (moduleName==="technicians") payload.is_published=visibility==="visible";
         else payload.status=visibility==="visible"?(moduleName==="workshops"?"published":"active"):"draft";
       }
-      if (moduleName!=="categories") {
+      if (!["categories","countries","locations"].includes(moduleName)) {
         const imagesInput=form.elements.namedItem("images");
         const imageUrls=JSON.parse(form.dataset.currentGalleryUrls||"[]");
         if(imagesInput?.files?.length){
@@ -1160,6 +1172,18 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       }
       if (result.error) throw result.error;
       await saveModuleRelationships(moduleName,result.data.id,form);
+      if(moduleName==="countries"){
+        for(const target of ["service_types","device_types","services","products","workshops","technicians","locations"]){
+          const targetForm=document.querySelector('[data-module-form="'+target+'"]');
+          if(targetForm)await loadModuleRelationOptions(target,targetForm);
+        }
+      }
+      if(moduleName==="locations"){
+        for(const target of ["workshops","technicians"]){
+          const targetForm=document.querySelector('[data-module-form="'+target+'"]');
+          if(targetForm)await loadModuleRelationOptions(target,targetForm);
+        }
+      }
       saved=true;
       resetModuleForm(moduleName); setModuleMessage(moduleName,config.title+(editId?" updated.":" created."),"success");
       await loadContentModule(moduleName);
@@ -1194,6 +1218,7 @@ activateDashboardModule("overview");
 async function loadDashboardSummaryCounts(){
   if(!ownerDashboard||currentDashboardRole!=="owner")return;
   const counts={
+    countries:["countries","id"],locations:["locations","id"],
     service_types:["service_types","id"],device_types:["device_types","id"],
     services:["services","id"],products:["products","id"],workshops:["workshops","id"],
     technicians:["technicians","id"],contacts:["contacts","id"],users:["Users","id"],
