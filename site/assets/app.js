@@ -468,6 +468,11 @@ if (profile && ["profile","edit-profile"].includes(accountMode)) {
   };
   let currentUser = null;
   let currentPhone = "";
+  Object.values(fields).forEach((field) => {
+    field.addEventListener("input", () => {
+      field.classList.toggle("is-placeholder", !field.textContent.trim());
+    });
+  });
 
   function profileMessage(text, kind = "") {
     status.textContent = text;
@@ -491,9 +496,6 @@ if (profile && ["profile","edit-profile"].includes(accountMode)) {
     field.classList.toggle("is-placeholder", !String(original || "").trim());
     field.contentEditable = "true";
     field.classList.add("is-editing");
-    field.addEventListener("input", () => {
-      field.classList.toggle("is-placeholder", !field.textContent.trim());
-    }, { once: true });
     button.dataset.saving = "true";
     button.textContent = "Save";
     field.focus();
