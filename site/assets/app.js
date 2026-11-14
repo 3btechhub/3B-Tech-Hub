@@ -165,9 +165,10 @@ async function loadHomeCatalog() {
 
 async function applyPublicSiteSettings() {
   const [{data,error},{data:introData}] = await Promise.all([
-    supabase.from("Settings").select("setting_value").eq("setting_key","site_profile").maybeSingle(),
-    supabase.from("Settings").select("setting_value").eq("setting_key","home_intro").maybeSingle()
+    supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","site_profile").maybeSingle(),
+    supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","home_intro").maybeSingle()
   ]);
+  await loadVisibilityRoleOptions(siteSettingsForm,data?.visibility_roles||introData?.visibility_roles||["owner","visitor"]);
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
   const intro=typeof introData?.setting_value?.content==="string"?introData.setting_value.content.trim():"";
   const introSection=document.getElementById("home-intro-section");
@@ -615,6 +616,9 @@ if (ownerDashboard) {
 // Owner-only website profile settings stored as a single public configuration record.
 const siteSettingsForm = document.querySelector("#site-settings-form");
 const siteSettingsMessage = document.querySelector("#site-settings-message");
+const siteSettingsVisibilityHost=document.createElement("div");siteSettingsVisibilityHost.className="module-related-options";siteSettingsVisibilityHost.dataset.visibilityRoles="true";
+const siteSettingsVisibilityField=document.createElement("div");siteSettingsVisibilityField.className="module-form-field module-related-field";addTextElement(siteSettingsVisibilityField,"span","","Visibility");siteSettingsVisibilityField.append(siteSettingsVisibilityHost);
+siteSettingsForm?.querySelector(".editor-actions")?.before(siteSettingsVisibilityField);
 
 async function loadSiteSettingsForm() {
   if (!siteSettingsForm || currentDashboardRole !== "owner") return;
@@ -649,9 +653,10 @@ if(siteSettingsForm){
       const {data:authData,error:authError}=await supabase.auth.getUser();if(authError||!authData.user)throw new Error("Your session has expired. Sign in again.");
       if(file){if(!file.type.startsWith("image/")||file.size>5*1024*1024)throw new Error("Choose an image up to 5 MB.");const path="branding/"+crypto.randomUUID()+"-"+file.name.replace(/[^\w.-]+/g,"-");const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type});if(uploadError)throw uploadError;logoUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;}
       if(siteSettingsForm.dataset.removeLogo==="true")logoUrl="";
-      const {error}=await supabase.from("Settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},description:"Public website profile"},{onConflict:"setting_key"});if(error)throw error;
+      const visibility_roles=[...new Set([...siteSettingsForm.querySelectorAll("[data-visibility-role]:checked")].map(box=>box.value).concat("owner"))];
+      const {error}=await supabase.from("Settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},visibility_roles,description:"Public website profile"},{onConflict:"setting_key"});if(error)throw error;
       const homeIntro=String(form.get("home_intro")||"").trim();
-      const {error:introError}=await supabase.from("Settings").upsert({setting_key:"home_intro",setting_value:{content:homeIntro},description:"Public homepage introduction"},{onConflict:"setting_key"});if(introError)throw introError;
+      const {error:introError}=await supabase.from("Settings").upsert({setting_key:"home_intro",setting_value:{content:homeIntro},visibility_roles,description:"Public homepage introduction"},{onConflict:"setting_key"});if(introError)throw introError;
       if(oldLogoUrl&&oldLogoUrl!==logoUrl){try{await removeStoredImage(oldLogoUrl);}catch(cleanupError){console.warn("Old logo cleanup failed.",cleanupError);}}
       siteSettingsForm.dataset.removeLogo="false";if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings saved.";
     }catch(error){if(siteSettingsMessage)siteSettingsMessage.textContent=error.message||"Could not save website settings.";}
