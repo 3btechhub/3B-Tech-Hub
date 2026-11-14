@@ -108,7 +108,7 @@ export function createIcon(name,className="svg-icon"){
  if(databaseSvgRegistry[key]&&appendSafeRegistrySvg(svg,databaseSvgRegistry[key]))return svg;
  svg.innerHTML=ICONS[key]||ICONS.link;return svg;
 }
-const MODULE_ICONS={services:"wrench",products:"package",workshops:"building",technicians:"technician",contacts:"contact"};
+const MODULE_ICONS={"service-types":"wrench","device-types":"package",services:"wrench",products:"package",workshops:"building",technicians:"technician",contacts:"contact"};
 export function getModuleIcon(module){return MODULE_ICONS[module]||"link";}
 
 const ITEM_ICON_MAP = {

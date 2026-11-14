@@ -3,13 +3,17 @@ import { createIcon, getModuleIcon, getItemIconName } from "./icon-utils.js";
 
 const BASE = "/3btechhub/";
 const publicColumns = {
-  services:"id,name,description,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp",
+  services:"id,name,description,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp,country,status",
   products:"id,name,description,condition,price_minor,currency,stock_qty,category,category_group,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp",
-  workshops:"id,title,description,workshop_date,workshop_time,location,trainer,phone,whatsapp,photo_url,category,short_info,service_information,gallery_urls,map_url,address",
-  technicians:"id,name,description,category,phone,whatsapp,photo_url,skill,short_info,service_information,gallery_urls,location,map_url,email,link",
-  contacts:"id,name,value"
+  workshops:"id,title,description,workshop_date,workshop_time,location,trainer,phone,whatsapp,photo_url,category,short_info,service_information,gallery_urls,map_url,address,country,status",
+  technicians:"id,name,description,category,phone,whatsapp,photo_url,skill,short_info,service_information,gallery_urls,location,map_url,email,link,country,is_published",
+  contacts:"id,name,value",
+  "service-types":"id,title,slug,country,photo_url,status",
+  "device-types":"id,title,slug,country,photo_url,status"
 };
 const definitions = {
+  "service-types": { title:"Service Types", table:"service_types", columns:publicColumns["service-types"], icon:"service-types" },
+  "device-types": { title:"Device Types", table:"device_types", columns:publicColumns["device-types"], icon:"device-types" },
   services: { title:"Services", table:"services", columns:publicColumns.services, icon:"wrench" },
   products: { title:"Products", table:"products", columns:publicColumns.products, icon:"package" },
   workshops: { title:"Workshops", table:"workshops", columns:publicColumns.workshops, icon:"building" },
@@ -287,8 +291,9 @@ async function renderDetail(root,data,module,def,supabase){
   await renderModuleRelationships(root,module,data,supabase);
 }
 function renderCard(item,module,slugMap){
-  const card=el("a","home-content-card");
-  const route=itemRoute(module,item,slugMap);if(route)card.href=route;
+  const route=(module==="service-types"||module==="device-types")?"":itemRoute(module,item,slugMap);
+  const card=el(route?"a":"article","home-content-card");
+  if(route)card.href=route;
   const visual=el("span","home-content-visual");
   visual.append(getItemFallbackIcon(item.name||item.title,module));
   if(item.photo_url){
@@ -302,10 +307,67 @@ function renderCard(item,module,slugMap){
   const body=el("span","home-content-card-body");
   const itemTitle=item.name||item.title||"";
   if(itemTitle)body.append(el("strong","",itemTitle));
-
   card.append(visual,body);
   return card;
 }
+function renderContactActionCard(item){
+  const href=getContactHref(item.value);
+  if(!href)return null;
+  const card=el("article","contact-action-card");
+  const title=el("h2","contact-action-title",item.name||"");
+  const action=el("a","contact-action-button",getContactActionLabel(item.value));
+  action.href=href;
+  action.prepend(createContactIcon(item.value,item.name||""));
+  if(/^https?:/i.test(href)){action.target="_blank";action.rel="noopener noreferrer";}
+  card.append(title,action);
+  return card;
+}
+const PAGE_SIZE=12;
+function moduleFilterFields(module){
+  const fields=[];
+  if(module!=="contacts")fields.push(["country","Country"]);
+  if(module==="workshops")fields.push(["location","Location"]);
+  if(module==="technicians")fields.push(["skill","Skill / Expertise"]);
+  return fields;
+}
+function renderModuleFilters(root,records,module,onChange){
+  const fields=moduleFilterFields(module);
+  if(!fields.length)return;
+  const bar=el("div","catalogue-filter-bar");
+  let count=0;
+  fields.forEach(([key,label])=>{
+    const values=[...new Set(records.map(record=>String(record[key]||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+    if(values.length<2)return;
+    const wrapper=el("label","catalogue-filter");
+    wrapper.append(el("span","catalogue-filter-label",label));
+    const select=el("select","catalogue-filter-select");
+    const all=el("option","","All "+label);
+    all.value="";
+    select.append(all);
+    values.forEach(value=>{const option=el("option","",value);option.value=value;select.append(option);});
+    select.addEventListener("change",()=>onChange(key,select.value));
+    wrapper.append(select);
+    bar.append(wrapper);
+    count++;
+  });
+  if(count)root.append(bar);
+}
+function renderModulePagination(root,page,total,onChange){
+  const pages=Math.ceil(total/PAGE_SIZE);
+  if(pages<2)return;
+  const nav=el("nav","catalogue-pagination");
+  nav.setAttribute("aria-label","Catalogue pages");
+  const previous=el("button","catalogue-page-button","Previous");
+  previous.type="button";previous.disabled=page===1;
+  previous.addEventListener("click",()=>onChange(page-1));
+  const status=el("span","catalogue-page-status","Page "+page+" of "+pages);
+  const next=el("button","catalogue-page-button","Next");
+  next.type="button";next.disabled=page===pages;
+  next.addEventListener("click",()=>onChange(page+1));
+  nav.append(previous,status,next);
+  root.append(nav);
+}
+
 export async function initCataloguePage(supabase,module,recordKey){
   const root=document.getElementById("catalogue-root");
   const def=definitions[module];
@@ -342,27 +404,45 @@ export async function initCataloguePage(supabase,module,recordKey){
     return;
   }
 
+  root.classList.add("catalogue-listing-page");
   const heading=el("h1","catalogue-title",def.title);
   heading.prepend(createIcon(getModuleIcon(module)));
   root.append(heading);
+
   let query=supabase.from(def.table).select(def.columns);
-  let records=[],offset=0;
-  const pageSize=500;
-  while(true){
-    const {data,error}=await query.range(offset,offset+pageSize-1);
-    if(error){root.append(el("p","muted","Could not load "+def.title.toLowerCase()+"."));return;}
-    if(!data?.length)break;
-    records.push(...data);
-    if(data.length<pageSize)break;
-    offset+=pageSize;
+  if(module==="service-types"||module==="device-types")query=query.in("status",["active","published"]);
+  else if(module==="services"||module==="products")query=query.eq("status","active");
+  else if(module==="workshops")query=query.eq("status","published");
+  else if(module==="technicians")query=query.eq("is_published",true);
+
+  const {data,error}=await query;
+  if(error){root.append(el("p","muted","Could not load "+def.title.toLowerCase()+"."));return;}
+  const records=(data||[]).slice().sort((a,b)=>String(a.title||a.name||"").localeCompare(String(b.title||b.name||"")));
+  if(module==="contacts"){
+    const grid=el("div","contact-action-grid");
+    const valid=records.filter(record=>getContactHref(record.value));
+    if(!valid.length)grid.append(el("p","home-empty","No contacts available yet."));
+    else valid.forEach(record=>grid.append(renderContactActionCard(record)));
+    root.append(grid);
+    return;
   }
 
-  const slugMap=module==="contacts"?new Map():await getPublicSlugMap(supabase,module);
+  const slugMap=(module==="service-types"||module==="device-types")?new Map():await getPublicSlugMap(supabase,module);
+  const filterState=Object.create(null);
+  let currentPage=1;
   const grid=el("div","home-card-grid catalogue-results-grid");
-  if(!records.length){
-    grid.append(el("p","home-empty","No "+def.title.toLowerCase()+" available yet."));
-  }else{
-    records.forEach(record=>{if(record.name||record.title||record.photo_url)grid.append(renderCard(record,module,slugMap));});
-  }
-  root.append(grid);
+  const paginationHost=el("div","catalogue-pagination-host");
+  const renderResults=()=>{
+    const filtered=records.filter(record=>Object.entries(filterState).every(([key,value])=>!value||String(record[key]||"").trim()===value));
+    const pageCount=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));
+    currentPage=Math.min(currentPage,pageCount);
+    grid.replaceChildren();
+    if(!filtered.length)grid.append(el("p","home-empty","No matching "+def.title.toLowerCase()+" available."));
+    else filtered.slice((currentPage-1)*PAGE_SIZE,currentPage*PAGE_SIZE).forEach(record=>grid.append(renderCard(record,module,slugMap)));
+    paginationHost.replaceChildren();
+    renderModulePagination(paginationHost,currentPage,filtered.length,nextPage=>{currentPage=nextPage;renderResults();});
+  };
+  renderModuleFilters(root,records,module,(key,value)=>{filterState[key]=value;currentPage=1;renderResults();});
+  root.append(grid,paginationHost);
+  renderResults();
 }
