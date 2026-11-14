@@ -17,7 +17,7 @@ function routeDetails(path) {
   const first = pathname.slice(BASE.length).split("/").filter(Boolean)[0] || "";
   if (first === "login") return { view:"account" };
   if (["home","account","profile","dashboard"].includes(first)) return { view:first };
-  if (["services","products","workshops","technicians","contacts"].includes(first)) { const slugPart=pathname.slice(BASE.length).split("/").filter(Boolean)[1] || ""; return { view:"catalogue", module:first, slug:slugPart ? decodeURIComponent(slugPart) : "" }; }
+  if (["services","products","workshops","technicians","contacts"].includes(first)) { const recordPart=pathname.slice(BASE.length).split("/").filter(Boolean)[1] || ""; return { view:"catalogue", module:first, recordId:recordPart ? decodeURIComponent(recordPart) : "" }; }
   return { view:"home" };
 }
 function resolveFragmentLinks(container, routePath) {
@@ -41,7 +41,7 @@ async function renderRoute(requestedPath, { replace = false } = {}) {
   main.id = "app-main";
   main.dataset.view = details.view;
   if (details.module) main.dataset.module=details.module; else delete main.dataset.module;
-  if (details.slug) main.dataset.slug=details.slug; else delete main.dataset.slug;
+  if (details.recordId) main.dataset.recordId=details.recordId; else delete main.dataset.recordId;
   main.innerHTML = source.innerHTML;
   resolveFragmentLinks(main, path);
   document.title = titles[details.view];
