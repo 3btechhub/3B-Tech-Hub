@@ -92,7 +92,7 @@ Five homepage sections:
 4. Technicians
 5. Contacts
 
-Public item cards on Home display only the uploaded image (or the module's fallback icon when no image is available) and the item title. The image/icon is placed at the logical start of the card: left in LTR and right in RTL. Do not display descriptions, categories, types, skills, locations or other metadata on Home cards. Categories remain available in Dashboard content-management forms and stored records; this is a display-only restriction, not a data/schema deletion. Each content item has a detail page and unique slug, in addition to the module listing page.
+Public item cards on Home display only the uploaded image (or the module's fallback icon when no image is available) and the item title. The image/icon is placed at the logical start of the card: left in LTR and right in RTL. Do not display descriptions, categories, types, skills, locations or other metadata on Home cards. Categories remain available in Dashboard content-management forms and stored records; this is a display-only restriction, not a data/schema deletion. Each content item has a detail page and unique slug-based URL, in addition to the module listing page. Slugs are used in public routes and links but are never rendered as a separate UI field or label.
 
 A disabled section must not appear on Home. Keep a consistent, responsive vertical gap between each Home section. Center-align every section title and style it at a clear headline-level size. Each module title is a link to its corresponding public listing page. Place a smaller “View all” link directly below the title, centered, with no underline in normal or hover states. When an item has no uploaded image, choose its fallback icon from the item name/meaning first, regardless of its parent module; use the module icon only when no item-name match is available. Apply the same item-name icon mapping on Home and public module listing pages. Uploaded images always take precedence over fallback icons.
 
@@ -365,13 +365,13 @@ Current implementation uses one global route context. Keep architecture extensib
 Proposed routes:
 - /
 - /services
-- /services/:id
+- /services/:slug
 - /products
-- /products/:id
+- /products/:slug
 - /workshops
-- /workshops/:id
+- /workshops/:slug
 - /technicians
-- /technicians/:id
+- /technicians/:slug
 - /contacts
 - /contacts/:id
 - /dashboard
