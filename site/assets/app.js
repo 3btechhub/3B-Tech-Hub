@@ -663,6 +663,14 @@ if(siteSettingsForm)void loadSiteSettingsForm();
 
 // Core content modules: each module uses its existing Supabase table and RLS policies.
 const dashboardContentModules = {
+  countries: { table:"countries", title:"Country", fields:[
+    ["title","Country Name","text",true],["code","Country Code","text",false],
+    ["is_global","Global Availability","checkbox",false],["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["code","visibility"] },
+  locations: { table:"locations", title:"Location", fields:[
+    ["title","Location Name","text",true],["country_id","Country","select",false,[]],
+    ["address","Address","textarea",false],["visibility","Visibility","select",false,["visible","hidden"]]
+  ], columns:["country_id","visibility"] },
   service_types: { table:"service_types", title:"Service Type", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["device_types","Device Type","multiselect",false],["services","Services","multiselect",false],
@@ -693,14 +701,14 @@ const dashboardContentModules = {
   ], columns:["country","visibility"] },
   workshops: { table:"workshops", title:"Workshop", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
-    ["location","Location","text",false],["service_types","Service Type","multiselect",false],
+    ["location_id","Location","select",false,[]],["service_types","Service Type","multiselect",false],
     ["device_types","Device Type","multiselect",false],["services","Service","multiselect",false],
     ["products","Products","multiselect",false],["technicians","Technicians","multiselect",false],
     ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
   ], columns:["country","location","visibility"] },
   technicians: { table:"technicians", title:"Technician", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
-    ["skill","Skill/Expertise","text",false],["phone","Phone Number","tel",false],
+    ["location_id","Location","select",false,[]],["skill","Skill/Expertise","text",false],["phone","Phone Number","tel",false],
     ["whatsapp","Whatsapp Number","tel",false],["link","Link","url",false],["email","Email","email",false],
     ["service_types","Service Type","multiselect",false],["device_types","Device Type","multiselect",false],
     ["services","Service","multiselect",false],["products","Products","multiselect",false],
@@ -752,20 +760,46 @@ const moduleRelationships = {
     workshops:{table:"workshop_technicians",parent:"technician_id",child:"workshop_id",target:"workshops",label:"title"}
   }
 };
+const countryRelationConfig = {
+  service_types:["service_type_countries","service_type_id"],
+  device_types:["device_type_countries","device_type_id"],
+  services:["service_countries","service_id"],
+  products:["product_countries","product_id"],
+  workshops:["workshop_countries","workshop_id"],
+  technicians:["technician_countries","technician_id"]
+};
+for (const [moduleName,[table,parent]] of Object.entries(countryRelationConfig)) {
+  moduleRelationships[moduleName].countries={table,parent,child:"country_id",target:"countries",label:"name"};
+}
 async function loadModuleRelationOptions(moduleName,form) {
   const config=moduleRelationships[moduleName]||{};
   for(const [key,rel] of Object.entries(config)){
     const host=form.querySelector('[data-related-options="'+key+'"]');
     if(!host)continue;
-    const {data,error}=await supabase.from(rel.target).select("id,"+rel.label).order(rel.label);
+    let query=supabase.from(rel.target).select("id,"+rel.label).order(rel.label);
+    if(rel.target==="countries"||rel.target==="locations")query=query.eq("status","active");
+    const {data,error}=await query;
     host.replaceChildren();
     if(error){addTextElement(host,"small","muted","Could not load options.");continue;}
     for(const record of data||[]){
       const label=document.createElement("label");label.className="module-related-option";
-      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=record.id;checkbox.dataset.relatedId=record.id;
+      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=record.id;checkbox.dataset.relatedId=record.id;checkbox.dataset.relatedName=record[rel.label]||"";
+      if(rel.target==="countries"&&record[rel.label]==="Global"){checkbox.checked=true;checkbox.defaultChecked=true;}
       label.append(checkbox,document.createTextNode(record[rel.label]||"Untitled"));host.append(label);
     }
     if(!host.childElementCount)addTextElement(host,"small","muted","No available records yet.");
+  }
+  const countrySelect=form.elements.namedItem("country_id");
+  if(countrySelect){
+    const {data,error}=await supabase.from("countries").select("id,name").eq("status","active").order("name");
+    countrySelect.replaceChildren(new Option("— Select —",""));
+    if(!error)for(const item of data||[])countrySelect.append(new Option(item.name,item.id));
+  }
+  const locationSelect=form.elements.namedItem("location_id");
+  if(locationSelect){
+    const {data,error}=await supabase.from("locations").select("id,name").eq("status","active").order("name");
+    locationSelect.replaceChildren(new Option("— Select —",""));
+    if(!error)for(const item of data||[])locationSelect.append(new Option(item.name,item.id));
   }
 }
 async function loadModuleRelationSelection(moduleName,recordId,form){
@@ -843,12 +877,7 @@ function createModuleField(field) {
   let control;
   if (type === "textarea") { control=document.createElement("textarea"); control.rows=3; }
   else if (type === "countries") {
-    const host=document.createElement("div");host.className="module-related-options";host.dataset.countryOptions="true";
-    for(const value of ["Global","Bangladesh","Saudi Arabia"]){
-      const option=document.createElement("label");option.className="module-related-option";
-      const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=value;checkbox.dataset.countryValue=value;checkbox.checked=value==="Global";checkbox.defaultChecked=value==="Global";
-      option.append(checkbox,document.createTextNode(value));host.append(option);
-    }
+    const host=document.createElement("div");host.className="module-related-options";host.dataset.relatedOptions="countries";
     wrapper.append(addTextElement(wrapper,"span","",label),host);
     return wrapper;
   }
