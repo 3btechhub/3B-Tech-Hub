@@ -84,13 +84,13 @@ applyTheme(savedTheme === "dark" ? "dark" : "light");
 applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 
 const HOME_MODULE_TYPES = Object.freeze([
-  { key:"service_types", table:"service_types", route:"service-types", icon:"wrench", columns:"id,title,slug,photo_url,gallery_urls" },
-  { key:"device_types", table:"device_types", route:"device-types", icon:"smartphone", columns:"id,title,slug,photo_url,gallery_urls" },
-  { key:"services", table:"services", route:"services", icon:"wrench", columns:"id,name,description,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp" },
-  { key:"products", table:"products", route:"products", icon:"package", columns:"id,name,description,condition,price_minor,currency,stock_qty,category,category_group,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp" },
-  { key:"workshops", table:"workshops", route:"workshops", icon:"building", columns:"id,title,description,workshop_date,workshop_time,location,trainer,phone,whatsapp,photo_url,category,short_info,service_information,gallery_urls,map_url,address" },
-  { key:"technicians", table:"technicians", route:"technicians", icon:"technician", columns:"id,name,description,category,phone,whatsapp,photo_url,skill,short_info,service_information,gallery_urls,location,map_url,email,link" },
-  { key:"contacts", table:"contacts", route:"contacts", icon:"contact", columns:"id,name,value" }
+  { key:"service_types", table:"service_types", route:"service-types", icon:"wrench", columns:"id,title,slug,photo_url,gallery_urls,status,visibility_roles" },
+  { key:"device_types", table:"device_types", route:"device-types", icon:"smartphone", columns:"id,title,slug,photo_url,gallery_urls,status,visibility_roles" },
+  { key:"services", table:"services", route:"services", icon:"wrench", columns:"id,name,description,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp,status,visibility_roles" },
+  { key:"products", table:"products", route:"products", icon:"package", columns:"id,name,description,condition,price_minor,currency,stock_qty,category,category_group,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp,status,visibility_roles" },
+  { key:"workshops", table:"workshops", route:"workshops", icon:"building", columns:"id,title,description,workshop_date,workshop_time,location,trainer,phone,whatsapp,photo_url,category,short_info,service_information,gallery_urls,map_url,address,status,visibility_roles" },
+  { key:"technicians", table:"technicians", route:"technicians", icon:"technician", columns:"id,name,description,category,phone,whatsapp,photo_url,skill,short_info,service_information,gallery_urls,location,map_url,email,link,is_published,visibility_roles" },
+  { key:"contacts", table:"contacts", route:"contacts", icon:"contact", columns:"id,name,value,visibility_roles" }
 ]);
 
 function renderHomeCard(module, record) {
@@ -138,7 +138,7 @@ async function loadHomeCatalog() {
     const module=HOME_MODULE_TYPES.find(item=>item.key===config.key);
     if(!module)continue;
     try{
-      const {data,error}=await supabase.from(module.table).select(module.columns).limit(5);
+      const {data,error}=await supabase.from(module.table).select(module.columns).order("created_at",{ascending:false}).limit(50);
       if(error)continue;
       if(["services","products","workshops","technicians"].includes(module.key)){
         const {data:slugRows,error:slugError}=await supabase.rpc("get_public_catalogue_slugs",{p_module:module.key});
@@ -146,7 +146,15 @@ async function loadHomeCatalog() {
         const slugById=new Map((slugRows||[]).map(row=>[row.id,row.slug]));
         (data||[]).forEach(record=>{record.publicSlug=slugById.get(record.id)||"";});
       }
-      const records=(data||[]).slice(0,4).filter(record=>{
+      const visitorRecords=(data||[]).filter(record=>{
+        if(!Array.isArray(record.visibility_roles)||!record.visibility_roles.includes("visitor"))return false;
+        if(["service_types","device_types"].includes(module.key))return ["active","published"].includes(record.status);
+        if(["services","products"].includes(module.key))return record.status==="active";
+        if(module.key==="workshops")return record.status==="published";
+        if(module.key==="technicians")return record.is_published===true;
+        return true;
+      });
+      const records=visitorRecords.slice(0,4).filter(record=>{
         const title=String(record.name||record.title||"").trim();
         const image=String(record.photo_url||"").trim();
         return Boolean(title||image);
