@@ -275,7 +275,7 @@ async function renderModuleRelationships(root,module,data,supabase){
     const ids=(links||[]).map(row=>row[child]).filter(Boolean);
     if(!ids.length)continue;
     const targetTable=target==="service-types"?"service_types":target==="device-types"?"device_types":target;
-    let query=supabase.from(targetTable).select(publicColumns[targetTable]).in("id",ids);
+    let query=supabase.from(targetTable).select(publicColumns[target]).in("id",ids);
     query=applyPublicVisibility(query,target);
     const {data:records,error:recordsError}=await query;
     if(recordsError)throw recordsError;
