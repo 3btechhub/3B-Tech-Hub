@@ -292,7 +292,6 @@ export async function initRoutePage() {
 
 if (form && !["profile","edit-profile"].includes(accountMode)) {
   const message = document.querySelector("#auth-message");
-  const title = document.querySelector("#auth-title");
   const submit = document.querySelector("#auth-submit");
   const toggle = document.querySelector("#toggle-signup");
   const forgot = document.querySelector("#forgot-password");
@@ -316,16 +315,9 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
     const recoveryNewPassword = mode === "recovery-new-password";
     const recoveryFlow = recoveryVerify || recoveryNewPassword;
 
-    title.textContent = signup ? "Create Account"
-      : recoveryStart ? "Reset Password"
-      : recoveryVerify ? "Code Varify"
-      : recoveryNewPassword ? "New Password"
-      : "Login";
-
-    // The Create Account state intentionally keeps the exact primary label
-    // supplied in the approved layout: "Login". Its submit action remains signup.
-    submit.textContent = recoveryStart ? "Send Code"
-      : recoveryVerify ? "Varify"
+    submit.textContent = signup ? "Create Account"
+      : recoveryStart ? "Send Code"
+      : recoveryVerify ? "Verify"
       : recoveryNewPassword ? "Update Password"
       : "Login";
 
