@@ -1,4 +1,4 @@
-import { initRoutePage } from "./app.js";
+import { initRoutePage, resolveAuthRoute } from "./app.js";
 
 const BASE = "/3btechhub/";
 const main = document.getElementById("app-main");
@@ -9,15 +9,16 @@ function normalizedPath(value) {
   const url = new URL(value, window.location.origin);
   let path = url.pathname;
   if (path === BASE.slice(0, -1) || path === BASE) path = BASE + "home/";
+  if (path === BASE + "account" || path === BASE + "account/") path = BASE + "login/" + url.search + url.hash;
   if (!path.startsWith(BASE)) return null;
   return (path.endsWith("/") ? path : path + "/") + url.search + url.hash;
 }
 function routeDetails(path) {
   const pathname = new URL(path, window.location.origin).pathname;
   const first = pathname.slice(BASE.length).split("/").filter(Boolean)[0] || "";
-  if (first === "login" || first === "account") return { view:"account", authMode:"login" };
+  if (first === "login") return { view:"account", authMode:"login" };
   if (first === "create-account") return { view:"account", authMode:"signup" };
-  if (first === "forgot-password") return { view:"account", authMode:"recovery-start" };
+  if (first === "forgot-password" || first === "reset-password") return { view:"account", authMode:"recovery-start" };
   if (first === "profile") return { view:"account", authMode:"profile" };
   if (first === "edit-profile") return { view:"account", authMode:"edit-profile" };
   if (["home","dashboard"].includes(first)) return { view:first };
@@ -33,7 +34,12 @@ function resolveFragmentLinks(container, routePath) {
   }
 }
 async function renderRoute(requestedPath, { replace = false } = {}) {
-  const path = normalizedPath(requestedPath) || BASE + "home/";
+  const requested = normalizedPath(requestedPath) || BASE + "home/";
+  const path = await resolveAuthRoute(requested);
+  if (path !== requested) {
+    history.replaceState({ route:path }, "", path);
+    return renderRoute(path, { replace:true });
+  }
   const details = routeDetails(path);
   const response = await fetch(BASE + "views/" + viewFiles[details.view], { cache:"no-store" });
   if (!response.ok) throw new Error("Could not load the requested page.");
