@@ -292,7 +292,7 @@ export async function initCataloguePage(supabase,module,slug){
     if(def.filter)query=query.eq(def.filter[0],def.filter[1]);
     const {data,error}=await query.maybeSingle();
     if(error||!data){
-      root.append(el("h1","","Content not found"),link(module,"Back to "+def.title));
+      root.append(el("h1","","Content not found"));
       return;
     }
     if(module==="contacts"){
