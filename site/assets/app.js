@@ -855,7 +855,6 @@ function createModuleField(field) {
     for(const value of ["Global","Bangladesh","Saudi Arabia"]){
       const option=document.createElement("label");option.className="module-related-option";
       const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=value;checkbox.dataset.countryValue=value;checkbox.checked=value==="Global";checkbox.defaultChecked=value==="Global";
-      checkbox.addEventListener("change",()=>{if(checkbox.checked){host.querySelectorAll("[data-country-value]").forEach(other=>{if(other!==checkbox&&(value==="Global"||other.dataset.countryValue==="Global"))other.checked=false;});}});
       option.append(checkbox,document.createTextNode(value));host.append(option);
     }
     wrapper.append(addTextElement(wrapper,"span","",label),host);
