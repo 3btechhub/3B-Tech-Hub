@@ -261,6 +261,7 @@ export async function initRoutePage() {
 
 if (form && !["profile","edit-profile"].includes(accountMode)) {
   const message = document.querySelector("#auth-message");
+  const title = document.querySelector("#auth-title");
   const submit = document.querySelector("#auth-submit");
   const toggle = document.querySelector("#toggle-signup");
   const forgot = document.querySelector("#forgot-password");
@@ -277,114 +278,113 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
 
   function render() {
     const signup = mode === "signup";
-    const recovery = mode === "recovery" || mode === "recovery-link";
     const recoveryStart = mode === "recovery-start";
-    const recoveryLink = mode === "recovery-link";
-    const labels = translations.en
-    submit.textContent = recoveryLink ? labels.updatePassword : recovery ? labels.verifyCodeReset : recoveryStart ? labels.sendResetCode : signup ? labels.createAccount : labels.signIn;
-    toggle.textContent = signup ? labels.loginAccount : labels.createAccount;
-    toggle.hidden = recoveryStart || recovery;
-    toggle.disabled = recovery;
-    forgot.hidden = recoveryStart || recovery;
-    forgot.disabled = recovery;
-    emailInput.readOnly = mode === "recovery";
-    otpInput.hidden = mode !== "recovery";
-    otpInput.required = mode === "recovery";
-    passwordInput.hidden = recoveryStart;
-    passwordInput.required = !recoveryStart;
-    passwordInput.autocomplete = recovery || signup ? "new-password" : "current-password";
-    passwordInput.setAttribute("aria-label", recovery ? labels.newPassword : labels.password);
-    passwordInput.placeholder = recovery ? labels.newPassword : labels.password;
-    passwordInput.required = true;
-    if (recovery) otpInput.focus();
+    const recoveryVerify = mode === "recovery";
+    const recoveryNewPassword = mode === "recovery-new-password";
+    const recoveryFlow = recoveryVerify || recoveryNewPassword;
+
+    title.textContent = signup ? "Create Account"
+      : recoveryStart ? "Reset Password"
+      : recoveryVerify ? "Code Varify"
+      : recoveryNewPassword ? "New Password"
+      : "Login";
+
+    // The Create Account state intentionally keeps the exact primary label
+    // supplied in the approved layout: "Login". Its submit action remains signup.
+    submit.textContent = recoveryStart ? "Send Code"
+      : recoveryVerify ? "Varify"
+      : recoveryNewPassword ? "Update Password"
+      : "Login";
+
+    forgot.textContent = recoveryStart ? "Login" : "Reset Password";
+    toggle.textContent = signup || recoveryStart ? "Login" : "Create Account";
+    if (recoveryStart) toggle.textContent = "Create Account";
+
+    forgot.hidden = recoveryFlow;
+    toggle.hidden = recoveryFlow;
+    emailInput.hidden = recoveryFlow;
+    emailInput.required = !recoveryFlow;
+    emailInput.readOnly = recoveryFlow;
+    passwordInput.hidden = recoveryStart || recoveryVerify;
+    passwordInput.required = !recoveryStart && !recoveryVerify;
+    passwordInput.autocomplete = signup || recoveryNewPassword ? "new-password" : "current-password";
+    passwordInput.placeholder = recoveryNewPassword ? "New Password" : "Password";
+    passwordInput.setAttribute("aria-label", recoveryNewPassword ? "New Password" : "Password");
+    otpInput.hidden = !recoveryVerify;
+    otpInput.required = recoveryVerify;
+    if (recoveryVerify) otpInput.focus();
   }
 
   toggle.addEventListener("click", () => {
-    if (mode === "recovery") return;
+    if (mode === "recovery" || mode === "recovery-new-password") return;
     mode = mode === "signup" ? "login" : "signup";
     render();
     showMessage("");
   });
 
-  forgot.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-    if (!email) {
-      emailInput.focus();
-      return showMessage("Enter your email address first.", "error");
-    }
-    forgot.disabled = true;
-    showMessage("Sending verification code…");
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: new URL("account/?recovery=1", ROOT_URL).href,
-      });
-      if (error) throw error;
-      recoveryEmail = email;
-      mode = "recovery";
-      otpInput.value = "";
-      passwordInput.value = "";
-      render();
-      showMessage("A verification code has been sent to your email. Enter the code and your new password.", "success");
-    } catch (error) {
-      forgot.disabled = false;
-      showMessage(error instanceof Error ? error.message : "Could not send the verification code. Please try again.", "error");
-    }
+  forgot.addEventListener("click", () => {
+    if (mode === "recovery" || mode === "recovery-new-password") return;
+    mode = mode === "recovery-start" ? "login" : "recovery-start";
+    render();
+    showMessage("");
   });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const email = emailInput.value.trim();
     const password = passwordInput.value;
+    const code = otpInput.value.trim();
 
-    if (!email && mode !== "recovery") {
+    if (!email && !["recovery", "recovery-new-password"].includes(mode)) {
       emailInput.focus();
       return showMessage("Enter your email address.", "error");
     }
-    if (mode !== "recovery-start" && password.length < 8) {
+    if (["login", "signup", "recovery-new-password"].includes(mode) && password.length < 8) {
       passwordInput.focus();
       return showMessage("Password must be at least 8 characters.", "error");
     }
-    if (mode === "recovery" && !/^\d{6,8}$/.test(otpInput.value.trim())) {
+    if (mode === "recovery" && !/^\\d{6,8}$/.test(code)) {
       otpInput.focus();
       return showMessage("Enter the verification code from your email.", "error");
     }
 
     submit.disabled = true;
-    showMessage(mode === "recovery-start" ? "Sending password reset code…" : mode === "recovery" ? "Verifying code and updating password…" : mode === "signup" ? "Creating account…" : "Signing in…");
+    showMessage(mode === "recovery-start" ? "Sending verification code…"
+      : mode === "recovery" ? "Verifying code…"
+      : mode === "recovery-new-password" ? "Updating password…"
+      : mode === "signup" ? "Creating account…" : "Signing in…");
     try {
       if (mode === "recovery-start") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: new URL("account/?recovery=1", ROOT_URL).href });
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: new URL("account/?recovery=1", ROOT_URL).href,
+        });
         if (error) throw error;
         recoveryEmail = email;
         mode = "recovery";
         otpInput.value = "";
-        passwordInput.value = "";
         render();
-        showMessage("A verification code has been sent to your email. Enter the code and your new password.", "success");
-      } else if (mode === "recovery-link") {
-        const { error: updateError } = await supabase.auth.updateUser({ password });
-        if (updateError) throw updateError;
-        await supabase.auth.signOut();
-        mode = "login";
-        render();
-        showMessage("Password updated successfully. You can now log in with your new password.", "success");
+        showMessage("A verification code has been sent to your email.", "success");
       } else if (mode === "recovery") {
-        const { error: verifyError } = await supabase.auth.verifyOtp({
+        const { error } = await supabase.auth.verifyOtp({
           email: recoveryEmail,
-          token: otpInput.value.trim(),
+          token: code,
           type: "recovery",
         });
-        if (verifyError) throw verifyError;
-        const { error: updateError } = await supabase.auth.updateUser({ password });
-        if (updateError) throw updateError;
+        if (error) throw error;
+        otpInput.value = "";
+        mode = "recovery-new-password";
+        render();
+        showMessage("Code verified. Enter your new password.", "success");
+      } else if (mode === "recovery-new-password") {
+        const { error } = await supabase.auth.updateUser({ password });
+        if (error) throw error;
         await supabase.auth.signOut();
         mode = "login";
         recoveryEmail = "";
-        otpInput.value = "";
-        passwordInput.value = "";
         emailInput.readOnly = false;
+        passwordInput.value = "";
         render();
-        showMessage("Password updated successfully. You can now log in with your new password.", "success");
+        showMessage("Password updated successfully. You can now log in.", "success");
       } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -396,10 +396,6 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
           showMessage("Account created successfully.", "success");
           window.navigateSiteRoute(new URL("profile/", ROOT_URL).pathname);
         } else {
-          // With email confirmation enabled, Supabase may return no session for
-          // both a new signup and an already-registered email. Try signing in
-          // with the exact same credentials: only a matching existing password
-          // can establish a session for the existing account.
           const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
           if (!loginError && loginData.session) {
             showMessage("This email already has an account. You are now logged in to that account.", "success");
@@ -407,7 +403,7 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
           } else if (loginError && /email not confirmed/i.test(loginError.message)) {
             showMessage("Check your inbox to confirm your new account before logging in.", "success");
           } else {
-            showMessage("This email may already have an account. Use the correct password, or choose Login or Forgot password.", "error");
+            showMessage("This email may already have an account. Use the correct password, or choose Login or Reset Password.", "error");
           }
         }
       } else {
@@ -426,12 +422,9 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
   render();
   const recoveryListener = supabase.auth.onAuthStateChange((event, session) => {
     if (event === "PASSWORD_RECOVERY" && session) {
-      mode = "recovery-link";
+      mode = "recovery-new-password";
       recoveryEmail = session.user.email || "";
       emailInput.value = recoveryEmail;
-      emailInput.readOnly = true;
-      otpInput.value = "";
-      passwordInput.value = "";
       render();
       showMessage("Enter your new password to finish resetting your account.", "success");
     }
