@@ -1505,3 +1505,75 @@ input:disabled,select:disabled,textarea:disabled{opacity:.7;cursor:not-allowed}
   backdrop-filter:none;
 }
 .site-header .site-menu[hidden]{display:none!important}
+
+
+/* Account page visibility and layout recovery. */
+[hidden] {
+  display: none !important;
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.account-layout {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  padding: 36px 20px;
+}
+
+.account-layout .auth-main {
+  display: block;
+  width: min(420px, 100%);
+  margin: 0 auto;
+}
+
+.account-layout .auth-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+
+.account-layout .auth-form input:not([hidden]) {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 50px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--page-text);
+}
+
+.account-layout .profile-form[hidden],
+.account-layout [hidden] {
+  display: none !important;
+}
+
+.account-layout .profile-form:not([hidden]) {
+  display: grid;
+  gap: 0;
+}
+
+@media (max-width: 480px) {
+  .account-layout {
+    padding: 28px 18px;
+  }
+  .account-layout .auth-main {
+    width: 100%;
+  }
+}
