@@ -221,7 +221,7 @@ export async function initRoutePage() {
       body:JSON.stringify({visitor_key:visitorKey,page_path:location.pathname,referrer:document.referrer||"",device,operating_system:os,browser})
     }).catch(error=>console.debug("Visitor analytics unavailable.",error));
   }
-  if(document.querySelector('#app-main[data-view="catalogue"]')){await applyPublicSiteSettings();await initCataloguePage(supabase,document.getElementById("app-main").dataset.module,document.getElementById("app-main").dataset.recordId||"");return;}
+  if(document.querySelector('#app-main[data-view="catalogue"]')){await applyPublicSiteSettings();await initCataloguePage(supabase,document.getElementById("app-main").dataset.module,document.getElementById("app-main").dataset.recordKey||"");return;}
   const form = document.querySelector("#auth-form");
 
 if (form) {
