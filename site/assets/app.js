@@ -165,8 +165,8 @@ async function loadHomeCatalog() {
 
 async function applyPublicSiteSettings() {
   const [{data,error},{data:introData}] = await Promise.all([
-    supabase.from("site_settings").select("setting_value").eq("setting_key","site_profile").eq("is_public",true).maybeSingle(),
-    supabase.from("site_settings").select("setting_value").eq("setting_key","home_intro").eq("is_public",true).maybeSingle()
+    supabase.from("Settings").select("setting_value").eq("setting_key","site_profile").maybeSingle(),
+    supabase.from("Settings").select("setting_value").eq("setting_key","home_intro").maybeSingle()
   ]);
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
   const intro=typeof introData?.setting_value?.content==="string"?introData.setting_value.content.trim():"";
@@ -471,7 +471,7 @@ if (profile) {
     setProfileValue("name", name, "Name");
     setProfileValue("email", currentUser.email || "", "Email");
     const { data: profileData, error: profileError } = await supabase
-      .from("user_profiles").select("phone").eq("user_id", currentUser.id).maybeSingle();
+      .from("Users").select("phone").eq("auth_user_id", currentUser.id).maybeSingle();
     if (profileError) {
       profileMessage("Could not load your phone number. Please refresh and try again.", "error");
     } else {
@@ -511,10 +511,9 @@ if (profile) {
       if (nameError) throw nameError;
       currentUser = nameData.user;
 
-      const { error: phoneError } = await supabase.from("user_profiles").upsert(
-        { user_id: currentUser.id, phone: phone || null },
-        { onConflict: "user_id" },
-      );
+      const { error: phoneError } = await supabase.from("Users").update(
+        { phone: phone || null },
+      ).eq("auth_user_id", currentUser.id);
       if (phoneError) throw phoneError;
       currentPhone = phone;
 
@@ -582,11 +581,11 @@ if (ownerDashboard) {
       currentDashboardRole = "owner";
       const ownerEmail = document.querySelector("#dashboard-owner-email");
       if (ownerEmail) ownerEmail.textContent = authData.user.email || "";
-      const resources = [["user_profiles","dashboard-users-count"],["services","dashboard-services-count"],["categories","dashboard-categories-count"],["products","dashboard-products-count"],["workshops","dashboard-workshops-count"],["technicians","dashboard-technicians-count"],["contacts","dashboard-contacts-count"],["app_roles","dashboard-roles-count"],["permissions","dashboard-permissions-count"]];
+      const resources = [["Users","dashboard-users-count"],["services","dashboard-services-count"],["categories","dashboard-categories-count"],["products","dashboard-products-count"],["workshops","dashboard-workshops-count"],["technicians","dashboard-technicians-count"],["contacts","dashboard-contacts-count"],["Roles","dashboard-roles-count"],["permissions","dashboard-permissions-count"]];
       const health=document.getElementById("dashboard-health-status");
       if(health){health.replaceChildren();const checks=[["Website","Online",true],["Supabase / Database","Checking…",null],["Authentication","Checking…",null],["Storage","Checking…",null],["Backend services","Checking…",null]];
         const [databaseCheck,authCheck,storageCheck,backendCheck]=await Promise.all([
-          supabase.from("site_settings").select("setting_key").limit(1),
+          supabase.from("Settings").select("setting_key").limit(1),
           supabase.auth.getUser(),
           supabase.storage.from("site-media").list("",{limit:1}),
           supabase.functions.invoke("owner-users",{body:{action:"health"}})
@@ -621,8 +620,8 @@ async function loadSiteSettingsForm() {
   if (!siteSettingsForm || currentDashboardRole !== "owner") return;
   if (siteSettingsMessage) siteSettingsMessage.textContent = "Loading website settings…";
   const [{data,error},{data:introData}] = await Promise.all([
-    supabase.from("site_settings").select("setting_value").eq("setting_key","site_profile").maybeSingle(),
-    supabase.from("site_settings").select("setting_value").eq("setting_key","home_intro").maybeSingle()
+    supabase.from("Settings").select("setting_value").eq("setting_key","site_profile").maybeSingle(),
+    supabase.from("Settings").select("setting_value").eq("setting_key","home_intro").maybeSingle()
   ]);
   if (error) { if (siteSettingsMessage) siteSettingsMessage.textContent=error.message||"Could not load website settings."; return; }
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
@@ -650,9 +649,9 @@ if(siteSettingsForm){
       const {data:authData,error:authError}=await supabase.auth.getUser();if(authError||!authData.user)throw new Error("Your session has expired. Sign in again.");
       if(file){if(!file.type.startsWith("image/")||file.size>5*1024*1024)throw new Error("Choose an image up to 5 MB.");const path="branding/"+crypto.randomUUID()+"-"+file.name.replace(/[^\w.-]+/g,"-");const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type});if(uploadError)throw uploadError;logoUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;}
       if(siteSettingsForm.dataset.removeLogo==="true")logoUrl="";
-      const {error}=await supabase.from("site_settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(error)throw error;
+      const {error}=await supabase.from("Settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},description:"Public website profile"},{onConflict:"setting_key"});if(error)throw error;
       const homeIntro=String(form.get("home_intro")||"").trim();
-      const {error:introError}=await supabase.from("site_settings").upsert({setting_key:"home_intro",setting_value:{content:homeIntro},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(introError)throw introError;
+      const {error:introError}=await supabase.from("Settings").upsert({setting_key:"home_intro",setting_value:{content:homeIntro},description:"Public homepage introduction"},{onConflict:"setting_key"});if(introError)throw introError;
       if(oldLogoUrl&&oldLogoUrl!==logoUrl){try{await removeStoredImage(oldLogoUrl);}catch(cleanupError){console.warn("Old logo cleanup failed.",cleanupError);}}
       siteSettingsForm.dataset.removeLogo="false";if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings saved.";
     }catch(error){if(siteSettingsMessage)siteSettingsMessage.textContent=error.message||"Could not save website settings.";}
@@ -1168,8 +1167,8 @@ async function loadDashboardSummaryCounts(){
   const counts={
     service_types:["service_types","id"],device_types:["device_types","id"],
     services:["services","id"],products:["products","id"],workshops:["workshops","id"],
-    technicians:["technicians","id"],contacts:["contacts","id"],users:["user_profiles","user_id"],
-    roles:["app_roles","id"],permission:["permissions","id"]
+    technicians:["technicians","id"],contacts:["contacts","id"],users:["Users","id"],
+    roles:["Roles","id"],permission:["permissions","id"]
   };
   await Promise.all(Object.entries(counts).map(async([key,[table,column]])=>{
     const node=document.querySelector('[data-dashboard-count="'+key+'"]');
