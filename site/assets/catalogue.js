@@ -163,6 +163,15 @@ async function renderContacts(root,record,supabase){
     email.prepend(createContactIcon(emailValue,"Email"));
     actions.append(email);
   }
+  const externalLink=safeExternalUrl(record.link);
+  if(externalLink){
+    const linkValue=String(record.link||"").trim();
+    const link=el("a","catalogue-contact-button",linkValue);
+    link.href=externalLink;
+    link.target="_blank";
+    link.rel="noopener noreferrer";
+    actions.append(link);
+  }
   if(!actions.childElementCount)return false;
   const section=el("section","catalogue-detail-section");
   section.append(actions);
