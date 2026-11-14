@@ -97,7 +97,7 @@ function renderHomeCard(module, record) {
   const title=record.name||record.title||"";
   const card=document.createElement(["service_types","device_types"].includes(module.key)?"div":"a");
   card.className="home-content-card";
-  if(card.tagName==="A"&&record.id)card.href="/3btechhub/"+module.key+"/"+encodeURIComponent(record.id)+"/";
+  if(card.tagName==="A"){const routeKey=module.key==="contacts"?record.id:record.publicSlug;if(routeKey)card.href="/3btechhub/"+module.key+"/"+encodeURIComponent(routeKey)+"/";}
   const visual=document.createElement("div");
   visual.className="home-content-visual"+(module.key==="technicians"?" home-content-visual--person":"");
   if(module.key==="contacts"){const icon=createContactIcon(record.value,title);icon.classList.add("home-content-fallback");visual.append(icon);}
@@ -133,6 +133,12 @@ async function loadHomeCatalog() {
       };
       const {data,error}=await supabase.from(module.table).select(publicColumns[module.key]).limit(5);
       if(error) throw error;
+      if(["services","products","workshops","technicians"].includes(module.key)){
+        const {data:slugRows,error:slugError}=await supabase.rpc("get_public_catalogue_slugs",{p_module:module.key});
+        if(slugError)throw slugError;
+        const slugById=new Map((slugRows||[]).map(row=>[row.id,row.slug]));
+        data?.forEach(record=>{record.publicSlug=slugById.get(record.id)||"";});
+      }
       target.replaceChildren();
       if(!data?.length) {
         const empty=document.createElement("p");
