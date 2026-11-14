@@ -91,7 +91,8 @@ begin
       new.code is distinct from old.code or new.slug is distinct from old.slug) then
     raise exception 'The Global country identity is protected.';
   end if;
-  return case when tg_op = 'DELETE' then old else new end;
+  if tg_op = 'DELETE' then return old; end if;
+  return new;
 end;
 $$;
 drop trigger if exists protect_global_country_record on public.countries;
@@ -143,6 +144,9 @@ create unique index if not exists languages_one_default on public.languages(is_d
 insert into public.languages(title,slug,description,country,status,visibility_roles,sort_order,is_default)
 values ('English','en','','Global','active',array['owner','visitor']::text[],10,true)
 on conflict (slug) do update set is_default=true, status='active';
+insert into public.language_countries(language_id,country_id)
+select l.id,c.id from public.languages l cross join public.countries c
+where l.slug='en' and c.is_global=true on conflict do nothing;
 
 alter table public.languages enable row level security;
 grant select on public.languages to anon, authenticated;
