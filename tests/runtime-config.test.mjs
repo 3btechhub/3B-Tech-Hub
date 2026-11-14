@@ -49,7 +49,7 @@ test("invalid configuration input is a safe no-op", () => {
   assert.equal(applyRuntimeConfig({ themes: [] }, "light", makeRoot()), 0);
 });
 
-test("runtime config loader reads only the public runtime_config setting", async () => {
+test("runtime config loader reads the runtime_config setting from Settings", async () => {
   const calls = [];
   const row = { schema_version: 1, themes: { light: { page_bg: "#fff" } } };
   const query = {
@@ -61,15 +61,14 @@ test("runtime config loader reads only the public runtime_config setting", async
 
   assert.equal(await loadRuntimeConfig(client), row);
   assert.deepEqual(calls, [
-    ["from", "site_settings"],
+    ["from", "Settings"],
     ["select", "setting_value"],
-    ["eq", "setting_key", "runtime_config"],
-    ["eq", "is_public", true]
+    ["eq", "setting_key", "runtime_config"]
   ]);
 });
 
 test("runtime config loader fails closed when setting is unavailable", async () => {
-  const client = { from: () => ({ select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: new Error("offline") }) }) }) }) }) };
+  const client = { from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: new Error("offline") }) }) }) }) };
   assert.equal(await loadRuntimeConfig(client), null);
 });
 
