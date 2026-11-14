@@ -803,7 +803,7 @@ async function loadVisibilityRoleOptions(form,selectedRoles) {
   for(const role of roles){
     const label=document.createElement("label");label.className="module-related-option";
     const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=role.slug;checkbox.dataset.visibilityRole=role.slug;
-    checkbox.checked=selectedRoles?selectedRoles.includes(role.slug):(role.slug==="owner"||role.slug==="visitor");
+    checkbox.checked=selectedRoles?selectedRoles.includes(role.slug):role.slug==="owner";
     checkbox.disabled=role.slug==="owner";
     label.append(checkbox,document.createTextNode(role.name));host.append(label);
   }
@@ -814,7 +814,7 @@ function setVisibilityRoleSelection(form,selectedRoles) {
   form.querySelectorAll("[data-visibility-role]").forEach(input=>{input.checked=selected.has(input.value);});
 }
 async function loadModuleRelationOptions(moduleName,form) {
-  await loadVisibilityRoleOptions(form);
+  await loadVisibilityRoleOptions(form,["owner"]);
   const config=moduleRelationships[moduleName]||{};
   for(const [key,rel] of Object.entries(config)){
     const host=form.querySelector('[data-related-options="'+key+'"]');
@@ -993,7 +993,7 @@ function resetModuleForm(moduleName) {
   if(form._moduleFormPlaceholder?.parentNode){
     form._moduleFormPlaceholder.parentNode.insertBefore(form,form._moduleFormPlaceholder);
   }
-  form.reset(); setVisibilityRoleSelection(form,["owner","visitor"]); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.currentGalleryUrls="[]"; form.dataset.removePhoto="false"; form.dataset.slugManual="false";
+  form.reset(); setVisibilityRoleSelection(form,["owner"]); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.currentGalleryUrls="[]"; form.dataset.removePhoto="false"; form.dataset.slugManual="false";
   updateImagePreview(form,"");
   const config=dashboardContentModules[moduleName];
   document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Add "+config.title;
@@ -1047,7 +1047,7 @@ async function renderModuleList(moduleName,records) {
       form.dataset.removePhoto="false";form.dataset.slugManual="false";
       for(const [key] of config.fields){
         const input=form.elements.namedItem(key);
-        if(key==="visibility_roles"){setVisibilityRoleSelection(form,record.visibility_roles||["owner","visitor"]);continue;}
+        if(key==="visibility_roles"){setVisibilityRoleSelection(form,record.visibility_roles||["owner"]);continue;}
         if(!input&&key!=="country"&&key!=="type")continue;
         else if(key==="type"&&moduleName==="categories"){const selected=new Set(Array.isArray(record.type)?record.type:[]);form.querySelectorAll("[data-checklist-value]").forEach(box=>box.checked=selected.has(box.dataset.checklistValue));}
         else if(key==="price")input.value=record.price_minor==null?"":String(Number(record.price_minor)/100);
