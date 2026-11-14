@@ -1577,3 +1577,10 @@ input:disabled,select:disabled,textarea:disabled{opacity:.7;cursor:not-allowed}
     width: 100%;
   }
 }
+
+/* Profile field names act as placeholders only when the value is empty. */
+.profile-row .profile-value { flex:1; text-align:end; }
+.profile-row .profile-value.is-placeholder::before {
+  content:attr(data-placeholder-text);
+  color:#888;
+}
