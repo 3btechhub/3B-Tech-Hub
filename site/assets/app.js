@@ -615,7 +615,7 @@ if (ownerDashboard) {
 // Owner-only website profile settings stored as a single public configuration record.
 const siteSettingsForm = document.querySelector("#site-settings-form");
 const siteSettingsMessage = document.querySelector("#site-settings-message");
-const siteSettingsVisibilityHost=document.createElement("div");siteSettingsVisibilityHost.className="module-related-options";siteSettingsVisibilityHost.dataset.visibilityRoles="true";
+const siteSettingsVisibilityHost=document.createElement("div");siteSettingsVisibilityHost.className="module-related-options";siteSettingsForm.dataset.visibilityRoles="true";
 const siteSettingsVisibilityField=document.createElement("div");siteSettingsVisibilityField.className="module-form-field module-related-field";addTextElement(siteSettingsVisibilityField,"span","","Visibility");siteSettingsVisibilityField.append(siteSettingsVisibilityHost);
 siteSettingsForm?.querySelector(".editor-actions")?.before(siteSettingsVisibilityField);
 
