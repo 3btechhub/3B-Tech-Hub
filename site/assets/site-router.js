@@ -22,6 +22,7 @@ function routeDetails(path) {
     const modes = { login:"login", "create-account":"signup", "reset-password":"recovery-start", profile:"profile", "edit-profile":"edit-profile" };
     return { view:"account", authMode:modes[child] || "login" };
   }
+  if (first === "edit-profile") return { view:"account", authMode:"edit-profile" };
   if (legacy[first]) return { view:"account", authMode:legacy[first] };
   if (["home","dashboard"].includes(first)) return { view:first };
   if (["service-types","device-types","services","products","workshops","technicians","contacts"].includes(first)) { const recordPart=parts[1] || ""; return { view:"catalogue", module:first, recordKey:recordPart ? decodeURIComponent(recordPart) : "" }; }
