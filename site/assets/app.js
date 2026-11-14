@@ -814,7 +814,9 @@ function setVisibilityRoleSelection(form,selectedRoles) {
   form.querySelectorAll("[data-visibility-role]").forEach(input=>{input.checked=selected.has(input.value);});
 }
 window.addEventListener("site-roles-updated",()=>{
-  document.querySelectorAll("[data-visibility-roles]").forEach(form=>{
+  document.querySelectorAll("[data-visibility-roles]").forEach(host=>{
+    const form=host.matches("form")?host:host.closest("form");
+    if(!form)return;
     const selected=[...form.querySelectorAll("[data-visibility-role]:checked")].map(input=>input.value);
     void loadVisibilityRoleOptions(form,selected);
   });
