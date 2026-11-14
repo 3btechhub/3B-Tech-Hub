@@ -246,7 +246,7 @@ export async function resolveAuthRoute(requestedPath) {
   const session = data?.session || null;
   const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
   const recoveryCallback = first === "reset-password" &&
-    (url.searchParams.get("recovery") === "1" || hashParams.get("type") === "recovery");
+    hashParams.get("type") === "recovery";
 
   if (!session && ["profile", "edit-profile"].includes(first)) {
     return new URL("login/", ROOT_URL).pathname;
@@ -290,7 +290,9 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
   const emailInput = form.elements.email;
   const passwordInput = form.elements.password;
   const otpInput = form.elements.otp;
-  let mode = document.querySelector("#app-main")?.dataset.authMode || "login";
+  const currentAuthUrl = new URL(window.location.href);
+  const isPasswordRecoveryCallback = new URLSearchParams(currentAuthUrl.hash.replace(/^#/, "")).get("type") === "recovery";
+  let mode = isPasswordRecoveryCallback ? "recovery-new-password" : (document.querySelector("#app-main")?.dataset.authMode || "login");
   let recoveryEmail = "";
 
   function showMessage(text, kind = "") {
@@ -405,6 +407,7 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
         passwordInput.value = "";
         render();
         showMessage("Password updated successfully. You can now log in.", "success");
+        window.navigateSiteRoute(new URL("login/", ROOT_URL).pathname, { replace:true });
       } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
