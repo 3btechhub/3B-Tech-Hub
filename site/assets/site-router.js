@@ -15,8 +15,10 @@ function normalizedPath(value) {
 function routeDetails(path) {
   const pathname = new URL(path, window.location.origin).pathname;
   const first = pathname.slice(BASE.length).split("/").filter(Boolean)[0] || "";
-  if (first === "login") return { view:"account" };
-  if (["home","account","profile","dashboard"].includes(first)) return { view:first };
+  if (first === "login" || first === "account") return { view:"account", authMode:"login" };
+  if (first === "create-account") return { view:"account", authMode:"signup" };
+  if (first === "forgot-password") return { view:"account", authMode:"recovery-start" };
+  if (["home","profile","dashboard"].includes(first)) return { view:first };
   if (["service-types","device-types","services","products","workshops","technicians","contacts"].includes(first)) { const recordPart=pathname.slice(BASE.length).split("/").filter(Boolean)[1] || ""; return { view:"catalogue", module:first, recordKey:recordPart ? decodeURIComponent(recordPart) : "" }; }
   return { view:"home" };
 }
@@ -42,6 +44,7 @@ async function renderRoute(requestedPath, { replace = false } = {}) {
   main.dataset.view = details.view;
   if (details.module) main.dataset.module=details.module; else delete main.dataset.module;
   if (details.recordKey) main.dataset.recordKey=details.recordKey; else delete main.dataset.recordKey;
+  if (details.authMode) main.dataset.authMode=details.authMode; else delete main.dataset.authMode;
   main.innerHTML = source.innerHTML;
   resolveFragmentLinks(main, path);
   document.title = titles[details.view];
