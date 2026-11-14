@@ -63,6 +63,7 @@ body{background:var(--page-bg);color:var(--page-text);font-size:var(--text-mediu
 .profile-form .auth-message { margin-top:10px; }
 
 .profile-row .is-placeholder { color:#888; }
+.profile-row .profile-value.is-placeholder::before { content:attr(data-placeholder-text); pointer-events:none; }
 
 
 /* Owner dashboard */
