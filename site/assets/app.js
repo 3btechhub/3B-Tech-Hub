@@ -771,6 +771,22 @@ const countryRelationConfig = {
 for (const [moduleName,[table,parent]] of Object.entries(countryRelationConfig)) {
   moduleRelationships[moduleName].countries={table,parent,child:"country_id",target:"countries",label:"name"};
 }
+async function syncTechnicianContacts(technicianId,payload){
+  const {error:deleteError}=await supabase.from("technician_contacts").delete().eq("technician_id",technicianId);
+  if(deleteError)throw deleteError;
+  const values=[["phone","Phone",payload.phone],["whatsapp","WhatsApp",payload.whatsapp],["email","Email",payload.email],["website","Website",payload.link]]
+    .filter(([, ,value])=>typeof value==="string"&&value.trim());
+  for(const [contact_type,label,value] of values){
+    const normalized_value=value.trim().toLowerCase();
+    const {data,error}=await supabase.from("contact_points").upsert(
+      {contact_type,label,value:value.trim(),normalized_value},
+      {onConflict:"contact_type,normalized_value"}
+    ).select("id").single();
+    if(error)throw error;
+    const {error:linkError}=await supabase.from("technician_contacts").insert({technician_id:technicianId,contact_id:data.id});
+    if(linkError)throw linkError;
+  }
+}
 async function loadModuleRelationOptions(moduleName,form) {
   const config=moduleRelationships[moduleName]||{};
   for(const [key,rel] of Object.entries(config)){
@@ -1172,6 +1188,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       }
       if (result.error) throw result.error;
       await saveModuleRelationships(moduleName,result.data.id,form);
+      if(moduleName==="technicians")await syncTechnicianContacts(result.data.id,payload);
       if(moduleName==="countries"){
         for(const target of ["service_types","device_types","services","products","workshops","technicians","locations"]){
           const targetForm=document.querySelector('[data-module-form="'+target+'"]');
