@@ -343,7 +343,7 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
       passwordInput.focus();
       return showMessage("Password must be at least 8 characters.", "error");
     }
-    if (mode === "recovery" && !/^\\d{6,8}$/.test(code)) {
+    if (mode === "recovery" && !/^\d{6,8}$/.test(code)) {
       otpInput.focus();
       return showMessage("Enter the verification code from your email.", "error");
     }
