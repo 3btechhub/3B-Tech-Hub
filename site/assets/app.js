@@ -666,46 +666,46 @@ const dashboardContentModules = {
   countries: { table:"countries", title:"Country", fields:[
     ["title","Country Name","text",true],["code","Country Code","text",false],
     ["is_global","Global Availability","checkbox",false],["visibility_roles","Visibility","role-visibility",false]
-  ], columns:["code","visibility"] },
+  ], columns:["code","visibility_roles"] },
   locations: { table:"locations", title:"Location", fields:[
     ["title","Location Name","text",true],["country_id","Country","select",false,[]],
     ["address","Address","textarea",false],["visibility_roles","Visibility","role-visibility",false]
-  ], columns:["country_id","visibility"] },
+  ], columns:["country_id","visibility_roles"] },
   service_types: { table:"service_types", title:"Service Type", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["device_types","Device Type","multiselect",false],["services","Services","multiselect",false],
     ["products","Products","multiselect",false],["workshops","Workshops","multiselect",false],
     ["technicians","Technicians","multiselect",false],["images","Images","files",false],
     ["visibility_roles","Visibility","role-visibility",false]
-  ], columns:["country","visibility"] },
+  ], columns:["country","visibility_roles"] },
   device_types: { table:"device_types", title:"Device Type", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["service_types","Service Type","multiselect",false],["services","Services","multiselect",false],
     ["products","Products","multiselect",false],["workshops","Workshops","multiselect",false],
     ["technicians","Technicians","multiselect",false],["images","Images","files",false],
-    ["visibility","Visibility","select",false,["visible","hidden"]]
+    ["visibility_roles","Visibility","role-visibility",false]
   ], columns:["country","visibility"] },
   services: { table:"services", title:"Service", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["service_types","Service Type","multiselect",false],["device_types","Device Type","multiselect",false],
     ["products","Products","multiselect",false],["workshops","Workshops","multiselect",false],
     ["technicians","Technicians","multiselect",false],["images","Images","files",false],
-    ["visibility","Visibility","select",false,["visible","hidden"]]
+    ["visibility_roles","Visibility","role-visibility",false]
   ], columns:["country","visibility"] },
   products: { table:"products", title:"Product", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["service_types","Service Type","multiselect",false],["device_types","Device Type","multiselect",false],
     ["services","Service","multiselect",false],["workshops","Workshops","multiselect",false],
     ["technicians","Technicians","multiselect",false],["images","Images","files",false],
-    ["visibility","Visibility","select",false,["visible","hidden"]]
+    ["visibility_roles","Visibility","role-visibility",false]
   ], columns:["country","visibility"] },
   workshops: { table:"workshops", title:"Workshop", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["location_id","Location","select",false,[]],["service_types","Service Type","multiselect",false],
     ["device_types","Device Type","multiselect",false],["services","Service","multiselect",false],
     ["products","Products","multiselect",false],["technicians","Technicians","multiselect",false],
-    ["images","Images","files",false],["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["country","location","visibility"] },
+    ["images","Images","files",false],["visibility_roles","Visibility","role-visibility",false]
+  ], columns:["country","location","visibility_roles"] },
   technicians: { table:"technicians", title:"Technician", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["location_id","Location","select",false,[]],["skill","Skill/Expertise","text",false],["phone","Phone Number","tel",false],
@@ -713,8 +713,8 @@ const dashboardContentModules = {
     ["service_types","Service Type","multiselect",false],["device_types","Device Type","multiselect",false],
     ["services","Service","multiselect",false],["products","Products","multiselect",false],
     ["workshops","Workshops","multiselect",false],["images","Images","files",false],
-    ["visibility","Visibility","select",false,["visible","hidden"]]
-  ], columns:["country","skill","link","visibility"] }
+    ["visibility_roles","Visibility","role-visibility",false]
+  ], columns:["country","skill","link","visibility_roles"] }
 };
 const moduleRelationships = {
   service_types: {
@@ -1040,8 +1040,9 @@ async function renderModuleList(moduleName,records) {
       form.dataset.currentGalleryUrls=JSON.stringify([...new Set([record.photo_url,...(record.gallery_urls||[])].filter(Boolean))]);
       form.dataset.removePhoto="false";form.dataset.slugManual="false";
       for(const [key] of config.fields){
-        const input=form.elements.namedItem(key);if(!input&&key!=="country"&&key!=="type")continue;
-        if(key==="visibility_roles")setVisibilityRoleSelection(form,record.visibility_roles||["owner","visitor"]);
+        const input=form.elements.namedItem(key);
+        if(key==="visibility_roles"){setVisibilityRoleSelection(form,record.visibility_roles||["owner","visitor"]);continue;}
+        if(!input&&key!=="country"&&key!=="type")continue;
         else if(key==="type"&&moduleName==="categories"){const selected=new Set(Array.isArray(record.type)?record.type:[]);form.querySelectorAll("[data-checklist-value]").forEach(box=>box.checked=selected.has(box.dataset.checklistValue));}
         else if(key==="price")input.value=record.price_minor==null?"":String(Number(record.price_minor)/100);
         else if(key==="title")input.value=record[moduleDatabaseKey(moduleName,key)]||"";
