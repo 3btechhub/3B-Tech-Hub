@@ -27,6 +27,15 @@ function el(tag,cls,text){
   if(text!==undefined)node.textContent=text;
   return node;
 }
+async function getPublicSlugMap(supabase,module){
+  const {data,error}=await supabase.rpc("get_public_catalogue_slugs",{p_module:module});
+  if(error)throw error;
+  return new Map((data||[]).map(row=>[row.id,row.slug]));
+}
+function itemRoute(module,item,slugMap){
+  const key=module==="contacts"?item.id:slugMap?.get(item.id);
+  return key?BASE+module+"/"+encodeURIComponent(key)+"/":"";
+}
 function link(path,label){
   const anchor=el("a","section-view-all",label);
   anchor.href=BASE+path+"/";
@@ -178,7 +187,7 @@ async function renderContacts(root,record,supabase){
   root.append(section);
   return true;
 }
-function renderProviderCards(root,title,records,module,emptyText){
+function renderProviderCards(root,title,records,module,slugMap,emptyText){
   if(!records.length)return;
   const section=el("section","catalogue-detail-section");
   section.append(el("h2","catalogue-detail-heading",title));
@@ -199,7 +208,7 @@ function renderProviderCards(root,title,records,module,emptyText){
       top.append(visual);
     }
     const name=record.name||record.title||"";
-    if(name){const titleLink=el("a","catalogue-related-name",name);if(record.id)titleLink.href=BASE+module+"/"+encodeURIComponent(record.id)+"/";top.append(titleLink);}
+    if(name){const titleLink=el("a","catalogue-related-name",name);const route=itemRoute(module,record,slugMap);if(route)titleLink.href=route;top.append(titleLink);}
     card.append(top);
     const summary=record.short_info||record.skill||record.description||"";
     if(hasDisplayValue(summary))card.append(el("p","catalogue-related-summary",summary));
@@ -247,7 +256,8 @@ async function renderModuleRelationships(root,module,data,supabase){
     let query=supabase.from(target).select(publicColumns[target]).in("id",ids);
     const {data:records,error:recordsError}=await query;
     if(recordsError)throw recordsError;
-    renderProviderCards(root,title,records||[],target);
+    const slugMap=target==="contacts"?new Map():await getPublicSlugMap(supabase,target);
+    renderProviderCards(root,title,records||[],target,slugMap);
   }
 }
 async function renderDetail(root,data,module,def,supabase){
@@ -276,9 +286,9 @@ async function renderDetail(root,data,module,def,supabase){
   renderGallery(root,data,module);
   await renderModuleRelationships(root,module,data,supabase);
 }
-function renderCard(item,module){
+function renderCard(item,module,slugMap){
   const card=el("a","home-content-card");
-  if(item.id)card.href=BASE+module+"/"+encodeURIComponent(item.id)+"/";
+  const route=itemRoute(module,item,slugMap);if(route)card.href=route;
   const visual=el("span","home-content-visual");
   visual.append(getItemFallbackIcon(item.name||item.title,module));
   if(item.photo_url){
@@ -296,12 +306,17 @@ function renderCard(item,module){
   card.append(visual,body);
   return card;
 }
-export async function initCataloguePage(supabase,module,recordId){
+export async function initCataloguePage(supabase,module,recordKey){
   const root=document.getElementById("catalogue-root");
   const def=definitions[module];
   if(!root||!def){if(root)root.textContent="Page not found.";return;}
   root.replaceChildren();
-  if(recordId){
+  if(recordKey){
+    let recordId=recordKey;
+    if(module!=="contacts"){
+      const slugMap=await getPublicSlugMap(supabase,module);
+      recordId=[...slugMap.entries()].find(([,slug])=>slug===recordKey)?.[0]||"";
+    }
     const query=supabase.from(def.table).select(def.columns).eq("id",recordId).limit(1);
     const {data,error}=await query.maybeSingle();
     if(error||!data){
@@ -342,11 +357,12 @@ export async function initCataloguePage(supabase,module,recordId){
     offset+=pageSize;
   }
 
+  const slugMap=module==="contacts"?new Map():await getPublicSlugMap(supabase,module);
   const grid=el("div","home-card-grid catalogue-results-grid");
   if(!records.length){
     grid.append(el("p","home-empty","No "+def.title.toLowerCase()+" available yet."));
   }else{
-    records.forEach(record=>{if(record.name||record.title||record.photo_url)grid.append(renderCard(record,module));});
+    records.forEach(record=>{if(record.name||record.title||record.photo_url)grid.append(renderCard(record,module,slugMap));});
   }
   root.append(grid);
 }
