@@ -69,7 +69,8 @@ function closeSiteMenu() {
   menuButton.setAttribute("aria-label", "Open menu");
 }
 async function setMenuSession(session) {
-  if (accountMenuLink) { accountMenuLink.href=new URL("login/",ROOT_URL).href; accountMenuLink.hidden=Boolean(session); }
+  if (accountMenuLink) { accountMenuLink.href=new URL("account/login/",ROOT_URL).href; accountMenuLink.hidden=Boolean(session); }
+  if (profileMenuLink) profileMenuLink.href=new URL("account/profile/",ROOT_URL).href;
   if (profileMenuLink) profileMenuLink.hidden=!session;
   if (logoutMenuLink) logoutMenuLink.hidden=!session;
   if (dashboardMenuLink) { dashboardMenuLink.hidden=true; if(session?.user?.id){const {data,error}=await supabase.from("user_roles").select("role").eq("user_id",session.user.id).eq("role","owner").maybeSingle();if(!error&&data?.role==="owner")dashboardMenuLink.hidden=false;} }
@@ -237,24 +238,32 @@ const ROOT_URL = new URL("https://3btechhub.github.io/3btechhub/");
 
 export async function resolveAuthRoute(requestedPath) {
   const url = new URL(requestedPath, window.location.origin);
-  const first = url.pathname.slice("/3btechhub/".length).split("/").filter(Boolean)[0] || "";
-  const authRoutes = ["login", "create-account", "forgot-password", "reset-password", "profile", "edit-profile"];
-  if (!authRoutes.includes(first)) return url.pathname + url.search + url.hash;
+  const basePath = ROOT_URL.pathname;
+  if (!url.pathname.startsWith(basePath)) return url.pathname + url.search + url.hash;
+  const parts = url.pathname.slice(basePath.length).split("/").filter(Boolean);
+  const first = parts[0] || "";
+  const legacyRoutes = {
+    login:"login", "create-account":"create-account", "forgot-password":"reset-password",
+    "reset-password":"reset-password", profile:"profile", "edit-profile":"edit-profile"
+  };
+  let accountRoute = first === "account" ? (parts[1] || "") : (legacyRoutes[first] || "");
+  if (first !== "account" && !accountRoute) return url.pathname + url.search + url.hash;
 
   const { data, error } = await supabase.auth.getSession();
-  if (error) return url.pathname + url.search + url.hash;
-  const session = data?.session || null;
+  const session = error ? null : (data?.session || null);
   const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
-  const recoveryCallback = first === "reset-password" &&
-    hashParams.get("type") === "recovery";
+  const recoveryCallback = accountRoute === "reset-password" &&
+    (hashParams.get("type") === "recovery" || url.searchParams.get("recovery") === "1");
 
-  if (!session && ["profile", "edit-profile"].includes(first)) {
-    return new URL("login/", ROOT_URL).pathname;
-  }
-  if (session && ["login", "create-account", "forgot-password", "reset-password"].includes(first) && !recoveryCallback) {
-    return new URL("profile/", ROOT_URL).pathname;
-  }
-  return url.pathname + url.search + url.hash;
+  let target = accountRoute || (session ? "profile" : "login");
+  if (!["login","create-account","reset-password","profile","edit-profile"].includes(target)) target = session ? "profile" : "login";
+  if (!session && ["profile","edit-profile"].includes(target)) target = "login";
+  if (session && ["login","create-account"].includes(target)) target = "profile";
+  if (session && target === "reset-password" && !recoveryCallback) target = "profile";
+
+  const canonicalPath = new URL("account/" + target + "/", ROOT_URL).pathname;
+  const canonical = first === "account" && parts.length === 2 && parts[1] === target && url.pathname === canonicalPath;
+  return canonical ? (url.pathname + url.search + url.hash) : (canonicalPath + url.search + url.hash);
 }
 
 export async function initRoutePage() {
@@ -291,7 +300,7 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
   const passwordInput = form.elements.password;
   const otpInput = form.elements.otp;
   const currentAuthUrl = new URL(window.location.href);
-  const isPasswordRecoveryCallback = new URLSearchParams(currentAuthUrl.hash.replace(/^#/, "")).get("type") === "recovery";
+  const isPasswordRecoveryCallback = new URLSearchParams(currentAuthUrl.hash.replace(/^#/, "")).get("type") === "recovery" || currentAuthUrl.searchParams.get("recovery") === "1";
   let mode = isPasswordRecoveryCallback ? "recovery-new-password" : (document.querySelector("#app-main")?.dataset.authMode || "login");
   let recoveryEmail = "";
 
@@ -341,13 +350,13 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
 
   toggle.addEventListener("click", () => {
     if (mode === "recovery" || mode === "recovery-new-password") return;
-    const target = mode === "signup" ? "login/" : "create-account/";
+    const target = mode === "signup" ? "account/login/" : "account/create-account/";
     window.navigateSiteRoute(new URL(target, ROOT_URL).pathname);
   });
 
   forgot.addEventListener("click", () => {
     if (mode === "recovery" || mode === "recovery-new-password") return;
-    const target = mode === "recovery-start" ? "login/" : "reset-password/";
+    const target = mode === "recovery-start" ? "account/login/" : "account/reset-password/";
     window.navigateSiteRoute(new URL(target, ROOT_URL).pathname);
   });
 
@@ -378,7 +387,7 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
     try {
       if (mode === "recovery-start") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: new URL("reset-password/?recovery=1", ROOT_URL).href,
+          redirectTo: new URL("account/reset-password/?recovery=1", ROOT_URL).href,
         });
         if (error) throw error;
         recoveryEmail = email;
@@ -407,22 +416,22 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
         passwordInput.value = "";
         render();
         showMessage("Password updated successfully. You can now log in.", "success");
-        window.navigateSiteRoute(new URL("login/", ROOT_URL).pathname, { replace:true });
+        window.navigateSiteRoute(new URL("account/login/", ROOT_URL).pathname, { replace:true });
       } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: new URL("login/", ROOT_URL).href },
+          options: { emailRedirectTo: new URL("account/login/", ROOT_URL).href },
         });
         if (error) throw error;
         if (data.session) {
           showMessage("Account created successfully.", "success");
-          window.navigateSiteRoute(new URL("profile/", ROOT_URL).pathname);
+          window.navigateSiteRoute(new URL("account/profile/", ROOT_URL).pathname);
         } else {
           const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
           if (!loginError && loginData.session) {
             showMessage("This email already has an account. You are now logged in to that account.", "success");
-            window.navigateSiteRoute(new URL("profile/", ROOT_URL).pathname);
+            window.navigateSiteRoute(new URL("account/profile/", ROOT_URL).pathname);
           } else if (loginError && /email not confirmed/i.test(loginError.message)) {
             showMessage("Check your inbox to confirm your new account before logging in.", "success");
           } else {
@@ -433,7 +442,7 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         showMessage("Signed in successfully.", "success");
-        window.navigateSiteRoute(new URL("profile/", ROOT_URL).pathname);
+        window.navigateSiteRoute(new URL("account/profile/", ROOT_URL).pathname);
       }
     } catch (error) {
       showMessage(error instanceof Error ? error.message : "Authentication failed. Please try again.", "error");
@@ -518,7 +527,7 @@ if (profile && ["profile","edit-profile"].includes(accountMode)) {
   async function loadProfile() {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
-      window.navigateSiteRoute(new URL("login/", ROOT_URL).pathname, { replace: true });
+      window.navigateSiteRoute(new URL("account/login/", ROOT_URL).pathname, { replace: true });
       return;
     }
     currentUser = data.user;
@@ -614,7 +623,7 @@ if (profile && ["profile","edit-profile"].includes(accountMode)) {
   await loadProfile();
   if (accountMode === "edit-profile") profile.querySelectorAll("[data-edit-field]").forEach((button) => button.click());
   const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) window.navigateSiteRoute(new URL("login/", ROOT_URL).pathname, { replace: true });
+    if (!session) window.navigateSiteRoute(new URL("account/login/", ROOT_URL).pathname, { replace: true });
   });
   window.__routeAuthSubscriptions.push(authListener.subscription);
 }
@@ -626,13 +635,13 @@ const ownerDashboard = document.querySelector("#app-main[data-view=\"dashboard\"
 if (ownerDashboard) {
   const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError || !authData.user) {
-    window.navigateSiteRoute(new URL("login/", ROOT_URL).pathname, { replace: true });
+    window.navigateSiteRoute(new URL("account/login/", ROOT_URL).pathname, { replace: true });
   } else {
     const { data: ownerRole, error: roleError } = await supabase
       .from("user_roles").select("role")
       .eq("user_id", authData.user.id).eq("role", "owner").maybeSingle();
     if (roleError || ownerRole?.role !== "owner") {
-      window.navigateSiteRoute(new URL("profile/", ROOT_URL).pathname, { replace: true });
+      window.navigateSiteRoute(new URL("account/profile/", ROOT_URL).pathname, { replace: true });
     } else {
       currentDashboardRole = "owner";
       const ownerEmail = document.querySelector("#dashboard-owner-email");
@@ -661,7 +670,7 @@ if (ownerDashboard) {
     }
   }
   const dashboardAuthListener = supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) window.navigateSiteRoute(new URL("login/", ROOT_URL).pathname, { replace: true });
+    if (!session) window.navigateSiteRoute(new URL("account/login/", ROOT_URL).pathname, { replace: true });
   });
   window.__routeAuthSubscriptions.push(dashboardAuthListener.data.subscription);
 }
