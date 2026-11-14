@@ -291,7 +291,7 @@ async function renderDetail(root,data,module,def,supabase){
   await renderModuleRelationships(root,module,data,supabase);
 }
 function renderCard(item,module,slugMap){
-  const route=(module==="service-types"||module==="device-types")?"":itemRoute(module,item,slugMap);
+  const route=itemRoute(module,item,slugMap);
   const card=el(route?"a":"article","home-content-card");
   if(route)card.href=route;
   const visual=el("span","home-content-visual");
@@ -374,13 +374,17 @@ export async function initCataloguePage(supabase,module,recordKey){
   if(!root||!def){if(root)root.textContent="Page not found.";return;}
   root.replaceChildren();
   if(recordKey){
-    let recordId=recordKey;
-    if(module!=="contacts"){
+    let query=supabase.from(def.table).select(def.columns);
+    if(module==="service-types"||module==="device-types"){
+      query=query.eq("slug",recordKey).in("status",["active","published"]);
+    }else if(module==="contacts"){
+      query=query.eq("id",recordKey);
+    }else{
       const slugMap=await getPublicSlugMap(supabase,module);
-      recordId=[...slugMap.entries()].find(([,slug])=>slug===recordKey)?.[0]||"";
+      const recordId=[...slugMap.entries()].find(([,slug])=>slug===recordKey)?.[0]||"";
+      query=query.eq("id",recordId);
     }
-    const query=supabase.from(def.table).select(def.columns).eq("id",recordId).limit(1);
-    const {data,error}=await query.maybeSingle();
+    const {data,error}=await query.limit(1).maybeSingle();
     if(error||!data){
       root.append(el("h1","","Content not found"));
       return;
@@ -427,7 +431,9 @@ export async function initCataloguePage(supabase,module,recordKey){
     return;
   }
 
-  const slugMap=(module==="service-types"||module==="device-types")?new Map():await getPublicSlugMap(supabase,module);
+  const slugMap=(module==="service-types"||module==="device-types")
+    ?new Map(records.filter(record=>record.slug).map(record=>[record.id,record.slug]))
+    :await getPublicSlugMap(supabase,module);
   const filterState=Object.create(null);
   let currentPage=1;
   const grid=el("div","home-card-grid catalogue-results-grid");
