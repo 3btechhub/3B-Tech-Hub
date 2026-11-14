@@ -23,6 +23,10 @@ jobs:
           test -s site/home/index.html
           test -s site/account/index.html
           test -s site/dashboard/index.html
+          ! test -d site/login
+          ! test -d site/create-account
+          ! test -d site/forgot-password
+          ! test -d site/profile
           test -s site/assets/style.css
           test -s site/assets/app.js
           test -s site/404.html
