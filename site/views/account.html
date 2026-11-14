@@ -1,4 +1,5 @@
-<main class="auth-main">
+<main class="account-layout">
+  <section class="auth-main" id="account-auth-layout">
     <form id="auth-form" class="auth-form">
       <label class="visually-hidden" for="email">Email address</label>
       <input id="email" name="email" type="email" autocomplete="email" placeholder="Email" data-placeholder="email" maxlength="254" required>
@@ -13,4 +14,16 @@
         <button id="toggle-signup" class="text-button" type="button" data-label="createAccount">Create account</button>
       </div>
     </form>
-  </main>
+  </section>
+  <section id="profile-card" class="auth-main profile-form" hidden>
+    <form class="profile-inline-form" id="profile-edit-form">
+      <div class="profile-row"><strong data-label="name">Name</strong><span class="profile-value" id="profile-name" data-profile-field="name" contenteditable="false" role="textbox" aria-label="Name">Loading…</span><button class="profile-inline-edit" type="button" data-edit-field="name" data-label="edit">Edit</button></div>
+      <div class="profile-row"><strong data-label="email">Email</strong><span class="profile-value" id="profile-email" data-profile-field="email" contenteditable="false" role="textbox" aria-label="Email">Loading…</span><button class="profile-inline-edit" type="button" data-edit-field="email" data-label="edit">Edit</button></div>
+      <div class="profile-row"><strong data-label="phoneNumber">Phone Number</strong><span class="profile-value" id="profile-phone" data-profile-field="phone" contenteditable="false" role="textbox" aria-label="Phone Number">Loading…</span><button class="profile-inline-edit" type="button" data-edit-field="phone" data-label="edit">Edit</button></div>
+      <div class="profile-row"><strong data-label="password">Password</strong><span class="profile-value" aria-label="Password is hidden">••••••••</span><button class="profile-inline-edit" id="profile-password-edit" type="button" data-label="edit">Edit</button></div>
+      <fieldset class="profile-password-fields" id="profile-password-fields" hidden><legend data-label="changePassword">Change Password</legend><input name="currentPassword" type="password" autocomplete="current-password" placeholder="Current Password" data-placeholder="currentPassword" aria-label="Current Password" data-aria-label="currentPassword"><input name="newPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="New Password" data-placeholder="newPassword" aria-label="New Password" data-aria-label="newPassword"><input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="256" placeholder="Confirm New Password" data-placeholder="confirmPassword" aria-label="Confirm New Password" data-aria-label="confirmPassword"></fieldset>
+      <button id="profile-save" type="submit" hidden aria-hidden="true" tabindex="-1"></button>
+    </form>
+    <p id="profile-message" class="auth-message" role="status" aria-live="polite"></p>
+  </section>
+</main>
