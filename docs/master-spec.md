@@ -85,14 +85,14 @@ Logo and Title must remain separate components. Clicking either must perform no 
 
 ## 5. Home Page
 
-Five independently controlled sections:
+Five homepage sections:
 1. Services
 2. Products
 3. Workshops
 4. Technicians
 5. Contacts
 
-Each section has its own On/Off visibility setting. Public item cards on Home display only the uploaded image (or the module's fallback icon when no image is available) and the item title. The image/icon is placed at the logical start of the card: left in LTR and right in RTL. Do not display descriptions, categories, types, skills, locations or other metadata on Home cards. Categories remain available in Dashboard content-management forms and stored records; this is a display-only restriction, not a data/schema deletion. Each content item has a detail page and unique slug, in addition to the module listing page.
+Public item cards on Home display only the uploaded image (or the module's fallback icon when no image is available) and the item title. The image/icon is placed at the logical start of the card: left in LTR and right in RTL. Do not display descriptions, categories, types, skills, locations or other metadata on Home cards. Categories remain available in Dashboard content-management forms and stored records; this is a display-only restriction, not a data/schema deletion. Each content item has a detail page and unique slug, in addition to the module listing page.
 
 A disabled section must not appear on Home. Keep a consistent, responsive vertical gap between each Home section. Center-align every section title and style it at a clear headline-level size. Each module title is a link to its corresponding public listing page. Place a smaller “View all” link directly below the title, centered, with no underline in normal or hover states. When an item has no uploaded image, choose its fallback icon from the item name/meaning first, regardless of its parent module; use the module icon only when no item-name match is available. Apply the same item-name icon mapping on Home and public module listing pages. Uploaded images always take precedence over fallback icons.
 
@@ -331,14 +331,6 @@ Visitor Analytics and administrative Activity Logs must use separate data and in
 
 Logo operations: Upload, Replace, Preview and Remove. Title and Logo are managed separately and remain separate components.
 
-### Home section visibility
-Provide five independent toggles:
-- Services
-- Products
-- Workshops
-- Technicians
-- Contacts
-
 ## 15. RTL / LTR Direction Policy
 
 ### 15.1 Current default: LTR Only
@@ -523,7 +515,7 @@ Show a clickable summary-count card for every module except Settings: Categories
 - User: Title, Roles, Permissions.
 - Roles: Title, Users, Permissions.
 - Permission: Title, Users, Roles.
-- Settings: Website Logo, Website Title, Website Intro, Homepage Module Management.
+- Settings: Website Logo, Website Title, Website Intro.
 
 Each named module remains a distinct module with its own primary database table. Catalogue relationships are shared across Categories, Services, Products, Workshops and Technicians; access relationships are shared across Users, Roles and Permissions. The nine non-Settings CRUD modules use a consistent form/checklist/list/create/read/update/delete interaction pattern. Every displayed field is connected to its corresponding database data. Input boxes must not show placeholders. Countries includes Global, selected by default for new records. Keep the dashboard visually consistent with the website design and easy to understand.
 
