@@ -665,18 +665,18 @@ if(siteSettingsForm)void loadSiteSettingsForm();
 const dashboardContentModules = {
   countries: { table:"countries", title:"Country", fields:[
     ["title","Country Name","text",true],["code","Country Code","text",false],
-    ["is_global","Global Availability","checkbox",false],["visibility","Visibility","select",false,["visible","hidden"]]
+    ["is_global","Global Availability","checkbox",false],["visibility_roles","Visibility","role-visibility",false]
   ], columns:["code","visibility"] },
   locations: { table:"locations", title:"Location", fields:[
     ["title","Location Name","text",true],["country_id","Country","select",false,[]],
-    ["address","Address","textarea",false],["visibility","Visibility","select",false,["visible","hidden"]]
+    ["address","Address","textarea",false],["visibility_roles","Visibility","role-visibility",false]
   ], columns:["country_id","visibility"] },
   service_types: { table:"service_types", title:"Service Type", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
     ["device_types","Device Type","multiselect",false],["services","Services","multiselect",false],
     ["products","Products","multiselect",false],["workshops","Workshops","multiselect",false],
     ["technicians","Technicians","multiselect",false],["images","Images","files",false],
-    ["visibility","Visibility","select",false,["visible","hidden"]]
+    ["visibility_roles","Visibility","role-visibility",false]
   ], columns:["country","visibility"] },
   device_types: { table:"device_types", title:"Device Type", fields:[
     ["title","Title","text",true],["slug","Slug","text",true],["country","Countries","countries",false],
@@ -787,7 +787,28 @@ async function syncTechnicianContacts(technicianId,payload){
     if(linkError)throw linkError;
   }
 }
+async function loadVisibilityRoleOptions(form,selectedRoles) {
+  const host=form.querySelector("[data-visibility-roles]");
+  if(!host)return;
+  const {data,error}=await supabase.from("Roles").select("name,slug").eq("is_active",true).order("name");
+  host.replaceChildren();
+  if(error){addTextElement(host,"small","muted","Could not load available roles.");throw error;}
+  const roles=data||[];
+  for(const role of roles){
+    const label=document.createElement("label");label.className="module-related-option";
+    const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=role.slug;checkbox.dataset.visibilityRole=role.slug;
+    checkbox.checked=selectedRoles?selectedRoles.includes(role.slug):(role.slug==="owner"||role.slug==="visitor");
+    checkbox.disabled=role.slug==="owner";
+    label.append(checkbox,document.createTextNode(role.name));host.append(label);
+  }
+  if(!roles.some(role=>role.slug==="owner"))throw new Error("The protected Owner role is missing.");
+}
+function setVisibilityRoleSelection(form,selectedRoles) {
+  const selected=new Set([...(selectedRoles||[]),"owner"]);
+  form.querySelectorAll("[data-visibility-role]").forEach(input=>{input.checked=selected.has(input.value);});
+}
 async function loadModuleRelationOptions(moduleName,form) {
+  await loadVisibilityRoleOptions(form);
   const config=moduleRelationships[moduleName]||{};
   for(const [key,rel] of Object.entries(config)){
     const host=form.querySelector('[data-related-options="'+key+'"]');
@@ -855,12 +876,6 @@ function moduleDatabaseKey(moduleName,key) {
   if (moduleName === "products" && key === "price") return "price_minor";
   return key;
 }
-function recordVisibility(moduleName,record) {
-  if (moduleName === "technicians") return record.is_published ? "visible" : "hidden";
-  if (moduleName === "service_types" || moduleName === "device_types") return record.status === "active" || record.status === "published" ? "visible" : "hidden";
-  if (moduleName === "workshops") return record.status === "published" ? "visible" : "hidden";
-  return record.status === "active" ? "visible" : "hidden";
-}
 function storagePathFromUrl(url) {
   if (!url) return "";
   try {
@@ -900,6 +915,13 @@ function createModuleField(field) {
     const relatedWrapper=document.createElement("div");relatedWrapper.className="module-form-field module-related-field";addTextElement(relatedWrapper,"span","",label);
     const host=document.createElement("div");host.className="module-related-options";host.dataset.checklistOptions=name;
     for(const value of options||[]){const option=document.createElement("label");option.className="module-related-option";const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.value=value;checkbox.dataset.checklistValue=value;option.append(checkbox,document.createTextNode(value));host.append(option);}
+    relatedWrapper.append(host);return relatedWrapper;
+  }
+  else if (type === "role-visibility") {
+    const relatedWrapper=document.createElement("div");relatedWrapper.className="module-form-field module-related-field";
+    addTextElement(relatedWrapper,"span","",label);
+    const host=document.createElement("div");host.className="module-related-options";host.dataset.visibilityRoles="true";
+    host.append(addTextElement(host,"small","muted","Loading available roles…"));
     relatedWrapper.append(host);return relatedWrapper;
   }
   else if (type === "multiselect") {
@@ -965,7 +987,7 @@ function resetModuleForm(moduleName) {
   if(form._moduleFormPlaceholder?.parentNode){
     form._moduleFormPlaceholder.parentNode.insertBefore(form,form._moduleFormPlaceholder);
   }
-  form.reset(); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.currentGalleryUrls="[]"; form.dataset.removePhoto="false"; form.dataset.slugManual="false";
+  form.reset(); setVisibilityRoleSelection(form,["owner","visitor"]); form.dataset.editId=""; form.dataset.currentPhotoUrl=""; form.dataset.currentGalleryUrls="[]"; form.dataset.removePhoto="false"; form.dataset.slugManual="false";
   updateImagePreview(form,"");
   const config=dashboardContentModules[moduleName];
   document.querySelector('[data-module-form-title="'+moduleName+'"]').textContent="Add "+config.title;
@@ -1019,7 +1041,7 @@ async function renderModuleList(moduleName,records) {
       form.dataset.removePhoto="false";form.dataset.slugManual="false";
       for(const [key] of config.fields){
         const input=form.elements.namedItem(key);if(!input&&key!=="country"&&key!=="type")continue;
-        if(key==="visibility")input.value=recordVisibility(moduleName,record);
+        if(key==="visibility_roles")setVisibilityRoleSelection(form,record.visibility_roles||["owner","visitor"]);
         else if(key==="type"&&moduleName==="categories"){const selected=new Set(Array.isArray(record.type)?record.type:[]);form.querySelectorAll("[data-checklist-value]").forEach(box=>box.checked=selected.has(box.dataset.checklistValue));}
         else if(key==="price")input.value=record.price_minor==null?"":String(Number(record.price_minor)/100);
         else if(key==="title")input.value=record[moduleDatabaseKey(moduleName,key)]||"";
@@ -1116,7 +1138,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       const payload={};
       for (const [key] of config.fields) {
         if(key==="type"&&moduleName==="categories"){payload.type=[...form.querySelectorAll("[data-checklist-value]:checked")].map(box=>box.dataset.checklistValue);continue;}
-        const input=form.elements.namedItem(key); if ((!input && key!=="country") || key==="images" || key==="visibility" || moduleRelationships[moduleName]?.[key]) continue;
+        const input=form.elements.namedItem(key); if ((!input && key!=="country") || key==="images" || key==="visibility_roles" || moduleRelationships[moduleName]?.[key]) continue;
         const dbKey=moduleDatabaseKey(moduleName,key);
         if(key==="country"){
           let selected=[...form.querySelectorAll('[data-related-options="countries"] input[data-related-id]:checked')];
@@ -1144,6 +1166,7 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
       const titleValue=String(titleInput?.value||"").trim();
       if (!titleValue) throw new Error("Title is required.");
       payload[moduleDatabaseKey(moduleName,"title")]=titleValue;
+      payload.visibility_roles=[...new Set([...form.querySelectorAll("[data-visibility-role]:checked")].map(box=>box.value).concat("owner"))];
       if (moduleName==="categories") {
         const selectedTypes=[...form.querySelectorAll("[data-checklist-value]:checked")].map(box=>box.dataset.checklistValue);
         if (!selectedTypes.length||selectedTypes.some(value=>!["Service","Device"].includes(value))) throw new Error("Select at least one valid Category Type.");
@@ -1155,9 +1178,10 @@ for (const [moduleName,config] of Object.entries(dashboardContentModules)) {
           payload.slug=slugValue;
         }
         if (moduleName==="services"||moduleName==="products") payload.description=payload.description||"";
-        const visibility=form.elements.namedItem("visibility")?.value||"hidden";
-        if (moduleName==="technicians") payload.is_published=visibility==="visible";
-        else payload.status=visibility==="visible"?(moduleName==="workshops"?"published":"active"):"draft";
+        if(!form.dataset.editId){
+          if(moduleName==="technicians")payload.is_published=true;
+          else payload.status=moduleName==="workshops"?"published":"active";
+        }
       }
       if (!["categories","countries","locations"].includes(moduleName)) {
         const imagesInput=form.elements.namedItem("images");
