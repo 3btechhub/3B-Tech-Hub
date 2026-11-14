@@ -262,7 +262,6 @@ async function renderDetail(root,data,module,def,supabase){
     renderGallery(root,data,module);
   }
   await renderModuleRelationships(root,module,data,supabase);
-  root.append(link(module,"Back to "+def.title));
 }
 function renderCard(item,module){
   const card=el("a","home-content-card");
@@ -304,14 +303,12 @@ export async function initCataloguePage(supabase,module,slug){
         action.href=href;
         root.append(action);
       }
-      root.append(link(module,"Back to "+def.title));
       return;
     }
     try{await renderDetail(root,data,module,def,supabase);}
     catch(error){
       console.error("Related catalogue information could not be loaded.",error);
       root.append(el("p","muted","Some related information is temporarily unavailable."));
-      root.append(link(module,"Back to "+def.title));
     }
     return;
   }
