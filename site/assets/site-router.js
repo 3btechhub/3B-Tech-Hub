@@ -2,8 +2,8 @@ import { initRoutePage } from "./app.js";
 
 const BASE = "/3btechhub/";
 const main = document.getElementById("app-main");
-const viewFiles = { home:"home.html", account:"account.html", profile:"profile.html", dashboard:"dashboard.html", catalogue:"catalogue.html" };
-const titles = { home:"3B TECH HUB", account:"Account | 3B TECH HUB", profile:"Profile | 3B TECH HUB", dashboard:"Dashboard | 3B TECH HUB", catalogue:"3B TECH HUB" };
+const viewFiles = { home:"home.html", account:"account.html", dashboard:"dashboard.html", catalogue:"catalogue.html" };
+const titles = { home:"3B TECH HUB", account:"Account | 3B TECH HUB", dashboard:"Dashboard | 3B TECH HUB", catalogue:"3B TECH HUB" };
 
 function normalizedPath(value) {
   const url = new URL(value, window.location.origin);
@@ -18,7 +18,9 @@ function routeDetails(path) {
   if (first === "login" || first === "account") return { view:"account", authMode:"login" };
   if (first === "create-account") return { view:"account", authMode:"signup" };
   if (first === "forgot-password") return { view:"account", authMode:"recovery-start" };
-  if (["home","profile","dashboard"].includes(first)) return { view:first };
+  if (first === "profile") return { view:"account", authMode:"profile" };
+  if (first === "edit-profile") return { view:"account", authMode:"edit-profile" };
+  if (["home","dashboard"].includes(first)) return { view:first };
   if (["service-types","device-types","services","products","workshops","technicians","contacts"].includes(first)) { const recordPart=pathname.slice(BASE.length).split("/").filter(Boolean)[1] || ""; return { view:"catalogue", module:first, recordKey:recordPart ? decodeURIComponent(recordPart) : "" }; }
   return { view:"home" };
 }
