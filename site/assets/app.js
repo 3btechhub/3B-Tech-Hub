@@ -84,20 +84,20 @@ applyTheme(savedTheme === "dark" ? "dark" : "light");
 applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 
 const homeCatalogModules = [
-  { key:"service_types", table:"service_types", title:"Service Type", icon:"wrench", published:["status",["active","published"]] },
-  { key:"device_types", table:"device_types", title:"Device Type", icon:"smartphone", published:["status",["active","published"]] },
-  { key:"services", table:"services", title:"Services", icon:"wrench", published:["status",["active"]] },
-  { key:"products", table:"products", title:"Products", icon:"package", published:["status",["active"]] },
-  { key:"workshops", table:"workshops", title:"Workshops", icon:"building", published:["status",["published"]] },
-  { key:"technicians", table:"technicians", title:"Technicians", icon:"technician", published:["is_published",[true]] },
+  { key:"service_types", table:"service_types", title:"Service Type", icon:"wrench" },
+  { key:"device_types", table:"device_types", title:"Device Type", icon:"smartphone" },
+  { key:"services", table:"services", title:"Services", icon:"wrench" },
+  { key:"products", table:"products", title:"Products", icon:"package" },
+  { key:"workshops", table:"workshops", title:"Workshops", icon:"building" },
+  { key:"technicians", table:"technicians", title:"Technicians", icon:"technician" },
   { key:"contacts", table:"contacts", title:"Contacts", icon:"contact", published:null }
 ];
 
 function renderHomeCard(module, record) {
-  const title=record.name||record.title||record.slug||"Untitled";
+  const title=record.name||record.title||"";
   const card=document.createElement(["service_types","device_types"].includes(module.key)?"div":"a");
   card.className="home-content-card";
-  if(card.tagName==="A")card.href="/3btechhub/"+module.key+"/"+encodeURIComponent(record.slug||"")+"/";
+  if(card.tagName==="A"&&record.id)card.href="/3btechhub/"+module.key+"/"+encodeURIComponent(record.id)+"/";
   const visual=document.createElement("div");
   visual.className="home-content-visual"+(module.key==="technicians"?" home-content-visual--person":"");
   if(module.key==="contacts"){const icon=createContactIcon(record.value,title);icon.classList.add("home-content-fallback");visual.append(icon);}
@@ -112,9 +112,7 @@ function renderHomeCard(module, record) {
   }
   const body=document.createElement("div");
   body.className="home-content-card-body";
-  const heading=document.createElement("h3");
-  heading.textContent=title;
-  body.append(heading);
+  if(title){const heading=document.createElement("h3");heading.textContent=title;body.append(heading);}
   card.append(visual,body);
   return card;
 }
@@ -126,12 +124,14 @@ async function loadHomeCatalog() {
     const target=document.getElementById("home-"+module.key+"-cards");
     if(!target) continue;
     try {
-      let query=supabase.from(module.table).select("*").limit(5);
-      if(module.published) {
-        const [column,values]=module.published;
-        query=query.in(column,values);
-      }
-      const {data,error}=await query;
+      const publicColumns={
+        service_types:"id,title,photo_url,gallery_urls",device_types:"id,title,photo_url,gallery_urls",
+        services:"id,name,description,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp",
+        products:"id,name,description,condition,price_minor,currency,stock_qty,category,category_group,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp",
+        workshops:"id,title,description,workshop_date,workshop_time,location,trainer,phone,whatsapp,photo_url,category,short_info,service_information,gallery_urls,map_url,address",
+        technicians:"id,name,description,category,phone,whatsapp,photo_url,skill,short_info,service_information,gallery_urls,location,map_url,email,link",contacts:"id,name,value"
+      };
+      const {data,error}=await supabase.from(module.table).select(publicColumns[module.key]).limit(5);
       if(error) throw error;
       target.replaceChildren();
       if(!data?.length) {
@@ -154,18 +154,15 @@ async function loadHomeCatalog() {
 }
 
 async function applyPublicSiteSettings() {
-  const [{data,error},{data:sectionsData},{data:introData}] = await Promise.all([
+  const [{data,error},{data:introData}] = await Promise.all([
     supabase.from("site_settings").select("setting_value").eq("setting_key","site_profile").eq("is_public",true).maybeSingle(),
-    supabase.from("site_settings").select("setting_value").eq("setting_key","home_sections").eq("is_public",true).maybeSingle(),
     supabase.from("site_settings").select("setting_value").eq("setting_key","home_intro").eq("is_public",true).maybeSingle()
   ]);
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
-  const sections=sectionsData?.setting_value&&typeof sectionsData.setting_value==="object"?sectionsData.setting_value:{};
-  document.querySelectorAll("[data-home-section]").forEach(section=>{const key=section.dataset.homeSection;if(typeof sections[key]==="boolean")section.hidden=!sections[key];});
   const intro=typeof introData?.setting_value?.content==="string"?introData.setting_value.content.trim():"";
   const introSection=document.getElementById("home-intro-section");
   const introContent=document.getElementById("home-intro-content");
-  if(introSection&&introContent){introContent.textContent=intro;introSection.hidden=!intro||sections.intro===false;}
+  if(introSection&&introContent){introContent.textContent=intro;introSection.hidden=!intro;}
   const websiteTitle = typeof settings.website_title === "string" && settings.website_title.trim()
     ? settings.website_title.trim() : "3B TECH HUB";
   document.querySelectorAll(".brand-title, .home-hero h1, .home-main h1").forEach((node) => { node.textContent = websiteTitle; });
@@ -224,7 +221,7 @@ export async function initRoutePage() {
       body:JSON.stringify({visitor_key:visitorKey,page_path:location.pathname,referrer:document.referrer||"",device,operating_system:os,browser})
     }).catch(error=>console.debug("Visitor analytics unavailable.",error));
   }
-  if(document.querySelector('#app-main[data-view="catalogue"]')){await applyPublicSiteSettings();await initCataloguePage(supabase,document.getElementById("app-main").dataset.module,document.getElementById("app-main").dataset.slug||"");return;}
+  if(document.querySelector('#app-main[data-view="catalogue"]')){await applyPublicSiteSettings();await initCataloguePage(supabase,document.getElementById("app-main").dataset.module,document.getElementById("app-main").dataset.recordId||"");return;}
   const form = document.querySelector("#auth-form");
 
 if (form) {
@@ -613,21 +610,18 @@ const siteSettingsMessage = document.querySelector("#site-settings-message");
 async function loadSiteSettingsForm() {
   if (!siteSettingsForm || currentDashboardRole !== "owner") return;
   if (siteSettingsMessage) siteSettingsMessage.textContent = "Loading website settings…";
-  const [{data,error},{data:sectionData},{data:introData}] = await Promise.all([
+  const [{data,error},{data:introData}] = await Promise.all([
     supabase.from("site_settings").select("setting_value").eq("setting_key","site_profile").maybeSingle(),
-    supabase.from("site_settings").select("setting_value").eq("setting_key","home_sections").maybeSingle(),
     supabase.from("site_settings").select("setting_value").eq("setting_key","home_intro").maybeSingle()
   ]);
   if (error) { if (siteSettingsMessage) siteSettingsMessage.textContent=error.message||"Could not load website settings."; return; }
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
-  const sections=sectionData?.setting_value&&typeof sectionData.setting_value==="object"?sectionData.setting_value:{};
   const intro=introData?.setting_value&&typeof introData.setting_value.content==="string"?introData.setting_value.content:"";
   siteSettingsForm.elements.home_intro.value=intro;
   siteSettingsForm.elements.website_title.value=typeof settings.website_title==="string"?settings.website_title:"3B TECH HUB";
   siteSettingsForm.elements.logo_url.value=typeof settings.logo_url==="string"?settings.logo_url:"";
   const preview=document.getElementById("site-logo-preview");
   if(preview&&settings.logo_url){preview.src=settings.logo_url;preview.hidden=false;}
-  for(const key of ["intro","services","products","workshops","technicians","contacts"]){const field=siteSettingsForm.elements["section_"+key];if(field)field.checked=sections[key]!==false;}
   if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings loaded.";
 }
 if(siteSettingsForm){
@@ -647,8 +641,6 @@ if(siteSettingsForm){
       if(file){if(!file.type.startsWith("image/")||file.size>5*1024*1024)throw new Error("Choose an image up to 5 MB.");const path="branding/"+crypto.randomUUID()+"-"+file.name.replace(/[^\w.-]+/g,"-");const {error:uploadError}=await supabase.storage.from("site-media").upload(path,file,{cacheControl:"3600",contentType:file.type});if(uploadError)throw uploadError;logoUrl=supabase.storage.from("site-media").getPublicUrl(path).data.publicUrl;}
       if(siteSettingsForm.dataset.removeLogo==="true")logoUrl="";
       const {error}=await supabase.from("site_settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(error)throw error;
-      const homeSections={};for(const key of ["intro","services","products","workshops","technicians","contacts"])homeSections[key]=Boolean(siteSettingsForm.elements["section_"+key]?.checked);
-      const {error:sectionError}=await supabase.from("site_settings").upsert({setting_key:"home_sections",setting_value:homeSections,is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(sectionError)throw sectionError;
       const homeIntro=String(form.get("home_intro")||"").trim();
       const {error:introError}=await supabase.from("site_settings").upsert({setting_key:"home_intro",setting_value:{content:homeIntro},is_public:true,updated_by:authData.user.id},{onConflict:"setting_key"});if(introError)throw introError;
       if(oldLogoUrl&&oldLogoUrl!==logoUrl){try{await removeStoredImage(oldLogoUrl);}catch(cleanupError){console.warn("Old logo cleanup failed.",cleanupError);}}
