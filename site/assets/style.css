@@ -1457,3 +1457,15 @@ input:disabled,select:disabled,textarea:disabled{opacity:.7;cursor:not-allowed}
 .catalogue-item-information-row{display:grid;gap:5px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 .catalogue-item-information-label{color:var(--page-text);font-size:var(--text-small);font-weight:700}
 .catalogue-item-information-row .catalogue-detail-field{white-space:pre-line}
+
+
+/* Dynamic homepage module area: modules are rendered from Supabase settings. */
+.home-module-area{display:flex;flex-direction:column;min-width:0;gap:0}
+.home-module-area[hidden],.home-intro-section[hidden]{display:none!important}
+.home-module-area>.home-catalog-section{position:relative;min-width:0;margin:0;padding-block:clamp(44px,6vw,64px);border:0}
+.home-module-area>.home-catalog-section+.home-catalog-section{padding-top:clamp(44px,6vw,64px)}
+.home-module-area>.home-catalog-section+.home-catalog-section::before{content:"";position:absolute;inset-inline:0;inset-block-start:0;border-top:1px solid var(--line)}
+@media(max-width:420px){
+ .home-module-area>.home-catalog-section{padding-block:40px}
+ .home-module-area>.home-catalog-section+.home-catalog-section{padding-top:40px}
+}

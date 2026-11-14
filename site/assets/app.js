@@ -83,15 +83,15 @@ renderSvgIconAttributes(document);
 applyTheme(savedTheme === "dark" ? "dark" : "light");
 applyRuntimeConfig(runtimeConfig, document.documentElement.dataset.theme);
 
-const homeCatalogModules = [
-  { key:"service_types", table:"service_types", title:"Service Type", icon:"wrench" },
-  { key:"device_types", table:"device_types", title:"Device Type", icon:"smartphone" },
-  { key:"services", table:"services", title:"Services", icon:"wrench" },
-  { key:"products", table:"products", title:"Products", icon:"package" },
-  { key:"workshops", table:"workshops", title:"Workshops", icon:"building" },
-  { key:"technicians", table:"technicians", title:"Technicians", icon:"technician" },
-  { key:"contacts", table:"contacts", title:"Contacts", icon:"contact", published:null }
-];
+const HOME_MODULE_TYPES = Object.freeze([
+  { key:"service_types", table:"service_types", route:"service-types", icon:"wrench", columns:"id,title,slug,photo_url,gallery_urls" },
+  { key:"device_types", table:"device_types", route:"device-types", icon:"smartphone", columns:"id,title,slug,photo_url,gallery_urls" },
+  { key:"services", table:"services", route:"services", icon:"wrench", columns:"id,name,description,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp" },
+  { key:"products", table:"products", route:"products", icon:"package", columns:"id,name,description,condition,price_minor,currency,stock_qty,category,category_group,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp" },
+  { key:"workshops", table:"workshops", route:"workshops", icon:"building", columns:"id,title,description,workshop_date,workshop_time,location,trainer,phone,whatsapp,photo_url,category,short_info,service_information,gallery_urls,map_url,address" },
+  { key:"technicians", table:"technicians", route:"technicians", icon:"technician", columns:"id,name,description,category,phone,whatsapp,photo_url,skill,short_info,service_information,gallery_urls,location,map_url,email,link" },
+  { key:"contacts", table:"contacts", route:"contacts", icon:"contact", columns:"id,name,value" }
+]);
 
 function renderHomeCard(module, record) {
   const title=record.name||record.title||"";
@@ -122,57 +122,69 @@ function renderHomeCard(module, record) {
 }
 
 async function loadHomeCatalog() {
-  const root=document.querySelector(".home-catalog");
-  if(!root) return;
-  for(const module of homeCatalogModules) {
-    const target=document.getElementById("home-"+module.key+"-cards");
-    if(!target) continue;
-    try {
-      const publicColumns={
-        service_types:"id,title,slug,photo_url,gallery_urls",device_types:"id,title,slug,photo_url,gallery_urls",
-        services:"id,name,description,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp",
-        products:"id,name,description,condition,price_minor,currency,stock_qty,category,category_group,photo_url,short_info,service_information,gallery_urls,location,map_url,phone,whatsapp",
-        workshops:"id,title,description,workshop_date,workshop_time,location,trainer,phone,whatsapp,photo_url,category,short_info,service_information,gallery_urls,map_url,address",
-        technicians:"id,name,description,category,phone,whatsapp,photo_url,skill,short_info,service_information,gallery_urls,location,map_url,email,link",contacts:"id,name,value"
-      };
-      const {data,error}=await supabase.from(module.table).select(publicColumns[module.key]).limit(5);
-      if(error) throw error;
+  const area=document.getElementById("home-module-area");
+  if(!area)return;
+  area.replaceChildren();
+  area.hidden=true;
+  const {data:moduleSettings,error:settingsError}=await supabase
+    .from("Settings").select("setting_value,visibility_roles")
+    .eq("setting_key","home_modules").maybeSingle();
+  if(settingsError||!moduleSettings||!Array.isArray(moduleSettings.setting_value?.modules))return;
+  if(!(moduleSettings.visibility_roles||[]).includes("visitor"))return;
+  const configuredModules=moduleSettings.setting_value.modules
+    .filter(item=>item&&typeof item.key==="string"&&Array.isArray(item.visibility_roles)&&item.visibility_roles.includes("visitor"))
+    .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0));
+  for(const config of configuredModules){
+    const module=HOME_MODULE_TYPES.find(item=>item.key===config.key);
+    if(!module)continue;
+    try{
+      const {data,error}=await supabase.from(module.table).select(module.columns).limit(5);
+      if(error)continue;
       if(["services","products","workshops","technicians"].includes(module.key)){
         const {data:slugRows,error:slugError}=await supabase.rpc("get_public_catalogue_slugs",{p_module:module.key});
-        if(slugError)throw slugError;
+        if(slugError)continue;
         const slugById=new Map((slugRows||[]).map(row=>[row.id,row.slug]));
-        data?.forEach(record=>{record.publicSlug=slugById.get(record.id)||"";});
+        (data||[]).forEach(record=>{record.publicSlug=slugById.get(record.id)||"";});
       }
-      target.replaceChildren();
-      if(!data?.length) {
-        const empty=document.createElement("p");
-        empty.className="home-empty";
-        empty.textContent="No "+module.title.toLowerCase()+" available yet.";
-        target.append(empty);
-        continue;
+      const records=(data||[]).slice(0,4).filter(record=>{
+        const title=String(record.name||record.title||"").trim();
+        const image=String(record.photo_url||"").trim();
+        return Boolean(title||image);
+      });
+      if(!records.length)continue;
+      const section=document.createElement("section");
+      section.className="home-catalog-section";
+      const moduleTitle=typeof config.title==="string"?config.title.trim():"";
+      if(moduleTitle){
+        const heading=document.createElement("div");
+        heading.className="home-section-heading";
+        const h2=document.createElement("h2");
+        const link=document.createElement("a");
+        link.className="home-module-link";
+        link.href="/3btechhub/"+module.route+"/";
+        link.textContent=moduleTitle;
+        h2.append(link);heading.append(h2);section.append(heading);
       }
-      data.slice(0,4).forEach(record=>target.append(renderHomeCard(module,record)));
-    } catch(error) {
-      console.error("Could not load public "+module.title.toLowerCase()+".",error);
-      target.replaceChildren();
-      const empty=document.createElement("p");
-      empty.className="home-empty";
-      empty.textContent="Could not load "+module.title.toLowerCase()+".";
-      target.append(empty);
-    }
+      const grid=document.createElement("div");
+      grid.className="home-card-grid";
+      records.forEach(record=>grid.append(renderHomeCard(module,record)));
+      section.append(grid);area.append(section);
+    }catch(error){console.error("Could not load homepage module.",module.key,error);}
   }
+  area.hidden=area.childElementCount===0;
 }
 
 async function applyPublicSiteSettings() {
-  const [{data,error},{data:introData}] = await Promise.all([
+  const [{data,error},{data:introData},{data:homeModulesData,error:homeModulesError}] = await Promise.all([
     supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","site_profile").maybeSingle(),
-    supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","home_intro").maybeSingle()
+    supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","home_intro").maybeSingle(),
+    supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","home_modules").maybeSingle()
   ]);
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
   const intro=typeof introData?.setting_value?.content==="string"?introData.setting_value.content.trim():"";
   const introSection=document.getElementById("home-intro-section");
   const introContent=document.getElementById("home-intro-content");
-  if(introSection&&introContent){introContent.textContent=intro;introSection.hidden=!intro;}
+  if(introSection&&introContent){introContent.textContent=intro;introSection.hidden=!intro||!(introData?.visibility_roles||[]).includes("visitor");}
   const websiteTitle = typeof settings.website_title === "string" && settings.website_title.trim()
     ? settings.website_title.trim() : "3B TECH HUB";
   document.querySelectorAll(".brand-title, .home-hero h1, .home-main h1").forEach((node) => { node.textContent = websiteTitle; });
@@ -635,7 +647,40 @@ if (ownerDashboard) {
 // Owner-only website profile settings stored as a single public configuration record.
 const siteSettingsForm = document.querySelector("#site-settings-form");
 const siteSettingsMessage = document.querySelector("#site-settings-message");
-const siteSettingsVisibilityHost=document.createElement("div");siteSettingsVisibilityHost.className="module-related-options";siteSettingsForm.dataset.visibilityRoles="true";
+const homeModulesSettingsHost=document.getElementById("home-modules-settings");
+function renderHomeModulesSettings(settingValue){
+  if(!homeModulesSettingsHost)return;
+  homeModulesSettingsHost.replaceChildren();
+  const modules=Array.isArray(settingValue?.modules)?settingValue.modules:[];
+  modules.filter(item=>HOME_MODULE_TYPES.some(type=>type.key===item?.key))
+    .sort((a,b)=>(Number(a.sort_order)||0)-(Number(b.sort_order)||0))
+    .forEach((item,index)=>{
+      const row=document.createElement("div");row.className="module-form-grid";row.dataset.homeModuleKey=item.key;
+      const titleField=document.createElement("label");titleField.className="module-form-field";
+      const titleLabel=document.createElement("span");titleLabel.textContent="Module Title";
+      const titleInput=document.createElement("input");titleInput.type="text";titleInput.maxLength=100;titleInput.value=typeof item.title==="string"?item.title:"";titleInput.dataset.homeModuleTitle="true";
+      titleField.append(titleLabel,titleInput);
+      const orderField=document.createElement("label");orderField.className="module-form-field";
+      const orderLabel=document.createElement("span");orderLabel.textContent="Display Order";
+      const orderInput=document.createElement("input");orderInput.type="number";orderInput.min="1";orderInput.max="999";orderInput.value=String(Number(item.sort_order)||((index+1)*10));orderInput.dataset.homeModuleOrder="true";
+      orderField.append(orderLabel,orderInput);
+      const visibilityField=document.createElement("label");visibilityField.className="module-related-option";
+      const visibilityInput=document.createElement("input");visibilityInput.type="checkbox";visibilityInput.checked=Array.isArray(item.visibility_roles)&&item.visibility_roles.includes("visitor");visibilityInput.dataset.homeModuleVisitor="true";
+      const visibilityText=document.createElement("span");visibilityText.textContent="Visitor Visibility";
+      visibilityField.append(visibilityInput,visibilityText);
+      row.append(titleField,orderField,visibilityField);homeModulesSettingsHost.append(row);
+    });
+}
+function collectHomeModulesSettings(){
+  if(!homeModulesSettingsHost)return [];
+  return [...homeModulesSettingsHost.querySelectorAll("[data-home-module-key]")].map((row,index)=>{
+    const title=row.querySelector("[data-home-module-title]")?.value.trim()||"";
+    const order=Number(row.querySelector("[data-home-module-order]")?.value);
+    const visible=Boolean(row.querySelector("[data-home-module-visitor]")?.checked);
+    return {key:row.dataset.homeModuleKey,title,sort_order:Number.isFinite(order)&&order>0?order:(index+1)*10,visibility_roles:visible?["owner","visitor"]:["owner"]};
+  });
+}
+const siteSettingsVisibilityHost=document.createElement("div");siteSettingsVisibilityHost.className="module-related-options";siteSettingsVisibilityHost.dataset.visibilityRoles="true";
 const siteSettingsVisibilityField=document.createElement("div");siteSettingsVisibilityField.className="module-form-field module-related-field";addTextElement(siteSettingsVisibilityField,"span","","Visibility");siteSettingsVisibilityField.append(siteSettingsVisibilityHost);
 siteSettingsForm?.querySelector(".editor-actions")?.before(siteSettingsVisibilityField);
 
@@ -646,7 +691,7 @@ async function loadSiteSettingsForm() {
     supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","site_profile").maybeSingle(),
     supabase.from("Settings").select("setting_value,visibility_roles").eq("setting_key","home_intro").maybeSingle()
   ]);
-  if (error) { if (siteSettingsMessage) siteSettingsMessage.textContent=error.message||"Could not load website settings."; return; }
+  if (error||homeModulesError) { if (siteSettingsMessage) siteSettingsMessage.textContent=(error||homeModulesError).message||"Could not load website settings."; return; }
   await loadVisibilityRoleOptions(siteSettingsForm,data?.visibility_roles||introData?.visibility_roles||["owner","visitor"]);
   const settings=data?.setting_value&&typeof data.setting_value==="object"?data.setting_value:{};
   const intro=introData?.setting_value&&typeof introData.setting_value.content==="string"?introData.setting_value.content:"";
@@ -655,6 +700,7 @@ async function loadSiteSettingsForm() {
   siteSettingsForm.elements.logo_url.value=typeof settings.logo_url==="string"?settings.logo_url:"";
   const preview=document.getElementById("site-logo-preview");
   if(preview&&settings.logo_url){preview.src=settings.logo_url;preview.hidden=false;}
+  renderHomeModulesSettings(homeModulesData?.setting_value);
   if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings loaded.";
 }
 if(siteSettingsForm){
@@ -677,8 +723,10 @@ if(siteSettingsForm){
       const {error}=await supabase.from("Settings").upsert({setting_key:"site_profile",setting_value:{website_title:websiteTitle,logo_url:logoUrl},visibility_roles,description:"Public website profile"},{onConflict:"setting_key"});if(error)throw error;
       const homeIntro=String(form.get("home_intro")||"").trim();
       const {error:introError}=await supabase.from("Settings").upsert({setting_key:"home_intro",setting_value:{content:homeIntro},visibility_roles,description:"Public homepage introduction"},{onConflict:"setting_key"});if(introError)throw introError;
+      const homeModules=collectHomeModulesSettings();
+      const {error:modulesError}=await supabase.from("Settings").upsert({setting_key:"home_modules",setting_value:{modules:homeModules},visibility_roles:["owner","visitor"],description:"Homepage module titles, order and visitor visibility"},{onConflict:"setting_key"});if(modulesError)throw modulesError;
       if(oldLogoUrl&&oldLogoUrl!==logoUrl){try{await removeStoredImage(oldLogoUrl);}catch(cleanupError){console.warn("Old logo cleanup failed.",cleanupError);}}
-      siteSettingsForm.dataset.removeLogo="false";if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings saved.";
+      siteSettingsForm.dataset.removeLogo="false";renderHomeModulesSettings({modules:homeModules});if(siteSettingsMessage)siteSettingsMessage.textContent="Website settings saved.";
     }catch(error){if(siteSettingsMessage)siteSettingsMessage.textContent=error.message||"Could not save website settings.";}
     finally{if(submit)submit.disabled=false;}
   });
