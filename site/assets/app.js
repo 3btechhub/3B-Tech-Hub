@@ -69,7 +69,7 @@ function closeSiteMenu() {
   menuButton.setAttribute("aria-label", "Open menu");
 }
 async function setMenuSession(session) {
-  if (accountMenuLink) { accountMenuLink.href=new URL("account/",ROOT_URL).href; accountMenuLink.hidden=Boolean(session); }
+  if (accountMenuLink) { accountMenuLink.href=new URL("login/",ROOT_URL).href; accountMenuLink.hidden=Boolean(session); }
   if (profileMenuLink) profileMenuLink.hidden=!session;
   if (logoutMenuLink) logoutMenuLink.hidden=!session;
   if (dashboardMenuLink) { dashboardMenuLink.hidden=true; if(session?.user?.id){const {data,error}=await supabase.from("user_roles").select("role").eq("user_id",session.user.id).eq("role","owner").maybeSingle();if(!error&&data?.role==="owner")dashboardMenuLink.hidden=false;} }
@@ -235,6 +235,28 @@ supabase.auth.onAuthStateChange((_event, session) => {
 });
 const ROOT_URL = new URL("https://3btechhub.github.io/3btechhub/");
 
+export async function resolveAuthRoute(requestedPath) {
+  const url = new URL(requestedPath, window.location.origin);
+  const first = url.pathname.slice("/3btechhub/".length).split("/").filter(Boolean)[0] || "";
+  const authRoutes = ["login", "create-account", "forgot-password", "reset-password", "profile", "edit-profile"];
+  if (!authRoutes.includes(first)) return url.pathname + url.search + url.hash;
+
+  const { data, error } = await supabase.auth.getSession();
+  if (error) return url.pathname + url.search + url.hash;
+  const session = data?.session || null;
+  const hashParams = new URLSearchParams(url.hash.replace(/^#/, ""));
+  const recoveryCallback = first === "reset-password" &&
+    (url.searchParams.get("recovery") === "1" || hashParams.get("type") === "recovery");
+
+  if (!session && ["profile", "edit-profile"].includes(first)) {
+    return new URL("login/", ROOT_URL).pathname;
+  }
+  if (session && ["login", "create-account", "forgot-password", "reset-password"].includes(first) && !recoveryCallback) {
+    return new URL("profile/", ROOT_URL).pathname;
+  }
+  return url.pathname + url.search + url.hash;
+}
+
 export async function initRoutePage() {
   window.__routeAuthSubscriptions?.forEach((subscription) => subscription.unsubscribe());
   window.__routeAuthSubscriptions = [];
@@ -317,16 +339,14 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
 
   toggle.addEventListener("click", () => {
     if (mode === "recovery" || mode === "recovery-new-password") return;
-    mode = mode === "signup" ? "login" : "signup";
-    render();
-    showMessage("");
+    const target = mode === "signup" ? "login/" : "create-account/";
+    window.navigateSiteRoute(new URL(target, ROOT_URL).pathname);
   });
 
   forgot.addEventListener("click", () => {
     if (mode === "recovery" || mode === "recovery-new-password") return;
-    mode = mode === "recovery-start" ? "login" : "recovery-start";
-    render();
-    showMessage("");
+    const target = mode === "recovery-start" ? "login/" : "reset-password/";
+    window.navigateSiteRoute(new URL(target, ROOT_URL).pathname);
   });
 
   form.addEventListener("submit", async (event) => {
@@ -356,7 +376,7 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
     try {
       if (mode === "recovery-start") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: new URL("account/?recovery=1", ROOT_URL).href,
+          redirectTo: new URL("reset-password/?recovery=1", ROOT_URL).href,
         });
         if (error) throw error;
         recoveryEmail = email;
@@ -389,7 +409,7 @@ if (form && !["profile","edit-profile"].includes(accountMode)) {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: new URL("account/", ROOT_URL).href },
+          options: { emailRedirectTo: new URL("login/", ROOT_URL).href },
         });
         if (error) throw error;
         if (data.session) {
@@ -495,7 +515,7 @@ if (profile && ["profile","edit-profile"].includes(accountMode)) {
   async function loadProfile() {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
-      window.navigateSiteRoute(new URL("account/", ROOT_URL).pathname, { replace: true });
+      window.navigateSiteRoute(new URL("login/", ROOT_URL).pathname, { replace: true });
       return;
     }
     currentUser = data.user;
@@ -591,7 +611,7 @@ if (profile && ["profile","edit-profile"].includes(accountMode)) {
   await loadProfile();
   if (accountMode === "edit-profile") profile.querySelectorAll("[data-edit-field]").forEach((button) => button.click());
   const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) window.navigateSiteRoute(new URL("account/", ROOT_URL).pathname, { replace: true });
+    if (!session) window.navigateSiteRoute(new URL("login/", ROOT_URL).pathname, { replace: true });
   });
   window.__routeAuthSubscriptions.push(authListener.subscription);
 }
@@ -603,7 +623,7 @@ const ownerDashboard = document.querySelector("#app-main[data-view=\"dashboard\"
 if (ownerDashboard) {
   const { data: authData, error: authError } = await supabase.auth.getUser();
   if (authError || !authData.user) {
-    window.navigateSiteRoute(new URL("account/", ROOT_URL).pathname, { replace: true });
+    window.navigateSiteRoute(new URL("login/", ROOT_URL).pathname, { replace: true });
   } else {
     const { data: ownerRole, error: roleError } = await supabase
       .from("user_roles").select("role")
@@ -638,7 +658,7 @@ if (ownerDashboard) {
     }
   }
   const dashboardAuthListener = supabase.auth.onAuthStateChange((_event, session) => {
-    if (!session) window.navigateSiteRoute(new URL("account/", ROOT_URL).pathname, { replace: true });
+    if (!session) window.navigateSiteRoute(new URL("login/", ROOT_URL).pathname, { replace: true });
   });
   window.__routeAuthSubscriptions.push(dashboardAuthListener.data.subscription);
 }
